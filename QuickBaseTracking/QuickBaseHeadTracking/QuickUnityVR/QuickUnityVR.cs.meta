@@ -1,0 +1,21 @@
+fileFormatVersion: 2
+guid: 39695b9dba667a74d931d98210c83a43
+timeCreated: 1481876637
+licenseType: Pro
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - _animator: {instanceID: 0}
+  - _calibrationTexture: {instanceID: 0}
+  - _vrGUICursor: {instanceID: 0}
+  - _cameraLeft: {instanceID: 0}
+  - _cameraRight: {instanceID: 0}
+  - _cameraMono: {instanceID: 0}
+  - _cameraControllerRoot: {instanceID: 0}
+  - _calibrationScreen: {instanceID: 0}
+  - _ikManager: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,1959 @@
+fileFormatVersion: 2
+guid: 3099c98f19bb0c548aa0bafd41ff8b0b
+timeCreated: 1484058893
+licenseType: Store
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: forearm
+    100002: hand_joint
+    100004: index_bone
+    100006: index_dist
+    100008: index_dist_end
+    100010: index_inter
+    100012: index_prox
+    100014: little_bone
+    100016: little_dist
+    100018: little_dist_end
+    100020: little_inter
+    100022: little_prox
+    100024: middle_bone
+    100026: middle_dist
+    100028: middle_dist_end
+    100030: middle_inter
+    100032: middle_prox
+    100034: ring_bone
+    100036: ring_dist
+    100038: ring_dist_end
+    100040: ring_inter
+    100042: ring_prox
+    100044: thumb_dist
+    100046: thumb_dist_end
+    100048: thumb_inter
+    100050: thumb_prox
+    100052: //RootNode
+    100054: vr_female_hand
+    100056: vr_hand_female_armature
+    400000: forearm
+    400002: hand_joint
+    400004: index_bone
+    400006: index_dist
+    400008: index_dist_end
+    400010: index_inter
+    400012: index_prox
+    400014: little_bone
+    400016: little_dist
+    400018: little_dist_end
+    400020: little_inter
+    400022: little_prox
+    400024: middle_bone
+    400026: middle_dist
+    400028: middle_dist_end
+    400030: middle_inter
+    400032: middle_prox
+    400034: ring_bone
+    400036: ring_dist
+    400038: ring_dist_end
+    400040: ring_inter
+    400042: ring_prox
+    400044: thumb_dist
+    400046: thumb_dist_end
+    400048: thumb_inter
+    400050: thumb_prox
+    400052: //RootNode
+    400054: vr_female_hand
+    400056: vr_hand_female_armature
+    4300000: vr_female_hand
+    7400000: vr_hand_female_armature|vr_catch
+    7400002: vr_hand_female_armature|vr_catch_end
+    7400004: vr_hand_female_armature|vr_catch_pose
+    7400006: vr_hand_female_armature|vr_catch_start
+    7400008: vr_hand_female_armature|vr_catch_throw
+    7400010: vr_hand_female_armature|vr_fist_clenching
+    7400012: vr_hand_female_armature|vr_fist_opening
+    7400014: vr_hand_female_armature|vr_fist_pose
+    7400016: vr_hand_female_armature|vr_indicating_pose
+    7400018: vr_hand_female_armature|vr_neutral_pose
+    7400020: vr_hand_female_armature|vr_neutral_pose_anim_01
+    7400022: vr_hand_female_armature|vr_neutral_pose_anim_02
+    7400024: vr_hand_female_armature|vr_pistol_holding_pose
+    7400026: vr_hand_female_armature|vr_pistol_shoot
+    7400028: vr_hand_female_armature|vr_skill_self_shot_01
+    7400030: vr_hand_female_armature|vr_skill_shot_01
+    7400032: vr_hand_female_armature|vr_skill_shot_02
+    7400034: vr_hand_female_armature|vr_skill_shot_02_end
+    7400036: vr_hand_female_armature|vr_skill_shot_02_loop
+    7400038: vr_hand_female_armature|vr_skill_shot_02_start
+    7400040: vr_hand_female_armature|vr_sword_holding_pose
+    9500000: //RootNode
+    13700000: vr_female_hand
+  materials:
+    importMaterials: 0
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations:
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_catch
+      takeName: vr_hand_female_armature|vr_catch
+      firstFrame: 0
+      lastFrame: 17
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_catch_end
+      takeName: vr_hand_female_armature|vr_catch_end
+      firstFrame: 0
+      lastFrame: 6
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_catch_pose
+      takeName: vr_hand_female_armature|vr_catch_pose
+      firstFrame: 0
+      lastFrame: 1
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 1
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_catch_start
+      takeName: vr_hand_female_armature|vr_catch_start
+      firstFrame: 0
+      lastFrame: 11
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_catch_throw
+      takeName: vr_hand_female_armature|vr_catch_throw
+      firstFrame: 0
+      lastFrame: 11
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_fist_clenching
+      takeName: vr_hand_female_armature|vr_fist_clenching
+      firstFrame: 0
+      lastFrame: 7
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_fist_opening
+      takeName: vr_hand_female_armature|vr_fist_opening
+      firstFrame: 0
+      lastFrame: 5
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_fist_pose
+      takeName: vr_hand_female_armature|vr_fist_pose
+      firstFrame: 0
+      lastFrame: 1
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 1
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_indicating_pose
+      takeName: vr_hand_female_armature|vr_indicating_pose
+      firstFrame: 0
+      lastFrame: 1
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 1
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_neutral_pose
+      takeName: vr_hand_female_armature|vr_neutral_pose
+      firstFrame: 0
+      lastFrame: 1
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 1
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_neutral_pose_anim_01
+      takeName: vr_hand_female_armature|vr_neutral_pose_anim_01
+      firstFrame: 0
+      lastFrame: 70
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 1
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_neutral_pose_anim_02
+      takeName: vr_hand_female_armature|vr_neutral_pose_anim_02
+      firstFrame: 0
+      lastFrame: 70
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 1
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_pistol_holding_pose
+      takeName: vr_hand_female_armature|vr_pistol_holding_pose
+      firstFrame: 0
+      lastFrame: 1
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 1
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_pistol_shoot
+      takeName: vr_hand_female_armature|vr_pistol_shoot
+      firstFrame: 0
+      lastFrame: 8
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_skill_self_shot_01
+      takeName: vr_hand_female_armature|vr_skill_self_shot_01
+      firstFrame: 0
+      lastFrame: 23
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_skill_shot_01
+      takeName: vr_hand_female_armature|vr_skill_shot_01
+      firstFrame: 0
+      lastFrame: 14
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_skill_shot_02
+      takeName: vr_hand_female_armature|vr_skill_shot_02
+      firstFrame: 0
+      lastFrame: 24
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_skill_shot_02_end
+      takeName: vr_hand_female_armature|vr_skill_shot_02_end
+      firstFrame: 0
+      lastFrame: 14
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_skill_shot_02_loop
+      takeName: vr_hand_female_armature|vr_skill_shot_02_loop
+      firstFrame: 0
+      lastFrame: 56
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 1
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_skill_shot_02_start
+      takeName: vr_hand_female_armature|vr_skill_shot_02_start
+      firstFrame: 0
+      lastFrame: 10
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 0
+      loopBlend: 0
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    - serializedVersion: 16
+      name: vr_hand_female_armature|vr_sword_holding_pose
+      takeName: vr_hand_female_armature|vr_sword_holding_pose
+      firstFrame: 0
+      lastFrame: 1
+      wrapMode: 0
+      orientationOffsetY: 0
+      level: 0
+      cycleOffset: 0
+      loop: 0
+      hasAdditiveReferencePose: 0
+      loopTime: 1
+      loopBlend: 1
+      loopBlendOrientation: 0
+      loopBlendPositionY: 0
+      loopBlendPositionXZ: 0
+      keepOriginalOrientation: 0
+      keepOriginalPositionY: 1
+      keepOriginalPositionXZ: 0
+      heightFromFeet: 0
+      mirror: 0
+      bodyMask: 01000000010000000100000001000000010000000100000001000000010000000100000001000000010000000100000001000000
+      curves: []
+      events: []
+      transformMask:
+      - path: 
+        weight: 1
+      - path: vr_female_hand
+        weight: 1
+      - path: vr_hand_female_armature
+        weight: 1
+      - path: vr_hand_female_armature/forearm
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/index_bone/index_prox/index_inter/index_dist/index_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/little_bone/little_prox/little_inter/little_dist/little_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/middle_bone/middle_prox/middle_inter/middle_dist/middle_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/hand_joint/ring_bone/ring_prox/ring_inter/ring_dist/ring_dist_end
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist
+        weight: 1
+      - path: vr_hand_female_armature/forearm/thumb_prox/thumb_inter/thumb_dist/thumb_dist_end
+        weight: 1
+      maskType: 0
+      maskSource: {instanceID: 0}
+      additiveReferencePoseFrame: 0
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 1
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

@@ -1,0 +1,156 @@
+fileFormatVersion: 2
+guid: fec02ffbcaf80544198795273e8ef565
+timeCreated: 1487163775
+licenseType: Store
+ModelImporter:
+  serializedVersion: 19
+  fileIDToRecycleName:
+    100000: amrature_fp_hand
+    100002: arm_down_deform
+    100004: arm_up_deform
+    100006: forearm_ down_deform
+    100008: forearm_up_deform
+    100010: //RootNode
+    100012: fp_male_hand_mobile
+    100014: hand_joint
+    100016: index_bone
+    100018: index_dist
+    100020: index_dist_end
+    100022: index_inter
+    100024: index_prox
+    100026: little_bone
+    100028: little_dist
+    100030: little_dist_end
+    100032: little_inter
+    100034: little_prox
+    100036: middle_bone
+    100038: middle_dist
+    100040: middle_dist_end
+    100042: middle_inter
+    100044: middle_prox
+    100046: ring_bone
+    100048: ring_dist
+    100050: ring_dist_end
+    100052: ring_inter
+    100054: ring_prox
+    100056: shoulder
+    100058: thumb_dist
+    100060: thumb_dist_end
+    100062: thumb_inter
+    100064: thumb_prox
+    400000: amrature_fp_hand
+    400002: arm_down_deform
+    400004: arm_up_deform
+    400006: forearm_ down_deform
+    400008: forearm_up_deform
+    400010: //RootNode
+    400012: fp_male_hand_mobile
+    400014: hand_joint
+    400016: index_bone
+    400018: index_dist
+    400020: index_dist_end
+    400022: index_inter
+    400024: index_prox
+    400026: little_bone
+    400028: little_dist
+    400030: little_dist_end
+    400032: little_inter
+    400034: little_prox
+    400036: middle_bone
+    400038: middle_dist
+    400040: middle_dist_end
+    400042: middle_inter
+    400044: middle_prox
+    400046: ring_bone
+    400048: ring_dist
+    400050: ring_dist_end
+    400052: ring_inter
+    400054: ring_prox
+    400056: shoulder
+    400058: thumb_dist
+    400060: thumb_dist_end
+    400062: thumb_inter
+    400064: thumb_prox
+    4300000: fp_male_hand_mobile
+    7400000: amrature_fp_hand|catch
+    7400002: amrature_fp_hand|fist_clenching
+    7400004: amrature_fp_hand|fist_opening
+    7400006: amrature_fp_hand|fist_pose
+    7400008: amrature_fp_hand|magic_shot_01
+    7400010: amrature_fp_hand|magic_shot_expressive_01
+    7400012: amrature_fp_hand|neutral_pose
+    7400014: amrature_fp_hand|neutral_pose_anim_01
+    7400016: amrature_fp_hand|neutral_pose_anim_02
+    7400018: amrature_fp_hand|pistol_holding_pose
+    7400020: amrature_fp_hand|pistol_shoot
+    7400022: amrature_fp_hand|punch
+    7400024: amrature_fp_hand|self_magic_shoot_01
+    7400026: amrature_fp_hand|sword_holding_pose
+    7400028: amrature_fp_hand|sword_holding_pose_anim_01
+    7400030: amrature_fp_hand|sword_slash_01
+    9500000: //RootNode
+    13700000: fp_male_hand_mobile
+  materials:
+    importMaterials: 0
+    materialName: 0
+    materialSearch: 1
+  animations:
+    legacyGenerateAnimations: 4
+    bakeSimulation: 0
+    resampleCurves: 1
+    optimizeGameObjects: 0
+    motionNodeName: 
+    animationImportErrors: 
+    animationImportWarnings: 
+    animationRetargetingWarnings: 
+    animationDoRetargetingWarnings: 0
+    animationCompression: 1
+    animationRotationError: 0.5
+    animationPositionError: 0.5
+    animationScaleError: 0.5
+    animationWrapMode: 0
+    extraExposedTransformPaths: []
+    clipAnimations: []
+    isReadable: 1
+  meshes:
+    lODScreenPercentages: []
+    globalScale: 1
+    meshCompression: 0
+    addColliders: 0
+    importBlendShapes: 1
+    swapUVChannels: 0
+    generateSecondaryUV: 1
+    useFileUnits: 1
+    optimizeMeshForGPU: 1
+    keepQuads: 0
+    weldVertices: 1
+    secondaryUVAngleDistortion: 8
+    secondaryUVAreaDistortion: 15.000001
+    secondaryUVHardAngle: 88
+    secondaryUVPackMargin: 4
+    useFileScale: 1
+  tangentSpace:
+    normalSmoothAngle: 60
+    normalImportMode: 0
+    tangentImportMode: 3
+  importAnimation: 1
+  copyAvatar: 0
+  humanDescription:
+    human: []
+    skeleton: []
+    armTwist: 0.5
+    foreArmTwist: 0.5
+    upperLegTwist: 0.5
+    legTwist: 0.5
+    armStretch: 0.05
+    legStretch: 0.05
+    feetSpacing: 0
+    rootMotionBoneName: 
+    hasTranslationDoF: 0
+  lastHumanDescriptionAvatarSource: {instanceID: 0}
+  animationType: 2
+  humanoidOversampling: 1
+  additionalBone: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

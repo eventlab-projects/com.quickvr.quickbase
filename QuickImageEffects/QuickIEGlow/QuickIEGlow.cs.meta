@@ -1,0 +1,20 @@
+fileFormatVersion: 2
+guid: c5bec41157355c542a02d93d9ce2ec6d
+timeCreated: 1497541054
+licenseType: Free
+MonoImporter:
+  serializedVersion: 2
+  defaultReferences:
+  - _glowingMaskShader: {fileID: 4800000, guid: 7f21e9d3174fe0946b9f4ac6f33427f8,
+      type: 3}
+  - _glowingPropertiesShader: {fileID: 4800000, guid: 3aed9059dcfa57643a497f3122c24954,
+      type: 3}
+  - _blurShader: {instanceID: 0}
+  - _expandShader: {instanceID: 0}
+  - _compositeShader: {fileID: 4800000, guid: db2bbc84180011142a176f46eb0f4572, type: 3}
+  - _shaderCamera: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

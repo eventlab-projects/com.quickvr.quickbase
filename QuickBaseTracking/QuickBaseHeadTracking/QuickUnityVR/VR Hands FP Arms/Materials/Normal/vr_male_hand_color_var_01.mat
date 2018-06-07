@@ -1,0 +1,112 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_Name: vr_male_hand_color_var_01
+  m_Shader: {fileID: 4800000, guid: 8da52ee33a180464ea915ad9c61c53a2, type: 3}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 5
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _Albedo:
+        m_Texture: {fileID: 2800000, guid: 07038268508d8194aaea46669425ec8f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _AlbedoRGB:
+        m_Texture: {fileID: 2800000, guid: 07038268508d8194aaea46669425ec8f, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _AmbientOcclusion:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Depth:
+        m_Texture: {fileID: 2800000, guid: 0052cb4e2625fcb4984c00dd267caca0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Metalic:
+        m_Texture: {fileID: 2800000, guid: f77fbaded7052b64faf532ab5aa7c0ba, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _MetalicRAOG:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Netalic:
+        m_Texture: {fileID: 0}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Normal:
+        m_Texture: {fileID: 2800000, guid: 0b71c0233dc54084caeffc9c28bc7a53, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Ramp:
+        m_Texture: {fileID: 2800000, guid: a71198a867c73fc4192598691b5fe294, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _RampRGB:
+        m_Texture: {fileID: 2800000, guid: a71198a867c73fc4192598691b5fe294, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Smothness:
+        m_Texture: {fileID: 2800000, guid: ba0443fcf5666da47a4f322839c91a06, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _SmothnessA:
+        m_Texture: {fileID: 2800000, guid: ba0443fcf5666da47a4f322839c91a06, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TextureSample0:
+        m_Texture: {fileID: 2800000, guid: 24b7ed9293c712a4bb5e0e66badcc3e0, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _Transluency:
+        m_Texture: {fileID: 2800000, guid: 9884a495a5a5b6f459e4cbae5471d969, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    - _TransluencyRGB:
+        m_Texture: {fileID: 2800000, guid: 9884a495a5a5b6f459e4cbae5471d969, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _AmbientOcclusionPower: 1
+    - _Float0: 1
+    - _Float1: 0
+    - _Metalic: 0
+    - _MetalicStrenght: 0.43
+    - _NormalStrenght: 1
+    - _Offset: 0.5
+    - _RampPower: 0.9
+    - _RimPower: 3.4
+    - _SMothness: 1
+    - _ScatteringPower: 1
+    - _Shininess: 0.01
+    - _Smoothness: 0.6
+    - _Specular: 0.204
+    - _Test: 0.1
+    - _TransAmbient: 0.243
+    - _TransDirect: 0.586
+    - _TransNormalDistortion: 0.059
+    - _TransScattering: 11.3
+    - _TransShadow: 0.226
+    - _Translucency: 9.8
+    - __dirty: 0
+    m_Colors:
+    - _Color: {r: 1, g: 1, b: 1, a: 1}
+    - _Color0: {r: 0.8235294, g: 0.01703852, b: 0, a: 0}
+    - _Color1: {r: 0, g: 0, b: 0, a: 0}
+    - _RimColor: {r: 0.18382353, g: 0.18382353, b: 0.18382353, a: 0}
+    - _Tint: {r: 0.88235295, g: 0.92156863, b: 1, a: 0}
+    - _TransluencyColor: {r: 1, g: 1, b: 1, a: 0}
+    - _TransmissionParams: {r: 0.1, g: 6, b: -2.03, a: 16.95}
+    - _Vector0: {r: 0, g: 0, b: 0, a: 0}

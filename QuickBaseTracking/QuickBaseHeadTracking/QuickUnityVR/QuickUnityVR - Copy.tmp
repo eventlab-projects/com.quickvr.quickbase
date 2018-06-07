@@ -1,0 +1,586 @@
+﻿using UnityEngine;
+using UnityEngine.XR;
+using System.Collections;
+using System.Collections.Generic;
+
+namespace QuickVR {
+
+    public class QuickUnityVR : QuickHeadTracking
+    {
+
+        #region MENU ITEM
+
+#if UNITY_EDITOR
+        public static class QuickVRMenu
+        {
+            const string MENU_ITEM = QuickVRManager.MENU_QUICKVR_ROOT + "/" + QuickVRManager.MENU_QUICKVR_HEADTRACKING + "/" + "QuickUnityVR";
+
+            [UnityEditor.MenuItem(MENU_ITEM)]
+            static void AddTracking()
+            {
+                if (!UnityEditor.Selection.activeGameObject.GetComponent<QuickUnityVR>())
+                {
+                    UnityEditor.Selection.activeGameObject.AddComponent<QuickUnityVR>();
+                }
+            }
+
+            [UnityEditor.MenuItem(MENU_ITEM, true)]
+            static bool ValidateAddTracking()
+            {
+                return (UnityEditor.Selection.activeTransform != null);
+            }
+
+        }
+
+#endif
+
+        #endregion
+
+        #region PUBLIC PARAMETERS
+
+        public static List<XRNodeState> _vrNodesState = new List<XRNodeState>();
+
+        public bool _displaceWithCamera = false;
+        public bool _rotateWithCamera = false;
+        public bool _autoCorrectHands = true;
+        public Vector3 _handControllerPositionOffset = new Vector3(0,0,-0.1f);
+
+        [BitMask(typeof(IKLimbBones))]
+        public int _trackedJoints = -1;
+
+        #endregion
+
+        #region PROTECTED PARAMETERS
+
+        [SerializeField, HideInInspector]
+        protected QuickIKManager _ikManager = null;
+
+        protected Transform _vrNodesRoot = null;
+        protected Transform _vrNodesOrigin = null;
+
+        protected Vector3 _initialPosition = Vector3.zero;
+        protected Quaternion _initialRotation = Quaternion.identity;
+
+        protected Vector3 _initialHipsLocalPosition = Vector3.zero;
+        protected float _maxHipsOffsetY = 0.0f;
+        protected float _hipsOffsetY = 0.0f;
+
+        protected bool _handsSwaped = false;
+
+        #endregion
+
+        #region EVENTS
+
+        public delegate void CalibrateAction();
+        public static event CalibrateAction OnCalibrate;
+
+        #endregion
+
+        #region CREATION AND DESTRUCTION
+
+        protected override void Awake()
+        {
+            base.Awake();
+
+            _initialPosition = transform.position;
+            _initialRotation = transform.rotation;
+            _initialHipsLocalPosition = _animator.GetBoneTransform(HumanBodyBones.Hips).localPosition;
+            _maxHipsOffsetY = _animator.GetBoneTransform(HumanBodyBones.Hips).position.y - transform.position.y;
+            _hipsOffsetY = _maxHipsOffsetY;
+
+            CreateIKManager();
+
+            //Create the VRNodes
+            _vrNodesRoot = new GameObject("__VRNodesRoot__").transform;
+            _vrNodesOrigin = _vrNodesRoot.CreateChild("__Origin__");
+            
+            foreach (QuickVRNode.Type t in QuickVRNode.GetTypeList()) CreateVRNode(t);
+
+            GetQuickVRNode(QuickVRNode.Type.LeftHand).gameObject.GetOrCreateComponent<QuickTrackedController>();
+            GetQuickVRNode(QuickVRNode.Type.RightHand).gameObject.GetOrCreateComponent<QuickTrackedController>();
+            
+            //Create the cursors for the hands. 
+            CreateVRCursor(VRCursorType.LEFT, GetQuickVRNode(QuickVRNode.Type.LeftHand).transform);
+            CreateVRCursor(VRCursorType.RIGHT, GetQuickVRNode(QuickVRNode.Type.RightHand).transform);
+        }
+
+        protected virtual void CreateIKManager()
+        {
+            _ikManager = gameObject.GetOrCreateComponent<QuickIKManager>();
+            _ikManager.enabled = false; //We control when to update the IK
+        }
+
+        protected virtual QuickVRNode CreateVRNode(QuickVRNode.Type n)
+        {
+            return _vrNodesRoot.CreateChild(n.ToString()).gameObject.GetOrCreateComponent<QuickVRNode>();
+        }
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+
+            GetQuickVRNode(QuickVRNode.Type.Head).OnConnected += OnHMDConnected;
+
+            GetQuickVRNode(QuickVRNode.Type.LeftHand).OnConnected += OnLeftHandConnected;
+            GetQuickVRNode(QuickVRNode.Type.RightHand).OnConnected += OnRightHandConnected;
+            
+            QuickVRManager.OnPreUpdateTracking += ComputeVRNodesState;
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+
+            QuickVRNode vrNode = GetQuickVRNode(QuickVRNode.Type.Head);
+            if (vrNode) vrNode.OnConnected -= OnHMDConnected;
+
+            vrNode = GetQuickVRNode(QuickVRNode.Type.LeftHand);
+            if (vrNode) vrNode.OnConnected -= OnLeftHandConnected;
+
+            vrNode = GetQuickVRNode(QuickVRNode.Type.RightHand);
+            if (vrNode) vrNode.OnConnected -= OnRightHandConnected;
+
+            QuickVRManager.OnPreUpdateTracking -= ComputeVRNodesState;
+        }
+
+        #endregion
+
+        #region GET AND SET
+
+        public virtual void SetInitialPosition(Vector3 initialPosition)
+        {
+            _initialPosition = initialPosition;
+        }
+
+        public virtual void SetInitialRotation(Quaternion initialRotation)
+        {
+            _initialRotation = initialRotation;
+        }
+
+        protected List<XRNodeState> GetExtraTrackers()
+        {
+            List<XRNodeState> extraTrackers = new List<XRNodeState>();
+            foreach (XRNodeState s in _vrNodesState)
+            {
+                if (s.tracked && s.nodeType == XRNode.HardwareTracker) extraTrackers.Add(s);
+            }
+
+            return extraTrackers;
+        }
+
+        public virtual int GetNumExtraTrackers()
+        {
+            return GetExtraTrackers().Count;
+        }
+
+        protected virtual Vector3 GetDisplacement()
+        {
+            QuickVRNode waistNode = GetQuickVRNode(QuickVRNode.Type.Waist);
+            if (waistNode.IsTracked()) return waistNode.GetTrackedObject().GetDisplacement();
+            else if (_displaceWithCamera) return GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject().GetDisplacement();
+            
+            return Vector3.zero;
+        }
+
+        protected virtual Quaternion GetRotationOffset()
+        {
+            QuickVRNode waistNode = GetQuickVRNode(QuickVRNode.Type.Waist);
+            QuickVRNode hmdNode = GetQuickVRNode(QuickVRNode.Type.Head);
+            QuickVRNode node = null;
+
+            if (waistNode.IsTracked()) node = waistNode;
+            else if (_rotateWithCamera) node = hmdNode;
+
+            if (!node) return Quaternion.identity;
+
+            Vector3 lastForward = Vector3.ProjectOnPlane(node.GetLastForward(), transform.up);
+            Vector3 currentForward = Vector3.ProjectOnPlane(node.transform.forward, transform.up);
+
+            return Quaternion.FromToRotation(lastForward, currentForward);
+        }
+
+        public override void Calibrate()
+        {
+            _ikManager.ResetIKChains();
+            _ikManager.Calibrate();
+
+            transform.position = _initialPosition;
+            transform.rotation = _initialRotation;
+            _animator.GetBoneTransform(HumanBodyBones.Hips).localPosition = _initialHipsLocalPosition;
+            _hipsOffsetY = _maxHipsOffsetY;
+
+            CalibrateVRNodes();
+            CalibrateCamera();
+
+            base.Calibrate();
+
+            if (OnCalibrate != null) OnCalibrate();
+        }
+
+        protected virtual void CalibrateCamera()
+        {
+            Vector3 fwdCam = Vector3.ProjectOnPlane(_camera.transform.forward, transform.up);
+            _cameraControllerRoot.Rotate(Vector3.Cross(fwdCam, transform.forward).normalized, Vector3.Angle(fwdCam, transform.forward), Space.World);
+        }
+
+        protected virtual void CheckVRHands()
+        {
+            //Check if the hands are reversed
+            QuickVRNode hmdNode = GetQuickVRNode(QuickVRNode.Type.Head);
+            QuickVRNode leftHandNode = GetQuickVRNode(QuickVRNode.Type.LeftHand);
+            QuickVRNode rightHandNode = GetQuickVRNode(QuickVRNode.Type.RightHand);
+            if (
+                Vector3.Dot(leftHandNode.transform.position - hmdNode.transform.position, hmdNode.transform.right) >
+                Vector3.Dot(rightHandNode.transform.position - hmdNode.transform.position, hmdNode.transform.right)
+                )
+            {
+                SwapQuickVRNode(leftHandNode, rightHandNode);
+                _handsSwaped = !_handsSwaped;
+            }
+        }
+
+        protected virtual void CheckVRExtraTrackers()
+        {
+            List<XRNodeState> extraTrackers = GetExtraTrackers();
+            int numTrackers = extraTrackers.Count;
+            QuickVRNode waistNode = GetQuickVRNode(QuickVRNode.Type.Waist);
+            QuickVRNode leftFootNode = GetQuickVRNode(QuickVRNode.Type.LeftFoot);
+            QuickVRNode rightFootNode = GetQuickVRNode(QuickVRNode.Type.RightFoot);
+
+            if (numTrackers == 1)
+            {
+                //We guess the extra tracker is the waist
+                waistNode.SetID(extraTrackers[0].uniqueID);
+            }
+            else if (numTrackers == 2)
+            {
+                //We guess the extra trackers are the two feet
+                leftFootNode.SetID(extraTrackers[0].uniqueID);
+                rightFootNode.SetID(extraTrackers[1].uniqueID);
+            }
+            else if (numTrackers == 3)
+            {
+                waistNode.SetID(extraTrackers[0].uniqueID);
+                leftFootNode.SetID(extraTrackers[1].uniqueID);
+                rightFootNode.SetID(extraTrackers[2].uniqueID);
+
+                //Let's determine which is the waist node
+                if (waistNode.transform.position.y < leftFootNode.transform.position.y)
+                {
+                    SwapQuickVRNode(waistNode, leftFootNode);
+                }
+                if (waistNode.transform.position.y < rightFootNode.transform.position.y)
+                {
+                    SwapQuickVRNode(waistNode, rightFootNode);
+                }
+            }
+        }
+
+        protected virtual void CheckVRFeet()
+        {
+            //Check if left and right feet are swapped
+            QuickVRNode hmdNode = GetQuickVRNode(QuickVRNode.Type.Head);
+            QuickVRNode leftFootNode = GetQuickVRNode(QuickVRNode.Type.LeftFoot);
+            QuickVRNode rightFootNode = GetQuickVRNode(QuickVRNode.Type.RightFoot);
+            if (
+                Vector3.Dot(leftFootNode.transform.position - hmdNode.transform.position, hmdNode.transform.right) >
+                Vector3.Dot(rightFootNode.transform.position - hmdNode.transform.position, hmdNode.transform.right))
+            {
+                SwapQuickVRNode(leftFootNode, rightFootNode);
+            }
+        }
+
+        protected virtual void SwapQuickVRNode(QuickVRNode vrNodeA, QuickVRNode vrNodeB)
+        {
+            ulong tmp = vrNodeA.GetID();
+            vrNodeA.SetID(vrNodeB.GetID());
+            vrNodeB.SetID(tmp);
+        }
+
+        protected virtual void CalibrateVRNodes()
+        {
+            CheckVRExtraTrackers();
+            CheckVRHands();         
+            CheckVRFeet();
+
+            foreach (QuickVRNode.Type t in QuickVRNode.GetTypeList())
+            {
+                CalibrateVRNode(t);
+            }
+        }
+
+        protected virtual void CalibrateVRNode(QuickVRNode.Type nodeType, bool resetTrackedObject = true)
+        {
+            QuickVRNode node = GetQuickVRNode(nodeType);
+            if (!node.IsTracked()) return;
+            
+            HumanBodyBones boneID = QuickUtils.ParseEnum<HumanBodyBones>(nodeType.ToString());
+            IKLimbBones ikLimbBone = QuickUtils.ParseEnum<IKLimbBones>(nodeType.ToString());
+            Transform nTransform = node.transform;
+            QuickTrackedObject tObject = node.GetTrackedObject();
+            Transform ikTarget = _ikManager.GetIKSolver(ikLimbBone)._targetLimb;
+
+            if (nodeType == QuickVRNode.Type.Head)
+            {
+                tObject.transform.localPosition = Quaternion.Inverse(transform.rotation) * (_animator.GetBoneTransform(HumanBodyBones.Head).position - GetEyeCenterPosition());
+                float yOffset = _animator.GetBoneTransform(HumanBodyBones.Head).position.y - _animator.GetBoneTransform(HumanBodyBones.Hips).position.y;
+                _vrNodesOrigin.position = tObject.transform.position - transform.up * yOffset;
+                _vrNodesOrigin.forward = Vector3.ProjectOnPlane(nTransform.forward, transform.up);
+            }
+
+            if (nodeType == QuickVRNode.Type.LeftHand || nodeType == QuickVRNode.Type.RightHand)
+            {
+                float correctionAngle = 90.0f;
+                SteamVR_Controller.DeviceRelation dRel = SteamVR_Controller.DeviceRelation.Leftmost;
+                if (nodeType == QuickVRNode.Type.RightHand)
+                {
+                    correctionAngle *= -1.0f;
+                    dRel = SteamVR_Controller.DeviceRelation.Rightmost;
+                }
+
+                nTransform.GetComponent<QuickTrackedController>().SetDeviceIndex(SteamVR_Controller.GetDeviceIndex(dRel));
+
+                if ((_trackedJoints & (1 << (int)ikLimbBone)) != 0)
+                {
+                    if (_autoCorrectHands)
+                    {
+                        ikTarget.Rotate(ikTarget.forward, correctionAngle, Space.World);
+                    }
+                    tObject.transform.localPosition = _handControllerPositionOffset;
+                }
+            }
+
+            else if (nodeType == QuickVRNode.Type.LeftFoot || nodeType == QuickVRNode.Type.RightFoot)
+            {
+                if ((_trackedJoints & (1 << (int)ikLimbBone)) != 0)
+                {
+                    ikTarget.parent = nTransform;
+                    ikTarget.position = _animator.GetBoneTransform(boneID).position;
+                }
+            }
+
+            //tObject.transform.localRotation = Quaternion.identity;
+            if (nodeType == QuickVRNode.Type.Head)
+            {
+                tObject.transform.localRotation = Quaternion.identity;
+            }
+            else
+            {
+                tObject.transform.rotation = _vrNodesOrigin.rotation * Quaternion.Inverse(transform.rotation) * ikTarget.rotation;
+            }
+
+            if (resetTrackedObject) tObject.Reset();
+        }
+
+        public virtual QuickTrackedController GetControllerLeft()
+        {
+            return GetQuickVRNode(QuickVRNode.Type.LeftHand).transform.GetComponent<QuickTrackedController>();
+        }
+
+        public virtual QuickTrackedController GetControllerRight()
+        {
+            return GetQuickVRNode(QuickVRNode.Type.RightHand).transform.GetComponent<QuickTrackedController>();
+        }
+
+        public virtual QuickVRNode GetQuickVRNode(QuickVRNode.Type node)
+        {
+            return _vrNodesRoot? _vrNodesRoot.Find(node.ToString()).GetComponent<QuickVRNode>() : null;
+        }
+
+        #endregion
+
+        #region UPDATE
+
+        //protected virtual void Update()
+        //{
+        //    _ikManager._ikMask = _ikMask;
+        //}
+
+        public override void UpdateTracking()
+        {
+            base.UpdateTracking();
+
+            UpdateTrackedController(GetControllerLeft());
+            UpdateTrackedController(GetControllerRight());
+            UpdateTransformRoot();
+            UpdateTransformNodes();
+            UpdateTrackingIK();
+            UpdateCameraPosition();
+        }
+
+        protected virtual void UpdateTrackedController(QuickTrackedController controller)
+        {
+            if (controller.GetDeviceIndex() == SteamVR_TrackedObject.EIndex.None)
+            {
+                QuickVRNode nHead = GetQuickVRNode(QuickVRNode.Type.Head);
+                bool isRight = Vector3.Dot(controller.transform.position - nHead.transform.position, nHead.transform.right) > 0;
+                controller.SetDeviceIndex(isRight? SteamVR_Controller.DeviceRelation.Rightmost : SteamVR_Controller.DeviceRelation.Leftmost);
+            }
+        }
+
+        protected virtual void UpdateTransformRoot()
+        {
+            //Update the rotation
+            transform.rotation *= GetRotationOffset();
+            _vrNodesOrigin.rotation *= GetRotationOffset();
+            if (_rotateWithCamera)
+            {
+                CalibrateCamera();
+            }
+                        
+            //Update the position
+            Vector3 offset = _vrNodesOrigin.InverseTransformVector(GetDisplacement());
+            transform.Translate(new Vector3(offset.x, 0.0f, offset.z), Space.Self);
+            _vrNodesOrigin.Translate(new Vector3(offset.x, 0.0f, offset.z), Space.Self);
+            
+            _hipsOffsetY = Mathf.Min(_hipsOffsetY + offset.y, _maxHipsOffsetY);
+            Transform tHips = _animator.GetBoneTransform(HumanBodyBones.Hips);
+            tHips.position = new Vector3(tHips.position.x, transform.position.y + _hipsOffsetY, tHips.position.z);
+        }
+
+        protected virtual void UpdateTransformNodes()
+        {
+            //Update the position and rotation of the trackers
+            Vector3 tmpPos = transform.position;
+            Quaternion tmpRot = transform.rotation;
+            transform.rotation = _vrNodesOrigin.rotation;
+
+            foreach (QuickVRNode.Type t in QuickVRNode.GetTypeList())
+            {
+                UpdateTransformNode(t);
+            }
+
+            transform.rotation = tmpRot;
+        }
+
+        protected virtual void UpdateTransformNode(QuickVRNode.Type nType)
+        {
+            QuickVRNode node = GetQuickVRNode(nType);
+            if (node.IsTracked())
+            {
+                QuickTrackedObject tObject = node.GetTrackedObject();
+                QuickIKSolver ikSolver = _ikManager.GetIKSolver(QuickUtils.ParseEnum<HumanBodyBones>(nType.ToString()));
+
+                ikSolver._targetLimb.position += node.GetTrackedObject().GetDisplacement();
+                ikSolver._targetLimb.rotation = node.GetTrackedObject().transform.rotation;
+            }
+        }
+
+        protected virtual void UpdateCameraPosition()
+        {
+            //This forces the camera to be in the Avatar's eye center. 
+            Vector3 offset = GetEyeCenterPosition() - _camera.transform.position;
+            _cameraControllerRoot.position += offset;
+        }
+
+        protected virtual void UpdateTrackingIK()
+        {
+            _ikManager.GetIKSolver(HumanBodyBones.Head)._weightIKPos = _applyHeadPosition ? 1.0f : 0.0f;
+            _ikManager.GetIKSolver(HumanBodyBones.Head)._weightIKRot = _applyHeadRotation ? 1.0f : 0.0f;
+
+            _ikManager.UpdateTracking();
+        }
+
+        protected virtual void OnHMDConnected()
+        {
+            Calibrate();
+        }
+
+        protected virtual void OnLeftHandConnected()
+        {
+            CalibrateVRNode(QuickVRNode.Type.LeftHand);
+        }
+
+        protected virtual void OnRightHandConnected()
+        {
+            CalibrateVRNode(QuickVRNode.Type.RightHand);
+        }
+
+        protected virtual void ComputeVRNodesState()
+        {
+            InputTracking.GetNodeStates(_vrNodesState);
+            foreach (XRNodeState s in _vrNodesState)
+            {
+                if (!s.tracked) continue;
+
+                if (s.nodeType == XRNode.Head)
+                {
+                    GetQuickVRNode(QuickVRNode.Type.Head).SetID(s.uniqueID);
+                }
+                else if (s.nodeType == XRNode.LeftHand)
+                {
+                    GetQuickVRNode(_handsSwaped? QuickVRNode.Type.RightHand : QuickVRNode.Type.LeftHand).SetID(s.uniqueID);
+                }
+                else if (s.nodeType == XRNode.RightHand)
+                {
+                    GetQuickVRNode(_handsSwaped ? QuickVRNode.Type.LeftHand : QuickVRNode.Type.RightHand).SetID(s.uniqueID);
+                }
+            }
+        }
+
+        #endregion
+
+        #region DEBUG
+
+        protected virtual void OnDrawGizmos()
+        {
+            if (Application.isPlaying)
+            {
+                DebugVRNodesOrigin();
+
+                DebugVRNode(QuickVRNode.Type.Head, Color.grey);
+                DebugVRNode(QuickVRNode.Type.LeftHand, Color.blue);
+                DebugVRNode(QuickVRNode.Type.LeftFoot, Color.cyan);
+                DebugVRNode(QuickVRNode.Type.RightHand, Color.red);
+                DebugVRNode(QuickVRNode.Type.RightFoot, Color.magenta);
+                DebugVRNode(QuickVRNode.Type.Waist, Color.black);
+
+                DebugVRNodeConnection(QuickVRNode.Type.Head, QuickVRNode.Type.LeftHand);
+                DebugVRNodeConnection(QuickVRNode.Type.Head, QuickVRNode.Type.RightHand);
+
+                Gizmos.color = Color.white;
+                QuickVRNode.Type tNode = GetQuickVRNode(QuickVRNode.Type.Waist).IsTracked() ? QuickVRNode.Type.Waist : QuickVRNode.Type.Head;
+                Gizmos.DrawLine(GetQuickVRNode(tNode).GetTrackedObject().transform.position, _vrNodesOrigin.position);
+            }
+        }
+
+        protected virtual void DebugVRNodesOrigin()
+        {
+            float s = 0.1f;
+            Gizmos.color = Color.blue;
+            Gizmos.DrawLine(_vrNodesOrigin.position, _vrNodesOrigin.position + _vrNodesOrigin.forward * s);
+        }
+
+        protected virtual void DebugVRNode(QuickVRNode.Type nType, Color color, float scale = 0.05f)
+        {
+            QuickVRNode qNode = GetQuickVRNode(nType);
+            if (qNode.IsTracked())
+            {
+                Transform tNode = qNode.transform;
+                Transform tTracked = qNode.GetTrackedObject().transform;
+
+                Gizmos.color = color;
+                Gizmos.DrawCube(tNode.position, new Vector3(scale, scale, scale));
+                Gizmos.DrawSphere(tTracked.position, scale * 0.5f);
+
+                Gizmos.color = Color.white;
+                Gizmos.DrawLine(tNode.position, tTracked.position);
+            }
+        }
+
+        protected virtual void DebugVRNodeConnection(QuickVRNode.Type n1Type, QuickVRNode.Type n2Type)
+        {
+            QuickVRNode n1 = GetQuickVRNode(n1Type);
+            QuickVRNode n2 = GetQuickVRNode(n2Type);
+            if (n1.IsTracked() && n2.IsTracked())
+            {
+                Gizmos.color = Color.white;
+                Gizmos.DrawLine(n1.GetTrackedObject().transform.position, n2.GetTrackedObject().transform.position);
+            } 
+        }
+
+        #endregion
+
+    }
+
+}
