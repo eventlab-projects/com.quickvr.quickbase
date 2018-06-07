@@ -54,12 +54,7 @@ namespace QuickVR {
             QuickSingletonManager.GetInstance<QuickVRManager>().AddTrackingManager(_priority, this);
 		}
 
-        protected virtual void OnDestroy()
-        {
-            QuickSingletonManager.GetInstance<QuickVRManager>().RemoveTrackingManager(_priority, this);
-        }
-
-		protected virtual void OnEnable() {
+        protected virtual void OnEnable() {
 			QuickVRManager.OnPreUpdateTracking += UpdateInput;
 		}
 

@@ -50,12 +50,6 @@ namespace QuickVR
             _trackingManagers[priority].Add(tManager);
         }
 
-        public virtual void RemoveTrackingManager(int priority, QuickBaseTrackingManager tManager)
-        {
-            if (!_trackingManagers.ContainsKey(priority)) return;
-            _trackingManagers[priority].Remove(tManager);
-        }
-
         protected virtual List<int> GetSortedKeys()
         {
             List<int> sortedKeys = new List<int>(_trackingManagers.Keys);

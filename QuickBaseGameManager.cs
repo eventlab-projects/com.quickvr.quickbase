@@ -214,8 +214,6 @@ namespace QuickVR {
         protected virtual IEnumerator CoShowLogos()
         {
             //Show the logos
-            QuickHeadTracking hTracking = _player.GetComponent<QuickHeadTracking>();
-            //hTracking.ShowCalibrationScreen(true);
             Texture calibrationTexture = _cameraFade.GetTexture();
             
             foreach (Texture2D logo in _logos)
@@ -231,7 +229,6 @@ namespace QuickVR {
                 while (_cameraFade.IsFading()) yield return null;
             }
 
-            //hTracking.ShowCalibrationScreen(false);
             _cameraFade.SetTexture(calibrationTexture);
         }
 

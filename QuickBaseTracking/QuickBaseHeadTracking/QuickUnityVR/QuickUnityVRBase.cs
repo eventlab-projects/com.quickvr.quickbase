@@ -275,7 +275,6 @@ namespace QuickVR
             QuickVRNode node = GetQuickVRNode(nodeType);
             if (!node.IsTracked()) return;
 
-            IKLimbBones ikLimbBone = QuickUtils.ParseEnum<IKLimbBones>(nodeType.ToString());
             QuickTrackedObject tObject = node.GetTrackedObject();
 
             if (nodeType == QuickVRNode.Type.Head)
