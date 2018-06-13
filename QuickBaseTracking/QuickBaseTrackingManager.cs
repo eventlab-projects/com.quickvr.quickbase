@@ -35,14 +35,12 @@ namespace QuickVR {
 
         protected virtual void Reset()
         {
-            _animator = GetComponent<Animator>();
             _priority = GetDefaultPriority();
-            if (_animator) _animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
         }
 
         protected virtual void Awake() {
-            if (_priority == 0) _priority = GetDefaultPriority();
-            if (!_animator) Reset();
+            _animator = GetComponent<Animator>();
+            if (_animator) _animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
 		}
 
 		protected virtual void Start() {

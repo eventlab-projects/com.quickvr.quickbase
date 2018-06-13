@@ -42,7 +42,7 @@ namespace QuickVR {
         protected Transform _ikSolversRoot = null;
 
         [SerializeField, HideInInspector]
-        protected List<IKLimbBones> _ikLimbBones;
+        protected List<IKLimbBones> _ikLimbBones = new List<IKLimbBones>();
 
         [SerializeField, HideInInspector]
         protected Transform _boneRotator = null;

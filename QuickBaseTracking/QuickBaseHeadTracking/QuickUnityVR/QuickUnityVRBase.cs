@@ -40,9 +40,6 @@ namespace QuickVR
 
         protected bool _handsSwaped = false;
 
-        protected QuickVRHand _vrHandLeft = null;
-        protected QuickVRHand _vrHandRight = null;
-
         #endregion
 
         #region EVENTS
@@ -56,20 +53,12 @@ namespace QuickVR
 
         protected override void Awake()
         {
-            CreateVRHands();
-
             base.Awake();
 
             _initialPosition = transform.position;
             _initialRotation = transform.rotation;
 
             CreateVRNodes();
-        }
-
-        protected virtual void CreateVRHands()
-        {
-            if (_vrHandLeft._axisAnim == "") _vrHandLeft._axisAnim = "LeftTrigger";
-            if (_vrHandRight._axisAnim == "") _vrHandRight._axisAnim = "RightTrigger";
         }
 
         protected override void CreateVRCursors()

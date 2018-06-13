@@ -35,6 +35,8 @@ namespace QuickVR {
 
         protected override void Awake()
         {
+            base.Awake();
+
             _initialHipsLocalPosition = _animator.GetBoneTransform(HumanBodyBones.Hips).localPosition;
             _maxHipsOffsetY = _animator.GetBoneTransform(HumanBodyBones.Hips).position.y - transform.position.y;
             _hipsOffsetY = _maxHipsOffsetY;
@@ -42,8 +44,6 @@ namespace QuickVR {
             //Create the IKManager
             _ikManager = gameObject.GetOrCreateComponent<QuickIKManager>();
             _ikManager.enabled = false; //We control when to update the IK
-
-            base.Awake();
         }
 
         protected override void CreateVRHands()
