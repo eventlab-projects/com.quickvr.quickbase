@@ -42,8 +42,10 @@ namespace QuickVR {
             SetColor(Color.clear);
         }
 
-        protected virtual void Start()
+        protected virtual IEnumerator Start()
         {
+            while (!Camera.main) yield return null;
+
             transform.parent = Camera.main.transform;
             transform.localPosition = Vector3.forward * 0.75f;
             transform.localRotation = Quaternion.identity;

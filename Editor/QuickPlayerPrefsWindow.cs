@@ -107,12 +107,6 @@ namespace QuickVR
             }
 
             //Check if the base settings are defined
-            List<string> baseKeys = QuickUtils.GetEnumValuesToString<SettingsBase.Key>();
-            foreach (string k in baseKeys)
-            {
-                QuickSetting s = _settings.CreateSetting(k);
-            }
-
             SettingsBase.SetSubjectID(SettingsBase.GetSubjectID());
             SettingsBase.SetSubjectHeight(SettingsBase.GetSubjectHeight());
             SettingsBase.SetGender(SettingsBase.GetGender());

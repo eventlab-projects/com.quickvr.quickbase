@@ -37,11 +37,14 @@ namespace QuickVR {
 
 		protected Dictionary<VRCursorType, QuickUICursor> _vrCursors = new Dictionary<VRCursorType, QuickUICursor>();
 
+        protected QuickVRHand _vrHandLeft = null;
+        protected QuickVRHand _vrHandRight = null;
+
         #endregion
 
-		#region CONSTANTS
+        #region CONSTANTS
 
-		protected const int DEFAULT_PRIORITY_TRACKING_HEAD = 2000;
+        protected const int DEFAULT_PRIORITY_TRACKING_HEAD = 2000;
 		protected const float DEFAULT_NEAR_CLIP_PLANE = 0.035f;
 		protected const float DEFAULT_FAR_CLIP_PLANE = 500.0f;
 
@@ -59,6 +62,7 @@ namespace QuickVR {
 
 			CreateCameraControllerRoot();
 			CreateCamera();
+            CreateVRHands();
             CreateVRCursors();
 
             if (!_calibrationTexture) _calibrationTexture = LoadDefaultCalibrationTexture();
@@ -102,6 +106,12 @@ namespace QuickVR {
             //_cameraControllerRoot = new GameObject(CAMERA_CONTROLLER_ROOT_NAME).transform;
 
             _cameraControllerRoot = transform.CreateChild(CAMERA_CONTROLLER_ROOT_NAME).transform;
+        }
+
+        protected virtual void CreateVRHands()
+        {
+            if (_vrHandLeft._axisAnim == "") _vrHandLeft._axisAnim = "LeftTrigger";
+            if (_vrHandRight._axisAnim == "") _vrHandRight._axisAnim = "RightTrigger";
         }
 
         #endregion
