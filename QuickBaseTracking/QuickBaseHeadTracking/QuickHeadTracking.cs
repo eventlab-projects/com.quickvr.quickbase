@@ -18,6 +18,7 @@ namespace QuickVR {
         public bool _applyHeadRotation = true;
 		public bool _applyHeadPosition = true;
 
+        public Camera _pfCamera = null;
 		public float _cameraNearPlane = DEFAULT_NEAR_CLIP_PLANE;
 		public float _cameraFarPlane = DEFAULT_FAR_CLIP_PLANE;
 		
@@ -65,7 +66,10 @@ namespace QuickVR {
 
         protected virtual void CreateCamera()
         {
-            _camera = _cameraControllerRoot.CreateChild("__Camera__").gameObject.GetOrCreateComponent<Camera>();
+            _camera = _pfCamera ? Instantiate<Camera>(_pfCamera) : new GameObject().GetOrCreateComponent<Camera>();
+            _camera.name = "__Camera__";
+            _camera.transform.parent = _cameraControllerRoot;
+            _camera.transform.ResetTransformation();
             _camera.tag = "MainCamera";
             _camera.gameObject.GetOrCreateComponent<AudioListener>();
             _camera.gameObject.GetOrCreateComponent<FlareLayer>();
