@@ -3,7 +3,8 @@ using UnityEngine.Rendering;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace QuickVR {
+namespace QuickVR
+{
 
     /// <summary>
     /// Camera fade. Simple fading script. A texture is stretched over the entire screen. The color of the pixel is set each
@@ -12,30 +13,32 @@ namespace QuickVR {
     public class CameraFade : MonoBehaviour
     {
 
-	    #region PROTECTED PARAMETERS
+        #region PROTECTED PARAMETERS
 
-	    protected bool _isFading = false;
+        protected bool _isFading = false;
         protected Material _material = null;
-	    
-	    #endregion
+        protected MeshFilter _meshFilter = null;
+
+        protected CommandBuffer _commandBuffer = null;
+
+        #endregion
 
         #region CREATION AND DESTRUCTION
 
         protected virtual void Awake()
         {
             //Create the mesh filter
-            MeshFilter mFilter = gameObject.GetComponent<MeshFilter>();
-            if (!mFilter) mFilter = gameObject.AddComponent<MeshFilter>();
-            mFilter.mesh = QuickUtils.CreateFullScreenQuad();
-            mFilter.mesh.bounds = new Bounds(Vector3.zero, new Vector3(1000000, 1000000, 1000000));
+            _meshFilter = gameObject.GetOrCreateComponent<MeshFilter>();
+            _meshFilter.mesh = QuickUtils.CreateFullScreenQuad();
+            _meshFilter.mesh.bounds = new Bounds(Vector3.zero, new Vector3(1000000, 1000000, 1000000));
 
             //Create the mesh renderer
-            MeshRenderer r = gameObject.GetComponent<MeshRenderer>();
-            if (!r) r = gameObject.AddComponent<MeshRenderer>();
+            MeshRenderer r = gameObject.GetOrCreateComponent<MeshRenderer>();
             r.shadowCastingMode = ShadowCastingMode.Off;
             r.receiveShadows = false;
-            r.material = new Material(Shader.Find("QuickVR/CalibrationScreen"));
-            _material = r.material;
+            r.material = new Material(Shader.Find("QuickVR/Dummy"));
+
+            _material = new Material(Shader.Find("QuickVR/CalibrationScreen"));
 
             gameObject.layer = LayerMask.NameToLayer("UI");
 
@@ -50,20 +53,27 @@ namespace QuickVR {
             transform.localPosition = Vector3.forward * 0.75f;
             transform.localRotation = Quaternion.identity;
             transform.Rotate(transform.up, 180.0f, Space.World);
+
+            _commandBuffer = new CommandBuffer();
+            Camera.main.AddCommandBuffer(CameraEvent.AfterImageEffects, _commandBuffer);
+
+            StartCoroutine(CoUpdateCommandBuffer());
         }
 
         #endregion
 
         #region GET AND SET
 
-        public virtual bool IsFading() {
-		    return _isFading;
-	    }
+        public virtual bool IsFading()
+        {
+            return _isFading;
+        }
 
-	    public virtual void SetColor(Color color) {
+        public virtual void SetColor(Color color)
+        {
             if (_isFading) StopAllCoroutines();
             _material.color = color;
-	    }
+        }
 
         public virtual void SetTexture(Texture tex)
         {
@@ -75,14 +85,16 @@ namespace QuickVR {
             return _material.mainTexture;
         }
 
-	    public virtual void StartFade(Color toColor, float fadeTime) {
+        public virtual void StartFade(Color toColor, float fadeTime)
+        {
             StartFade(_material.color, toColor, fadeTime);
-	    }
+        }
 
-	    public virtual void StartFade(Color fromColor, Color toColor, float fadeTime) {
-		    if (_isFading) StopAllCoroutines();
+        public virtual void StartFade(Color fromColor, Color toColor, float fadeTime)
+        {
+            if (_isFading) StopAllCoroutines();
             StartCoroutine(CoFade(fromColor, toColor, fadeTime));
-	    }
+        }
 
         public virtual void FadeOut(float fadeTime)
         {
@@ -94,9 +106,26 @@ namespace QuickVR {
             StartFade(Color.clear, fadeTime);
         }
 
-	    #endregion
-    
-	    #region UPDATE
+        #endregion
+
+        #region UPDATE
+
+        protected virtual void OnWillRenderObject()
+        {
+            _commandBuffer.Clear();
+            Matrix4x4 m = Matrix4x4.TRS(transform.position, transform.rotation, transform.localScale);
+            _commandBuffer.DrawMesh(_meshFilter.mesh, m, _material);
+        }
+
+        protected virtual IEnumerator CoUpdateCommandBuffer()
+        {
+            while (true)
+            {
+                yield return new WaitForEndOfFrame();
+
+                
+            }
+        }
 
         protected virtual IEnumerator CoFade(Color fromColor, Color toColor, float fadeTime)
         {
@@ -117,7 +146,7 @@ namespace QuickVR {
             _isFading = false;
         }
 
-	    #endregion
+        #endregion
 
     }
 
