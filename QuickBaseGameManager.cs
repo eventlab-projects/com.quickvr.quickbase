@@ -44,6 +44,8 @@ namespace QuickVR {
 
 		protected AudioSource _audioSource = null;
 
+        protected QuickUnityVRBase _hTracking;
+
         #endregion
 
         #region EVENTS
@@ -55,8 +57,8 @@ namespace QuickVR {
         #endregion
 
 		#region CREATION AND DESTRUCTION
-
-		protected virtual void Awake() {
+        
+        protected virtual void Awake() {
 			_debugManager = QuickSingletonManager.GetInstance<DebugManager>();
             _sceneManager = QuickSingletonManager.GetInstance<QuickSceneManager>();
             _fps = QuickSingletonManager.GetInstance<PerformanceFPS>();
@@ -73,7 +75,9 @@ namespace QuickVR {
 			InitGameConfiguration();
 			
             AwakePlayer();
-		}
+
+            _hTracking = GetPlayer().GetComponentInChildren<QuickUnityVRBase>(true);
+        }
 
         protected virtual void Start()
         {
@@ -145,11 +149,35 @@ namespace QuickVR {
 			StartCoroutine(CoFinish());
 		}
 
-		#endregion
+        public virtual void SetInitialPositionAndRotation()
+        {
+            Transform target = GetPlayer().transform;
 
-		#region UPDATE
+            //Vector3 footPrintsLocalPos = Vector3.zero;
+            //Vector3 footPrintsLocalForward = Vector3.forward;
+            //if (_footprints != null)
+            //{
+            //    footPrintsLocalPos = _relativeMatrix.MultiplyPoint(_footprints.position);
+            //    footPrintsLocalForward = _relativeMatrix.MultiplyVector(_footprints.forward);
+            //}
 
-		protected virtual IEnumerator CoUpdate() {
+            _hTracking.SetInitialPosition(target.position);
+            _hTracking.SetInitialRotation(target.rotation);
+
+            //if (_footprints != null)
+            //{
+            //    _footprints.position = target.localToWorldMatrix.MultiplyPoint(footPrintsLocalPos);
+            //    _footprints.forward = target.localToWorldMatrix.MultiplyVector(footPrintsLocalForward);
+            //}
+
+            //_relativeMatrix = Matrix4x4.identity;
+        }
+
+        #endregion
+
+        #region UPDATE
+
+        protected virtual IEnumerator CoUpdate() {
             //Start loading the next scene
             if (_nextSceneName != "") _sceneManager.LoadSceneAsync(_nextSceneName);
 
