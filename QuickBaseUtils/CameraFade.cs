@@ -56,8 +56,6 @@ namespace QuickVR
 
             _commandBuffer = new CommandBuffer();
             Camera.main.AddCommandBuffer(CameraEvent.AfterImageEffects, _commandBuffer);
-
-            StartCoroutine(CoUpdateCommandBuffer());
         }
 
         #endregion
@@ -115,16 +113,6 @@ namespace QuickVR
             _commandBuffer.Clear();
             Matrix4x4 m = Matrix4x4.TRS(transform.position, transform.rotation, transform.localScale);
             _commandBuffer.DrawMesh(_meshFilter.mesh, m, _material);
-        }
-
-        protected virtual IEnumerator CoUpdateCommandBuffer()
-        {
-            while (true)
-            {
-                yield return new WaitForEndOfFrame();
-
-                
-            }
         }
 
         protected virtual IEnumerator CoFade(Color fromColor, Color toColor, float fadeTime)

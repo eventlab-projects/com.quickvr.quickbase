@@ -53,7 +53,9 @@ namespace QuickVR {
 
 		protected virtual void Awake() {
 			_testName = gameObject.name;
-		}
+            _gameManager = QuickSingletonManager.GetInstance<QuickBaseGameManager>();
+            _debugManager = QuickSingletonManager.GetInstance<DebugManager>();
+        }
 
 		protected virtual void Start() {
 
@@ -62,9 +64,6 @@ namespace QuickVR {
 
 		public virtual void Init() {
 			if (_sendOnInitEvent && (OnInit != null)) OnInit(this);
-
-            _gameManager = QuickSingletonManager.GetInstance<QuickBaseGameManager>();
-            _debugManager = QuickSingletonManager.GetInstance<DebugManager>();
 
             _finished = false;
 			_readyToFinish = false;
