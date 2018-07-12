@@ -9,6 +9,7 @@ public class QuickUnityVRAsset : ScriptableObject
     public UnityEngine.LayerMask _visibleLayers;
     public System.Boolean _applyHeadRotation;
     public System.Boolean _applyHeadPosition;
+    public UnityEngine.Camera _pfCamera;
     public System.Single _cameraNearPlane;
     public System.Single _cameraFarPlane;
     public UnityEngine.Vector3 _handControllerPositionOffset;

@@ -11,6 +11,9 @@ namespace QuickVR {
 
         #region PUBLIC ATTRIBUTES
 
+        public bool _displaceWithCamera = false;
+        public bool _rotateWithCamera = false;
+
         public enum UpdateReference
         {
             UserPose,
@@ -170,6 +173,8 @@ namespace QuickVR {
             _hipsOffsetY = Mathf.Min(_hipsOffsetY + GetDisplacement().y, _maxHipsOffsetY);
             Transform tHips = _animator.GetBoneTransform(HumanBodyBones.Hips);
             tHips.position = new Vector3(tHips.position.x, transform.position.y + _hipsOffsetY, tHips.position.z);
+
+            if (_rotateWithCamera) CalibrateCameraForward();
         }
 
         protected override void UpdateTransformNodes()
