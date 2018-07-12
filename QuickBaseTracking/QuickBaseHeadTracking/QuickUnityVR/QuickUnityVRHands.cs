@@ -72,14 +72,12 @@ namespace QuickVR {
 
         protected override float GetRotationOffset()
         {
-            //QuickVRNode hmdNode = GetQuickVRNode(QuickVRNode.Type.Head);
+            QuickVRNode hmdNode = GetQuickVRNode(QuickVRNode.Type.Head);
 
-            //Vector3 currentForward = Vector3.ProjectOnPlane(_vrNodesOrigin.forward, _vrNodesOrigin.up);
-            //Vector3 targetForward = Vector3.ProjectOnPlane(hmdNode.transform.forward, _vrNodesOrigin.up);
+            Vector3 currentForward = Vector3.ProjectOnPlane(_vrNodesOrigin.forward, _vrNodesOrigin.up);
+            Vector3 targetForward = Vector3.ProjectOnPlane(hmdNode.transform.forward, _vrNodesOrigin.up);
 
-            //return Vector3.SignedAngle(currentForward, targetForward, _vrNodesOrigin.up);
-
-            return 0.0f;
+            return Vector3.SignedAngle(currentForward, targetForward, _vrNodesOrigin.up);
         }
 
         protected override void CalibrateVRNodeHead(QuickVRNode node)
@@ -106,6 +104,13 @@ namespace QuickVR {
         #endregion
 
         #region UPDATE
+
+        protected override void UpdateTransformRoot()
+        {
+            base.UpdateTransformRoot();
+
+            CalibrateCameraForward();
+        }
 
         protected override void UpdateTransformNodes()
         {

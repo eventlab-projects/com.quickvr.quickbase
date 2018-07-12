@@ -12,8 +12,11 @@ namespace QuickVR
 
         protected Vector3 _lastPosition = Vector3.zero;
         protected Vector3 _displacement = Vector3.zero;
+        protected Vector3 _velocity = Vector3.zero;
 
-        protected Vector3 _lastForward = Vector3.zero;
+        protected float _speed = 0.0f;
+        protected float _acceleration = 0.0f;
+
         protected Quaternion _lastRotation = Quaternion.identity;
         protected Quaternion _rotationOffset = Quaternion.identity;
 
@@ -38,7 +41,6 @@ namespace QuickVR
 
             _rotationOffset = Quaternion.identity;
             _lastRotation = transform.rotation;
-            _lastForward = transform.forward;
         }
 
         public Vector3 GetDisplacement()
@@ -53,14 +55,19 @@ namespace QuickVR
             return _rotationOffset;
         }
 
-        public Vector3 GetLastForward()
+        public Vector3 GetVelocity()
         {
-            return _lastForward;
+            return _velocity;
         }
 
-        public Vector3 GetLastPosition()
+        public float GetSpeed()
         {
-            return _lastPosition;
+            return _speed;
+        }
+
+        public float GetAcceleration()
+        {
+            return _acceleration;
         }
 
         #endregion
@@ -69,21 +76,19 @@ namespace QuickVR
 
         public virtual void UpdateTrackedData()
         {
-            UpdateTrackedPosition();
-            UpdateTrackedRotation();
-        }
-
-        protected virtual void UpdateTrackedPosition()
-        {
             _displacement = transform.position - _lastPosition;
-            _lastPosition = transform.position;
-        }
+            float dt = Time.deltaTime;
+            if (!Mathf.Approximately(dt, 0))
+            {
+                _velocity = _displacement / dt;
+                _speed = _velocity.magnitude;
+                _acceleration = _speed / dt;
+            }
 
-        protected virtual void UpdateTrackedRotation()
-        {
             _rotationOffset = Quaternion.Inverse(_lastRotation) * transform.rotation;
+            
             _lastRotation = transform.rotation;
-            _lastForward = transform.forward;
+            _lastPosition = transform.position;
         }
 
         #endregion

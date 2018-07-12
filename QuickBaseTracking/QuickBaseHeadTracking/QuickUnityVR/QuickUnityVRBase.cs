@@ -19,8 +19,6 @@ namespace QuickVR
 
         #region PUBLIC ATTRIBUTES
 
-        public bool _displaceWithCamera = false;
-        public bool _rotateWithCamera = false;
         public Vector3 _handControllerPositionOffset = new Vector3(0, 0, -0.1f);
 
         [BitMask(typeof(IKLimbBones))]
@@ -336,8 +334,7 @@ namespace QuickVR
             float rotOffset = GetRotationOffset();
             transform.Rotate(transform.up, rotOffset, Space.World);
             _vrNodesOrigin.Rotate(_vrNodesOrigin.up, rotOffset, Space.World);
-            if (_rotateWithCamera) CalibrateCameraForward();
-
+            
             //Update the position
             Vector3 offset = _vrNodesOrigin.InverseTransformVector(GetDisplacement());
             transform.Translate(new Vector3(offset.x, 0.0f, offset.z), Space.Self);

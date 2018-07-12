@@ -103,6 +103,7 @@ namespace QuickVR
             if (_state == State.CONNECTED)
             {
                 Update();
+                _trackedObject.Reset();
                 if (OnConnected != null) OnConnected();
             }
             else if (_state == State.TRACKED)
