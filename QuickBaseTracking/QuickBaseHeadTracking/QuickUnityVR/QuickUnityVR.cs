@@ -194,7 +194,7 @@ namespace QuickVR {
         protected virtual void UpdateTransformNodeReferenceCalibrationPose(QuickVRNode.Type nType)
         {
             QuickVRNode node = GetQuickVRNode(nType);
-            if (node.IsTracked())
+            if (node.IsTracked() && QuickUtils.IsEnumValue<HumanBodyBones>(nType.ToString()))
             {
                 QuickTrackedObject tObject = node.GetTrackedObject();
                 HumanBodyBones boneID = QuickUtils.ParseEnum<HumanBodyBones>(nType.ToString());
@@ -212,11 +212,11 @@ namespace QuickVR {
         protected virtual void UpdateTransformNodeReferenceUserPose(QuickVRNode.Type nType)
         {
             QuickVRNode node = GetQuickVRNode(nType);
-            if (node.IsTracked())
+            if (node.IsTracked() && QuickUtils.IsEnumValue<HumanBodyBones>(nType.ToString()))
             {
                 Transform hips = _animator.GetBoneTransform(HumanBodyBones.Hips);
                 QuickIKSolver ikSolver = _ikManager.GetIKSolver(QuickUtils.ParseEnum<HumanBodyBones>(nType.ToString()));
-
+                
                 QuickTrackedObject tObject = node.GetTrackedObject();
                 Vector3 posOffset = tObject.transform.position - _vrNodesOrigin.position;
                 ikSolver._targetLimb.position = hips.position + transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * posOffset;

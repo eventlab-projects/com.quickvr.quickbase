@@ -68,6 +68,7 @@ namespace QuickVR {
         {
             base.Reset();
 
+            _animator = GetComponent<Animator>();
             _ikLimbBones = QuickUtils.GetEnumValues<IKLimbBones>();
             _ikTargetsRoot = transform.CreateChild("__IKTargets__");
             _ikSolversRoot = transform.CreateChild("__IKSolvers__");

@@ -34,7 +34,6 @@ namespace QuickVR
 
         protected Vector3 _initialPosition = Vector3.zero;
         protected Quaternion _initialRotation = Quaternion.identity;
-        protected float _cameraRotationOffset = 0.0f;
 
         protected bool _handsSwaped = false;
 
@@ -285,7 +284,6 @@ namespace QuickVR
             //Calculate the camera rotation offset
             _cameraControllerRoot.rotation = transform.rotation;
             Vector3 fwdCam = Vector3.ProjectOnPlane(_camera.transform.forward, transform.up).normalized;
-            _cameraRotationOffset = Vector3.SignedAngle(fwdCam, transform.forward, transform.up);
         }
 
         public virtual QuickVRNode GetQuickVRNode(QuickVRNode.Type node)
@@ -334,10 +332,16 @@ namespace QuickVR
 
         protected virtual void UpdateCameraPosition()
         {
+            //Apply the correct rotation to the cameracontrollerroot:
+            //1) Align the camera with the current avatar's forward
+            //2) Apply the rotation offset defined by the head node
+            QuickVRNode nodeHead = GetQuickVRNode(QuickVRNode.Type.Head);
+            Vector3 fwdCam = Vector3.ProjectOnPlane(_camera.transform.forward, transform.up).normalized;
+            Vector3 fwdHead = Vector3.ProjectOnPlane(nodeHead.GetTrackedObject().transform.forward, transform.up).normalized;
+            float rotOffset = Vector3.SignedAngle(fwdCam, transform.forward, transform.up) + Vector3.SignedAngle(_vrNodesOrigin.forward, fwdHead, transform.up);
+            _cameraControllerRoot.Rotate(transform.up, rotOffset, Space.World);
+            
             //This forces the camera to be in the Avatar's eye center. 
-            _cameraControllerRoot.rotation = transform.rotation;
-            _cameraControllerRoot.Rotate(transform.up, _cameraRotationOffset, Space.World);
-
             Vector3 offset = GetEyeCenterPosition() - _camera.transform.position;
             _cameraControllerRoot.position += offset;
         }
