@@ -475,12 +475,7 @@ namespace QuickVR {
             Vector3 vu = GetScreenAxis(Direction.Y);        // up axis of screen
             Vector3 vn = GetScreenAxis(Direction.Z);        // normal vector of screen
 
-            Gizmos.color = Color.red;
-            Gizmos.DrawRay(transform.position, vr);
-            Gizmos.color = Color.green;
-            Gizmos.DrawRay(transform.position, vu);
-            Gizmos.color = Color.blue;
-            Gizmos.DrawRay(transform.position, -vn);
+            DebugExtension.DrawCoordinatesSystem(transform.position, vr, vu, -vn);
         }
 
         protected virtual void DrawReflectionCamera(Camera reflectionCamera)

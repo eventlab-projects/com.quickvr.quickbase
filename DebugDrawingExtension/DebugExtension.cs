@@ -1390,24 +1390,34 @@ public static class DebugExtension
 	{
 		DrawCapsule(start, end, Color.white, radius);
 	}
-	
-	#endregion
-	
-	#region DebugFunctions
-	
-	/// <summary>
-	/// 	- Gets the methods of an object.
-	/// </summary>
-	/// <returns>
-	/// 	- A list of methods accessible from this object.
-	/// </returns>
-	/// <param name='obj'>
-	/// 	- The object to get the methods of.
-	/// </param>
-	/// <param name='includeInfo'>
-	/// 	- Whether or not to include each method's method info in the list.
-	/// </param>
-	public static string MethodsOfObject(System.Object obj, bool includeInfo = false){
+
+    public static void DrawCoordinatesSystem(Vector3 center, Vector3 right, Vector3 up, Vector3 forward, float aSize = 1.0f)
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawLine(center, center + right * aSize);
+        Gizmos.color = Color.green;
+        Gizmos.DrawLine(center, center + up * aSize);
+        Gizmos.color = Color.blue;
+        Gizmos.DrawLine(center, center + forward * aSize);
+    }
+
+    #endregion
+
+    #region DebugFunctions
+
+    /// <summary>
+    /// 	- Gets the methods of an object.
+    /// </summary>
+    /// <returns>
+    /// 	- A list of methods accessible from this object.
+    /// </returns>
+    /// <param name='obj'>
+    /// 	- The object to get the methods of.
+    /// </param>
+    /// <param name='includeInfo'>
+    /// 	- Whether or not to include each method's method info in the list.
+    /// </param>
+    public static string MethodsOfObject(System.Object obj, bool includeInfo = false){
 		string methods = "";
 		MethodInfo[] methodInfos = obj.GetType().GetMethods();
 		for(int i = 0; i < methodInfos.Length; i++){

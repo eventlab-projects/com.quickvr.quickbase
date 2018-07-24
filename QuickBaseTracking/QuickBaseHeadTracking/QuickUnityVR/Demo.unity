@@ -267,7 +267,6 @@ GameObject:
   m_Component:
   - component: {fileID: 189260646}
   - component: {fileID: 189260647}
-  - component: {fileID: 189260648}
   m_Layer: 0
   m_Name: GameObject
   m_TagString: Untagged
@@ -318,23 +317,6 @@ MonoBehaviour:
   _trackedJoints: -1
   _pfHandLeft: {fileID: 0}
   _pfHandRight: {fileID: 0}
---- !u!114 &189260648
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 189260645}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5dc7f38fa935a3148b3d1084774fe51f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _targetNode: 0
-  _speedCurveAsset: {fileID: 0}
-  _acceleration: 8
-  _speedMultiplier: 0.75
-  _currentSpeed: 0
-  _desiredSpeed: 0
 --- !u!1 &294576599
 GameObject:
   m_ObjectHideFlags: 0
@@ -420,7 +402,7 @@ Prefab:
       objectReference: {fileID: 0}
     - target: {fileID: 100246, guid: 920b88643f1a9ff408b6c50ac59bbd41, type: 3}
       propertyPath: m_IsActive
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 400246, guid: 920b88643f1a9ff408b6c50ac59bbd41, type: 3}
       propertyPath: m_LocalEulerAnglesHint.y
