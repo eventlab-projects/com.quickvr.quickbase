@@ -330,8 +330,27 @@ namespace QuickVR {
         }
     }
 
-    public static class QuickUtilsEditor
+    [InitializeOnLoad]
+    public class QuickUtilsEditor
     {
+        static QuickUtilsEditor()
+        {
+            EditorApplication.playModeStateChanged += PlayModeChanged;
+        }
+
+        private static void PlayModeChanged(PlayModeStateChange state)
+        {
+            if (state == PlayModeStateChange.EnteredPlayMode)
+            {
+                QuickUtils.OnCloseApplication += StopEditor;
+            }
+        }
+
+        private static void StopEditor()
+        {
+            EditorApplication.isPlaying = false;
+        }
+
         public static void CreateDataFolder(string relativePath)
         {
             string path = Application.dataPath + "/" + relativePath;

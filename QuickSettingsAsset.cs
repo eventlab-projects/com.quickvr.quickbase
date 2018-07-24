@@ -107,13 +107,6 @@ namespace QuickVR
 
         #endregion
 
-        #region PROTECTED PARAMETERS
-
-        [SerializeField]
-        protected List<string> _buildScenes = new List<string>();
-
-        #endregion
-
         #region CREATION AND DESTRUCTION
 
         public virtual QuickSetting CreateSetting(string key)
@@ -146,27 +139,6 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
-
-        public virtual void ComputeBuildScenes()
-        {
-#if UNITY_EDITOR
-            //Find the enabled scenes in the editor window. 
-            _buildScenes.Clear();
-            UnityEditor.EditorBuildSettingsScene[] allScenes = UnityEditor.EditorBuildSettings.scenes;
-            foreach (UnityEditor.EditorBuildSettingsScene s in allScenes)
-            {
-                if (!s.enabled) continue;
-                _buildScenes.Add(s.path);
-            }
-#endif
-        }
-
-        public virtual List<string> GetBuildScenes()
-        {
-            ComputeBuildScenes();
-
-            return _buildScenes;
-        }
 
         public virtual void LoadPlayerPrefs()
         {

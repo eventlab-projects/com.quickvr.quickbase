@@ -40,6 +40,9 @@ namespace QuickVR
     public static class QuickUtils
     {
 
+        public delegate void CloseApplicationAction();
+        public static event CloseApplicationAction OnCloseApplication;
+
         public static GameMode _gameMode = GameMode.SINGLE_PLAYER;
 
         public static Mesh CreateFullScreenQuad()
@@ -220,11 +223,9 @@ namespace QuickVR
 
         public static void CloseApplication()
         {
-#if UNITY_EDITOR
-            UnityEditor.EditorApplication.isPlaying = false;
-#else
-				Application.Quit();
-#endif
+            if (OnCloseApplication != null) OnCloseApplication();
+
+		    Application.Quit();
         }
 
         public static void SaveCameraRenderToFile(string file, Camera cam, int width, int height)

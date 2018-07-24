@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 using System.Linq;
 
@@ -40,22 +41,16 @@ namespace QuickVR
 
         #region GET AND SET
 
-        public static void ComputeBuildScenes()
-        {
-            CheckSettings();
-
-            _settings.ComputeBuildScenes();
-
-#if UNITY_EDITOR
-            UnityEditor.EditorUtility.SetDirty(_settings);
-#endif
-        }
-
         public static List<string> GetBuildScenes()
         {
-            ComputeBuildScenes();
-            
-            return _settings.GetBuildScenes();
+            List<string> result = new List<string>();
+            for (int i = 0; i < SceneManager.sceneCountInBuildSettings; i++)
+            {
+                string path = SceneUtility.GetScenePathByBuildIndex(i);
+                if (path.Length > 0) result.Add(path);
+            }
+
+            return result;
         }
 
         public static void ClearSettingsCustom()
