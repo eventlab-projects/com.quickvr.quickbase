@@ -67,13 +67,6 @@ namespace QuickVR
             return result;
         }
 
-        public static void ClearSettingsCustom()
-        {
-            CheckSettings();
-
-            _settings.ClearSettingsCustom();
-        }
-
         public static bool HasKey(string key)
         {
             CheckSettings();

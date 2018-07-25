@@ -155,14 +155,6 @@ namespace QuickVR
             }
         }
 
-        public virtual void ClearSettingsCustom()
-        {
-            _settingsCustom.Clear();
-#if UNITY_EDITOR
-            UnityEditor.EditorUtility.SetDirty(this);
-#endif
-        }
-
         public virtual QuickSetting GetSetting(string key)
         {
             QuickSetting result = null;
