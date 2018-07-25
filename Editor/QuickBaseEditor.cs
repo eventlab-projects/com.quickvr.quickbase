@@ -335,7 +335,13 @@ namespace QuickVR {
     {
         static QuickUtilsEditor()
         {
+            QuickPlayerPrefs.OnSetValue += SaveSettingsAsset;
             EditorApplication.playModeStateChanged += PlayModeChanged;
+        }
+
+        private static void SaveSettingsAsset()
+        {
+            UnityEditor.EditorUtility.SetDirty(QuickPlayerPrefs.GetSettingsAsset());
         }
 
         private static void PlayModeChanged(PlayModeStateChange state)

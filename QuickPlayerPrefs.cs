@@ -18,6 +18,13 @@ namespace QuickVR
 
         #endregion
 
+        #region EVENTS
+
+        public delegate void SetValueAction();
+        public static event SetValueAction OnSetValue;
+
+        #endregion
+
         #region CREATION AND DESTRUCTION
 
         private static void CheckSettings()
@@ -40,6 +47,13 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
+
+        public static QuickSettingsAsset GetSettingsAsset()
+        {
+            CheckSettings();
+
+            return _settings;
+        }
 
         public static List<string> GetBuildScenes()
         {
@@ -113,9 +127,7 @@ namespace QuickVR
 
             s.SetValue(value);
 
-#if UNITY_EDITOR
-            UnityEditor.EditorUtility.SetDirty(_settings);
-#endif
+            if (OnSetValue != null) OnSetValue();
         }
 
         public static QuickSetting GetSetting(string key)
