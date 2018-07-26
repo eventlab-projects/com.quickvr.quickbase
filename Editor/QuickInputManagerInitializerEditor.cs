@@ -7,7 +7,7 @@ namespace QuickVR
 {
 
     [InitializeOnLoad]
-    public class QuickInputManagerInitializer
+    public class QuickInputManagerInitializerEditor
     {
 
         #region PROTECTED ATTRIBUTES
@@ -21,7 +21,7 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        static QuickInputManagerInitializer()
+        static QuickInputManagerInitializerEditor()
         {
             _inputManager = new SerializedObject(AssetDatabase.LoadAllAssetsAtPath("ProjectSettings/InputManager.asset")[0]);
             _pAxes = _inputManager.FindProperty("m_Axes");

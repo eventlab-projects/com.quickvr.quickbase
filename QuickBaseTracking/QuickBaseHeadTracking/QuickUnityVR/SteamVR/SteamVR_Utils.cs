@@ -12,50 +12,6 @@ using Valve.VR;
 public static class SteamVR_Utils
 {
 	// this version does not clamp [0..1]
-	public static Quaternion Slerp(Quaternion A, Quaternion B, float t)
-	{
-		var cosom = Mathf.Clamp(A.x * B.x + A.y * B.y + A.z * B.z + A.w * B.w, -1.0f, 1.0f);
-		if (cosom < 0.0f)
-		{
-			B = new Quaternion(-B.x, -B.y, -B.z, -B.w);
-			cosom = -cosom;
-		}
-
-		float sclp, sclq;
-		if ((1.0f - cosom) > 0.0001f)
-		{
-			var omega = Mathf.Acos(cosom);
-			var sinom = Mathf.Sin(omega);
-			sclp = Mathf.Sin((1.0f - t) * omega) / sinom;
-			sclq = Mathf.Sin(t * omega) / sinom;
-		}
-		else
-		{
-			// "from" and "to" very close, so do linear interp
-			sclp = 1.0f - t;
-			sclq = t;
-		}
-
-		return new Quaternion(
-			sclp * A.x + sclq * B.x,
-			sclp * A.y + sclq * B.y,
-			sclp * A.z + sclq * B.z,
-			sclp * A.w + sclq * B.w);
-	}
-
-	public static Vector3 Lerp(Vector3 A, Vector3 B, float t)
-	{
-		return new Vector3(
-			Lerp(A.x, B.x, t),
-			Lerp(A.y, B.y, t),
-			Lerp(A.z, B.z, t));
-	}
-
-	public static float Lerp(float A, float B, float t)
-	{
-		return A + (B - A) * t;
-	}
-
 	private static float _copysign(float sizeval, float signval)
 	{
 		return Mathf.Sign(signval) == 1 ? Mathf.Abs(sizeval) : -Mathf.Abs(sizeval);

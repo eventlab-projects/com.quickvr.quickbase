@@ -12,7 +12,7 @@ namespace QuickVR
 {
 
     [System.Serializable]
-    public class QuickPlayerPrefsWindow : EditorWindow
+    public class QuickPlayerPrefsWindowEditor : EditorWindow
     {
         #region PROTECTED PARAMETERS
 
@@ -53,7 +53,7 @@ namespace QuickVR
         [MenuItem("QuickVR/PlayerPrefs")]
         public static void ShowWindow()
         {
-            EditorWindow.GetWindow<QuickPlayerPrefsWindow>();
+            EditorWindow.GetWindow<QuickPlayerPrefsWindowEditor>();
         }
 
         protected virtual bool CreateNewSetting(out object value)
