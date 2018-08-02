@@ -80,6 +80,12 @@ namespace QuickVR
 
         protected virtual void LateUpdate()
         {
+            foreach (var pair in _trackingManagers)
+            {
+                HashSet<QuickBaseTrackingManager> tManagers = pair.Value;
+                tManagers.RemoveWhere(IsNull);
+            }
+
             List<int> sortedKeys = GetSortedKeys();
 
             if (OnPreUpdateTracking != null) OnPreUpdateTracking();
@@ -101,6 +107,11 @@ namespace QuickVR
             }
 
             if (OnPostUpdateTracking != null) OnPostUpdateTracking();
+        }
+
+        private static bool IsNull(QuickBaseTrackingManager tManager)
+        {
+            return tManager == null;
         }
 
         #endregion
