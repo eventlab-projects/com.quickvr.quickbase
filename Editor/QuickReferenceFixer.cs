@@ -8,6 +8,8 @@ using UnityEditor;
 
 using QuickVR;
 
+using AltProg.CleanEmptyDir;
+
 /**
  * Fixes the missing references for the QuickVR library, when we move from source to binaries. 
  * 
@@ -262,6 +264,11 @@ public class QuickReferenceFixer : EditorWindow {
             Debug.Log("Removing source file: " + path);
             AssetDatabase.DeleteAsset(path);
         }
+
+        //Remove all the empty folders
+        List<System.IO.DirectoryInfo> emptyDirs;
+        Core.FillEmptyDirList(out emptyDirs);
+        Core.DeleteAllEmptyDirAndMeta(ref emptyDirs);
 
         Debug.Log("All Source Files Removed!!!");
 
