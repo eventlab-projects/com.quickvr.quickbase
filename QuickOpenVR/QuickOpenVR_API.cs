@@ -7,9 +7,8 @@
 
 using System;
 using System.Runtime.InteropServices;
-using Valve.VR;
 
-namespace Valve.VR
+namespace QuickOpenVR
 {
 
 [StructLayout(LayoutKind.Sequential)]
@@ -1535,7 +1534,109 @@ public class CVRSystem
 	{
 		FnTable = (IVRSystem)Marshal.PtrToStructure(pInterface, typeof(IVRSystem));
 	}
-	
+	public void GetRecommendedRenderTargetSize(ref uint pnWidth,ref uint pnHeight)
+	{
+		pnWidth = 0;
+		pnHeight = 0;
+		FnTable.GetRecommendedRenderTargetSize(ref pnWidth,ref pnHeight);
+	}
+	public HmdMatrix44_t GetProjectionMatrix(EVREye eEye,float fNearZ,float fFarZ)
+	{
+		HmdMatrix44_t result = FnTable.GetProjectionMatrix(eEye,fNearZ,fFarZ);
+		return result;
+	}
+	public void GetProjectionRaw(EVREye eEye,ref float pfLeft,ref float pfRight,ref float pfTop,ref float pfBottom)
+	{
+		pfLeft = 0;
+		pfRight = 0;
+		pfTop = 0;
+		pfBottom = 0;
+		FnTable.GetProjectionRaw(eEye,ref pfLeft,ref pfRight,ref pfTop,ref pfBottom);
+	}
+	public bool ComputeDistortion(EVREye eEye,float fU,float fV,ref DistortionCoordinates_t pDistortionCoordinates)
+	{
+		bool result = FnTable.ComputeDistortion(eEye,fU,fV,ref pDistortionCoordinates);
+		return result;
+	}
+	public HmdMatrix34_t GetEyeToHeadTransform(EVREye eEye)
+	{
+		HmdMatrix34_t result = FnTable.GetEyeToHeadTransform(eEye);
+		return result;
+	}
+	public bool GetTimeSinceLastVsync(ref float pfSecondsSinceLastVsync,ref ulong pulFrameCounter)
+	{
+		pfSecondsSinceLastVsync = 0;
+		pulFrameCounter = 0;
+		bool result = FnTable.GetTimeSinceLastVsync(ref pfSecondsSinceLastVsync,ref pulFrameCounter);
+		return result;
+	}
+	public int GetD3D9AdapterIndex()
+	{
+		int result = FnTable.GetD3D9AdapterIndex();
+		return result;
+	}
+	public void GetDXGIOutputInfo(ref int pnAdapterIndex)
+	{
+		pnAdapterIndex = 0;
+		FnTable.GetDXGIOutputInfo(ref pnAdapterIndex);
+	}
+	public void GetOutputDevice(ref ulong pnDevice,ETextureType textureType,IntPtr pInstance)
+	{
+		pnDevice = 0;
+		FnTable.GetOutputDevice(ref pnDevice,textureType,pInstance);
+	}
+	public bool IsDisplayOnDesktop()
+	{
+		bool result = FnTable.IsDisplayOnDesktop();
+		return result;
+	}
+	public bool SetDisplayVisibility(bool bIsVisibleOnDesktop)
+	{
+		bool result = FnTable.SetDisplayVisibility(bIsVisibleOnDesktop);
+		return result;
+	}
+	public void GetDeviceToAbsoluteTrackingPose(ETrackingUniverseOrigin eOrigin,float fPredictedSecondsToPhotonsFromNow,TrackedDevicePose_t [] pTrackedDevicePoseArray)
+	{
+		FnTable.GetDeviceToAbsoluteTrackingPose(eOrigin,fPredictedSecondsToPhotonsFromNow,pTrackedDevicePoseArray,(uint) pTrackedDevicePoseArray.Length);
+	}
+	public void ResetSeatedZeroPose()
+	{
+		FnTable.ResetSeatedZeroPose();
+	}
+	public HmdMatrix34_t GetSeatedZeroPoseToStandingAbsoluteTrackingPose()
+	{
+		HmdMatrix34_t result = FnTable.GetSeatedZeroPoseToStandingAbsoluteTrackingPose();
+		return result;
+	}
+	public HmdMatrix34_t GetRawZeroPoseToStandingAbsoluteTrackingPose()
+	{
+		HmdMatrix34_t result = FnTable.GetRawZeroPoseToStandingAbsoluteTrackingPose();
+		return result;
+	}
+	public uint GetSortedTrackedDeviceIndicesOfClass(ETrackedDeviceClass eTrackedDeviceClass,uint [] punTrackedDeviceIndexArray,uint unRelativeToTrackedDeviceIndex)
+	{
+		uint result = FnTable.GetSortedTrackedDeviceIndicesOfClass(eTrackedDeviceClass,punTrackedDeviceIndexArray,(uint) punTrackedDeviceIndexArray.Length,unRelativeToTrackedDeviceIndex);
+		return result;
+	}
+	public EDeviceActivityLevel GetTrackedDeviceActivityLevel(uint unDeviceId)
+	{
+		EDeviceActivityLevel result = FnTable.GetTrackedDeviceActivityLevel(unDeviceId);
+		return result;
+	}
+	public void ApplyTransform(ref TrackedDevicePose_t pOutputPose,ref TrackedDevicePose_t pTrackedDevicePose,ref HmdMatrix34_t pTransform)
+	{
+		FnTable.ApplyTransform(ref pOutputPose,ref pTrackedDevicePose,ref pTransform);
+	}
+	public uint GetTrackedDeviceIndexForControllerRole(ETrackedControllerRole unDeviceType)
+	{
+		uint result = FnTable.GetTrackedDeviceIndexForControllerRole(unDeviceType);
+		return result;
+	}
+	public ETrackedControllerRole GetControllerRoleForTrackedDeviceIndex(uint unDeviceIndex)
+	{
+		ETrackedControllerRole result = FnTable.GetControllerRoleForTrackedDeviceIndex(unDeviceIndex);
+		return result;
+	}
 	public ETrackedDeviceClass GetTrackedDeviceClass(uint unDeviceIndex)
 	{
 		ETrackedDeviceClass result = FnTable.GetTrackedDeviceClass(unDeviceIndex);
@@ -1546,7 +1647,123 @@ public class CVRSystem
 		bool result = FnTable.IsTrackedDeviceConnected(unDeviceIndex);
 		return result;
 	}
-	
+	public bool GetBoolTrackedDeviceProperty(uint unDeviceIndex,ETrackedDeviceProperty prop,ref ETrackedPropertyError pError)
+	{
+		bool result = FnTable.GetBoolTrackedDeviceProperty(unDeviceIndex,prop,ref pError);
+		return result;
+	}
+	public float GetFloatTrackedDeviceProperty(uint unDeviceIndex,ETrackedDeviceProperty prop,ref ETrackedPropertyError pError)
+	{
+		float result = FnTable.GetFloatTrackedDeviceProperty(unDeviceIndex,prop,ref pError);
+		return result;
+	}
+	public int GetInt32TrackedDeviceProperty(uint unDeviceIndex,ETrackedDeviceProperty prop,ref ETrackedPropertyError pError)
+	{
+		int result = FnTable.GetInt32TrackedDeviceProperty(unDeviceIndex,prop,ref pError);
+		return result;
+	}
+	public ulong GetUint64TrackedDeviceProperty(uint unDeviceIndex,ETrackedDeviceProperty prop,ref ETrackedPropertyError pError)
+	{
+		ulong result = FnTable.GetUint64TrackedDeviceProperty(unDeviceIndex,prop,ref pError);
+		return result;
+	}
+	public HmdMatrix34_t GetMatrix34TrackedDeviceProperty(uint unDeviceIndex,ETrackedDeviceProperty prop,ref ETrackedPropertyError pError)
+	{
+		HmdMatrix34_t result = FnTable.GetMatrix34TrackedDeviceProperty(unDeviceIndex,prop,ref pError);
+		return result;
+	}
+	public uint GetArrayTrackedDeviceProperty(uint unDeviceIndex,ETrackedDeviceProperty prop,uint propType,IntPtr pBuffer,uint unBufferSize,ref ETrackedPropertyError pError)
+	{
+		uint result = FnTable.GetArrayTrackedDeviceProperty(unDeviceIndex,prop,propType,pBuffer,unBufferSize,ref pError);
+		return result;
+	}
+	public uint GetStringTrackedDeviceProperty(uint unDeviceIndex,ETrackedDeviceProperty prop,System.Text.StringBuilder pchValue,uint unBufferSize,ref ETrackedPropertyError pError)
+	{
+		uint result = FnTable.GetStringTrackedDeviceProperty(unDeviceIndex,prop,pchValue,unBufferSize,ref pError);
+		return result;
+	}
+	public string GetPropErrorNameFromEnum(ETrackedPropertyError error)
+	{
+		IntPtr result = FnTable.GetPropErrorNameFromEnum(error);
+		return Marshal.PtrToStringAnsi(result);
+	}
+// This is a terrible hack to workaround the fact that VRControllerState_t and VREvent_t were
+// originally mis-compiled with the wrong packing for Linux and OSX.
+	[UnmanagedFunctionPointer(CallingConvention.StdCall)]
+	internal delegate bool _PollNextEventPacked(ref VREvent_t_Packed pEvent,uint uncbVREvent);
+	[StructLayout(LayoutKind.Explicit)]
+	struct PollNextEventUnion
+	{
+		[FieldOffset(0)]
+		public IVRSystem._PollNextEvent pPollNextEvent;
+		[FieldOffset(0)]
+		public _PollNextEventPacked pPollNextEventPacked;
+	}
+	public bool PollNextEvent(ref VREvent_t pEvent,uint uncbVREvent)
+	{
+#if !UNITY_METRO
+		if ((System.Environment.OSVersion.Platform == System.PlatformID.MacOSX) ||
+				(System.Environment.OSVersion.Platform == System.PlatformID.Unix))
+		{
+			PollNextEventUnion u;
+			VREvent_t_Packed event_packed = new VREvent_t_Packed();
+			u.pPollNextEventPacked = null;
+			u.pPollNextEvent = FnTable.PollNextEvent;
+			bool packed_result = u.pPollNextEventPacked(ref event_packed,(uint)System.Runtime.InteropServices.Marshal.SizeOf(typeof(VREvent_t_Packed)));
+
+			event_packed.Unpack(ref pEvent);
+			return packed_result;
+		}
+#endif
+		bool result = FnTable.PollNextEvent(ref pEvent,uncbVREvent);
+		return result;
+	}
+	public bool PollNextEventWithPose(ETrackingUniverseOrigin eOrigin,ref VREvent_t pEvent,uint uncbVREvent,ref TrackedDevicePose_t pTrackedDevicePose)
+	{
+		bool result = FnTable.PollNextEventWithPose(eOrigin,ref pEvent,uncbVREvent,ref pTrackedDevicePose);
+		return result;
+	}
+	public string GetEventTypeNameFromEnum(EVREventType eType)
+	{
+		IntPtr result = FnTable.GetEventTypeNameFromEnum(eType);
+		return Marshal.PtrToStringAnsi(result);
+	}
+	public HiddenAreaMesh_t GetHiddenAreaMesh(EVREye eEye,EHiddenAreaMeshType type)
+	{
+		HiddenAreaMesh_t result = FnTable.GetHiddenAreaMesh(eEye,type);
+		return result;
+	}
+// This is a terrible hack to workaround the fact that VRControllerState_t and VREvent_t were
+// originally mis-compiled with the wrong packing for Linux and OSX.
+	[UnmanagedFunctionPointer(CallingConvention.StdCall)]
+	internal delegate bool _GetControllerStatePacked(uint unControllerDeviceIndex,ref VRControllerState_t_Packed pControllerState,uint unControllerStateSize);
+	[StructLayout(LayoutKind.Explicit)]
+	struct GetControllerStateUnion
+	{
+		[FieldOffset(0)]
+		public IVRSystem._GetControllerState pGetControllerState;
+		[FieldOffset(0)]
+		public _GetControllerStatePacked pGetControllerStatePacked;
+	}
+	public bool GetControllerState(uint unControllerDeviceIndex,ref VRControllerState_t pControllerState,uint unControllerStateSize)
+	{
+#if !UNITY_METRO
+		if ((System.Environment.OSVersion.Platform == System.PlatformID.MacOSX) ||
+				(System.Environment.OSVersion.Platform == System.PlatformID.Unix))
+		{
+			GetControllerStateUnion u;
+			VRControllerState_t_Packed state_packed = new VRControllerState_t_Packed(pControllerState);
+			u.pGetControllerStatePacked = null;
+			u.pGetControllerState = FnTable.GetControllerState;
+			bool packed_result = u.pGetControllerStatePacked(unControllerDeviceIndex,ref state_packed,(uint)System.Runtime.InteropServices.Marshal.SizeOf(typeof(VRControllerState_t_Packed)));
+
+			state_packed.Unpack(ref pControllerState);
+			return packed_result;
+		}
+#endif
+		bool result = FnTable.GetControllerState(unControllerDeviceIndex,ref pControllerState,unControllerStateSize);
+		return result;
+	}
 // This is a terrible hack to workaround the fact that VRControllerState_t and VREvent_t were
 // originally mis-compiled with the wrong packing for Linux and OSX.
 	[UnmanagedFunctionPointer(CallingConvention.StdCall)]
@@ -1582,10 +1799,1464 @@ public class CVRSystem
 	{
 		FnTable.TriggerHapticPulse(unControllerDeviceIndex,unAxisId,usDurationMicroSec);
 	}
-	
+	public string GetButtonIdNameFromEnum(EVRButtonId eButtonId)
+	{
+		IntPtr result = FnTable.GetButtonIdNameFromEnum(eButtonId);
+		return Marshal.PtrToStringAnsi(result);
+	}
+	public string GetControllerAxisTypeNameFromEnum(EVRControllerAxisType eAxisType)
+	{
+		IntPtr result = FnTable.GetControllerAxisTypeNameFromEnum(eAxisType);
+		return Marshal.PtrToStringAnsi(result);
+	}
+	public bool IsInputAvailable()
+	{
+		bool result = FnTable.IsInputAvailable();
+		return result;
+	}
+	public bool IsSteamVRDrawingControllers()
+	{
+		bool result = FnTable.IsSteamVRDrawingControllers();
+		return result;
+	}
+	public bool ShouldApplicationPause()
+	{
+		bool result = FnTable.ShouldApplicationPause();
+		return result;
+	}
+	public bool ShouldApplicationReduceRenderingWork()
+	{
+		bool result = FnTable.ShouldApplicationReduceRenderingWork();
+		return result;
+	}
+	public uint DriverDebugRequest(uint unDeviceIndex,string pchRequest,System.Text.StringBuilder pchResponseBuffer,uint unResponseBufferSize)
+	{
+		uint result = FnTable.DriverDebugRequest(unDeviceIndex,pchRequest,pchResponseBuffer,unResponseBufferSize);
+		return result;
+	}
+	public EVRFirmwareError PerformFirmwareUpdate(uint unDeviceIndex)
+	{
+		EVRFirmwareError result = FnTable.PerformFirmwareUpdate(unDeviceIndex);
+		return result;
+	}
+	public void AcknowledgeQuit_Exiting()
+	{
+		FnTable.AcknowledgeQuit_Exiting();
+	}
+	public void AcknowledgeQuit_UserPrompt()
+	{
+		FnTable.AcknowledgeQuit_UserPrompt();
+	}
 }
 
 
+public class CVRExtendedDisplay
+{
+	IVRExtendedDisplay FnTable;
+	internal CVRExtendedDisplay(IntPtr pInterface)
+	{
+		FnTable = (IVRExtendedDisplay)Marshal.PtrToStructure(pInterface, typeof(IVRExtendedDisplay));
+	}
+	public void GetWindowBounds(ref int pnX,ref int pnY,ref uint pnWidth,ref uint pnHeight)
+	{
+		pnX = 0;
+		pnY = 0;
+		pnWidth = 0;
+		pnHeight = 0;
+		FnTable.GetWindowBounds(ref pnX,ref pnY,ref pnWidth,ref pnHeight);
+	}
+	public void GetEyeOutputViewport(EVREye eEye,ref uint pnX,ref uint pnY,ref uint pnWidth,ref uint pnHeight)
+	{
+		pnX = 0;
+		pnY = 0;
+		pnWidth = 0;
+		pnHeight = 0;
+		FnTable.GetEyeOutputViewport(eEye,ref pnX,ref pnY,ref pnWidth,ref pnHeight);
+	}
+	public void GetDXGIOutputInfo(ref int pnAdapterIndex,ref int pnAdapterOutputIndex)
+	{
+		pnAdapterIndex = 0;
+		pnAdapterOutputIndex = 0;
+		FnTable.GetDXGIOutputInfo(ref pnAdapterIndex,ref pnAdapterOutputIndex);
+	}
+}
+
+
+public class CVRTrackedCamera
+{
+	IVRTrackedCamera FnTable;
+	internal CVRTrackedCamera(IntPtr pInterface)
+	{
+		FnTable = (IVRTrackedCamera)Marshal.PtrToStructure(pInterface, typeof(IVRTrackedCamera));
+	}
+	public string GetCameraErrorNameFromEnum(EVRTrackedCameraError eCameraError)
+	{
+		IntPtr result = FnTable.GetCameraErrorNameFromEnum(eCameraError);
+		return Marshal.PtrToStringAnsi(result);
+	}
+	public EVRTrackedCameraError HasCamera(uint nDeviceIndex,ref bool pHasCamera)
+	{
+		pHasCamera = false;
+		EVRTrackedCameraError result = FnTable.HasCamera(nDeviceIndex,ref pHasCamera);
+		return result;
+	}
+	public EVRTrackedCameraError GetCameraFrameSize(uint nDeviceIndex,EVRTrackedCameraFrameType eFrameType,ref uint pnWidth,ref uint pnHeight,ref uint pnFrameBufferSize)
+	{
+		pnWidth = 0;
+		pnHeight = 0;
+		pnFrameBufferSize = 0;
+		EVRTrackedCameraError result = FnTable.GetCameraFrameSize(nDeviceIndex,eFrameType,ref pnWidth,ref pnHeight,ref pnFrameBufferSize);
+		return result;
+	}
+	public EVRTrackedCameraError GetCameraIntrinsics(uint nDeviceIndex,EVRTrackedCameraFrameType eFrameType,ref HmdVector2_t pFocalLength,ref HmdVector2_t pCenter)
+	{
+		EVRTrackedCameraError result = FnTable.GetCameraIntrinsics(nDeviceIndex,eFrameType,ref pFocalLength,ref pCenter);
+		return result;
+	}
+	public EVRTrackedCameraError GetCameraProjection(uint nDeviceIndex,EVRTrackedCameraFrameType eFrameType,float flZNear,float flZFar,ref HmdMatrix44_t pProjection)
+	{
+		EVRTrackedCameraError result = FnTable.GetCameraProjection(nDeviceIndex,eFrameType,flZNear,flZFar,ref pProjection);
+		return result;
+	}
+	public EVRTrackedCameraError AcquireVideoStreamingService(uint nDeviceIndex,ref ulong pHandle)
+	{
+		pHandle = 0;
+		EVRTrackedCameraError result = FnTable.AcquireVideoStreamingService(nDeviceIndex,ref pHandle);
+		return result;
+	}
+	public EVRTrackedCameraError ReleaseVideoStreamingService(ulong hTrackedCamera)
+	{
+		EVRTrackedCameraError result = FnTable.ReleaseVideoStreamingService(hTrackedCamera);
+		return result;
+	}
+	public EVRTrackedCameraError GetVideoStreamFrameBuffer(ulong hTrackedCamera,EVRTrackedCameraFrameType eFrameType,IntPtr pFrameBuffer,uint nFrameBufferSize,ref CameraVideoStreamFrameHeader_t pFrameHeader,uint nFrameHeaderSize)
+	{
+		EVRTrackedCameraError result = FnTable.GetVideoStreamFrameBuffer(hTrackedCamera,eFrameType,pFrameBuffer,nFrameBufferSize,ref pFrameHeader,nFrameHeaderSize);
+		return result;
+	}
+	public EVRTrackedCameraError GetVideoStreamTextureSize(uint nDeviceIndex,EVRTrackedCameraFrameType eFrameType,ref VRTextureBounds_t pTextureBounds,ref uint pnWidth,ref uint pnHeight)
+	{
+		pnWidth = 0;
+		pnHeight = 0;
+		EVRTrackedCameraError result = FnTable.GetVideoStreamTextureSize(nDeviceIndex,eFrameType,ref pTextureBounds,ref pnWidth,ref pnHeight);
+		return result;
+	}
+	public EVRTrackedCameraError GetVideoStreamTextureD3D11(ulong hTrackedCamera,EVRTrackedCameraFrameType eFrameType,IntPtr pD3D11DeviceOrResource,ref IntPtr ppD3D11ShaderResourceView,ref CameraVideoStreamFrameHeader_t pFrameHeader,uint nFrameHeaderSize)
+	{
+		EVRTrackedCameraError result = FnTable.GetVideoStreamTextureD3D11(hTrackedCamera,eFrameType,pD3D11DeviceOrResource,ref ppD3D11ShaderResourceView,ref pFrameHeader,nFrameHeaderSize);
+		return result;
+	}
+	public EVRTrackedCameraError GetVideoStreamTextureGL(ulong hTrackedCamera,EVRTrackedCameraFrameType eFrameType,ref uint pglTextureId,ref CameraVideoStreamFrameHeader_t pFrameHeader,uint nFrameHeaderSize)
+	{
+		pglTextureId = 0;
+		EVRTrackedCameraError result = FnTable.GetVideoStreamTextureGL(hTrackedCamera,eFrameType,ref pglTextureId,ref pFrameHeader,nFrameHeaderSize);
+		return result;
+	}
+	public EVRTrackedCameraError ReleaseVideoStreamTextureGL(ulong hTrackedCamera,uint glTextureId)
+	{
+		EVRTrackedCameraError result = FnTable.ReleaseVideoStreamTextureGL(hTrackedCamera,glTextureId);
+		return result;
+	}
+}
+
+
+public class CVRApplications
+{
+	IVRApplications FnTable;
+	internal CVRApplications(IntPtr pInterface)
+	{
+		FnTable = (IVRApplications)Marshal.PtrToStructure(pInterface, typeof(IVRApplications));
+	}
+	public EVRApplicationError AddApplicationManifest(string pchApplicationManifestFullPath,bool bTemporary)
+	{
+		EVRApplicationError result = FnTable.AddApplicationManifest(pchApplicationManifestFullPath,bTemporary);
+		return result;
+	}
+	public EVRApplicationError RemoveApplicationManifest(string pchApplicationManifestFullPath)
+	{
+		EVRApplicationError result = FnTable.RemoveApplicationManifest(pchApplicationManifestFullPath);
+		return result;
+	}
+	public bool IsApplicationInstalled(string pchAppKey)
+	{
+		bool result = FnTable.IsApplicationInstalled(pchAppKey);
+		return result;
+	}
+	public uint GetApplicationCount()
+	{
+		uint result = FnTable.GetApplicationCount();
+		return result;
+	}
+	public EVRApplicationError GetApplicationKeyByIndex(uint unApplicationIndex,System.Text.StringBuilder pchAppKeyBuffer,uint unAppKeyBufferLen)
+	{
+		EVRApplicationError result = FnTable.GetApplicationKeyByIndex(unApplicationIndex,pchAppKeyBuffer,unAppKeyBufferLen);
+		return result;
+	}
+	public EVRApplicationError GetApplicationKeyByProcessId(uint unProcessId,System.Text.StringBuilder pchAppKeyBuffer,uint unAppKeyBufferLen)
+	{
+		EVRApplicationError result = FnTable.GetApplicationKeyByProcessId(unProcessId,pchAppKeyBuffer,unAppKeyBufferLen);
+		return result;
+	}
+	public EVRApplicationError LaunchApplication(string pchAppKey)
+	{
+		EVRApplicationError result = FnTable.LaunchApplication(pchAppKey);
+		return result;
+	}
+	public EVRApplicationError LaunchTemplateApplication(string pchTemplateAppKey,string pchNewAppKey,AppOverrideKeys_t [] pKeys)
+	{
+		EVRApplicationError result = FnTable.LaunchTemplateApplication(pchTemplateAppKey,pchNewAppKey,pKeys,(uint) pKeys.Length);
+		return result;
+	}
+	public EVRApplicationError LaunchApplicationFromMimeType(string pchMimeType,string pchArgs)
+	{
+		EVRApplicationError result = FnTable.LaunchApplicationFromMimeType(pchMimeType,pchArgs);
+		return result;
+	}
+	public EVRApplicationError LaunchDashboardOverlay(string pchAppKey)
+	{
+		EVRApplicationError result = FnTable.LaunchDashboardOverlay(pchAppKey);
+		return result;
+	}
+	public bool CancelApplicationLaunch(string pchAppKey)
+	{
+		bool result = FnTable.CancelApplicationLaunch(pchAppKey);
+		return result;
+	}
+	public EVRApplicationError IdentifyApplication(uint unProcessId,string pchAppKey)
+	{
+		EVRApplicationError result = FnTable.IdentifyApplication(unProcessId,pchAppKey);
+		return result;
+	}
+	public uint GetApplicationProcessId(string pchAppKey)
+	{
+		uint result = FnTable.GetApplicationProcessId(pchAppKey);
+		return result;
+	}
+	public string GetApplicationsErrorNameFromEnum(EVRApplicationError error)
+	{
+		IntPtr result = FnTable.GetApplicationsErrorNameFromEnum(error);
+		return Marshal.PtrToStringAnsi(result);
+	}
+	public uint GetApplicationPropertyString(string pchAppKey,EVRApplicationProperty eProperty,System.Text.StringBuilder pchPropertyValueBuffer,uint unPropertyValueBufferLen,ref EVRApplicationError peError)
+	{
+		uint result = FnTable.GetApplicationPropertyString(pchAppKey,eProperty,pchPropertyValueBuffer,unPropertyValueBufferLen,ref peError);
+		return result;
+	}
+	public bool GetApplicationPropertyBool(string pchAppKey,EVRApplicationProperty eProperty,ref EVRApplicationError peError)
+	{
+		bool result = FnTable.GetApplicationPropertyBool(pchAppKey,eProperty,ref peError);
+		return result;
+	}
+	public ulong GetApplicationPropertyUint64(string pchAppKey,EVRApplicationProperty eProperty,ref EVRApplicationError peError)
+	{
+		ulong result = FnTable.GetApplicationPropertyUint64(pchAppKey,eProperty,ref peError);
+		return result;
+	}
+	public EVRApplicationError SetApplicationAutoLaunch(string pchAppKey,bool bAutoLaunch)
+	{
+		EVRApplicationError result = FnTable.SetApplicationAutoLaunch(pchAppKey,bAutoLaunch);
+		return result;
+	}
+	public bool GetApplicationAutoLaunch(string pchAppKey)
+	{
+		bool result = FnTable.GetApplicationAutoLaunch(pchAppKey);
+		return result;
+	}
+	public EVRApplicationError SetDefaultApplicationForMimeType(string pchAppKey,string pchMimeType)
+	{
+		EVRApplicationError result = FnTable.SetDefaultApplicationForMimeType(pchAppKey,pchMimeType);
+		return result;
+	}
+	public bool GetDefaultApplicationForMimeType(string pchMimeType,System.Text.StringBuilder pchAppKeyBuffer,uint unAppKeyBufferLen)
+	{
+		bool result = FnTable.GetDefaultApplicationForMimeType(pchMimeType,pchAppKeyBuffer,unAppKeyBufferLen);
+		return result;
+	}
+	public bool GetApplicationSupportedMimeTypes(string pchAppKey,System.Text.StringBuilder pchMimeTypesBuffer,uint unMimeTypesBuffer)
+	{
+		bool result = FnTable.GetApplicationSupportedMimeTypes(pchAppKey,pchMimeTypesBuffer,unMimeTypesBuffer);
+		return result;
+	}
+	public uint GetApplicationsThatSupportMimeType(string pchMimeType,System.Text.StringBuilder pchAppKeysThatSupportBuffer,uint unAppKeysThatSupportBuffer)
+	{
+		uint result = FnTable.GetApplicationsThatSupportMimeType(pchMimeType,pchAppKeysThatSupportBuffer,unAppKeysThatSupportBuffer);
+		return result;
+	}
+	public uint GetApplicationLaunchArguments(uint unHandle,System.Text.StringBuilder pchArgs,uint unArgs)
+	{
+		uint result = FnTable.GetApplicationLaunchArguments(unHandle,pchArgs,unArgs);
+		return result;
+	}
+	public EVRApplicationError GetStartingApplication(System.Text.StringBuilder pchAppKeyBuffer,uint unAppKeyBufferLen)
+	{
+		EVRApplicationError result = FnTable.GetStartingApplication(pchAppKeyBuffer,unAppKeyBufferLen);
+		return result;
+	}
+	public EVRApplicationTransitionState GetTransitionState()
+	{
+		EVRApplicationTransitionState result = FnTable.GetTransitionState();
+		return result;
+	}
+	public EVRApplicationError PerformApplicationPrelaunchCheck(string pchAppKey)
+	{
+		EVRApplicationError result = FnTable.PerformApplicationPrelaunchCheck(pchAppKey);
+		return result;
+	}
+	public string GetApplicationsTransitionStateNameFromEnum(EVRApplicationTransitionState state)
+	{
+		IntPtr result = FnTable.GetApplicationsTransitionStateNameFromEnum(state);
+		return Marshal.PtrToStringAnsi(result);
+	}
+	public bool IsQuitUserPromptRequested()
+	{
+		bool result = FnTable.IsQuitUserPromptRequested();
+		return result;
+	}
+	public EVRApplicationError LaunchInternalProcess(string pchBinaryPath,string pchArguments,string pchWorkingDirectory)
+	{
+		EVRApplicationError result = FnTable.LaunchInternalProcess(pchBinaryPath,pchArguments,pchWorkingDirectory);
+		return result;
+	}
+	public uint GetCurrentSceneProcessId()
+	{
+		uint result = FnTable.GetCurrentSceneProcessId();
+		return result;
+	}
+}
+
+
+public class CVRChaperone
+{
+	IVRChaperone FnTable;
+	internal CVRChaperone(IntPtr pInterface)
+	{
+		FnTable = (IVRChaperone)Marshal.PtrToStructure(pInterface, typeof(IVRChaperone));
+	}
+	public ChaperoneCalibrationState GetCalibrationState()
+	{
+		ChaperoneCalibrationState result = FnTable.GetCalibrationState();
+		return result;
+	}
+	public bool GetPlayAreaSize(ref float pSizeX,ref float pSizeZ)
+	{
+		pSizeX = 0;
+		pSizeZ = 0;
+		bool result = FnTable.GetPlayAreaSize(ref pSizeX,ref pSizeZ);
+		return result;
+	}
+	public bool GetPlayAreaRect(ref HmdQuad_t rect)
+	{
+		bool result = FnTable.GetPlayAreaRect(ref rect);
+		return result;
+	}
+	public void ReloadInfo()
+	{
+		FnTable.ReloadInfo();
+	}
+	public void SetSceneColor(HmdColor_t color)
+	{
+		FnTable.SetSceneColor(color);
+	}
+	public void GetBoundsColor(ref HmdColor_t pOutputColorArray,int nNumOutputColors,float flCollisionBoundsFadeDistance,ref HmdColor_t pOutputCameraColor)
+	{
+		FnTable.GetBoundsColor(ref pOutputColorArray,nNumOutputColors,flCollisionBoundsFadeDistance,ref pOutputCameraColor);
+	}
+	public bool AreBoundsVisible()
+	{
+		bool result = FnTable.AreBoundsVisible();
+		return result;
+	}
+	public void ForceBoundsVisible(bool bForce)
+	{
+		FnTable.ForceBoundsVisible(bForce);
+	}
+}
+
+
+public class CVRChaperoneSetup
+{
+	IVRChaperoneSetup FnTable;
+	internal CVRChaperoneSetup(IntPtr pInterface)
+	{
+		FnTable = (IVRChaperoneSetup)Marshal.PtrToStructure(pInterface, typeof(IVRChaperoneSetup));
+	}
+	public bool CommitWorkingCopy(EChaperoneConfigFile configFile)
+	{
+		bool result = FnTable.CommitWorkingCopy(configFile);
+		return result;
+	}
+	public void RevertWorkingCopy()
+	{
+		FnTable.RevertWorkingCopy();
+	}
+	public bool GetWorkingPlayAreaSize(ref float pSizeX,ref float pSizeZ)
+	{
+		pSizeX = 0;
+		pSizeZ = 0;
+		bool result = FnTable.GetWorkingPlayAreaSize(ref pSizeX,ref pSizeZ);
+		return result;
+	}
+	public bool GetWorkingPlayAreaRect(ref HmdQuad_t rect)
+	{
+		bool result = FnTable.GetWorkingPlayAreaRect(ref rect);
+		return result;
+	}
+	public bool GetWorkingCollisionBoundsInfo(out HmdQuad_t [] pQuadsBuffer)
+	{
+		uint punQuadsCount = 0;
+		bool result = FnTable.GetWorkingCollisionBoundsInfo(null,ref punQuadsCount);
+		pQuadsBuffer= new HmdQuad_t[punQuadsCount];
+		result = FnTable.GetWorkingCollisionBoundsInfo(pQuadsBuffer,ref punQuadsCount);
+		return result;
+	}
+	public bool GetLiveCollisionBoundsInfo(out HmdQuad_t [] pQuadsBuffer)
+	{
+		uint punQuadsCount = 0;
+		bool result = FnTable.GetLiveCollisionBoundsInfo(null,ref punQuadsCount);
+		pQuadsBuffer= new HmdQuad_t[punQuadsCount];
+		result = FnTable.GetLiveCollisionBoundsInfo(pQuadsBuffer,ref punQuadsCount);
+		return result;
+	}
+	public bool GetWorkingSeatedZeroPoseToRawTrackingPose(ref HmdMatrix34_t pmatSeatedZeroPoseToRawTrackingPose)
+	{
+		bool result = FnTable.GetWorkingSeatedZeroPoseToRawTrackingPose(ref pmatSeatedZeroPoseToRawTrackingPose);
+		return result;
+	}
+	public bool GetWorkingStandingZeroPoseToRawTrackingPose(ref HmdMatrix34_t pmatStandingZeroPoseToRawTrackingPose)
+	{
+		bool result = FnTable.GetWorkingStandingZeroPoseToRawTrackingPose(ref pmatStandingZeroPoseToRawTrackingPose);
+		return result;
+	}
+	public void SetWorkingPlayAreaSize(float sizeX,float sizeZ)
+	{
+		FnTable.SetWorkingPlayAreaSize(sizeX,sizeZ);
+	}
+	public void SetWorkingCollisionBoundsInfo(HmdQuad_t [] pQuadsBuffer)
+	{
+		FnTable.SetWorkingCollisionBoundsInfo(pQuadsBuffer,(uint) pQuadsBuffer.Length);
+	}
+	public void SetWorkingSeatedZeroPoseToRawTrackingPose(ref HmdMatrix34_t pMatSeatedZeroPoseToRawTrackingPose)
+	{
+		FnTable.SetWorkingSeatedZeroPoseToRawTrackingPose(ref pMatSeatedZeroPoseToRawTrackingPose);
+	}
+	public void SetWorkingStandingZeroPoseToRawTrackingPose(ref HmdMatrix34_t pMatStandingZeroPoseToRawTrackingPose)
+	{
+		FnTable.SetWorkingStandingZeroPoseToRawTrackingPose(ref pMatStandingZeroPoseToRawTrackingPose);
+	}
+	public void ReloadFromDisk(EChaperoneConfigFile configFile)
+	{
+		FnTable.ReloadFromDisk(configFile);
+	}
+	public bool GetLiveSeatedZeroPoseToRawTrackingPose(ref HmdMatrix34_t pmatSeatedZeroPoseToRawTrackingPose)
+	{
+		bool result = FnTable.GetLiveSeatedZeroPoseToRawTrackingPose(ref pmatSeatedZeroPoseToRawTrackingPose);
+		return result;
+	}
+	public void SetWorkingCollisionBoundsTagsInfo(byte [] pTagsBuffer)
+	{
+		FnTable.SetWorkingCollisionBoundsTagsInfo(pTagsBuffer,(uint) pTagsBuffer.Length);
+	}
+	public bool GetLiveCollisionBoundsTagsInfo(out byte [] pTagsBuffer)
+	{
+		uint punTagCount = 0;
+		bool result = FnTable.GetLiveCollisionBoundsTagsInfo(null,ref punTagCount);
+		pTagsBuffer= new byte[punTagCount];
+		result = FnTable.GetLiveCollisionBoundsTagsInfo(pTagsBuffer,ref punTagCount);
+		return result;
+	}
+	public bool SetWorkingPhysicalBoundsInfo(HmdQuad_t [] pQuadsBuffer)
+	{
+		bool result = FnTable.SetWorkingPhysicalBoundsInfo(pQuadsBuffer,(uint) pQuadsBuffer.Length);
+		return result;
+	}
+	public bool GetLivePhysicalBoundsInfo(out HmdQuad_t [] pQuadsBuffer)
+	{
+		uint punQuadsCount = 0;
+		bool result = FnTable.GetLivePhysicalBoundsInfo(null,ref punQuadsCount);
+		pQuadsBuffer= new HmdQuad_t[punQuadsCount];
+		result = FnTable.GetLivePhysicalBoundsInfo(pQuadsBuffer,ref punQuadsCount);
+		return result;
+	}
+	public bool ExportLiveToBuffer(System.Text.StringBuilder pBuffer,ref uint pnBufferLength)
+	{
+		pnBufferLength = 0;
+		bool result = FnTable.ExportLiveToBuffer(pBuffer,ref pnBufferLength);
+		return result;
+	}
+	public bool ImportFromBufferToWorking(string pBuffer,uint nImportFlags)
+	{
+		bool result = FnTable.ImportFromBufferToWorking(pBuffer,nImportFlags);
+		return result;
+	}
+}
+
+
+public class CVRCompositor
+{
+	IVRCompositor FnTable;
+	internal CVRCompositor(IntPtr pInterface)
+	{
+		FnTable = (IVRCompositor)Marshal.PtrToStructure(pInterface, typeof(IVRCompositor));
+	}
+	public void SetTrackingSpace(ETrackingUniverseOrigin eOrigin)
+	{
+		FnTable.SetTrackingSpace(eOrigin);
+	}
+	public ETrackingUniverseOrigin GetTrackingSpace()
+	{
+		ETrackingUniverseOrigin result = FnTable.GetTrackingSpace();
+		return result;
+	}
+	public EVRCompositorError WaitGetPoses(TrackedDevicePose_t [] pRenderPoseArray,TrackedDevicePose_t [] pGamePoseArray)
+	{
+		EVRCompositorError result = FnTable.WaitGetPoses(pRenderPoseArray,(uint) pRenderPoseArray.Length,pGamePoseArray,(uint) pGamePoseArray.Length);
+		return result;
+	}
+	public EVRCompositorError GetLastPoses(TrackedDevicePose_t [] pRenderPoseArray,TrackedDevicePose_t [] pGamePoseArray)
+	{
+		EVRCompositorError result = FnTable.GetLastPoses(pRenderPoseArray,(uint) pRenderPoseArray.Length,pGamePoseArray,(uint) pGamePoseArray.Length);
+		return result;
+	}
+	public EVRCompositorError GetLastPoseForTrackedDeviceIndex(uint unDeviceIndex,ref TrackedDevicePose_t pOutputPose,ref TrackedDevicePose_t pOutputGamePose)
+	{
+		EVRCompositorError result = FnTable.GetLastPoseForTrackedDeviceIndex(unDeviceIndex,ref pOutputPose,ref pOutputGamePose);
+		return result;
+	}
+	public EVRCompositorError Submit(EVREye eEye,ref Texture_t pTexture,ref VRTextureBounds_t pBounds,EVRSubmitFlags nSubmitFlags)
+	{
+		EVRCompositorError result = FnTable.Submit(eEye,ref pTexture,ref pBounds,nSubmitFlags);
+		return result;
+	}
+	public void ClearLastSubmittedFrame()
+	{
+		FnTable.ClearLastSubmittedFrame();
+	}
+	public void PostPresentHandoff()
+	{
+		FnTable.PostPresentHandoff();
+	}
+	public bool GetFrameTiming(ref Compositor_FrameTiming pTiming,uint unFramesAgo)
+	{
+		bool result = FnTable.GetFrameTiming(ref pTiming,unFramesAgo);
+		return result;
+	}
+	public uint GetFrameTimings(ref Compositor_FrameTiming pTiming,uint nFrames)
+	{
+		uint result = FnTable.GetFrameTimings(ref pTiming,nFrames);
+		return result;
+	}
+	public float GetFrameTimeRemaining()
+	{
+		float result = FnTable.GetFrameTimeRemaining();
+		return result;
+	}
+	public void GetCumulativeStats(ref Compositor_CumulativeStats pStats,uint nStatsSizeInBytes)
+	{
+		FnTable.GetCumulativeStats(ref pStats,nStatsSizeInBytes);
+	}
+	public void FadeToColor(float fSeconds,float fRed,float fGreen,float fBlue,float fAlpha,bool bBackground)
+	{
+		FnTable.FadeToColor(fSeconds,fRed,fGreen,fBlue,fAlpha,bBackground);
+	}
+	public HmdColor_t GetCurrentFadeColor(bool bBackground)
+	{
+		HmdColor_t result = FnTable.GetCurrentFadeColor(bBackground);
+		return result;
+	}
+	public void FadeGrid(float fSeconds,bool bFadeIn)
+	{
+		FnTable.FadeGrid(fSeconds,bFadeIn);
+	}
+	public float GetCurrentGridAlpha()
+	{
+		float result = FnTable.GetCurrentGridAlpha();
+		return result;
+	}
+	public EVRCompositorError SetSkyboxOverride(Texture_t [] pTextures)
+	{
+		EVRCompositorError result = FnTable.SetSkyboxOverride(pTextures,(uint) pTextures.Length);
+		return result;
+	}
+	public void ClearSkyboxOverride()
+	{
+		FnTable.ClearSkyboxOverride();
+	}
+	public void CompositorBringToFront()
+	{
+		FnTable.CompositorBringToFront();
+	}
+	public void CompositorGoToBack()
+	{
+		FnTable.CompositorGoToBack();
+	}
+	public void CompositorQuit()
+	{
+		FnTable.CompositorQuit();
+	}
+	public bool IsFullscreen()
+	{
+		bool result = FnTable.IsFullscreen();
+		return result;
+	}
+	public uint GetCurrentSceneFocusProcess()
+	{
+		uint result = FnTable.GetCurrentSceneFocusProcess();
+		return result;
+	}
+	public uint GetLastFrameRenderer()
+	{
+		uint result = FnTable.GetLastFrameRenderer();
+		return result;
+	}
+	public bool CanRenderScene()
+	{
+		bool result = FnTable.CanRenderScene();
+		return result;
+	}
+	public void ShowMirrorWindow()
+	{
+		FnTable.ShowMirrorWindow();
+	}
+	public void HideMirrorWindow()
+	{
+		FnTable.HideMirrorWindow();
+	}
+	public bool IsMirrorWindowVisible()
+	{
+		bool result = FnTable.IsMirrorWindowVisible();
+		return result;
+	}
+	public void CompositorDumpImages()
+	{
+		FnTable.CompositorDumpImages();
+	}
+	public bool ShouldAppRenderWithLowResources()
+	{
+		bool result = FnTable.ShouldAppRenderWithLowResources();
+		return result;
+	}
+	public void ForceInterleavedReprojectionOn(bool bOverride)
+	{
+		FnTable.ForceInterleavedReprojectionOn(bOverride);
+	}
+	public void ForceReconnectProcess()
+	{
+		FnTable.ForceReconnectProcess();
+	}
+	public void SuspendRendering(bool bSuspend)
+	{
+		FnTable.SuspendRendering(bSuspend);
+	}
+	public EVRCompositorError GetMirrorTextureD3D11(EVREye eEye,IntPtr pD3D11DeviceOrResource,ref IntPtr ppD3D11ShaderResourceView)
+	{
+		EVRCompositorError result = FnTable.GetMirrorTextureD3D11(eEye,pD3D11DeviceOrResource,ref ppD3D11ShaderResourceView);
+		return result;
+	}
+	public void ReleaseMirrorTextureD3D11(IntPtr pD3D11ShaderResourceView)
+	{
+		FnTable.ReleaseMirrorTextureD3D11(pD3D11ShaderResourceView);
+	}
+	public EVRCompositorError GetMirrorTextureGL(EVREye eEye,ref uint pglTextureId,IntPtr pglSharedTextureHandle)
+	{
+		pglTextureId = 0;
+		EVRCompositorError result = FnTable.GetMirrorTextureGL(eEye,ref pglTextureId,pglSharedTextureHandle);
+		return result;
+	}
+	public bool ReleaseSharedGLTexture(uint glTextureId,IntPtr glSharedTextureHandle)
+	{
+		bool result = FnTable.ReleaseSharedGLTexture(glTextureId,glSharedTextureHandle);
+		return result;
+	}
+	public void LockGLSharedTextureForAccess(IntPtr glSharedTextureHandle)
+	{
+		FnTable.LockGLSharedTextureForAccess(glSharedTextureHandle);
+	}
+	public void UnlockGLSharedTextureForAccess(IntPtr glSharedTextureHandle)
+	{
+		FnTable.UnlockGLSharedTextureForAccess(glSharedTextureHandle);
+	}
+	public uint GetVulkanInstanceExtensionsRequired(System.Text.StringBuilder pchValue,uint unBufferSize)
+	{
+		uint result = FnTable.GetVulkanInstanceExtensionsRequired(pchValue,unBufferSize);
+		return result;
+	}
+	public uint GetVulkanDeviceExtensionsRequired(IntPtr pPhysicalDevice,System.Text.StringBuilder pchValue,uint unBufferSize)
+	{
+		uint result = FnTable.GetVulkanDeviceExtensionsRequired(pPhysicalDevice,pchValue,unBufferSize);
+		return result;
+	}
+	public void SetExplicitTimingMode(EVRCompositorTimingMode eTimingMode)
+	{
+		FnTable.SetExplicitTimingMode(eTimingMode);
+	}
+	public EVRCompositorError SubmitExplicitTimingData()
+	{
+		EVRCompositorError result = FnTable.SubmitExplicitTimingData();
+		return result;
+	}
+}
+
+
+public class CVROverlay
+{
+	IVROverlay FnTable;
+	internal CVROverlay(IntPtr pInterface)
+	{
+		FnTable = (IVROverlay)Marshal.PtrToStructure(pInterface, typeof(IVROverlay));
+	}
+	public EVROverlayError FindOverlay(string pchOverlayKey,ref ulong pOverlayHandle)
+	{
+		pOverlayHandle = 0;
+		EVROverlayError result = FnTable.FindOverlay(pchOverlayKey,ref pOverlayHandle);
+		return result;
+	}
+	public EVROverlayError CreateOverlay(string pchOverlayKey,string pchOverlayName,ref ulong pOverlayHandle)
+	{
+		pOverlayHandle = 0;
+		EVROverlayError result = FnTable.CreateOverlay(pchOverlayKey,pchOverlayName,ref pOverlayHandle);
+		return result;
+	}
+	public EVROverlayError DestroyOverlay(ulong ulOverlayHandle)
+	{
+		EVROverlayError result = FnTable.DestroyOverlay(ulOverlayHandle);
+		return result;
+	}
+	public EVROverlayError SetHighQualityOverlay(ulong ulOverlayHandle)
+	{
+		EVROverlayError result = FnTable.SetHighQualityOverlay(ulOverlayHandle);
+		return result;
+	}
+	public ulong GetHighQualityOverlay()
+	{
+		ulong result = FnTable.GetHighQualityOverlay();
+		return result;
+	}
+	public uint GetOverlayKey(ulong ulOverlayHandle,System.Text.StringBuilder pchValue,uint unBufferSize,ref EVROverlayError pError)
+	{
+		uint result = FnTable.GetOverlayKey(ulOverlayHandle,pchValue,unBufferSize,ref pError);
+		return result;
+	}
+	public uint GetOverlayName(ulong ulOverlayHandle,System.Text.StringBuilder pchValue,uint unBufferSize,ref EVROverlayError pError)
+	{
+		uint result = FnTable.GetOverlayName(ulOverlayHandle,pchValue,unBufferSize,ref pError);
+		return result;
+	}
+	public EVROverlayError SetOverlayName(ulong ulOverlayHandle,string pchName)
+	{
+		EVROverlayError result = FnTable.SetOverlayName(ulOverlayHandle,pchName);
+		return result;
+	}
+	public EVROverlayError GetOverlayImageData(ulong ulOverlayHandle,IntPtr pvBuffer,uint unBufferSize,ref uint punWidth,ref uint punHeight)
+	{
+		punWidth = 0;
+		punHeight = 0;
+		EVROverlayError result = FnTable.GetOverlayImageData(ulOverlayHandle,pvBuffer,unBufferSize,ref punWidth,ref punHeight);
+		return result;
+	}
+	public string GetOverlayErrorNameFromEnum(EVROverlayError error)
+	{
+		IntPtr result = FnTable.GetOverlayErrorNameFromEnum(error);
+		return Marshal.PtrToStringAnsi(result);
+	}
+	public EVROverlayError SetOverlayRenderingPid(ulong ulOverlayHandle,uint unPID)
+	{
+		EVROverlayError result = FnTable.SetOverlayRenderingPid(ulOverlayHandle,unPID);
+		return result;
+	}
+	public uint GetOverlayRenderingPid(ulong ulOverlayHandle)
+	{
+		uint result = FnTable.GetOverlayRenderingPid(ulOverlayHandle);
+		return result;
+	}
+	public EVROverlayError SetOverlayFlag(ulong ulOverlayHandle,VROverlayFlags eOverlayFlag,bool bEnabled)
+	{
+		EVROverlayError result = FnTable.SetOverlayFlag(ulOverlayHandle,eOverlayFlag,bEnabled);
+		return result;
+	}
+	public EVROverlayError GetOverlayFlag(ulong ulOverlayHandle,VROverlayFlags eOverlayFlag,ref bool pbEnabled)
+	{
+		pbEnabled = false;
+		EVROverlayError result = FnTable.GetOverlayFlag(ulOverlayHandle,eOverlayFlag,ref pbEnabled);
+		return result;
+	}
+	public EVROverlayError SetOverlayColor(ulong ulOverlayHandle,float fRed,float fGreen,float fBlue)
+	{
+		EVROverlayError result = FnTable.SetOverlayColor(ulOverlayHandle,fRed,fGreen,fBlue);
+		return result;
+	}
+	public EVROverlayError GetOverlayColor(ulong ulOverlayHandle,ref float pfRed,ref float pfGreen,ref float pfBlue)
+	{
+		pfRed = 0;
+		pfGreen = 0;
+		pfBlue = 0;
+		EVROverlayError result = FnTable.GetOverlayColor(ulOverlayHandle,ref pfRed,ref pfGreen,ref pfBlue);
+		return result;
+	}
+	public EVROverlayError SetOverlayAlpha(ulong ulOverlayHandle,float fAlpha)
+	{
+		EVROverlayError result = FnTable.SetOverlayAlpha(ulOverlayHandle,fAlpha);
+		return result;
+	}
+	public EVROverlayError GetOverlayAlpha(ulong ulOverlayHandle,ref float pfAlpha)
+	{
+		pfAlpha = 0;
+		EVROverlayError result = FnTable.GetOverlayAlpha(ulOverlayHandle,ref pfAlpha);
+		return result;
+	}
+	public EVROverlayError SetOverlayTexelAspect(ulong ulOverlayHandle,float fTexelAspect)
+	{
+		EVROverlayError result = FnTable.SetOverlayTexelAspect(ulOverlayHandle,fTexelAspect);
+		return result;
+	}
+	public EVROverlayError GetOverlayTexelAspect(ulong ulOverlayHandle,ref float pfTexelAspect)
+	{
+		pfTexelAspect = 0;
+		EVROverlayError result = FnTable.GetOverlayTexelAspect(ulOverlayHandle,ref pfTexelAspect);
+		return result;
+	}
+	public EVROverlayError SetOverlaySortOrder(ulong ulOverlayHandle,uint unSortOrder)
+	{
+		EVROverlayError result = FnTable.SetOverlaySortOrder(ulOverlayHandle,unSortOrder);
+		return result;
+	}
+	public EVROverlayError GetOverlaySortOrder(ulong ulOverlayHandle,ref uint punSortOrder)
+	{
+		punSortOrder = 0;
+		EVROverlayError result = FnTable.GetOverlaySortOrder(ulOverlayHandle,ref punSortOrder);
+		return result;
+	}
+	public EVROverlayError SetOverlayWidthInMeters(ulong ulOverlayHandle,float fWidthInMeters)
+	{
+		EVROverlayError result = FnTable.SetOverlayWidthInMeters(ulOverlayHandle,fWidthInMeters);
+		return result;
+	}
+	public EVROverlayError GetOverlayWidthInMeters(ulong ulOverlayHandle,ref float pfWidthInMeters)
+	{
+		pfWidthInMeters = 0;
+		EVROverlayError result = FnTable.GetOverlayWidthInMeters(ulOverlayHandle,ref pfWidthInMeters);
+		return result;
+	}
+	public EVROverlayError SetOverlayAutoCurveDistanceRangeInMeters(ulong ulOverlayHandle,float fMinDistanceInMeters,float fMaxDistanceInMeters)
+	{
+		EVROverlayError result = FnTable.SetOverlayAutoCurveDistanceRangeInMeters(ulOverlayHandle,fMinDistanceInMeters,fMaxDistanceInMeters);
+		return result;
+	}
+	public EVROverlayError GetOverlayAutoCurveDistanceRangeInMeters(ulong ulOverlayHandle,ref float pfMinDistanceInMeters,ref float pfMaxDistanceInMeters)
+	{
+		pfMinDistanceInMeters = 0;
+		pfMaxDistanceInMeters = 0;
+		EVROverlayError result = FnTable.GetOverlayAutoCurveDistanceRangeInMeters(ulOverlayHandle,ref pfMinDistanceInMeters,ref pfMaxDistanceInMeters);
+		return result;
+	}
+	public EVROverlayError SetOverlayTextureColorSpace(ulong ulOverlayHandle,EColorSpace eTextureColorSpace)
+	{
+		EVROverlayError result = FnTable.SetOverlayTextureColorSpace(ulOverlayHandle,eTextureColorSpace);
+		return result;
+	}
+	public EVROverlayError GetOverlayTextureColorSpace(ulong ulOverlayHandle,ref EColorSpace peTextureColorSpace)
+	{
+		EVROverlayError result = FnTable.GetOverlayTextureColorSpace(ulOverlayHandle,ref peTextureColorSpace);
+		return result;
+	}
+	public EVROverlayError SetOverlayTextureBounds(ulong ulOverlayHandle,ref VRTextureBounds_t pOverlayTextureBounds)
+	{
+		EVROverlayError result = FnTable.SetOverlayTextureBounds(ulOverlayHandle,ref pOverlayTextureBounds);
+		return result;
+	}
+	public EVROverlayError GetOverlayTextureBounds(ulong ulOverlayHandle,ref VRTextureBounds_t pOverlayTextureBounds)
+	{
+		EVROverlayError result = FnTable.GetOverlayTextureBounds(ulOverlayHandle,ref pOverlayTextureBounds);
+		return result;
+	}
+	public uint GetOverlayRenderModel(ulong ulOverlayHandle,System.Text.StringBuilder pchValue,uint unBufferSize,ref HmdColor_t pColor,ref EVROverlayError pError)
+	{
+		uint result = FnTable.GetOverlayRenderModel(ulOverlayHandle,pchValue,unBufferSize,ref pColor,ref pError);
+		return result;
+	}
+	public EVROverlayError SetOverlayRenderModel(ulong ulOverlayHandle,string pchRenderModel,ref HmdColor_t pColor)
+	{
+		EVROverlayError result = FnTable.SetOverlayRenderModel(ulOverlayHandle,pchRenderModel,ref pColor);
+		return result;
+	}
+	public EVROverlayError GetOverlayTransformType(ulong ulOverlayHandle,ref VROverlayTransformType peTransformType)
+	{
+		EVROverlayError result = FnTable.GetOverlayTransformType(ulOverlayHandle,ref peTransformType);
+		return result;
+	}
+	public EVROverlayError SetOverlayTransformAbsolute(ulong ulOverlayHandle,ETrackingUniverseOrigin eTrackingOrigin,ref HmdMatrix34_t pmatTrackingOriginToOverlayTransform)
+	{
+		EVROverlayError result = FnTable.SetOverlayTransformAbsolute(ulOverlayHandle,eTrackingOrigin,ref pmatTrackingOriginToOverlayTransform);
+		return result;
+	}
+	public EVROverlayError GetOverlayTransformAbsolute(ulong ulOverlayHandle,ref ETrackingUniverseOrigin peTrackingOrigin,ref HmdMatrix34_t pmatTrackingOriginToOverlayTransform)
+	{
+		EVROverlayError result = FnTable.GetOverlayTransformAbsolute(ulOverlayHandle,ref peTrackingOrigin,ref pmatTrackingOriginToOverlayTransform);
+		return result;
+	}
+	public EVROverlayError SetOverlayTransformTrackedDeviceRelative(ulong ulOverlayHandle,uint unTrackedDevice,ref HmdMatrix34_t pmatTrackedDeviceToOverlayTransform)
+	{
+		EVROverlayError result = FnTable.SetOverlayTransformTrackedDeviceRelative(ulOverlayHandle,unTrackedDevice,ref pmatTrackedDeviceToOverlayTransform);
+		return result;
+	}
+	public EVROverlayError GetOverlayTransformTrackedDeviceRelative(ulong ulOverlayHandle,ref uint punTrackedDevice,ref HmdMatrix34_t pmatTrackedDeviceToOverlayTransform)
+	{
+		punTrackedDevice = 0;
+		EVROverlayError result = FnTable.GetOverlayTransformTrackedDeviceRelative(ulOverlayHandle,ref punTrackedDevice,ref pmatTrackedDeviceToOverlayTransform);
+		return result;
+	}
+	public EVROverlayError SetOverlayTransformTrackedDeviceComponent(ulong ulOverlayHandle,uint unDeviceIndex,string pchComponentName)
+	{
+		EVROverlayError result = FnTable.SetOverlayTransformTrackedDeviceComponent(ulOverlayHandle,unDeviceIndex,pchComponentName);
+		return result;
+	}
+	public EVROverlayError GetOverlayTransformTrackedDeviceComponent(ulong ulOverlayHandle,ref uint punDeviceIndex,System.Text.StringBuilder pchComponentName,uint unComponentNameSize)
+	{
+		punDeviceIndex = 0;
+		EVROverlayError result = FnTable.GetOverlayTransformTrackedDeviceComponent(ulOverlayHandle,ref punDeviceIndex,pchComponentName,unComponentNameSize);
+		return result;
+	}
+	public EVROverlayError GetOverlayTransformOverlayRelative(ulong ulOverlayHandle,ref ulong ulOverlayHandleParent,ref HmdMatrix34_t pmatParentOverlayToOverlayTransform)
+	{
+		ulOverlayHandleParent = 0;
+		EVROverlayError result = FnTable.GetOverlayTransformOverlayRelative(ulOverlayHandle,ref ulOverlayHandleParent,ref pmatParentOverlayToOverlayTransform);
+		return result;
+	}
+	public EVROverlayError SetOverlayTransformOverlayRelative(ulong ulOverlayHandle,ulong ulOverlayHandleParent,ref HmdMatrix34_t pmatParentOverlayToOverlayTransform)
+	{
+		EVROverlayError result = FnTable.SetOverlayTransformOverlayRelative(ulOverlayHandle,ulOverlayHandleParent,ref pmatParentOverlayToOverlayTransform);
+		return result;
+	}
+	public EVROverlayError ShowOverlay(ulong ulOverlayHandle)
+	{
+		EVROverlayError result = FnTable.ShowOverlay(ulOverlayHandle);
+		return result;
+	}
+	public EVROverlayError HideOverlay(ulong ulOverlayHandle)
+	{
+		EVROverlayError result = FnTable.HideOverlay(ulOverlayHandle);
+		return result;
+	}
+	public bool IsOverlayVisible(ulong ulOverlayHandle)
+	{
+		bool result = FnTable.IsOverlayVisible(ulOverlayHandle);
+		return result;
+	}
+	public EVROverlayError GetTransformForOverlayCoordinates(ulong ulOverlayHandle,ETrackingUniverseOrigin eTrackingOrigin,HmdVector2_t coordinatesInOverlay,ref HmdMatrix34_t pmatTransform)
+	{
+		EVROverlayError result = FnTable.GetTransformForOverlayCoordinates(ulOverlayHandle,eTrackingOrigin,coordinatesInOverlay,ref pmatTransform);
+		return result;
+	}
+// This is a terrible hack to workaround the fact that VRControllerState_t and VREvent_t were
+// originally mis-compiled with the wrong packing for Linux and OSX.
+	[UnmanagedFunctionPointer(CallingConvention.StdCall)]
+	internal delegate bool _PollNextOverlayEventPacked(ulong ulOverlayHandle,ref VREvent_t_Packed pEvent,uint uncbVREvent);
+	[StructLayout(LayoutKind.Explicit)]
+	struct PollNextOverlayEventUnion
+	{
+		[FieldOffset(0)]
+		public IVROverlay._PollNextOverlayEvent pPollNextOverlayEvent;
+		[FieldOffset(0)]
+		public _PollNextOverlayEventPacked pPollNextOverlayEventPacked;
+	}
+	public bool PollNextOverlayEvent(ulong ulOverlayHandle,ref VREvent_t pEvent,uint uncbVREvent)
+	{
+#if !UNITY_METRO
+		if ((System.Environment.OSVersion.Platform == System.PlatformID.MacOSX) ||
+				(System.Environment.OSVersion.Platform == System.PlatformID.Unix))
+		{
+			PollNextOverlayEventUnion u;
+			VREvent_t_Packed event_packed = new VREvent_t_Packed();
+			u.pPollNextOverlayEventPacked = null;
+			u.pPollNextOverlayEvent = FnTable.PollNextOverlayEvent;
+			bool packed_result = u.pPollNextOverlayEventPacked(ulOverlayHandle,ref event_packed,(uint)System.Runtime.InteropServices.Marshal.SizeOf(typeof(VREvent_t_Packed)));
+
+			event_packed.Unpack(ref pEvent);
+			return packed_result;
+		}
+#endif
+		bool result = FnTable.PollNextOverlayEvent(ulOverlayHandle,ref pEvent,uncbVREvent);
+		return result;
+	}
+	public EVROverlayError GetOverlayInputMethod(ulong ulOverlayHandle,ref VROverlayInputMethod peInputMethod)
+	{
+		EVROverlayError result = FnTable.GetOverlayInputMethod(ulOverlayHandle,ref peInputMethod);
+		return result;
+	}
+	public EVROverlayError SetOverlayInputMethod(ulong ulOverlayHandle,VROverlayInputMethod eInputMethod)
+	{
+		EVROverlayError result = FnTable.SetOverlayInputMethod(ulOverlayHandle,eInputMethod);
+		return result;
+	}
+	public EVROverlayError GetOverlayMouseScale(ulong ulOverlayHandle,ref HmdVector2_t pvecMouseScale)
+	{
+		EVROverlayError result = FnTable.GetOverlayMouseScale(ulOverlayHandle,ref pvecMouseScale);
+		return result;
+	}
+	public EVROverlayError SetOverlayMouseScale(ulong ulOverlayHandle,ref HmdVector2_t pvecMouseScale)
+	{
+		EVROverlayError result = FnTable.SetOverlayMouseScale(ulOverlayHandle,ref pvecMouseScale);
+		return result;
+	}
+	public bool ComputeOverlayIntersection(ulong ulOverlayHandle,ref VROverlayIntersectionParams_t pParams,ref VROverlayIntersectionResults_t pResults)
+	{
+		bool result = FnTable.ComputeOverlayIntersection(ulOverlayHandle,ref pParams,ref pResults);
+		return result;
+	}
+	public bool IsHoverTargetOverlay(ulong ulOverlayHandle)
+	{
+		bool result = FnTable.IsHoverTargetOverlay(ulOverlayHandle);
+		return result;
+	}
+	public ulong GetGamepadFocusOverlay()
+	{
+		ulong result = FnTable.GetGamepadFocusOverlay();
+		return result;
+	}
+	public EVROverlayError SetGamepadFocusOverlay(ulong ulNewFocusOverlay)
+	{
+		EVROverlayError result = FnTable.SetGamepadFocusOverlay(ulNewFocusOverlay);
+		return result;
+	}
+	public EVROverlayError SetOverlayNeighbor(EOverlayDirection eDirection,ulong ulFrom,ulong ulTo)
+	{
+		EVROverlayError result = FnTable.SetOverlayNeighbor(eDirection,ulFrom,ulTo);
+		return result;
+	}
+	public EVROverlayError MoveGamepadFocusToNeighbor(EOverlayDirection eDirection,ulong ulFrom)
+	{
+		EVROverlayError result = FnTable.MoveGamepadFocusToNeighbor(eDirection,ulFrom);
+		return result;
+	}
+	public EVROverlayError SetOverlayDualAnalogTransform(ulong ulOverlay,EDualAnalogWhich eWhich,IntPtr vCenter,float fRadius)
+	{
+		EVROverlayError result = FnTable.SetOverlayDualAnalogTransform(ulOverlay,eWhich,vCenter,fRadius);
+		return result;
+	}
+	public EVROverlayError GetOverlayDualAnalogTransform(ulong ulOverlay,EDualAnalogWhich eWhich,ref HmdVector2_t pvCenter,ref float pfRadius)
+	{
+		pfRadius = 0;
+		EVROverlayError result = FnTable.GetOverlayDualAnalogTransform(ulOverlay,eWhich,ref pvCenter,ref pfRadius);
+		return result;
+	}
+	public EVROverlayError SetOverlayTexture(ulong ulOverlayHandle,ref Texture_t pTexture)
+	{
+		EVROverlayError result = FnTable.SetOverlayTexture(ulOverlayHandle,ref pTexture);
+		return result;
+	}
+	public EVROverlayError ClearOverlayTexture(ulong ulOverlayHandle)
+	{
+		EVROverlayError result = FnTable.ClearOverlayTexture(ulOverlayHandle);
+		return result;
+	}
+	public EVROverlayError SetOverlayRaw(ulong ulOverlayHandle,IntPtr pvBuffer,uint unWidth,uint unHeight,uint unDepth)
+	{
+		EVROverlayError result = FnTable.SetOverlayRaw(ulOverlayHandle,pvBuffer,unWidth,unHeight,unDepth);
+		return result;
+	}
+	public EVROverlayError SetOverlayFromFile(ulong ulOverlayHandle,string pchFilePath)
+	{
+		EVROverlayError result = FnTable.SetOverlayFromFile(ulOverlayHandle,pchFilePath);
+		return result;
+	}
+	public EVROverlayError GetOverlayTexture(ulong ulOverlayHandle,ref IntPtr pNativeTextureHandle,IntPtr pNativeTextureRef,ref uint pWidth,ref uint pHeight,ref uint pNativeFormat,ref ETextureType pAPIType,ref EColorSpace pColorSpace,ref VRTextureBounds_t pTextureBounds)
+	{
+		pWidth = 0;
+		pHeight = 0;
+		pNativeFormat = 0;
+		EVROverlayError result = FnTable.GetOverlayTexture(ulOverlayHandle,ref pNativeTextureHandle,pNativeTextureRef,ref pWidth,ref pHeight,ref pNativeFormat,ref pAPIType,ref pColorSpace,ref pTextureBounds);
+		return result;
+	}
+	public EVROverlayError ReleaseNativeOverlayHandle(ulong ulOverlayHandle,IntPtr pNativeTextureHandle)
+	{
+		EVROverlayError result = FnTable.ReleaseNativeOverlayHandle(ulOverlayHandle,pNativeTextureHandle);
+		return result;
+	}
+	public EVROverlayError GetOverlayTextureSize(ulong ulOverlayHandle,ref uint pWidth,ref uint pHeight)
+	{
+		pWidth = 0;
+		pHeight = 0;
+		EVROverlayError result = FnTable.GetOverlayTextureSize(ulOverlayHandle,ref pWidth,ref pHeight);
+		return result;
+	}
+	public EVROverlayError CreateDashboardOverlay(string pchOverlayKey,string pchOverlayFriendlyName,ref ulong pMainHandle,ref ulong pThumbnailHandle)
+	{
+		pMainHandle = 0;
+		pThumbnailHandle = 0;
+		EVROverlayError result = FnTable.CreateDashboardOverlay(pchOverlayKey,pchOverlayFriendlyName,ref pMainHandle,ref pThumbnailHandle);
+		return result;
+	}
+	public bool IsDashboardVisible()
+	{
+		bool result = FnTable.IsDashboardVisible();
+		return result;
+	}
+	public bool IsActiveDashboardOverlay(ulong ulOverlayHandle)
+	{
+		bool result = FnTable.IsActiveDashboardOverlay(ulOverlayHandle);
+		return result;
+	}
+	public EVROverlayError SetDashboardOverlaySceneProcess(ulong ulOverlayHandle,uint unProcessId)
+	{
+		EVROverlayError result = FnTable.SetDashboardOverlaySceneProcess(ulOverlayHandle,unProcessId);
+		return result;
+	}
+	public EVROverlayError GetDashboardOverlaySceneProcess(ulong ulOverlayHandle,ref uint punProcessId)
+	{
+		punProcessId = 0;
+		EVROverlayError result = FnTable.GetDashboardOverlaySceneProcess(ulOverlayHandle,ref punProcessId);
+		return result;
+	}
+	public void ShowDashboard(string pchOverlayToShow)
+	{
+		FnTable.ShowDashboard(pchOverlayToShow);
+	}
+	public uint GetPrimaryDashboardDevice()
+	{
+		uint result = FnTable.GetPrimaryDashboardDevice();
+		return result;
+	}
+	public EVROverlayError ShowKeyboard(int eInputMode,int eLineInputMode,string pchDescription,uint unCharMax,string pchExistingText,bool bUseMinimalMode,ulong uUserValue)
+	{
+		EVROverlayError result = FnTable.ShowKeyboard(eInputMode,eLineInputMode,pchDescription,unCharMax,pchExistingText,bUseMinimalMode,uUserValue);
+		return result;
+	}
+	public EVROverlayError ShowKeyboardForOverlay(ulong ulOverlayHandle,int eInputMode,int eLineInputMode,string pchDescription,uint unCharMax,string pchExistingText,bool bUseMinimalMode,ulong uUserValue)
+	{
+		EVROverlayError result = FnTable.ShowKeyboardForOverlay(ulOverlayHandle,eInputMode,eLineInputMode,pchDescription,unCharMax,pchExistingText,bUseMinimalMode,uUserValue);
+		return result;
+	}
+	public uint GetKeyboardText(System.Text.StringBuilder pchText,uint cchText)
+	{
+		uint result = FnTable.GetKeyboardText(pchText,cchText);
+		return result;
+	}
+	public void HideKeyboard()
+	{
+		FnTable.HideKeyboard();
+	}
+	public void SetKeyboardTransformAbsolute(ETrackingUniverseOrigin eTrackingOrigin,ref HmdMatrix34_t pmatTrackingOriginToKeyboardTransform)
+	{
+		FnTable.SetKeyboardTransformAbsolute(eTrackingOrigin,ref pmatTrackingOriginToKeyboardTransform);
+	}
+	public void SetKeyboardPositionForOverlay(ulong ulOverlayHandle,HmdRect2_t avoidRect)
+	{
+		FnTable.SetKeyboardPositionForOverlay(ulOverlayHandle,avoidRect);
+	}
+	public EVROverlayError SetOverlayIntersectionMask(ulong ulOverlayHandle,ref VROverlayIntersectionMaskPrimitive_t pMaskPrimitives,uint unNumMaskPrimitives,uint unPrimitiveSize)
+	{
+		EVROverlayError result = FnTable.SetOverlayIntersectionMask(ulOverlayHandle,ref pMaskPrimitives,unNumMaskPrimitives,unPrimitiveSize);
+		return result;
+	}
+	public EVROverlayError GetOverlayFlags(ulong ulOverlayHandle,ref uint pFlags)
+	{
+		pFlags = 0;
+		EVROverlayError result = FnTable.GetOverlayFlags(ulOverlayHandle,ref pFlags);
+		return result;
+	}
+	public VRMessageOverlayResponse ShowMessageOverlay(string pchText,string pchCaption,string pchButton0Text,string pchButton1Text,string pchButton2Text,string pchButton3Text)
+	{
+		VRMessageOverlayResponse result = FnTable.ShowMessageOverlay(pchText,pchCaption,pchButton0Text,pchButton1Text,pchButton2Text,pchButton3Text);
+		return result;
+	}
+	public void CloseMessageOverlay()
+	{
+		FnTable.CloseMessageOverlay();
+	}
+}
+
+
+public class CVRRenderModels
+{
+	IVRRenderModels FnTable;
+	internal CVRRenderModels(IntPtr pInterface)
+	{
+		FnTable = (IVRRenderModels)Marshal.PtrToStructure(pInterface, typeof(IVRRenderModels));
+	}
+	public EVRRenderModelError LoadRenderModel_Async(string pchRenderModelName,ref IntPtr ppRenderModel)
+	{
+		EVRRenderModelError result = FnTable.LoadRenderModel_Async(pchRenderModelName,ref ppRenderModel);
+		return result;
+	}
+	public void FreeRenderModel(IntPtr pRenderModel)
+	{
+		FnTable.FreeRenderModel(pRenderModel);
+	}
+	public EVRRenderModelError LoadTexture_Async(int textureId,ref IntPtr ppTexture)
+	{
+		EVRRenderModelError result = FnTable.LoadTexture_Async(textureId,ref ppTexture);
+		return result;
+	}
+	public void FreeTexture(IntPtr pTexture)
+	{
+		FnTable.FreeTexture(pTexture);
+	}
+	public EVRRenderModelError LoadTextureD3D11_Async(int textureId,IntPtr pD3D11Device,ref IntPtr ppD3D11Texture2D)
+	{
+		EVRRenderModelError result = FnTable.LoadTextureD3D11_Async(textureId,pD3D11Device,ref ppD3D11Texture2D);
+		return result;
+	}
+	public EVRRenderModelError LoadIntoTextureD3D11_Async(int textureId,IntPtr pDstTexture)
+	{
+		EVRRenderModelError result = FnTable.LoadIntoTextureD3D11_Async(textureId,pDstTexture);
+		return result;
+	}
+	public void FreeTextureD3D11(IntPtr pD3D11Texture2D)
+	{
+		FnTable.FreeTextureD3D11(pD3D11Texture2D);
+	}
+	public uint GetRenderModelName(uint unRenderModelIndex,System.Text.StringBuilder pchRenderModelName,uint unRenderModelNameLen)
+	{
+		uint result = FnTable.GetRenderModelName(unRenderModelIndex,pchRenderModelName,unRenderModelNameLen);
+		return result;
+	}
+	public uint GetRenderModelCount()
+	{
+		uint result = FnTable.GetRenderModelCount();
+		return result;
+	}
+	public uint GetComponentCount(string pchRenderModelName)
+	{
+		uint result = FnTable.GetComponentCount(pchRenderModelName);
+		return result;
+	}
+	public uint GetComponentName(string pchRenderModelName,uint unComponentIndex,System.Text.StringBuilder pchComponentName,uint unComponentNameLen)
+	{
+		uint result = FnTable.GetComponentName(pchRenderModelName,unComponentIndex,pchComponentName,unComponentNameLen);
+		return result;
+	}
+	public ulong GetComponentButtonMask(string pchRenderModelName,string pchComponentName)
+	{
+		ulong result = FnTable.GetComponentButtonMask(pchRenderModelName,pchComponentName);
+		return result;
+	}
+	public uint GetComponentRenderModelName(string pchRenderModelName,string pchComponentName,System.Text.StringBuilder pchComponentRenderModelName,uint unComponentRenderModelNameLen)
+	{
+		uint result = FnTable.GetComponentRenderModelName(pchRenderModelName,pchComponentName,pchComponentRenderModelName,unComponentRenderModelNameLen);
+		return result;
+	}
+// This is a terrible hack to workaround the fact that VRControllerState_t and VREvent_t were
+// originally mis-compiled with the wrong packing for Linux and OSX.
+	[UnmanagedFunctionPointer(CallingConvention.StdCall)]
+	internal delegate bool _GetComponentStatePacked(string pchRenderModelName,string pchComponentName,ref VRControllerState_t_Packed pControllerState,ref RenderModel_ControllerMode_State_t pState,ref RenderModel_ComponentState_t pComponentState);
+	[StructLayout(LayoutKind.Explicit)]
+	struct GetComponentStateUnion
+	{
+		[FieldOffset(0)]
+		public IVRRenderModels._GetComponentState pGetComponentState;
+		[FieldOffset(0)]
+		public _GetComponentStatePacked pGetComponentStatePacked;
+	}
+	public bool GetComponentState(string pchRenderModelName,string pchComponentName,ref VRControllerState_t pControllerState,ref RenderModel_ControllerMode_State_t pState,ref RenderModel_ComponentState_t pComponentState)
+	{
+#if !UNITY_METRO
+		if ((System.Environment.OSVersion.Platform == System.PlatformID.MacOSX) ||
+				(System.Environment.OSVersion.Platform == System.PlatformID.Unix))
+		{
+			GetComponentStateUnion u;
+			VRControllerState_t_Packed state_packed = new VRControllerState_t_Packed(pControllerState);
+			u.pGetComponentStatePacked = null;
+			u.pGetComponentState = FnTable.GetComponentState;
+			bool packed_result = u.pGetComponentStatePacked(pchRenderModelName,pchComponentName,ref state_packed,ref pState,ref pComponentState);
+
+			state_packed.Unpack(ref pControllerState);
+			return packed_result;
+		}
+#endif
+		bool result = FnTable.GetComponentState(pchRenderModelName,pchComponentName,ref pControllerState,ref pState,ref pComponentState);
+		return result;
+	}
+	public bool RenderModelHasComponent(string pchRenderModelName,string pchComponentName)
+	{
+		bool result = FnTable.RenderModelHasComponent(pchRenderModelName,pchComponentName);
+		return result;
+	}
+	public uint GetRenderModelThumbnailURL(string pchRenderModelName,System.Text.StringBuilder pchThumbnailURL,uint unThumbnailURLLen,ref EVRRenderModelError peError)
+	{
+		uint result = FnTable.GetRenderModelThumbnailURL(pchRenderModelName,pchThumbnailURL,unThumbnailURLLen,ref peError);
+		return result;
+	}
+	public uint GetRenderModelOriginalPath(string pchRenderModelName,System.Text.StringBuilder pchOriginalPath,uint unOriginalPathLen,ref EVRRenderModelError peError)
+	{
+		uint result = FnTable.GetRenderModelOriginalPath(pchRenderModelName,pchOriginalPath,unOriginalPathLen,ref peError);
+		return result;
+	}
+	public string GetRenderModelErrorNameFromEnum(EVRRenderModelError error)
+	{
+		IntPtr result = FnTable.GetRenderModelErrorNameFromEnum(error);
+		return Marshal.PtrToStringAnsi(result);
+	}
+}
+
+
+public class CVRNotifications
+{
+	IVRNotifications FnTable;
+	internal CVRNotifications(IntPtr pInterface)
+	{
+		FnTable = (IVRNotifications)Marshal.PtrToStructure(pInterface, typeof(IVRNotifications));
+	}
+	public EVRNotificationError CreateNotification(ulong ulOverlayHandle,ulong ulUserValue,EVRNotificationType type,string pchText,EVRNotificationStyle style,ref NotificationBitmap_t pImage,ref uint pNotificationId)
+	{
+		pNotificationId = 0;
+		EVRNotificationError result = FnTable.CreateNotification(ulOverlayHandle,ulUserValue,type,pchText,style,ref pImage,ref pNotificationId);
+		return result;
+	}
+	public EVRNotificationError RemoveNotification(uint notificationId)
+	{
+		EVRNotificationError result = FnTable.RemoveNotification(notificationId);
+		return result;
+	}
+}
+
+
+public class CVRSettings
+{
+	IVRSettings FnTable;
+	internal CVRSettings(IntPtr pInterface)
+	{
+		FnTable = (IVRSettings)Marshal.PtrToStructure(pInterface, typeof(IVRSettings));
+	}
+	public string GetSettingsErrorNameFromEnum(EVRSettingsError eError)
+	{
+		IntPtr result = FnTable.GetSettingsErrorNameFromEnum(eError);
+		return Marshal.PtrToStringAnsi(result);
+	}
+	public bool Sync(bool bForce,ref EVRSettingsError peError)
+	{
+		bool result = FnTable.Sync(bForce,ref peError);
+		return result;
+	}
+	public void SetBool(string pchSection,string pchSettingsKey,bool bValue,ref EVRSettingsError peError)
+	{
+		FnTable.SetBool(pchSection,pchSettingsKey,bValue,ref peError);
+	}
+	public void SetInt32(string pchSection,string pchSettingsKey,int nValue,ref EVRSettingsError peError)
+	{
+		FnTable.SetInt32(pchSection,pchSettingsKey,nValue,ref peError);
+	}
+	public void SetFloat(string pchSection,string pchSettingsKey,float flValue,ref EVRSettingsError peError)
+	{
+		FnTable.SetFloat(pchSection,pchSettingsKey,flValue,ref peError);
+	}
+	public void SetString(string pchSection,string pchSettingsKey,string pchValue,ref EVRSettingsError peError)
+	{
+		FnTable.SetString(pchSection,pchSettingsKey,pchValue,ref peError);
+	}
+	public bool GetBool(string pchSection,string pchSettingsKey,ref EVRSettingsError peError)
+	{
+		bool result = FnTable.GetBool(pchSection,pchSettingsKey,ref peError);
+		return result;
+	}
+	public int GetInt32(string pchSection,string pchSettingsKey,ref EVRSettingsError peError)
+	{
+		int result = FnTable.GetInt32(pchSection,pchSettingsKey,ref peError);
+		return result;
+	}
+	public float GetFloat(string pchSection,string pchSettingsKey,ref EVRSettingsError peError)
+	{
+		float result = FnTable.GetFloat(pchSection,pchSettingsKey,ref peError);
+		return result;
+	}
+	public void GetString(string pchSection,string pchSettingsKey,System.Text.StringBuilder pchValue,uint unValueLen,ref EVRSettingsError peError)
+	{
+		FnTable.GetString(pchSection,pchSettingsKey,pchValue,unValueLen,ref peError);
+	}
+	public void RemoveSection(string pchSection,ref EVRSettingsError peError)
+	{
+		FnTable.RemoveSection(pchSection,ref peError);
+	}
+	public void RemoveKeyInSection(string pchSection,string pchSettingsKey,ref EVRSettingsError peError)
+	{
+		FnTable.RemoveKeyInSection(pchSection,pchSettingsKey,ref peError);
+	}
+}
+
+
+public class CVRScreenshots
+{
+	IVRScreenshots FnTable;
+	internal CVRScreenshots(IntPtr pInterface)
+	{
+		FnTable = (IVRScreenshots)Marshal.PtrToStructure(pInterface, typeof(IVRScreenshots));
+	}
+	public EVRScreenshotError RequestScreenshot(ref uint pOutScreenshotHandle,EVRScreenshotType type,string pchPreviewFilename,string pchVRFilename)
+	{
+		pOutScreenshotHandle = 0;
+		EVRScreenshotError result = FnTable.RequestScreenshot(ref pOutScreenshotHandle,type,pchPreviewFilename,pchVRFilename);
+		return result;
+	}
+	public EVRScreenshotError HookScreenshot(EVRScreenshotType [] pSupportedTypes)
+	{
+		EVRScreenshotError result = FnTable.HookScreenshot(pSupportedTypes,(int) pSupportedTypes.Length);
+		return result;
+	}
+	public EVRScreenshotType GetScreenshotPropertyType(uint screenshotHandle,ref EVRScreenshotError pError)
+	{
+		EVRScreenshotType result = FnTable.GetScreenshotPropertyType(screenshotHandle,ref pError);
+		return result;
+	}
+	public uint GetScreenshotPropertyFilename(uint screenshotHandle,EVRScreenshotPropertyFilenames filenameType,System.Text.StringBuilder pchFilename,uint cchFilename,ref EVRScreenshotError pError)
+	{
+		uint result = FnTable.GetScreenshotPropertyFilename(screenshotHandle,filenameType,pchFilename,cchFilename,ref pError);
+		return result;
+	}
+	public EVRScreenshotError UpdateScreenshotProgress(uint screenshotHandle,float flProgress)
+	{
+		EVRScreenshotError result = FnTable.UpdateScreenshotProgress(screenshotHandle,flProgress);
+		return result;
+	}
+	public EVRScreenshotError TakeStereoScreenshot(ref uint pOutScreenshotHandle,string pchPreviewFilename,string pchVRFilename)
+	{
+		pOutScreenshotHandle = 0;
+		EVRScreenshotError result = FnTable.TakeStereoScreenshot(ref pOutScreenshotHandle,pchPreviewFilename,pchVRFilename);
+		return result;
+	}
+	public EVRScreenshotError SubmitScreenshot(uint screenshotHandle,EVRScreenshotType type,string pchSourcePreviewFilename,string pchSourceVRFilename)
+	{
+		EVRScreenshotError result = FnTable.SubmitScreenshot(screenshotHandle,type,pchSourcePreviewFilename,pchSourceVRFilename);
+		return result;
+	}
+}
+
+
+public class CVRResources
+{
+	IVRResources FnTable;
+	internal CVRResources(IntPtr pInterface)
+	{
+		FnTable = (IVRResources)Marshal.PtrToStructure(pInterface, typeof(IVRResources));
+	}
+	public uint LoadSharedResource(string pchResourceName,string pchBuffer,uint unBufferLen)
+	{
+		uint result = FnTable.LoadSharedResource(pchResourceName,pchBuffer,unBufferLen);
+		return result;
+	}
+	public uint GetResourceFullPath(string pchResourceName,string pchResourceTypeDirectory,System.Text.StringBuilder pchPathBuffer,uint unBufferLen)
+	{
+		uint result = FnTable.GetResourceFullPath(pchResourceName,pchResourceTypeDirectory,pchPathBuffer,unBufferLen);
+		return result;
+	}
+}
+
+
+public class CVRDriverManager
+{
+	IVRDriverManager FnTable;
+	internal CVRDriverManager(IntPtr pInterface)
+	{
+		FnTable = (IVRDriverManager)Marshal.PtrToStructure(pInterface, typeof(IVRDriverManager));
+	}
+	public uint GetDriverCount()
+	{
+		uint result = FnTable.GetDriverCount();
+		return result;
+	}
+	public uint GetDriverName(uint nDriver,System.Text.StringBuilder pchValue,uint unBufferSize)
+	{
+		uint result = FnTable.GetDriverName(nDriver,pchValue,unBufferSize);
+		return result;
+	}
+}
 
 
 public class OpenVRInterop
@@ -3298,6 +4969,16 @@ public class OpenVR
 		public void Clear()
 		{
 			m_pVRSystem = null;
+			m_pVRChaperone = null;
+			m_pVRChaperoneSetup = null;
+			m_pVRCompositor = null;
+			m_pVROverlay = null;
+			m_pVRRenderModels = null;
+			m_pVRExtendedDisplay = null;
+			m_pVRSettings = null;
+			m_pVRApplications = null;
+			m_pVRScreenshots = null;
+			m_pVRTrackedCamera = null;
 		}
 
 		void CheckClear()
@@ -3322,7 +5003,147 @@ public class OpenVR
 			return m_pVRSystem;
 		}
 
+		public CVRChaperone VRChaperone()
+		{
+			CheckClear();
+			if (m_pVRChaperone == null)
+			{
+				var eError = EVRInitError.None;
+				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVRChaperone_Version, ref eError);
+				if (pInterface != IntPtr.Zero && eError == EVRInitError.None)
+					m_pVRChaperone = new CVRChaperone(pInterface);
+			}
+			return m_pVRChaperone;
+		}
+
+		public CVRChaperoneSetup VRChaperoneSetup()
+		{
+			CheckClear();
+			if (m_pVRChaperoneSetup == null)
+			{
+				var eError = EVRInitError.None;
+				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVRChaperoneSetup_Version, ref eError);
+				if (pInterface != IntPtr.Zero && eError == EVRInitError.None)
+					m_pVRChaperoneSetup = new CVRChaperoneSetup(pInterface);
+			}
+			return m_pVRChaperoneSetup;
+		}
+
+		public CVRCompositor VRCompositor()
+		{
+			CheckClear();
+			if (m_pVRCompositor == null)
+			{
+				var eError = EVRInitError.None;
+				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVRCompositor_Version, ref eError);
+				if (pInterface != IntPtr.Zero && eError == EVRInitError.None)
+					m_pVRCompositor = new CVRCompositor(pInterface);
+			}
+			return m_pVRCompositor;
+		}
+
+		public CVROverlay VROverlay()
+		{
+			CheckClear();
+			if (m_pVROverlay == null)
+			{
+				var eError = EVRInitError.None;
+				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVROverlay_Version, ref eError);
+				if (pInterface != IntPtr.Zero && eError == EVRInitError.None)
+					m_pVROverlay = new CVROverlay(pInterface);
+			}
+			return m_pVROverlay;
+		}
+
+		public CVRRenderModels VRRenderModels()
+		{
+			CheckClear();
+			if (m_pVRRenderModels == null)
+			{
+				var eError = EVRInitError.None;
+				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVRRenderModels_Version, ref eError);
+				if (pInterface != IntPtr.Zero && eError == EVRInitError.None)
+					m_pVRRenderModels = new CVRRenderModels(pInterface);
+			}
+			return m_pVRRenderModels;
+		}
+
+		public CVRExtendedDisplay VRExtendedDisplay()
+		{
+			CheckClear();
+			if (m_pVRExtendedDisplay == null)
+			{
+				var eError = EVRInitError.None;
+				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVRExtendedDisplay_Version, ref eError);
+				if (pInterface != IntPtr.Zero && eError == EVRInitError.None)
+					m_pVRExtendedDisplay = new CVRExtendedDisplay(pInterface);
+			}
+			return m_pVRExtendedDisplay;
+		}
+
+		public CVRSettings VRSettings()
+		{
+			CheckClear();
+			if (m_pVRSettings == null)
+			{
+				var eError = EVRInitError.None;
+				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVRSettings_Version, ref eError);
+				if (pInterface != IntPtr.Zero && eError == EVRInitError.None)
+					m_pVRSettings = new CVRSettings(pInterface);
+			}
+			return m_pVRSettings;
+		}
+
+		public CVRApplications VRApplications()
+		{
+			CheckClear();
+			if (m_pVRApplications == null)
+			{
+				var eError = EVRInitError.None;
+				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVRApplications_Version, ref eError);
+				if (pInterface != IntPtr.Zero && eError == EVRInitError.None)
+					m_pVRApplications = new CVRApplications(pInterface);
+			}
+			return m_pVRApplications;
+		}
+
+		public CVRScreenshots VRScreenshots()
+		{
+			CheckClear();
+			if (m_pVRScreenshots == null)
+			{
+				var eError = EVRInitError.None;
+				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVRScreenshots_Version, ref eError);
+				if (pInterface != IntPtr.Zero && eError == EVRInitError.None)
+					m_pVRScreenshots = new CVRScreenshots(pInterface);
+			}
+			return m_pVRScreenshots;
+		}
+
+		public CVRTrackedCamera VRTrackedCamera()
+		{
+			CheckClear();
+			if (m_pVRTrackedCamera == null)
+			{
+				var eError = EVRInitError.None;
+				var pInterface = OpenVRInterop.GetGenericInterface(FnTable_Prefix+IVRTrackedCamera_Version, ref eError);
+				if (pInterface != IntPtr.Zero && eError == EVRInitError.None)
+					m_pVRTrackedCamera = new CVRTrackedCamera(pInterface);
+			}
+			return m_pVRTrackedCamera;
+		}
+
 		private CVRSystem m_pVRSystem;
+		private CVRChaperone m_pVRChaperone;
+		private CVRChaperoneSetup m_pVRChaperoneSetup;
+		private CVRCompositor m_pVRCompositor;
+		private CVROverlay m_pVROverlay;
+		private CVRRenderModels m_pVRRenderModels;
+		private CVRExtendedDisplay m_pVRExtendedDisplay;
+		private CVRSettings m_pVRSettings;
+		private CVRApplications m_pVRApplications;
+		private CVRScreenshots m_pVRScreenshots;
+		private CVRTrackedCamera m_pVRTrackedCamera;
 	};
 
 	private static COpenVRContext _OpenVRInternal_ModuleContext = null;
@@ -3337,7 +5158,17 @@ public class OpenVR
 	}
 
 	public static CVRSystem System { get { return OpenVRInternal_ModuleContext.VRSystem(); } }
-	
+	public static CVRChaperone Chaperone { get { return OpenVRInternal_ModuleContext.VRChaperone(); } }
+	public static CVRChaperoneSetup ChaperoneSetup { get { return OpenVRInternal_ModuleContext.VRChaperoneSetup(); } }
+	public static CVRCompositor Compositor { get { return OpenVRInternal_ModuleContext.VRCompositor(); } }
+	public static CVROverlay Overlay { get { return OpenVRInternal_ModuleContext.VROverlay(); } }
+	public static CVRRenderModels RenderModels { get { return OpenVRInternal_ModuleContext.VRRenderModels(); } }
+	public static CVRExtendedDisplay ExtendedDisplay { get { return OpenVRInternal_ModuleContext.VRExtendedDisplay(); } }
+	public static CVRSettings Settings { get { return OpenVRInternal_ModuleContext.VRSettings(); } }
+	public static CVRApplications Applications { get { return OpenVRInternal_ModuleContext.VRApplications(); } }
+	public static CVRScreenshots Screenshots { get { return OpenVRInternal_ModuleContext.VRScreenshots(); } }
+	public static CVRTrackedCamera TrackedCamera { get { return OpenVRInternal_ModuleContext.VRTrackedCamera(); } }
+
 	/** Finds the active installation of vrclient.dll and initializes it */
 	public static CVRSystem Init(ref EVRInitError peError, EVRApplicationType eApplicationType = EVRApplicationType.VRApplication_Scene)
 	{

@@ -7,9 +7,9 @@
 using UnityEngine;
 using System.Collections;
 using System.Runtime.InteropServices;
-using Valve.VR;
+using QuickOpenVR;
 
-public static class SteamVR_Utils
+public static class QuickOpenVR_Utils
 {
 	// this version does not clamp [0..1]
 	private static float _copysign(float sizeval, float signval)
