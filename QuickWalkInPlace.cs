@@ -5,7 +5,7 @@ using UnityEngine;
 namespace QuickVR
 {
 
-    public class QuickWalkInPlace : MonoBehaviour
+    public class QuickWalkInPlace : QuickCharacterControllerBase //MonoBehaviour
     {
 
         #region CONSTANTS
@@ -46,8 +46,10 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        protected virtual void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
             if (!_speedCurve) _speedCurve = Resources.Load<QuickSpeedCurveAsset>("QuickSpeedCurveDefault");
         }
 
@@ -74,7 +76,7 @@ namespace QuickVR
         {
             _posYCicleStart = _posYLastFrame = _node.GetTrackedObject().transform.position.y;
             _timeCicleStart = Time.time;
-            _coUpdateSpeed = StartCoroutine(CoUpdateSpeed());
+            //_coUpdateSpeed = StartCoroutine(CoUpdateSpeed());
             _numStillFrames = 0;
         }
 
@@ -82,27 +84,26 @@ namespace QuickVR
 
         #region GET AND SET
 
-        //protected override void ComputeTargetLinearVelocity()
-        //{
-        //    // Calculate how fast we should be moving
-        //    float hAxis = InputManager.GetAxis(InputManager.DEFAULT_AXIS_HORIZONTAL);
-        //    float vAxis = InputManager.GetAxis(InputManager.DEFAULT_AXIS_VERTICAL);
-        //    _targetLinearVelocity = new Vector3(hAxis, 0, vAxis);
-        //    _targetLinearVelocity.Normalize();
-        //    _targetLinearVelocity = transform.TransformDirection(_targetLinearVelocity);
-        //    _targetLinearVelocity *= _maxLinearSpeed;
-        //}
+        protected override void ComputeTargetLinearVelocity()
+        {
+            // Calculate how fast we should be moving
+            _targetLinearVelocity = transform.forward * _desiredSpeed;
+        }
 
-        //protected override void ComputeTargetAngularVelocity()
-        //{
-        //    //float cAXis = InputManager.GetAxis(InputManager.DEFAULT_AXIS_HORIZONTAL_RIGHT);
-        //    float cAXis = InputManager.GetAxis(InputManager.DEFAULT_AXIS_HORIZONTAL);
-        //    _targetAngularVelocity = transform.up * cAXis * _angularAcceleration * Mathf.Deg2Rad;
-        //}
+        protected override void ComputeTargetAngularVelocity()
+        {
+            float cAXis = InputManager.GetAxis(InputManager.DEFAULT_AXIS_HORIZONTAL);
+            _targetAngularVelocity = Vector3.zero; //transform.up * cAXis * _angularAcceleration * Mathf.Deg2Rad;
+        }
+
+        public override float GetMaxLinearSpeed()
+        {
+            return _speedCurve.Evaluate(0);
+        }
 
         #endregion
 
-        #region UPDATE
+            #region UPDATE
 
         protected virtual void UpdateTranslation()
         {

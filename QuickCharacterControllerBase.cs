@@ -3,9 +3,6 @@ using System.Collections;
 
 namespace QuickVR {
 
-	[RequireComponent(typeof(CapsuleCollider))]
-	[RequireComponent(typeof(Rigidbody))]
-
 	public abstract class QuickCharacterControllerBase : MonoBehaviour {
 
 		#region PUBLIC PARAMETERS
@@ -67,10 +64,11 @@ namespace QuickVR {
 		}
 
 		protected virtual void InitCollider() {
-			_collider = GetComponent<CapsuleCollider>();
+			_collider = gameObject.GetOrCreateComponent<CapsuleCollider>();
 			_collider.radius = _radius;
 			_collider.height = _height;
-			_collider.material = _physicMaterial;
+            _collider.center = new Vector3(0.0f, _height * 0.5f, 0.0f);
+            _collider.material = _physicMaterial;
 		}
 
 		protected virtual void CreatePhysicMaterial() {
@@ -85,7 +83,7 @@ namespace QuickVR {
 		}
 
 		protected virtual void InitRigidBody() {
-			_rigidBody = GetComponent<Rigidbody>();
+			_rigidBody = gameObject.GetOrCreateComponent<Rigidbody>();
 			_rigidBody.freezeRotation = true;
 			_rigidBody.maxAngularVelocity = _maxAngularSpeed * Mathf.Deg2Rad;
 			_rigidBody.useGravity = true;
