@@ -18,7 +18,7 @@ namespace QuickVR
         #region PUBLIC ATTRIBUTES
 
         public QuickVRNode.Type _targetNode = QuickVRNode.Type.Head;
-        public QuickSpeedCurveAsset _speedCurveAsset = null;
+        public QuickSpeedCurveAsset _speedCurve = null;
 
         public float _acceleration = 8.0f;
         public float _speedMultiplier = 0.75f;
@@ -27,15 +27,10 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected AnimationCurve _speedCurve = null;
-
         protected float _timeCicleStart = 0.0f;
 
         protected float _posYCicleStart = 0.0f;
         protected float _posYLastFrame = 0.0f;
-
-        [SerializeField, ReadOnly]
-        protected float _currentSpeed = 0.0f;
 
         [SerializeField, ReadOnly]
         protected float _desiredSpeed = 0.0f;
@@ -53,8 +48,7 @@ namespace QuickVR
 
         protected virtual void Awake()
         {
-            if (!_speedCurveAsset) _speedCurveAsset = Resources.Load<QuickSpeedCurveAsset>("QuickSpeedCurveDefault");
-            _speedCurve = _speedCurveAsset._animationCurve;
+            if (!_speedCurve) _speedCurve = Resources.Load<QuickSpeedCurveAsset>("QuickSpeedCurveDefault");
         }
 
         protected virtual void Start()
@@ -83,6 +77,28 @@ namespace QuickVR
             _coUpdateSpeed = StartCoroutine(CoUpdateSpeed());
             _numStillFrames = 0;
         }
+
+        #endregion
+
+        #region GET AND SET
+
+        //protected override void ComputeTargetLinearVelocity()
+        //{
+        //    // Calculate how fast we should be moving
+        //    float hAxis = InputManager.GetAxis(InputManager.DEFAULT_AXIS_HORIZONTAL);
+        //    float vAxis = InputManager.GetAxis(InputManager.DEFAULT_AXIS_VERTICAL);
+        //    _targetLinearVelocity = new Vector3(hAxis, 0, vAxis);
+        //    _targetLinearVelocity.Normalize();
+        //    _targetLinearVelocity = transform.TransformDirection(_targetLinearVelocity);
+        //    _targetLinearVelocity *= _maxLinearSpeed;
+        //}
+
+        //protected override void ComputeTargetAngularVelocity()
+        //{
+        //    //float cAXis = InputManager.GetAxis(InputManager.DEFAULT_AXIS_HORIZONTAL_RIGHT);
+        //    float cAXis = InputManager.GetAxis(InputManager.DEFAULT_AXIS_HORIZONTAL);
+        //    _targetAngularVelocity = transform.up * cAXis * _angularAcceleration * Mathf.Deg2Rad;
+        //}
 
         #endregion
 
@@ -132,13 +148,14 @@ namespace QuickVR
 
         protected virtual IEnumerator CoUpdateSpeed()
         {
+            float currentSpeed = 0.0f;
             while (true)
             {
                 if (_numStillFrames < NUM_FRAMES_STILL)
                 {
                     float ds = _acceleration * Time.deltaTime;
-                    _currentSpeed = (_currentSpeed < _desiredSpeed) ? Mathf.Min(_currentSpeed + ds, _desiredSpeed) : Mathf.Max(_currentSpeed - ds, _desiredSpeed);
-                    transform.Translate(Vector3.forward * _currentSpeed * Time.deltaTime, Space.Self);
+                    currentSpeed = (currentSpeed < _desiredSpeed) ? Mathf.Min(currentSpeed + ds, _desiredSpeed) : Mathf.Max(currentSpeed - ds, _desiredSpeed);
+                    transform.Translate(Vector3.forward * currentSpeed * Time.deltaTime, Space.Self);
                 }
 
                 yield return null;

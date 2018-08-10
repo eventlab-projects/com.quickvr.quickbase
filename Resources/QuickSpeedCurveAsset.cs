@@ -13,6 +13,15 @@ namespace QuickVR
 
         public AnimationCurve _animationCurve = new AnimationCurve();
 
+        #region GET AND SET
+
+        public virtual float Evaluate(float dt)
+        {
+            return _animationCurve.Evaluate(dt);
+        }
+
+        #endregion
+
     }
 
 }
