@@ -101,7 +101,6 @@ namespace QuickVR
             base.OnEnable();
 
             GetQuickVRNode(QuickVRNode.Type.Head).OnConnected += OnHMDConnected;
-
             GetQuickVRNode(QuickVRNode.Type.LeftHand).OnConnected += OnLeftHandConnected;
             GetQuickVRNode(QuickVRNode.Type.RightHand).OnConnected += OnRightHandConnected;
 
@@ -180,6 +179,10 @@ namespace QuickVR
             QuickVRNode waistNode = GetQuickVRNode(QuickVRNode.Type.Waist);
             QuickVRNode leftFootNode = GetQuickVRNode(QuickVRNode.Type.LeftFoot);
             QuickVRNode rightFootNode = GetQuickVRNode(QuickVRNode.Type.RightFoot);
+
+            waistNode.SetID(0);
+            leftFootNode.SetID(0);
+            rightFootNode.SetID(0);
 
             if (numTrackers == 1)
             {

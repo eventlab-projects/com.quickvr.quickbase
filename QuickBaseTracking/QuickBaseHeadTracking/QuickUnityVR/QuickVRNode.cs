@@ -37,8 +37,6 @@ namespace QuickVR
         protected ulong _id = 0;
         protected State _state = State.DISCONNECTED;
 
-        protected bool _initialized = false;
-
         protected QuickTrackedObject _trackedObject = null;
 
         protected static List<Type> _typeList = new List<Type>();
@@ -84,8 +82,6 @@ namespace QuickVR
             if (id == _id) return;
 
             _id = id;
-            _initialized = true;
-
             _trackedObject.Reset();
         }
 
@@ -124,18 +120,15 @@ namespace QuickVR
         {
             XRNodeState? result = null;
 
-            if (_initialized)
+            foreach (XRNodeState s in _vrNodesStates)
             {
-                foreach (XRNodeState s in _vrNodesStates)
+                if (s.uniqueID == _id)
                 {
-                    if (s.uniqueID == _id)
-                    {
-                        result = s;
-                        break;
-                    }
+                    result = s;
+                    break;
                 }
             }
-
+            
             return result;
         }
 

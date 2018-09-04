@@ -5,7 +5,7 @@ using UnityEngine;
 namespace QuickVR
 {
 
-    public class QuickWalkInPlace : QuickCharacterControllerBase //MonoBehaviour
+    public class QuickWalkInPlace : QuickCharacterControllerBase
     {
 
         #region CONSTANTS
@@ -17,7 +17,14 @@ namespace QuickVR
 
         #region PUBLIC ATTRIBUTES
 
-        public QuickVRNode.Type _targetNode = QuickVRNode.Type.Head;
+        public enum WalkMethod
+        {
+            Head, 
+            Hips, 
+            Feet, 
+        }
+
+        public WalkMethod _walkMethod = WalkMethod.Head;
         public QuickSpeedCurveAsset _speedCurve = null;
 
         public float _acceleration = 8.0f;
@@ -38,7 +45,6 @@ namespace QuickVR
         protected QuickVRNode _node = null;
 
         protected bool _trend = false;  //true => going towards a local max; false => going towards a local min
-        protected Coroutine _coUpdateSpeed = null;
 
         protected int _numStillFrames = 0;  //Counts how many consecutive frames the reference transform has been (almost) still
 
@@ -55,28 +61,43 @@ namespace QuickVR
 
         protected virtual void Start()
         {
-            _node = GetComponent<QuickUnityVRBase>().GetQuickVRNode(_targetNode);
-            _node.OnConnected += Init;
-        }
+            QuickUnityVRBase hTracking = GetComponent<QuickUnityVRBase>();
+            _node = hTracking.GetQuickVRNode(_walkMethod == WalkMethod.Head ? QuickVRNode.Type.Head : QuickVRNode.Type.Waist);
+            if (_walkMethod != WalkMethod.Feet)
+            {
+                //If the walk method chosen is using the Head or the Hips nodes only, the feet 
+                //are driven by the animation. Otherwise, they are driven by the real user movement. 
+                hTracking._trackedJoints &= ~(1 << (int)IKLimbBones.LeftFoot);
+                hTracking._trackedJoints &= ~(1 << (int)IKLimbBones.RightFoot);
+
+                if (hTracking.GetType() == typeof(QuickUnityVR))
+                {
+                    QuickUnityVR uVR = (QuickUnityVR)hTracking;
+                    
+                }
+            }
+
+            QuickIKManager ikManager = GetComponent<QuickIKManager>();
+            ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.LeftFoot);
+            ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.RightFoot);
+        }            
 
         protected virtual void OnEnable()
         {
             QuickVRManager.OnPostUpdateTracking += UpdateTranslation;
-            if (_node) _node.OnConnected += Init;
+            QuickUnityVRBase.OnCalibrate += Init;
         }
 
         protected virtual void OnDisable()
         {
             QuickVRManager.OnPostUpdateTracking -= UpdateTranslation;
-            if (_node) _node.OnConnected -= Init;
-            if (_coUpdateSpeed != null) StopCoroutine(_coUpdateSpeed);
+            QuickUnityVRBase.OnCalibrate -= Init;
         }
 
         protected virtual void Init()
         {
             _posYCicleStart = _posYLastFrame = _node.GetTrackedObject().transform.position.y;
             _timeCicleStart = Time.time;
-            //_coUpdateSpeed = StartCoroutine(CoUpdateSpeed());
             _numStillFrames = 0;
         }
 
@@ -145,22 +166,6 @@ namespace QuickVR
             }
 
             _posYLastFrame = posY;
-        }
-
-        protected virtual IEnumerator CoUpdateSpeed()
-        {
-            float currentSpeed = 0.0f;
-            while (true)
-            {
-                if (_numStillFrames < NUM_FRAMES_STILL)
-                {
-                    float ds = _acceleration * Time.deltaTime;
-                    currentSpeed = (currentSpeed < _desiredSpeed) ? Mathf.Min(currentSpeed + ds, _desiredSpeed) : Mathf.Max(currentSpeed - ds, _desiredSpeed);
-                    transform.Translate(Vector3.forward * currentSpeed * Time.deltaTime, Space.Self);
-                }
-
-                yield return null;
-            }
         }
 
         #endregion
