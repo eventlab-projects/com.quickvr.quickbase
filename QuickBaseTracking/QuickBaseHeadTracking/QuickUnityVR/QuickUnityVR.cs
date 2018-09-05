@@ -88,9 +88,11 @@ namespace QuickVR {
             base.Calibrate();
         }
 
-        protected override void CalibrateVRNode(QuickVRNode.Type nodeType, bool resetTrackedObject = true)
+        protected override void CalibrateVRNode(QuickVRNode.Type nodeType)
         {
-            base.CalibrateVRNode(nodeType, resetTrackedObject);
+            Debug.Log("calibrate node " + nodeType);
+
+            base.CalibrateVRNode(nodeType);
 
             QuickVRNode node = GetQuickVRNode(nodeType);
             QuickTrackedObject tObject = node.GetTrackedObject();
@@ -103,6 +105,13 @@ namespace QuickVR {
                 //Correct the hands rotation
                 if (nodeType == QuickVRNode.Type.LeftHand) tObject.transform.Rotate(tObject.transform.forward, 90.0f, Space.World);
                 if (nodeType == QuickVRNode.Type.RightHand) tObject.transform.Rotate(tObject.transform.forward, -90.0f, Space.World);
+
+                //Set the position of the hips
+                if (nodeType == QuickVRNode.Type.Waist)
+                {
+                    QuickTrackedObject tObjectHead = GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject();
+                    tObject.transform.position = new Vector3(tObjectHead.transform.position.x, tObject.transform.position.y, tObjectHead.transform.position.z);
+                }
             }
             else
             {
@@ -113,6 +122,7 @@ namespace QuickVR {
             Transform cPose = GetCalibrationPose(nodeType);
             cPose.position = tObject.transform.position;
             cPose.rotation = tObject.transform.rotation;
+            tObject.Reset();
         }
 
         protected override void CalibrateVRNodeHead(QuickVRNode node)

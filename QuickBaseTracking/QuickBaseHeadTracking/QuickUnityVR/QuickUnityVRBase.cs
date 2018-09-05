@@ -259,7 +259,7 @@ namespace QuickVR
             }
         }
 
-        protected virtual void CalibrateVRNode(QuickVRNode.Type nodeType, bool resetTrackedObject = true)
+        protected virtual void CalibrateVRNode(QuickVRNode.Type nodeType)
         {
             QuickVRNode node = GetQuickVRNode(nodeType);
             if (!node.IsTracked()) return;

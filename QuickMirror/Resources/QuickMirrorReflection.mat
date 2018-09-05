@@ -4,7 +4,7 @@
 Material:
   serializedVersion: 6
   m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabParentObject: {fileID: 0}
   m_PrefabInternal: {fileID: 0}
   m_Name: QuickMirrorReflection
   m_Shader: {fileID: 4800000, guid: a0b1cf8bc018eed4980ab8af28022290, type: 3}

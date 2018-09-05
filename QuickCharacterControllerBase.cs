@@ -185,9 +185,9 @@ namespace QuickVR {
 			_rigidBody.AddTorque(_targetAngularVelocity, ForceMode.Acceleration);
 		}
 
-		#endregion
+        #endregion
 
-		#region PHYSICS MANAGEMENT
+        #region PHYSICS MANAGEMENT
 
         //protected virtual void OnCollisionStay(Collision collision)
         //{
@@ -200,27 +200,33 @@ namespace QuickVR {
         //    }
         //}
 
-        /*
-		protected virtual void OnCollisionStay(Collision collision) {
-			//Allow this character to overcome step stairs according to the defined maxStepHeight. 
-			//Ignore other agents. 
-			if ((collision.gameObject.layer == _layerPlayer) || (collision.gameObject.layer == _layerAutonomousAgent)) return;
 
-			//Look for the contact point with the higher y
-			Vector3 bottomPos = _bottomBound.position;
-			foreach (ContactPoint contact in collision.contacts) {
-				//We are only interested on those contact points pointing on the same direction
-				//that the horizontal velocity and in a higher elevation than current character's
-				//position.
-				Vector3 offset = contact.point - bottomPos;
-				if ((offset.y > _stepOffset.y) && (Vector3.Dot(offset, _targetLinearVelocity) > 0)) {
-					_stepOffset = offset;
-				}
-			}
-		}
-        */
-		#endregion
+        protected virtual void OnCollisionStay(Collision collision)
+        {
+            //Allow this character to overcome step stairs according to the defined maxStepHeight. 
+            //Ignore other agents.
 
-	}
+            if ((collision.gameObject.layer == _layerPlayer) || (collision.gameObject.layer == _layerAutonomousAgent)) return;
+
+            //Look for the contact point with the higher y
+
+            Vector3 bottomPos = _bottomBound.position;
+            foreach (ContactPoint contact in collision.contacts)
+            {
+                //We are only interested on those contact points pointing on the same direction
+                //that the horizontal velocity and in a higher elevation than current character's
+                //position.
+
+                Vector3 offset = contact.point - bottomPos;
+                if ((offset.y > _stepOffset.y) && (Vector3.Dot(offset, _targetLinearVelocity) > 0))
+                {
+                    _stepOffset = offset;
+                }
+            }
+        }
+
+        #endregion
+
+    }
 
 }

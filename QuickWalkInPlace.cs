@@ -73,7 +73,7 @@ namespace QuickVR
                 if (hTracking.GetType() == typeof(QuickUnityVR))
                 {
                     QuickUnityVR uVR = (QuickUnityVR)hTracking;
-                    
+                    uVR._rotateWithCamera = uVR._displaceWithCamera = _walkMethod == WalkMethod.Head;
                 }
             }
 
@@ -128,44 +128,48 @@ namespace QuickVR
 
         protected virtual void UpdateTranslation()
         {
-            if (!_node.IsTracked()) return;
-            
-            QuickTrackedObject tObject = _node.GetTrackedObject();
 
-            float posY = tObject.transform.position.y;
-            if ((_trend && (posY < _posYLastFrame)) || (!_trend && (posY > _posYLastFrame)))
+            if (_node.IsTracked())
             {
-                //1) If the trend is positive, but the current posY is less than posY at previous frame (_posYLastFrame), 
-                //we have found a local max
 
-                //2) If the trend is negative, but the current posY is greater than posY at previous frame (_posYLastFrame), 
-                //we have found a local min
+                QuickTrackedObject tObject = _node.GetTrackedObject();
 
-                //On either case, we have found the end of the current cicle. 
-
-                float dy = Mathf.Abs(posY - _posYCicleStart);
-                //Debug.Log("dy = " + dy.ToString("f3"));
-                if (dy > DY_THRESHOLD)
+                float posY = tObject.transform.position.y;
+                if ((_trend && (posY < _posYLastFrame)) || (!_trend && (posY > _posYLastFrame)))
                 {
-                    float dt = Time.time - _timeCicleStart;
-                    _desiredSpeed = _speedCurve.Evaluate(dt);
-                    _numStillFrames = 0;
+                    //1) If the trend is positive, but the current posY is less than posY at previous frame (_posYLastFrame), 
+                    //we have found a local max
+
+                    //2) If the trend is negative, but the current posY is greater than posY at previous frame (_posYLastFrame), 
+                    //we have found a local min
+
+                    //On either case, we have found the end of the current cicle. 
+
+                    float dy = Mathf.Abs(posY - _posYCicleStart);
+                    //Debug.Log("dy = " + dy.ToString("f3"));
+                    if (dy > DY_THRESHOLD)
+                    {
+                        float dt = Time.time - _timeCicleStart;
+                        _desiredSpeed = _speedCurve.Evaluate(dt);
+                        _numStillFrames = 0;
+                    }
+                    else
+                    {
+                        _desiredSpeed = 0.0f;
+                        _numStillFrames++;
+                    }
+
+                    _desiredSpeed *= _speedMultiplier;
+
+                    _posYCicleStart = posY;
+                    _timeCicleStart = Time.time;
+
+                    _trend = !_trend;
                 }
-                else
-                {
-                    _desiredSpeed = 0.0f;
-                    _numStillFrames++;
-                }
 
-                _desiredSpeed *= _speedMultiplier;
-
-                _posYCicleStart = posY;
-                _timeCicleStart = Time.time;
-
-                _trend = !_trend;
+                _posYLastFrame = posY;
             }
-
-            _posYLastFrame = posY;
+            else _desiredSpeed = 0.0f;
         }
 
         #endregion
