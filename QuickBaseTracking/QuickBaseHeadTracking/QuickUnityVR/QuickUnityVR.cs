@@ -90,8 +90,6 @@ namespace QuickVR {
 
         protected override void CalibrateVRNode(QuickVRNode.Type nodeType)
         {
-            Debug.Log("calibrate node " + nodeType);
-
             base.CalibrateVRNode(nodeType);
 
             QuickVRNode node = GetQuickVRNode(nodeType);
