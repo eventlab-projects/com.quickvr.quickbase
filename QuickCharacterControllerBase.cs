@@ -31,14 +31,12 @@ namespace QuickVR {
 		#region PROTECTED PARAMETERS
 
 		protected bool _grounded = false;
+        protected bool _stepping = false;
 		protected Rigidbody _rigidBody = null;
 		protected CapsuleCollider _collider = null;
-		protected Transform _bottomBound = null;
 
 		protected Vector3 _targetLinearVelocity = Vector3.zero;
 		protected Vector3 _targetAngularVelocity = Vector3.zero;
-
-		protected Vector3 _stepOffset = Vector3.zero;
 
 		protected float _gravity = 0.0f;
 
@@ -56,7 +54,6 @@ namespace QuickVR {
 
 			InitCollider();
 			InitRigidBody();
-			InitBottomBound();
 
 			_gravity = Physics.gravity.magnitude;
 			_layerPlayer = LayerMask.NameToLayer("Player");
@@ -87,12 +84,6 @@ namespace QuickVR {
 			_rigidBody.freezeRotation = true;
 			_rigidBody.maxAngularVelocity = _maxAngularSpeed * Mathf.Deg2Rad;
 			_rigidBody.useGravity = true;
-		}
-
-		protected virtual void InitBottomBound() {
-			_bottomBound = new GameObject("__BottomBound__").transform;
-			_bottomBound.parent = transform;
-			_bottomBound.transform.localPosition = _collider.center -transform.up * _collider.bounds.size.y * 0.5f;
 		}
 
 		#endregion
@@ -132,6 +123,8 @@ namespace QuickVR {
 		#region UPDATE
 
 		protected virtual void FixedUpdate() {
+            if (_stepping) return;
+
             if (CanMove())
             {
                 ComputeTargetLinearVelocity();
@@ -142,33 +135,21 @@ namespace QuickVR {
                 UpdateAngularVelocity();
             }
             else _rigidBody.velocity = Vector3.zero;
-
-			_stepOffset = Vector3.zero;
 		}
 
 		protected virtual void UpdateLinearVelocity() {
-			if ((_stepOffset.y > 0) && (_stepOffset.y <= _maxStepHeight)) {
-				//We are stepping up. 
+			//We are moving in the desired direction. 
+			if (_targetLinearVelocity == Vector3.zero) _rigidBody.drag = _linearDrag;
+			else {
 				_rigidBody.drag = 0.0f;
 
-				Vector3 hVel = new Vector3(_rigidBody.velocity.x + _stepOffset.x, 0.0f, _rigidBody.velocity.z + _stepOffset.z);
-				Vector3 vVel = transform.up * GetJumpVerticalSpeed(_stepOffset.y);
-				_rigidBody.velocity = hVel + vVel;
+				//Apply a force that attempts to reach our target velocity
+				Vector3 offset = (_targetLinearVelocity - _rigidBody.velocity);
+				Vector2 v = new Vector2(offset.x, offset.z);
+				v.Normalize();
+				_rigidBody.velocity += new Vector3(v.x, 0.0f, v.y) * _linearAcceleration * Time.deltaTime;
 			}
-			else {
-				//We are moving in the desired direction. 
-				if (_targetLinearVelocity == Vector3.zero) _rigidBody.drag = _linearDrag;
-				else {
-					_rigidBody.drag = 0.0f;
-
-					//Apply a force that attempts to reach our target velocity
-					Vector3 offset = (_targetLinearVelocity - _rigidBody.velocity);
-					Vector2 v = new Vector2(offset.x, offset.z);
-					v.Normalize();
-					_rigidBody.velocity += new Vector3(v.x, 0.0f, v.y) * _linearAcceleration * Time.deltaTime;
-				}
-			}
-
+			
 			ClampLinearVelocity();
 		}
 
@@ -203,26 +184,55 @@ namespace QuickVR {
 
         protected virtual void OnCollisionStay(Collision collision)
         {
+            if (_stepping) return;
+
             //Allow this character to overcome step stairs according to the defined maxStepHeight. 
             //Ignore other agents.
 
             if ((collision.gameObject.layer == _layerPlayer) || (collision.gameObject.layer == _layerAutonomousAgent)) return;
 
             //Look for the contact point with the higher y
-
-            Vector3 bottomPos = _bottomBound.position;
+            Vector3 stepOffset = Vector3.zero;
             foreach (ContactPoint contact in collision.contacts)
             {
                 //We are only interested on those contact points pointing on the same direction
                 //that the horizontal velocity and in a higher elevation than current character's
                 //position.
 
-                Vector3 offset = contact.point - bottomPos;
-                if ((offset.y > _stepOffset.y) && (Vector3.Dot(offset, _targetLinearVelocity) > 0))
+                Vector3 offset = contact.point - transform.position;
+                if ((offset.y > stepOffset.y) && (Vector3.Dot(offset, _targetLinearVelocity) > 0))
                 {
-                    _stepOffset = offset;
+                    stepOffset = offset;
                 }
             }
+
+            if ((stepOffset.y > 0) && (stepOffset.y <= _maxStepHeight))
+            {
+                StartCoroutine(CoUpdateStepping(stepOffset));
+            }
+        }
+
+        protected virtual IEnumerator CoUpdateStepping(Vector3 stepOffset)
+        {
+            _stepping = true;
+            _rigidBody.isKinematic = true;
+
+            //Move the rigid body upwards until the step height is reached. 
+            float stepHeight = stepOffset.y;
+            float targetHeight = transform.position.y + stepHeight;
+            float vSpeed = GetJumpVerticalSpeed(stepHeight);
+            while (transform.position.y < targetHeight)
+            {
+                transform.Translate(Vector3.up * vSpeed * Time.deltaTime);
+                yield return null;
+            }
+            transform.position = new Vector3(transform.position.x, targetHeight, transform.position.z);
+
+            //Add some horizontal movement
+            _rigidBody.velocity = Vector3.Scale(_targetLinearVelocity, new Vector3(1, 0, 1));
+
+            _rigidBody.isKinematic = false;
+            _stepping = false;
         }
 
         #endregion
