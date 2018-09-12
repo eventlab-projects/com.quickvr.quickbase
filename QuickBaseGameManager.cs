@@ -62,8 +62,27 @@ namespace QuickVR {
 
         #endregion
 
-		#region CREATION AND DESTRUCTION
-        
+        #region CREATION AND DESTRUCTION
+
+        protected virtual void OnEnable()
+        {
+            OnRunning += StartTeleport;
+            QuickTeleport.OnPreTeleport += SaveRelativeMatrix;
+            QuickTeleport.OnPostTeleport += SetInitialPositionAndRotation;
+        }
+
+        protected virtual void OnDisable()
+        {
+            OnRunning -= StartTeleport;
+            QuickTeleport.OnPostTeleport -= SetInitialPositionAndRotation;
+            QuickTeleport.OnPreTeleport -= SaveRelativeMatrix;
+        }
+
+        protected virtual void StartTeleport()
+        {
+            StartCoroutine(CoUpdateTeleport());
+        }
+
         protected virtual void Awake() {
 			_debugManager = QuickSingletonManager.GetInstance<DebugManager>();
             _sceneManager = QuickSingletonManager.GetInstance<QuickSceneManager>();
@@ -321,7 +340,33 @@ namespace QuickVR {
 			_audioSource.Stop();
 		}
 
-		protected virtual IEnumerator CoFinish()
+        protected virtual IEnumerator CoUpdateTeleport()
+        {
+            QuickTeleport teleport = GetPlayer().GetComponent<QuickTeleport>();
+            if (teleport != null)
+            {
+                VRCursorType cType = VRCursorType.RIGHT;
+                QuickUnityVRBase hTracking = GetPlayer().GetComponent<QuickUnityVRBase>();
+                teleport.enabled = true;
+                QuickUICursor cursor = hTracking.GetVRCursor(cType);
+
+                cursor._RayCastMask &= ~(1 << LayerMask.NameToLayer("PeripheryVision"));
+
+                while (true)
+                {
+                    yield return null;
+
+                    bool isPointing = hTracking.GetVRHand(QuickVRNode.Type.RightHand).IsPointing();
+                    hTracking.SetVRCursorActive(cType, isPointing);
+
+                    Color c = teleport.IsTeleportWalkableObjectSelected() ? Color.green : Color.red;
+                    teleport.SetTrajectoryTargetColor(c);
+                    hTracking.GetVRCursor(cType).SetColor(c);
+                }
+            }
+        }
+
+        protected virtual IEnumerator CoFinish()
         {
             if (!_finishing)
             {
