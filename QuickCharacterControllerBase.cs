@@ -36,6 +36,7 @@ namespace QuickVR {
 		protected CapsuleCollider _collider = null;
 
 		protected Vector3 _targetLinearVelocity = Vector3.zero;
+        protected Vector3 _currentLinearVelocity = Vector3.zero;
 		protected Vector3 _targetAngularVelocity = Vector3.zero;
         protected Vector3 _preLinearVelocity = Vector3.zero;    //The linear velocity the object had before Unity's internal physics update
 
@@ -105,12 +106,12 @@ namespace QuickVR {
         protected virtual void ComputeTargetAngularVelocity() { }
 
 		protected virtual void ClampLinearVelocity() {
-			Vector2 vHor = new Vector2(_rigidBody.velocity.x, _rigidBody.velocity.z);
+			Vector2 vHor = new Vector2(_currentLinearVelocity.x, _currentLinearVelocity.z);
 			float mSpeed = GetMaxLinearSpeed();
 			if (vHor.sqrMagnitude > (mSpeed * mSpeed)) {
 				vHor.Normalize();
 				vHor *= mSpeed;
-				_rigidBody.velocity = new Vector3(vHor.x, _rigidBody.velocity.y, vHor.y);
+                _currentLinearVelocity = new Vector3(vHor.x, _currentLinearVelocity.y, vHor.y);
 			}
 		}
 
@@ -132,7 +133,9 @@ namespace QuickVR {
                 UpdateAngularVelocity();
                 UpdateJump();
             }
-            else _rigidBody.velocity = Vector3.zero;
+            else _currentLinearVelocity = Vector3.zero;
+
+            _rigidBody.velocity = _currentLinearVelocity;
 
             _preLinearVelocity = _rigidBody.velocity;
 		}
@@ -141,16 +144,20 @@ namespace QuickVR {
             ComputeTargetLinearVelocity();
 
             //We are moving in the desired direction. 
-            if (_targetLinearVelocity == Vector3.zero) _rigidBody.drag = _linearDrag;
-			else {
-				_rigidBody.drag = 0.0f;
+            if (_targetLinearVelocity == Vector3.zero)
+            {
+                _currentLinearVelocity = Vector3.zero;
+            }
+            else
+            {
+                _rigidBody.drag = 0.0f;
 
-				//Apply a force that attempts to reach our target velocity
-				Vector3 offset = (_targetLinearVelocity - _rigidBody.velocity);
-				Vector2 v = new Vector2(offset.x, offset.z);
-				v.Normalize();
-				_rigidBody.velocity += new Vector3(v.x, 0.0f, v.y) * _linearAcceleration * Time.deltaTime;
-			}
+                //Apply a force that attempts to reach our target velocity
+                Vector3 offset = (_targetLinearVelocity - _currentLinearVelocity);
+                Vector2 v = new Vector2(offset.x, offset.z);
+                v.Normalize();
+                _currentLinearVelocity += new Vector3(v.x, 0.0f, v.y) * _linearAcceleration * Time.deltaTime;
+            }
 			
 			ClampLinearVelocity();
 		}
