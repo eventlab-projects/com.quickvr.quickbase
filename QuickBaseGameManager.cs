@@ -17,7 +17,11 @@ namespace QuickVR {
 
         public Transform _playerMale = null;
         public Transform _playerFemale = null;
-        
+
+        public bool _useFootprints = true;
+        public Transform _footprints = null;
+        public float _minDistToFootPrints = 0.5f;        
+
         public AudioClip _headTrackingCalibrationInstructions = null;
 		
 		public float _timeOut = -1;	//Number of seconds to wait until automatic finishing the game
@@ -45,6 +49,8 @@ namespace QuickVR {
 		protected AudioSource _audioSource = null;
 
         protected QuickUnityVRBase _hTracking;
+
+        protected Matrix4x4 _relativeMatrix = Matrix4x4.identity;
 
         #endregion
 
@@ -77,6 +83,16 @@ namespace QuickVR {
             AwakePlayer();
 
             _hTracking = GetPlayer().GetComponentInChildren<QuickUnityVRBase>(true);
+
+            if (_useFootprints && _footprints == null)
+            {
+                _footprints = Instantiate<GameObject>(Resources.Load<GameObject>("Footprints/Footprints")).transform;
+            }
+            else if (!_useFootprints && _footprints != null)
+                _footprints.gameObject.SetActive(false);
+
+            if (_footprints != null)
+                _footprints.parent = GetPlayer().parent;
         }
 
         protected virtual void Start()
@@ -149,28 +165,60 @@ namespace QuickVR {
 			StartCoroutine(CoFinish());
 		}
 
+        protected virtual void SaveRelativeMatrix()
+        {
+            _relativeMatrix = GetPlayer().transform.worldToLocalMatrix;
+        }
+
         public virtual void SetInitialPositionAndRotation()
         {
             Transform target = GetPlayer().transform;
 
-            //Vector3 footPrintsLocalPos = Vector3.zero;
-            //Vector3 footPrintsLocalForward = Vector3.forward;
-            //if (_footprints != null)
-            //{
-            //    footPrintsLocalPos = _relativeMatrix.MultiplyPoint(_footprints.position);
-            //    footPrintsLocalForward = _relativeMatrix.MultiplyVector(_footprints.forward);
-            //}
+            Vector3 footPrintsLocalPos = Vector3.zero;
+            Vector3 footPrintsLocalForward = Vector3.forward;
+            if (_footprints != null)
+            {
+                footPrintsLocalPos = _relativeMatrix.MultiplyPoint(_footprints.position);
+                footPrintsLocalForward = _relativeMatrix.MultiplyVector(_footprints.forward);
+            }
 
             _hTracking.SetInitialPosition(target.position);
             _hTracking.SetInitialRotation(target.rotation);
 
-            //if (_footprints != null)
-            //{
-            //    _footprints.position = target.localToWorldMatrix.MultiplyPoint(footPrintsLocalPos);
-            //    _footprints.forward = target.localToWorldMatrix.MultiplyVector(footPrintsLocalForward);
-            //}
+            if (_footprints != null)
+            {
+                _footprints.position = target.localToWorldMatrix.MultiplyPoint(footPrintsLocalPos);
+                _footprints.forward = target.localToWorldMatrix.MultiplyVector(footPrintsLocalForward);
+            }
 
-            //_relativeMatrix = Matrix4x4.identity;
+            _relativeMatrix = Matrix4x4.identity;
+        }
+
+        protected bool IsPlayerOnSpot()
+        {
+            if (_footprints != null)
+                return Vector3.Distance(GetPlayer().transform.position, _footprints.position) <= _minDistToFootPrints;
+            else
+                return true;
+        }
+
+        public virtual IEnumerator WaitParticipantToBeOnSpot()
+        {
+            // Wait for the participant to be on the right spot (footprints mark) 
+            while (!IsPlayerOnSpot())
+                yield return null;
+                        
+            yield return null;
+        }
+
+        public virtual void MovePlayerTo(Transform target, bool calibrate = true)
+        {
+            SaveRelativeMatrix();
+
+            GetPlayer().position = target.position;
+
+            GetPlayer().rotation = target.rotation;
+            SetInitialPositionAndRotation();
         }
 
         #endregion
@@ -203,7 +251,10 @@ namespace QuickVR {
 					//The maximum time for the game has expired. 
 					Finish();
 				}
-			}
+
+                if (_footprints != null)
+                    _footprints.transform.position = new Vector3(_footprints.transform.position.x, GetPlayer().position.y, _footprints.transform.position.z);
+            }
 		}
 
 		protected virtual IEnumerator CoUpdateStateCalibrating() {
