@@ -5,6 +5,25 @@ namespace QuickVR {
 
 	public class QuickCharacterControllerPlayer : QuickCharacterControllerBase {
 
+        #region PROTECTED ATTRIBUTES
+
+        protected QuickUnityVRBase _hTracking = null;
+
+        #endregion
+
+        #region CREATION AND DESTRUCTION
+
+        protected virtual IEnumerator Start()
+        {
+            while (!_hTracking)
+            {
+                _hTracking = GetComponent<QuickUnityVRBase>();
+                yield return null;
+            }
+        }
+
+        #endregion
+
         #region GET AND SET
 
         //protected override void ComputeTargetLinearVelocity() {
@@ -29,7 +48,7 @@ namespace QuickVR {
 
         protected override void UpdateLinearVelocity()
         {
-            
+            _currentLinearVelocity = Vector3.Scale(_hTracking.GetPlayerVelocity(), Vector3.right + Vector3.forward);   
         }
 
         protected override void UpdateAngularVelocity()

@@ -54,7 +54,7 @@ namespace QuickVR
         {
             base.Awake();
 
-            gameObject.GetOrCreateComponent<QuickCharacterControllerPlayer>();  //Make sure this component exists, so the transform is moved with the translation of the player
+            //gameObject.GetOrCreateComponent<QuickCharacterControllerPlayer>();  //Make sure this component exists, so the transform is moved with the translation of the player
 
             _initialPosition = transform.position;
             _initialRotation = transform.rotation;

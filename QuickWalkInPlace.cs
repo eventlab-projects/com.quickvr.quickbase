@@ -97,14 +97,12 @@ namespace QuickVR
         protected override void OnEnable()
         {
             base.OnEnable();
-            QuickVRManager.OnPostUpdateTracking += UpdateTranslation;
             QuickUnityVRBase.OnCalibrate += Init;
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
-            QuickVRManager.OnPostUpdateTracking -= UpdateTranslation;
             QuickUnityVRBase.OnCalibrate -= Init;
         }
 
@@ -121,29 +119,6 @@ namespace QuickVR
 
         protected override void ComputeTargetLinearVelocity()
         {
-            // Calculate how fast we should be moving
-            _targetLinearVelocity = transform.forward * _desiredSpeed;
-            _currentLinearVelocity = transform.forward * _currentLinearVelocity.magnitude;
-        }
-
-        protected override void ComputeTargetAngularVelocity()
-        {
-            float cAXis = InputManager.GetAxis(InputManager.DEFAULT_AXIS_HORIZONTAL);
-            _targetAngularVelocity = Vector3.zero; //transform.up * cAXis * _angularAcceleration * Mathf.Deg2Rad;
-        }
-
-        public override float GetMaxLinearSpeed()
-        {
-            return _speedCurve.Evaluate(0);
-        }
-
-        #endregion
-
-            #region UPDATE
-
-        protected virtual void UpdateTranslation()
-        {
-
             if (_node.IsTracked())
             {
 
@@ -187,6 +162,20 @@ namespace QuickVR
                 _posYLastFrame = posY;
             }
             else _desiredSpeed = 0.0f;
+
+            // Calculate how fast we should be moving
+            _targetLinearVelocity = transform.forward * _desiredSpeed;
+            _currentLinearVelocity = transform.forward * _currentLinearVelocity.magnitude;
+        }
+
+        protected override void ComputeTargetAngularVelocity()
+        {
+            
+        }
+
+        public override float GetMaxLinearSpeed()
+        {
+            return _speedCurve.Evaluate(0);
         }
 
         #endregion
