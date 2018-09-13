@@ -52,6 +52,9 @@ namespace QuickVR {
 
         protected Matrix4x4 _relativeMatrix = Matrix4x4.identity;
 
+        protected QuickTeleport _teleport = null;
+        protected Coroutine _coUpdateTeleport = null;
+
         #endregion
 
         #region EVENTS
@@ -65,7 +68,7 @@ namespace QuickVR {
         #region CREATION AND DESTRUCTION
 
         protected virtual void OnEnable()
-        {
+        {            
             OnRunning += StartTeleport;
             QuickTeleport.OnPreTeleport += SaveRelativeMatrix;
             QuickTeleport.OnPostTeleport += SetInitialPositionAndRotation;
@@ -111,7 +114,7 @@ namespace QuickVR {
                 _footprints.gameObject.SetActive(false);
 
             if (_footprints != null)
-                _footprints.parent = GetPlayer().parent;
+                _footprints.parent = GetPlayer().parent;            
         }
 
         protected virtual void Start()
@@ -240,6 +243,31 @@ namespace QuickVR {
             SetInitialPositionAndRotation();
         }
 
+        public void EnableTeleport(bool b)
+        {
+            if (_teleport != null)
+            {
+                _teleport.enabled = b;
+
+                if (b)
+                {
+                    if (_coUpdateTeleport == null)
+                        _coUpdateTeleport = StartCoroutine(CoUpdateTeleport());
+                }
+                else if (_coUpdateTeleport != null)
+                {
+                    StopCoroutine(_coUpdateTeleport);
+                    _coUpdateTeleport = null;
+                }
+
+                if (!b)
+                {
+                    _hTracking.SetVRCursorActive(VRCursorType.RIGHT, false);
+                    _teleport.SetTrajectoryVisible(false);
+                }
+            }
+        }
+
         #endregion
 
         #region UPDATE
@@ -342,12 +370,12 @@ namespace QuickVR {
 
         protected virtual IEnumerator CoUpdateTeleport()
         {
-            QuickTeleport teleport = GetPlayer().GetComponent<QuickTeleport>();
-            if (teleport != null)
+            _teleport = GetPlayer().GetComponentInChildren<QuickTeleport>(true);
+            if (_teleport != null)
             {
                 VRCursorType cType = VRCursorType.RIGHT;
                 QuickUnityVRBase hTracking = GetPlayer().GetComponent<QuickUnityVRBase>();
-                teleport.enabled = true;
+                _teleport.enabled = true;
                 QuickUICursor cursor = hTracking.GetVRCursor(cType);
 
                 cursor._RayCastMask &= ~(1 << LayerMask.NameToLayer("PeripheryVision"));
@@ -359,8 +387,8 @@ namespace QuickVR {
                     bool isPointing = hTracking.GetVRHand(QuickVRNode.Type.RightHand).IsPointing();
                     hTracking.SetVRCursorActive(cType, isPointing);
 
-                    Color c = teleport.IsTeleportWalkableObjectSelected() ? Color.green : Color.red;
-                    teleport.SetTrajectoryTargetColor(c);
+                    Color c = _teleport.IsTeleportWalkableObjectSelected() ? Color.green : Color.red;
+                    _teleport.SetTrajectoryTargetColor(c);
                     hTracking.GetVRCursor(cType).SetColor(c);
                 }
             }
