@@ -40,7 +40,7 @@ namespace QuickVR {
 
         protected override void UpdateLinearVelocity()
         {
-            _rigidBody.velocity = _playerLinearVelocity;
+            //_rigidBody.velocity = _playerLinearVelocity;
         }
 
         protected override void UpdateAngularVelocity()
