@@ -54,7 +54,7 @@ namespace QuickVR
         {
             base.Awake();
 
-            //_characterController = gameObject.GetOrCreateComponent<QuickCharacterControllerPlayer>();
+            _characterController = gameObject.GetOrCreateComponent<QuickCharacterControllerPlayer>();
 
             _initialPosition = transform.position;
             _initialRotation = transform.rotation;
@@ -335,7 +335,7 @@ namespace QuickVR
             _vrNodesOrigin.Translate(new Vector3(offset.x, 0.0f, offset.z), Space.Self);
 
             Vector3 v = (Quaternion.Inverse(_vrNodesOrigin.rotation) * transform.rotation * disp) / Time.deltaTime;
-            //_characterController.SetPlayerLinearVelocity(Vector3.Scale(v, new Vector3(1, 0, 1)));
+            _characterController.SetCurrentLinearVelocity(Vector3.Scale(v, new Vector3(1, 0, 1)));
         }
 
         protected abstract void UpdateTransformNodes();

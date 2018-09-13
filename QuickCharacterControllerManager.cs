@@ -102,7 +102,7 @@ namespace QuickVR
 
         protected virtual void FixedUpdate()
         {
-            _rigidBody.velocity = Vector3.zero;
+            _rigidBody.velocity = Vector3.Scale(_rigidBody.velocity, Vector3.up);
 
             foreach (QuickCharacterControllerBase characterController in _characterControllers)
             {
@@ -158,7 +158,7 @@ namespace QuickVR
             _stepping = true;
             _rigidBody.isKinematic = true;
 
-            float speed = 0.5f;
+            float speed = _preLinearVelocity.magnitude; //0.5f;
 
             //Move upwards until the step height is reached. 
             yield return StartCoroutine(CoUpdateStepping(transform.position + Vector3.up * stepOffset.y, stepOffset.y, speed));
@@ -167,7 +167,6 @@ namespace QuickVR
             float d = _collider.radius * 1.01f;    //The horizontal distance
             yield return StartCoroutine(CoUpdateStepping(transform.position + linearVelocity.normalized * d, d, speed));
 
-            _rigidBody.velocity = Vector3.zero;
             _rigidBody.isKinematic = false;
             _stepping = false;
         }

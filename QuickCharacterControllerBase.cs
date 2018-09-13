@@ -63,6 +63,11 @@ namespace QuickVR {
             return _currentLinearVelocity;
         }
 
+        public virtual void SetCurrentLinearVelocity(Vector3 v)
+        {
+            _currentLinearVelocity = v;
+        }
+
 		public virtual float GetMaxLinearSpeed() {
 			return _maxLinearSpeed;
 		}

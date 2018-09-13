@@ -5,12 +5,6 @@ namespace QuickVR {
 
 	public class QuickCharacterControllerPlayer : QuickCharacterControllerBase {
 
-        #region PROTECTED ATTRIBUTES
-
-        protected Vector3 _playerLinearVelocity = Vector3.zero;
-
-        #endregion
-        
         #region GET AND SET
 
         //protected override void ComputeTargetLinearVelocity() {
@@ -29,18 +23,13 @@ namespace QuickVR {
         //          _targetAngularVelocity = transform.up * cAXis * _angularAcceleration * Mathf.Deg2Rad;
         //}
 
-        public virtual void SetPlayerLinearVelocity(Vector3 v)
-        {
-            _playerLinearVelocity = v;
-        }
-
         #endregion
 
         #region UPDATE
 
         protected override void UpdateLinearVelocity()
         {
-            //_rigidBody.velocity = _playerLinearVelocity;
+            
         }
 
         protected override void UpdateAngularVelocity()
