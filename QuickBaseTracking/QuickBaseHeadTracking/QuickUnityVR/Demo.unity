@@ -518,7 +518,7 @@ Transform:
   m_GameObject: {fileID: 224848453}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0.05, z: -1.444}
-  m_LocalScale: {x: 1, y: 0.1, z: 1}
+  m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 10
@@ -719,6 +719,27 @@ MonoBehaviour:
   _rotateWithCamera: 0
   _updateReference: 0
   _ikManager: {fileID: 0}
+--- !u!114 &437895855
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_PrefabParentObject: {fileID: 0}
+  m_PrefabInternal: {fileID: 0}
+  m_GameObject: {fileID: 437895853}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e476a9ac24090984eb98677aa31c7ba9, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _move: 1
+  _hasPriority: 0
+  _maxLinearSpeed: 2.5
+  _linearAcceleration: 1
+  _linearDrag: 4
+  _maxAngularSpeed: 45
+  _angularAcceleration: 45
+  _angularDrag: 4
+  _canJump: 1
+  _jumpHeight: 2
 --- !u!1 &476704152
 GameObject:
   m_ObjectHideFlags: 0
