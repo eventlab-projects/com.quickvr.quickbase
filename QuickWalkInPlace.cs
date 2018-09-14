@@ -94,15 +94,13 @@ namespace QuickVR
             ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.RightFoot);
         }            
 
-        protected override void OnEnable()
+        protected virtual void OnEnable()
         {
-            base.OnEnable();
             QuickUnityVRBase.OnCalibrate += Init;
         }
 
-        protected override void OnDisable()
+        protected virtual void OnDisable()
         {
-            base.OnDisable();
             QuickUnityVRBase.OnCalibrate -= Init;
         }
 
