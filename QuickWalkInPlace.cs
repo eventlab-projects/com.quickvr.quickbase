@@ -11,7 +11,6 @@ namespace QuickVR
         #region CONSTANTS
 
         protected const float DY_THRESHOLD = 0.004f;
-        protected const int NUM_FRAMES_STILL = 3;
 
         #endregion
 
@@ -27,7 +26,6 @@ namespace QuickVR
         public WalkMethod _walkMethod = WalkMethod.Head;
         public QuickSpeedCurveAsset _speedCurve = null;
 
-        public float _acceleration = 8.0f;
         public float _speedMultiplier = 0.75f;
 
         #endregion
@@ -46,7 +44,10 @@ namespace QuickVR
 
         protected bool _trend = false;  //true => going towards a local max; false => going towards a local min
 
-        protected int _numStillFrames = 0;  //Counts how many consecutive frames the reference transform has been (almost) still
+        protected float _timeStill = 0.0f;  //How many seconds the user remains (almost) still
+
+        protected float _fStepMin = 0.0f;
+        protected float _fStepMax = 0.0f;
 
         #endregion
 
@@ -57,6 +58,17 @@ namespace QuickVR
             base.Awake();
 
             if (!_speedCurve) _speedCurve = Resources.Load<QuickSpeedCurveAsset>("QuickSpeedCurveDefault");
+            _speedCurve._animationCurve.postWrapMode = WrapMode.Clamp;
+            _speedCurve._animationCurve.preWrapMode = WrapMode.Clamp;
+
+            Keyframe[] keys = _speedCurve._animationCurve.keys;
+            _fStepMin = _fStepMax = keys[0].time;
+            for (int i = 1; i < keys.Length; i++)
+            {
+                float t = keys[i].time;
+                if (t < _fStepMin) _fStepMin = t;
+                else if (t > _fStepMax) _fStepMax = t;
+            }
         }
 
         protected virtual void Start()
@@ -84,13 +96,11 @@ namespace QuickVR
 
         protected virtual void OnEnable()
         {
-            QuickVRManager.OnPostUpdateTracking += UpdateTranslation;
             QuickUnityVRBase.OnCalibrate += Init;
         }
 
         protected virtual void OnDisable()
         {
-            QuickVRManager.OnPostUpdateTracking -= UpdateTranslation;
             QuickUnityVRBase.OnCalibrate -= Init;
         }
 
@@ -98,7 +108,7 @@ namespace QuickVR
         {
             _posYCicleStart = _posYLastFrame = _node.GetTrackedObject().transform.position.y;
             _timeCicleStart = Time.time;
-            _numStillFrames = 0;
+            _timeStill = 0.0f;
         }
 
         #endregion
@@ -107,28 +117,6 @@ namespace QuickVR
 
         protected override void ComputeTargetLinearVelocity()
         {
-            // Calculate how fast we should be moving
-            _targetLinearVelocity = transform.forward * _desiredSpeed;
-        }
-
-        protected override void ComputeTargetAngularVelocity()
-        {
-            float cAXis = InputManager.GetAxis(InputManager.DEFAULT_AXIS_HORIZONTAL);
-            _targetAngularVelocity = Vector3.zero; //transform.up * cAXis * _angularAcceleration * Mathf.Deg2Rad;
-        }
-
-        public override float GetMaxLinearSpeed()
-        {
-            return _speedCurve.Evaluate(0);
-        }
-
-        #endregion
-
-            #region UPDATE
-
-        protected virtual void UpdateTranslation()
-        {
-
             if (_node.IsTracked())
             {
 
@@ -149,14 +137,16 @@ namespace QuickVR
                     //Debug.Log("dy = " + dy.ToString("f3"));
                     if (dy > DY_THRESHOLD)
                     {
+                        //A real step has been detected
                         float dt = Time.time - _timeCicleStart;
                         _desiredSpeed = _speedCurve.Evaluate(dt);
-                        _numStillFrames = 0;
+                        _timeStill = 0.0f;
                     }
                     else
                     {
-                        _desiredSpeed = 0.0f;
-                        _numStillFrames++;
+                        //We are still
+                        _timeStill += Time.deltaTime;
+                        _desiredSpeed = Mathf.Lerp(_speedCurve.Evaluate(_fStepMax), 0.0f, _timeStill / _fStepMax);
                     }
 
                     _desiredSpeed *= _speedMultiplier;
@@ -170,6 +160,20 @@ namespace QuickVR
                 _posYLastFrame = posY;
             }
             else _desiredSpeed = 0.0f;
+
+            // Calculate how fast we should be moving
+            _targetLinearVelocity = transform.forward * _desiredSpeed;
+            _currentLinearVelocity = transform.forward * _currentLinearVelocity.magnitude;
+        }
+
+        protected override void ComputeTargetAngularVelocity()
+        {
+            
+        }
+
+        public override float GetMaxLinearSpeed()
+        {
+            return _speedCurve.Evaluate(0);
         }
 
         #endregion

@@ -5,15 +5,15 @@ namespace QuickVR {
 
 	public abstract class QuickCharacterControllerBase : MonoBehaviour {
 
-		#region PUBLIC PARAMETERS
+        #region PUBLIC PARAMETERS
 
-		public bool _move = true;
+        public bool _move = true;
         public bool _hasPriority = false;
 
-		public float _radius = 0.25f;				//Character radius
-		public float _height = 2.0f;				//Character height
+        public float _radius = 0.25f;               //Character radius
+        public float _height = 2.0f;                //Character height
 
-		public float _maxLinearSpeed = 2.5f;		//Max linear speed in m/s
+        public float _maxLinearSpeed = 2.5f;		//Max linear speed in m/s
 		public float _linearAcceleration = 1.0f;	//Max linear acceleration in m/s^2
 		public float _linearDrag = 4.0f;			//The drag applied to the linear speed when no input is applied
 
@@ -21,83 +21,97 @@ namespace QuickVR {
 		public float _angularAcceleration = 45.0f;	//Angular acceleration in degrees/second^2
 		public float _angularDrag = 4.0f;			//The drag applied to the angular speed when no input is applied. 
 
-		public float _maxStepHeight = 0.3f;			//The step offset used for stepping stairs and so on. 
+        public float _maxStepHeight = 0.3f;         //The step offset used for stepping stairs and so on. 
 
-		public bool _canJump = true;
+        public bool _canJump = true;
 		public float _jumpHeight = 2.0f;
 
-		#endregion
+        #endregion
 
-		#region PROTECTED PARAMETERS
+        #region PROTECTED PARAMETERS
 
-		protected bool _grounded = false;
-		protected Rigidbody _rigidBody = null;
-		protected CapsuleCollider _collider = null;
-		protected Transform _bottomBound = null;
+        protected Rigidbody _rigidBody = null;
+        protected CapsuleCollider _collider = null;
+        protected static PhysicMaterial _physicMaterial = null;
 
-		protected Vector3 _targetLinearVelocity = Vector3.zero;
+        protected Vector3 _targetLinearVelocity = Vector3.zero;
+        protected Vector3 _currentLinearVelocity = Vector3.zero;
 		protected Vector3 _targetAngularVelocity = Vector3.zero;
-
-		protected Vector3 _stepOffset = Vector3.zero;
 
 		protected float _gravity = 0.0f;
 
-		protected int _layerPlayer = 0;
-		protected int _layerAutonomousAgent = 0;
+        protected Vector3 _preLinearVelocity = Vector3.zero;    //The linear velocity the object had before Unity's internal physics update
 
-		protected static PhysicMaterial _physicMaterial = null;
+        protected bool _grounded = false;
+        protected bool _stepping = false;
 
-		#endregion
+        #endregion
 
-		#region CREATION AND DESTRUCTION
+        #region CREATION AND DESTRUCTION
 
-		protected virtual void Awake() {
-			CreatePhysicMaterial();
-
-			InitCollider();
-			InitRigidBody();
-			InitBottomBound();
-
+        protected virtual void Awake() {
 			_gravity = Physics.gravity.magnitude;
-			_layerPlayer = LayerMask.NameToLayer("Player");
-			_layerAutonomousAgent = LayerMask.NameToLayer("AutonomousAgent");
-		}
 
-		protected virtual void InitCollider() {
-			_collider = gameObject.GetOrCreateComponent<CapsuleCollider>();
-			_collider.radius = _radius;
-			_collider.height = _height;
+            CreatePhysicMaterial();
+
+            InitCollider();
+            InitRigidBody();
+        }
+
+        protected virtual void InitCollider()
+        {
+            _collider = gameObject.GetOrCreateComponent<CapsuleCollider>();
+            _collider.radius = _radius;
+            _collider.height = _height;
             _collider.center = new Vector3(0.0f, _height * 0.5f, 0.0f);
             _collider.material = _physicMaterial;
-		}
+        }
 
-		protected virtual void CreatePhysicMaterial() {
-			if (!_physicMaterial) {
-				_physicMaterial = new PhysicMaterial("__CharacterControllerPhysicMaterial__");
-				_physicMaterial.dynamicFriction = 0.0f;
-				_physicMaterial.staticFriction = 0.0f;
-				_physicMaterial.bounciness = 0.0f;
-				_physicMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
-				_physicMaterial.bounceCombine = PhysicMaterialCombine.Minimum;
-			}
-		}
+        protected virtual void CreatePhysicMaterial()
+        {
+            if (!_physicMaterial)
+            {
+                _physicMaterial = new PhysicMaterial("__CharacterControllerPhysicMaterial__");
+                _physicMaterial.dynamicFriction = 0.0f;
+                _physicMaterial.staticFriction = 0.0f;
+                _physicMaterial.bounciness = 0.0f;
+                _physicMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
+                _physicMaterial.bounceCombine = PhysicMaterialCombine.Minimum;
+            }
+        }
 
-		protected virtual void InitRigidBody() {
-			_rigidBody = gameObject.GetOrCreateComponent<Rigidbody>();
-			_rigidBody.freezeRotation = true;
-			_rigidBody.maxAngularVelocity = _maxAngularSpeed * Mathf.Deg2Rad;
-			_rigidBody.useGravity = true;
-		}
+        protected virtual void InitRigidBody()
+        {
+            _rigidBody = gameObject.GetOrCreateComponent<Rigidbody>();
+            _rigidBody.freezeRotation = true;
+            _rigidBody.maxAngularVelocity = _maxAngularSpeed * Mathf.Deg2Rad;
+            _rigidBody.useGravity = true;
+            _rigidBody.drag = 0.0f;
+        }
 
-		protected virtual void InitBottomBound() {
-			_bottomBound = new GameObject("__BottomBound__").transform;
-			_bottomBound.parent = transform;
-			_bottomBound.transform.localPosition = _collider.center -transform.up * _collider.bounds.size.y * 0.5f;
-		}
+        #endregion
 
-		#endregion
+        #region GET AND SET
 
-		#region GET AND SET
+        public static int GetLayerPlayer()
+        {
+            return LayerMask.NameToLayer("Player");
+        }
+
+        public static int GetLayerAutonomousAgent()
+        {
+            return LayerMask.NameToLayer("AutonomousAgent");
+        }
+
+        public virtual Vector3 GetCurrentLinearVelocity()
+        {
+            return _currentLinearVelocity;
+        }
+
+        public virtual void SetCurrentLinearVelocity(Vector3 v)
+        {
+            _currentLinearVelocity = v;
+        }
 
 		public virtual float GetMaxLinearSpeed() {
 			return _maxLinearSpeed;
@@ -109,16 +123,16 @@ namespace QuickVR {
 			return Mathf.Sqrt(2.0f * jumpHeight * _gravity);
 		}
 
-		protected abstract void ComputeTargetLinearVelocity();
-		protected abstract void ComputeTargetAngularVelocity();
+        protected virtual void ComputeTargetLinearVelocity() { }
+        protected virtual void ComputeTargetAngularVelocity() { }
 
 		protected virtual void ClampLinearVelocity() {
-			Vector2 vHor = new Vector2(_rigidBody.velocity.x, _rigidBody.velocity.z);
+			Vector2 vHor = new Vector2(_currentLinearVelocity.x, _currentLinearVelocity.z);
 			float mSpeed = GetMaxLinearSpeed();
 			if (vHor.sqrMagnitude > (mSpeed * mSpeed)) {
 				vHor.Normalize();
 				vHor *= mSpeed;
-				_rigidBody.velocity = new Vector3(vHor.x, _rigidBody.velocity.y, vHor.y);
+                _currentLinearVelocity = new Vector3(vHor.x, _currentLinearVelocity.y, vHor.y);
 			}
 		}
 
@@ -131,59 +145,56 @@ namespace QuickVR {
 
 		#region UPDATE
 
-		protected virtual void FixedUpdate() {
+		protected virtual void FixedUpdate()
+        {
             if (CanMove())
             {
-                ComputeTargetLinearVelocity();
-                ComputeTargetAngularVelocity();
-
                 UpdateLinearVelocity();
-                UpdateJump();
                 UpdateAngularVelocity();
+                UpdateJump();
             }
-            else _rigidBody.velocity = Vector3.zero;
+            else _currentLinearVelocity = Vector3.zero;
 
-			_stepOffset = Vector3.zero;
-		}
+            _rigidBody.velocity = Vector3.Scale(_rigidBody.velocity, Vector3.up) + _currentLinearVelocity;
+            _preLinearVelocity = _rigidBody.velocity;
+        }
 
 		protected virtual void UpdateLinearVelocity() {
-			if ((_stepOffset.y > 0) && (_stepOffset.y <= _maxStepHeight)) {
-				//We are stepping up. 
-				_rigidBody.drag = 0.0f;
+            ComputeTargetLinearVelocity();
 
-				Vector3 hVel = new Vector3(_rigidBody.velocity.x + _stepOffset.x, 0.0f, _rigidBody.velocity.z + _stepOffset.z);
-				Vector3 vVel = transform.up * GetJumpVerticalSpeed(_stepOffset.y);
-				_rigidBody.velocity = hVel + vVel;
-			}
-			else {
-				//We are moving in the desired direction. 
-				if (_targetLinearVelocity == Vector3.zero) _rigidBody.drag = _linearDrag;
-				else {
-					_rigidBody.drag = 0.0f;
-
-					//Apply a force that attempts to reach our target velocity
-					Vector3 offset = (_targetLinearVelocity - _rigidBody.velocity);
-					Vector2 v = new Vector2(offset.x, offset.z);
-					v.Normalize();
-					_rigidBody.velocity += new Vector3(v.x, 0.0f, v.y) * _linearAcceleration * Time.deltaTime;
-				}
-			}
-
+            //We are moving in the desired direction. 
+            if (_targetLinearVelocity == Vector3.zero)
+            {
+                _currentLinearVelocity = Vector3.zero;
+            }
+            else
+            {
+                //Apply a force that attempts to reach our target velocity
+                Vector3 offset = (_targetLinearVelocity - _currentLinearVelocity);
+                Vector2 v = new Vector2(offset.x, offset.z);
+                v.Normalize();
+                _currentLinearVelocity += new Vector3(v.x, 0.0f, v.y) * _linearAcceleration * Time.deltaTime;
+            }
+			
 			ClampLinearVelocity();
 		}
 
-		protected virtual void UpdateJump() {
-			// Jump
-			if (_grounded && _canJump && Input.GetButton("Jump")) {
-				_rigidBody.velocity = new Vector3(_rigidBody.velocity.x, GetJumpVerticalSpeed(_jumpHeight), _rigidBody.velocity.z);
-				_grounded = false;
-			}
+		protected virtual void UpdateAngularVelocity() {
+            ComputeTargetAngularVelocity();
+
+   //         _rigidBody.angularDrag = (_targetAngularVelocity == Vector3.zero)? _angularDrag : 0.0f;
+			//_rigidBody.AddTorque(_targetAngularVelocity, ForceMode.Acceleration);
 		}
 
-		protected virtual void UpdateAngularVelocity() {
-			_rigidBody.angularDrag = (_targetAngularVelocity == Vector3.zero)? _angularDrag : 0.0f;
-			_rigidBody.AddTorque(_targetAngularVelocity, ForceMode.Acceleration);
-		}
+        protected virtual void UpdateJump()
+        {
+            // Jump
+            //if (_grounded && _canJump && Input.GetButton("Jump"))
+            //{
+            //    _rigidBody.velocity = new Vector3(_rigidBody.velocity.x, GetJumpVerticalSpeed(_jumpHeight), _rigidBody.velocity.z);
+            //    _grounded = false;
+            //}
+        }
 
         #endregion
 
@@ -200,28 +211,70 @@ namespace QuickVR {
         //    }
         //}
 
-
         protected virtual void OnCollisionStay(Collision collision)
         {
+            if (_stepping) return;
+
             //Allow this character to overcome step stairs according to the defined maxStepHeight. 
             //Ignore other agents.
 
-            if ((collision.gameObject.layer == _layerPlayer) || (collision.gameObject.layer == _layerAutonomousAgent)) return;
+            if ((collision.gameObject.layer == GetLayerPlayer()) || (collision.gameObject.layer == GetLayerAutonomousAgent())) return;
 
+            //Check if the current speed is significant enough to consider that we are, at least, walking
+            float minSpeed = 0.25f;
+            float speed2 = Vector3.Scale(_preLinearVelocity, new Vector3(1, 0, 1)).sqrMagnitude;
+            if (speed2 < minSpeed * minSpeed) return;
+
+            //If we arrive here, we consider that we are walking and we have collided with an obstacle. Let's check if
+            //this is an step that we can overcome. 
             //Look for the contact point with the higher y
-
-            Vector3 bottomPos = _bottomBound.position;
+            Vector3 stepOffset = Vector3.zero;
             foreach (ContactPoint contact in collision.contacts)
             {
                 //We are only interested on those contact points pointing on the same direction
-                //that the horizontal velocity and in a higher elevation than current character's
-                //position.
-
-                Vector3 offset = contact.point - bottomPos;
-                if ((offset.y > _stepOffset.y) && (Vector3.Dot(offset, _targetLinearVelocity) > 0))
+                //that the linear velocity and in a higher elevation than current character's position.
+                Vector3 offset = contact.point - transform.position;
+                if ((offset.y > stepOffset.y) && (Vector3.Dot(offset, _preLinearVelocity) > 0))
                 {
-                    _stepOffset = offset;
+                    stepOffset = offset;
                 }
+            }
+
+            float minStepHeight = 0.05f;
+            if ((stepOffset.y > minStepHeight) && (stepOffset.y <= _maxStepHeight))
+            {
+                StartCoroutine(CoUpdateStepping(stepOffset, _preLinearVelocity));
+            }
+        }
+
+        protected virtual IEnumerator CoUpdateStepping(Vector3 stepOffset, Vector3 linearVelocity)
+        {
+            _stepping = true;
+            _rigidBody.isKinematic = true;
+
+            float speed = _preLinearVelocity.magnitude; //0.5f;
+
+            //Move upwards until the step height is reached. 
+            yield return StartCoroutine(CoUpdateStepping(transform.position + Vector3.up * stepOffset.y, stepOffset.y, speed));
+
+            //Move in the direction of the velocity in order to ensure that the 
+            float d = _collider.radius * 1.01f;    //The horizontal distance
+            yield return StartCoroutine(CoUpdateStepping(transform.position + linearVelocity.normalized * d, d, speed));
+
+            _rigidBody.isKinematic = false;
+            _stepping = false;
+        }
+
+        protected virtual IEnumerator CoUpdateStepping(Vector3 targetPos, float distance, float speed)
+        {
+            float totalTime = distance / speed;
+            float elapsedTime = 0.0f;
+            Vector3 initialPos = transform.position;
+            while (elapsedTime < totalTime)
+            {
+                elapsedTime += Time.deltaTime;
+                transform.position = Vector3.Lerp(initialPos, targetPos, elapsedTime / totalTime);
+                yield return null;
             }
         }
 

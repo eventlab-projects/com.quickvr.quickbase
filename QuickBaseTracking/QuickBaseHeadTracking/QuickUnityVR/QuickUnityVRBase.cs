@@ -37,6 +37,8 @@ namespace QuickVR
 
         protected bool _handsSwaped = false;
 
+        protected Vector3 _playerVelocity = Vector3.zero;
+
         #endregion
 
         #region EVENTS
@@ -51,6 +53,8 @@ namespace QuickVR
         protected override void Awake()
         {
             base.Awake();
+
+            //gameObject.GetOrCreateComponent<QuickCharacterControllerPlayer>();  //Make sure this component exists, so the transform is moved with the translation of the player
 
             _initialPosition = transform.position;
             _initialRotation = transform.rotation;
@@ -155,6 +159,11 @@ namespace QuickVR
 
         protected abstract Vector3 GetDisplacement();
         protected abstract float GetRotationOffset();
+
+        public virtual Vector3 GetPlayerVelocity()
+        {
+            return _playerVelocity;
+        }
         
         protected virtual void CheckVRHands()
         {
@@ -324,11 +333,13 @@ namespace QuickVR
             float rotOffset = GetRotationOffset();
             transform.Rotate(transform.up, rotOffset, Space.World);
             _vrNodesOrigin.Rotate(_vrNodesOrigin.up, rotOffset, Space.World);
-            
+
             //Update the position
+            Vector3 disp = GetDisplacement();
             Vector3 offset = _vrNodesOrigin.InverseTransformVector(GetDisplacement());
-            transform.Translate(new Vector3(offset.x, 0.0f, offset.z), Space.Self);
             _vrNodesOrigin.Translate(new Vector3(offset.x, 0.0f, offset.z), Space.Self);
+
+            _playerVelocity = (Quaternion.Inverse(_vrNodesOrigin.rotation) * transform.rotation * disp) / Time.deltaTime;
         }
 
         protected abstract void UpdateTransformNodes();
