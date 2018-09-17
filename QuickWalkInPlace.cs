@@ -97,11 +97,13 @@ namespace QuickVR
         protected virtual void OnEnable()
         {
             QuickUnityVRBase.OnCalibrate += Init;
+            _rigidBody.isKinematic = false;
         }
 
         protected virtual void OnDisable()
         {
             QuickUnityVRBase.OnCalibrate -= Init;
+            _rigidBody.isKinematic = true;
         }
 
         protected virtual void Init()
