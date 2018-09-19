@@ -41,7 +41,7 @@ namespace QuickVR
         protected float _fStepMin = 0.0f;
         protected float _fStepMax = 0.0f;
 
-        protected Coroutine _coUpdateTrackedNode = null; 
+        protected Coroutine _coUpdateTrackedNode = null;
 
         #endregion
 
@@ -90,7 +90,7 @@ namespace QuickVR
         {
             _posYCicleStart = _posYLastFrame = _node.GetTrackedObject().transform.position.y;
             _timeCicleStart = Time.time;
-            _timeStill = 0.0f;
+            _timeStill = _fStepMax;
         }
 
         #endregion
@@ -116,7 +116,6 @@ namespace QuickVR
                     //On either case, we have found the end of the current cicle. 
 
                     float dy = Mathf.Abs(posY - _posYCicleStart);
-                    //Debug.Log("dy = " + dy.ToString("f3"));
                     if (dy > DY_THRESHOLD)
                     {
                         //A real step has been detected
@@ -126,8 +125,7 @@ namespace QuickVR
                     }
                     else
                     {
-                        //We are still
-                        _timeStill += Time.deltaTime;
+                        _timeStill = Mathf.Min(_timeStill + Time.deltaTime, _fStepMax);
                         _desiredSpeed = Mathf.Lerp(_speedCurve.Evaluate(_fStepMax), 0.0f, _timeStill / _fStepMax);
                     }
 
