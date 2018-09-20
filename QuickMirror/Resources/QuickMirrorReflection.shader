@@ -19,7 +19,7 @@ Shader "QuickVR/MirrorReflection"
 		Tags
 		{
 			"RenderType" = "Opaque"
-			"Queue" = "Transparent+1"		//The mirror will be rendered AFTER all transparent objects has been rendered
+			"Queue" = "Geometry"		
 		}
 
 		Pass
