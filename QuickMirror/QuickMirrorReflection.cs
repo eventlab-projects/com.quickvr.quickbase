@@ -334,7 +334,8 @@ namespace QuickVR {
             if (_lights != null) {
                 for (int i = 0; i < _lights.Length; i++)
                 {
-                    _lights[i].shadows = LightShadows.None;
+                    if (_lights[i] != null)
+                        _lights[i].shadows = LightShadows.None;
                 }
             }
         }
@@ -347,7 +348,8 @@ namespace QuickVR {
             {
                 for (int i = 0; i < _lights.Length; i++)
                 {
-                    _lights[i].shadows = _shadowTypes[i];
+                    if (_lights[i] != null)
+                        _lights[i].shadows = _shadowTypes[i];
                 }
             }
         }
