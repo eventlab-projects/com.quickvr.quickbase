@@ -16,14 +16,6 @@ namespace QuickVR
 
         #region PUBLIC ATTRIBUTES
 
-        public enum WalkMethod
-        {
-            Head, 
-            Hips, 
-            Feet, 
-        }
-
-        public WalkMethod _walkMethod = WalkMethod.Head;
         public QuickSpeedCurveAsset _speedCurve = null;
 
         public float _speedMultiplier = 0.75f;
@@ -49,6 +41,8 @@ namespace QuickVR
         protected float _fStepMin = 0.0f;
         protected float _fStepMax = 0.0f;
 
+        protected Coroutine _coUpdateTrackedNode = null;
+
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -73,22 +67,6 @@ namespace QuickVR
 
         protected virtual void Start()
         {
-            QuickUnityVRBase hTracking = GetComponent<QuickUnityVRBase>();
-            _node = hTracking.GetQuickVRNode(_walkMethod == WalkMethod.Head ? QuickVRNode.Type.Head : QuickVRNode.Type.Waist);
-            if (_walkMethod != WalkMethod.Feet)
-            {
-                //If the walk method chosen is using the Head or the Hips nodes only, the feet 
-                //are driven by the animation. Otherwise, they are driven by the real user movement. 
-                hTracking._trackedJoints &= ~(1 << (int)IKLimbBones.LeftFoot);
-                hTracking._trackedJoints &= ~(1 << (int)IKLimbBones.RightFoot);
-
-                if (hTracking.GetType() == typeof(QuickUnityVR))
-                {
-                    QuickUnityVR uVR = (QuickUnityVR)hTracking;
-                    uVR._rotateWithCamera = uVR._displaceWithCamera = _walkMethod == WalkMethod.Head;
-                }
-            }
-
             QuickIKManager ikManager = GetComponent<QuickIKManager>();
             ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.LeftFoot);
             ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.RightFoot);
@@ -97,18 +75,22 @@ namespace QuickVR
         protected virtual void OnEnable()
         {
             QuickUnityVRBase.OnCalibrate += Init;
+            _rigidBody.isKinematic = false;
+            _coUpdateTrackedNode = StartCoroutine(CoUpdateTrackedNode());
         }
 
         protected virtual void OnDisable()
         {
             QuickUnityVRBase.OnCalibrate -= Init;
+            _rigidBody.isKinematic = true;
+            StopCoroutine(_coUpdateTrackedNode);
         }
 
         protected virtual void Init()
         {
             _posYCicleStart = _posYLastFrame = _node.GetTrackedObject().transform.position.y;
             _timeCicleStart = Time.time;
-            _timeStill = 0.0f;
+            _timeStill = _fStepMax;
         }
 
         #endregion
@@ -117,7 +99,7 @@ namespace QuickVR
 
         protected override void ComputeTargetLinearVelocity()
         {
-            if (_node.IsTracked())
+            if (_node && _node.IsTracked())
             {
 
                 QuickTrackedObject tObject = _node.GetTrackedObject();
@@ -134,7 +116,6 @@ namespace QuickVR
                     //On either case, we have found the end of the current cicle. 
 
                     float dy = Mathf.Abs(posY - _posYCicleStart);
-                    //Debug.Log("dy = " + dy.ToString("f3"));
                     if (dy > DY_THRESHOLD)
                     {
                         //A real step has been detected
@@ -144,8 +125,7 @@ namespace QuickVR
                     }
                     else
                     {
-                        //We are still
-                        _timeStill += Time.deltaTime;
+                        _timeStill = Mathf.Min(_timeStill + Time.deltaTime, _fStepMax);
                         _desiredSpeed = Mathf.Lerp(_speedCurve.Evaluate(_fStepMax), 0.0f, _timeStill / _fStepMax);
                     }
 
@@ -174,6 +154,27 @@ namespace QuickVR
         public override float GetMaxLinearSpeed()
         {
             return _speedCurve.Evaluate(0);
+        }
+
+        protected virtual IEnumerator CoUpdateTrackedNode()
+        {
+            QuickUnityVRBase hTracking = GetComponent<QuickUnityVRBase>();
+
+            while (true)
+            {
+                QuickVRNode hipsNode = hTracking.GetQuickVRNode(QuickVRNode.Type.Waist);
+                if (hipsNode)
+                {
+                    QuickVRNode n = hipsNode.IsTracked() ? hipsNode : hTracking.GetQuickVRNode(QuickVRNode.Type.Head);
+                    if (n != _node)
+                    {
+                        _node = n;
+                        Init();
+                    }
+                }
+
+                yield return null;
+            }
         }
 
         #endregion
