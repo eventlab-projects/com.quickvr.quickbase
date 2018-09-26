@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEngine.XR;
 
 using System.Collections;
@@ -30,18 +29,15 @@ namespace QuickVR {
             X,Y,Z,
         };
 
-        public bool _ignoreSceneCamera = false;
         public bool _disablePixelLights = false;							//Disable per pixel lighting on the reflection. Use this for performance boost. 
 
-        public LightShadows _reflectionShadowType = LightShadows.Soft;	//Determines the most expensive type of shadows that will be used on the reflected image. 
-        public RenderingPath _reflectedRenderingPath = RenderingPath.Forward;
+        public ShadowQuality _reflectionShadowType = ShadowQuality.All;	//Determines the most expensive type of shadows that will be used on the reflected image. 
+        public RenderingPath _reflectedRenderingPath = RenderingPath.UsePlayerSettings;
 		public ReflectionQuality _reflectionQuality = ReflectionQuality.HIGH;
         public float _reflectionDistance = 100.0f;
 
         public LayerMask _reflectLayers = -1;							//The layers that will be reflected on the mirror.
 
-        public Direction _direction = Direction.Z;
-		
 		#endregion
 		
 		#region PROTECTED PARAMETERS
@@ -64,9 +60,6 @@ namespace QuickVR {
 			BOTTOM_RIGHT,
 		};
 
-        protected Light[] _lights = null;
-        protected LightShadows[] _shadowTypes = null;
-		
 		#endregion
 		
 		#region INITIALIZATION AND DESTRUCTION
@@ -88,15 +81,6 @@ namespace QuickVR {
             {
                 _renderer.sharedMaterial = new Material(Shader.Find(shaderName));
             }
-            
-            SceneManager.sceneLoaded += OnSceneLoaded;
-        }
-		
-		protected virtual void OnDisable() {
-            // Cleanup all the objects we possibly have created
-            if (_reflectionCamera) DestroyImmediate(_reflectionCamera.gameObject);
-
-            SceneManager.sceneLoaded -= OnSceneLoaded;
         }
 		
 		protected virtual void CreateReflectionTexture() {
@@ -178,19 +162,14 @@ namespace QuickVR {
 			//return reflectionCamera;
 		}
 
-        protected virtual void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-        {
-            _lights = FindObjectsOfType<Light>();
-            _shadowTypes = new LightShadows[_lights.Length];
-            for (int i = 0; i < _lights.Length; i++)
-            {
-                _shadowTypes[i] = _lights[i].shadows;
-            }
-        }
-		
-		#endregion
+        #endregion
 		
 		#region GET AND SET
+
+        protected virtual Material GetMaterial()
+        {
+            return (Application.isPlaying) ? _renderer.material : _renderer.sharedMaterial;
+        }
 		
 		protected Vector2 GetTextureSize(ReflectionQuality quality) {
 			float tSize = ((int)quality == 0)? 2048.0f : (float)(2048 / (int)quality);
@@ -221,15 +200,6 @@ namespace QuickVR {
 		protected virtual Vector3 GetCornerPosition(Corner corner) {
             Bounds bounds = _mFilter.sharedMesh.bounds;
 
-            if (_direction == Direction.Y)
-            {
-                if (corner == Corner.BOTTOM_LEFT) return transform.TransformPoint(new Vector3(bounds.min.x, bounds.center.y, -bounds.min.z));
-                if (corner == Corner.TOP_LEFT) return transform.TransformPoint(new Vector3(bounds.min.x, bounds.center.y, -bounds.max.z));
-                if (corner == Corner.BOTTOM_RIGHT) return transform.TransformPoint(new Vector3(bounds.max.x, bounds.center.y, -bounds.min.z));
-                return transform.TransformPoint(new Vector3(bounds.max.x, bounds.center.y, -bounds.max.z));
-            }
-
-            //if (_direction == Direction.Z)
             if (corner == Corner.BOTTOM_LEFT) return transform.TransformPoint(new Vector3(bounds.min.x, bounds.min.y, bounds.center.z));
             if (corner == Corner.TOP_LEFT) return transform.TransformPoint(new Vector3(bounds.min.x, bounds.max.y, bounds.center.z));
             if (corner == Corner.BOTTOM_RIGHT) return transform.TransformPoint(new Vector3(bounds.max.x, bounds.min.y, bounds.center.z));
@@ -255,7 +225,6 @@ namespace QuickVR {
         #region MIRROR RENDER
 
         protected virtual bool AllowRender() {
-            //return ((!_ignoreSceneCamera || (_ignoreSceneCamera && cam.name != "SceneCamera")) && !_insideRendering && Vector3.Distance(cam.transform.position, transform.position) < _reflectionDistance);
             return (!_insideRendering && Vector3.Distance(Camera.current.transform.position, transform.position) < _reflectionDistance);
         }
 
@@ -263,35 +232,19 @@ namespace QuickVR {
 		// camera. We render reflections and do other updates here.
 		// Because the script executes in edit mode, reflections for the scene view
 		// camera will just work!
-		public virtual void OnWillRenderObject() {
-            //Compute the UVs
-            Vector3[] vertices = _mFilter.sharedMesh.vertices;
-            Vector2[] uv = _mFilter.sharedMesh.uv;
-            Vector3 origin = GetCornerPosition(Corner.BOTTOM_LEFT);
-            Vector3 offset = GetCornerPosition(Corner.TOP_RIGHT) - origin;
-            Vector3 vr = GetScreenAxis(Direction.X);
-            Vector3 vu = GetScreenAxis(Direction.Y);
-            float w = Vector3.Dot(offset, vr);
-            float h = Vector3.Dot(offset, vu);
-
-            for (int i = 0; i < vertices.Length; i++)
-            {
-                Vector3 v = transform.TransformPoint(vertices[i]) - origin;
-                uv[i] = new Vector2(1.0f - (Vector3.Dot(v, vr) / w), 1.0f - (Vector3.Dot(v, vu) / h));
-            }
-            _mFilter.sharedMesh.uv = uv;
-            
-			//Force the mirror to be in the Water layer, so it will avoid to be rendered by the reflection cameras
+		protected virtual void OnWillRenderObject() {
+            //Force the mirror to be in the Water layer, so it will avoid to be rendered by the reflection cameras
 			gameObject.layer = LayerMask.NameToLayer("Water");
 
             if (AllowRender())
             {
-
                 _insideRendering = true;    // Safeguard from recursive reflections.        
 
-                // Optionally disable pixel lights for reflection
+                //Tune the quality settings for the reflected image
                 int oldPixelLightCount = QualitySettings.pixelLightCount;
                 if (_disablePixelLights) QualitySettings.pixelLightCount = 0;
+                ShadowQuality oldShadowQuality = QualitySettings.shadows;
+                QualitySettings.shadows = _reflectionShadowType;
 
                 CreateReflectionTexture();
                 CreateReflectionCamera();
@@ -299,8 +252,9 @@ namespace QuickVR {
 
                 _insideRendering = false;
 
-                // Restore pixel light count
-                if (_disablePixelLights) QualitySettings.pixelLightCount = oldPixelLightCount;
+                // Restore the quality settings
+                QualitySettings.pixelLightCount = oldPixelLightCount;
+                QualitySettings.shadows = oldShadowQuality;
             }
             else
             {
@@ -320,36 +274,16 @@ namespace QuickVR {
         }
 		
 		protected virtual void OnPreRenderVirtualImage() {
-            if (_lights != null) {
-                for (int i = 0; i < _lights.Length; i++)
-                {
-                    if (_lights[i] != null)
-                        _lights[i].shadows = LightShadows.None;
-                }
-            }
+                        
         }
 		
 		protected virtual void OnPostRenderVirtualImage() {
-            Material mat = (Application.isPlaying) ? _renderer.material : _renderer.sharedMaterial;
-            if (mat) ConfigureMaterial(mat);
-
-            if (_lights != null)
-            {
-                for (int i = 0; i < _lights.Length; i++)
-                {
-                    if (_lights[i] != null)
-                        _lights[i].shadows = _shadowTypes[i];
-                }
-            }
-        }
-
-        protected virtual void ConfigureMaterial(Material mat)
-        {
+            Material mat = GetMaterial();
             mat.SetTexture("_LeftEyeTexture", _reflectionTextureLeft);
             mat.SetTexture("_RightEyeTexture", _reflectionTextureRight);
         }
-		
-		protected virtual void ReflectCamera() {
+
+        protected virtual void ReflectCamera() {
 			//Reflect camera around reflection plane
 			Vector3 normal = GetNormal();							
 			Vector3 camToPlane = Camera.current.transform.position - transform.position; 
