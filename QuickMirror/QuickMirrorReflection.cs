@@ -24,11 +24,6 @@ namespace QuickVR {
             POOR = 8,
         };
 
-        public enum Direction
-        {
-            X,Y,Z,
-        };
-
         public bool _disablePixelLights = false;							//Disable per pixel lighting on the reflection. Use this for performance boost. 
 
         public ShadowQuality _reflectionShadowType = ShadowQuality.All;	//Determines the most expensive type of shadows that will be used on the reflected image. 
@@ -176,19 +171,6 @@ namespace QuickVR {
 			return new Vector2(tSize, tSize);
 		}
 
-        protected virtual Vector3 GetCenter()
-        {
-            return transform.TransformPoint(_mFilter.sharedMesh.bounds.center);
-        }
-
-        protected virtual Vector3 GetScreenAxis(Direction dir)
-        {
-            Vector3 pa = GetCornerPosition(Corner.BOTTOM_LEFT);
-            if (dir == Direction.X) return (GetCornerPosition(Corner.BOTTOM_RIGHT) - pa).normalized;
-            else if (dir == Direction.Y) return (GetCornerPosition(Corner.TOP_LEFT) - pa).normalized;
-            return -GetNormal();
-        }
-
         protected virtual Vector3 GetNormal() {
             Vector3 center = transform.position;
             Vector3 tr = GetCornerPosition(Corner.TOP_RIGHT);
@@ -327,12 +309,12 @@ namespace QuickVR {
 			Vector3 va = pa - pe;
 			Vector3 vb = pb - pe;
 			Vector3 vc = pc - pe;
-			Vector3 vr = GetScreenAxis(Direction.X);		// right axis of screen
-			Vector3 vu = GetScreenAxis(Direction.Y);		// up axis of screen
-			Vector3 vn = GetScreenAxis(Direction.Z);        // normal vector of screen
+            Vector3 vr = transform.right;       // right axis of screen
+			Vector3 vu = transform.up;		    // up axis of screen
+			Vector3 vn = -transform.forward;    // normal vector of screen
 
             //Adjust the near and far clipping planes of the reflection camera. 
-            Vector3 v = pe - GetCenter();
+            Vector3 v = pe - transform.position;
             Vector3 projectedPoint = pe - Vector3.Project(v, vn);
             float n = Mathf.Max(Camera.current.nearClipPlane, Vector3.Distance(pe, projectedPoint));
             float f = Mathf.Max(n, Camera.current.farClipPlane);
@@ -396,11 +378,7 @@ namespace QuickVR {
             Vector3 pd = GetCornerPosition(Corner.TOP_RIGHT);
             Gizmos.DrawSphere(pd, r);
 
-            Vector3 vr = GetScreenAxis(Direction.X);        // right axis of screen
-            Vector3 vu = GetScreenAxis(Direction.Y);        // up axis of screen
-            Vector3 vn = GetScreenAxis(Direction.Z);        // normal vector of screen
-
-            DebugExtension.DrawCoordinatesSystem(transform.position, vr, vu, -vn);
+            DebugExtension.DrawCoordinatesSystem(transform.position, transform.right, transform.up, transform.forward);
         }
 
         protected virtual void DrawReflectionCamera(Camera reflectionCamera)
