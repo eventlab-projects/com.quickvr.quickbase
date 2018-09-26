@@ -30,8 +30,6 @@ namespace QuickVR {
             X,Y,Z,
         };
 
-		public Material _reflectionMat = null;
-
         public bool _ignoreSceneCamera = false;
         public bool _disablePixelLights = false;							//Disable per pixel lighting on the reflection. Use this for performance boost. 
 
@@ -58,10 +56,6 @@ namespace QuickVR {
 
 		protected MeshFilter _mFilter;
         protected Renderer _renderer;
-        protected BoxCollider _collider;
-
-        protected Material _rendererMaterial = null;
-        protected Material _rendererSharedMaterial = null;
 
         protected enum Corner {
 			TOP_LEFT,
@@ -86,20 +80,15 @@ namespace QuickVR {
             _renderer = gameObject.GetOrCreateComponent<MeshRenderer>();
             _renderer.receiveShadows = false;
                         
-			_collider = gameObject.GetOrCreateComponent<BoxCollider>();
-            if (!_reflectionMat) _reflectionMat = Resources.Load<Material>("QuickMirrorReflection");
-
+			gameObject.GetOrCreateComponent<BoxCollider>();
+            
             //Ensure that the renderer has the reflection material. 
-            if (Application.isPlaying)
+            string shaderName = "QuickVR/MirrorReflection";
+            if (!_renderer.sharedMaterial || _renderer.sharedMaterial.shader.name != shaderName)
             {
-                _renderer.material = _reflectionMat;
-                _rendererMaterial = _renderer.material;
+                _renderer.sharedMaterial = new Material(Shader.Find(shaderName));
             }
-            else {
-                _renderer.sharedMaterial = _reflectionMat;
-                _rendererSharedMaterial = _renderer.sharedMaterial;
-            }
-
+            
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
 		
@@ -163,10 +152,10 @@ namespace QuickVR {
             //Create the camera
             if (_reflectionCamera) return;
 
-            _reflectionCamera = new GameObject("__MirrorReflectionCamera__").AddComponent<Camera>();
+            _reflectionCamera = transform.CreateChild("__MirrorReflectionCamera__").gameObject.GetOrCreateComponent<Camera>();
             _reflectionCamera.gameObject.layer = LayerMask.NameToLayer("Water");
             _reflectionCamera.gameObject.hideFlags = HideFlags.HideAndDontSave;
-            _reflectionCamera.gameObject.AddComponent<Skybox>();
+            _reflectionCamera.gameObject.GetOrCreateComponent<Skybox>();
 
             _reflectionCamera.enabled = false;
             
@@ -341,7 +330,7 @@ namespace QuickVR {
         }
 		
 		protected virtual void OnPostRenderVirtualImage() {
-			Material mat = (Application.isPlaying) ? _rendererMaterial : _rendererSharedMaterial;
+            Material mat = (Application.isPlaying) ? _renderer.material : _renderer.sharedMaterial;
             if (mat) ConfigureMaterial(mat);
 
             if (_lights != null)
