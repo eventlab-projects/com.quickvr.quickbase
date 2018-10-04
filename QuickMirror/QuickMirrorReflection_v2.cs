@@ -41,26 +41,8 @@ namespace QuickVR
             float d = -Vector3.Dot(normal, pos);
             Vector4 reflectionPlane = new Vector4(normal.x, normal.y, normal.z, d);
             Matrix4x4 reflection = CalculateReflectionMatrix(reflectionPlane);
-
-            Vector3 oldEyePos;
-            Matrix4x4 worldToCameraMatrix;
-            if (Camera.current.stereoEnabled)
-            {
-                worldToCameraMatrix = Camera.current.GetStereoViewMatrix(eye) * reflection;
-                Vector3 eyeOffset = (eye == Camera.StereoscopicEye.Left)? InputTracking.GetLocalPosition(XRNode.LeftEye) : InputTracking.GetLocalPosition(XRNode.RightEye);
-                eyeOffset.z = 0.0f;
-                oldEyePos = Camera.current.transform.position + Camera.current.transform.TransformVector(eyeOffset);
-            }
-            else
-            {
-                worldToCameraMatrix = Camera.current.worldToCameraMatrix * reflection;
-                oldEyePos = Camera.current.transform.position;
-            }
-
-            Vector3 newEyePos = reflection.MultiplyPoint(oldEyePos);
-            _reflectionCamera.transform.position = newEyePos;
-            _reflectionCamera.transform.rotation = Camera.current.transform.rotation;
-            _reflectionCamera.worldToCameraMatrix = worldToCameraMatrix;
+            _reflectionCamera.worldToCameraMatrix = (Camera.current.stereoEnabled)? Camera.current.GetStereoViewMatrix(eye) : Camera.current.worldToCameraMatrix;
+            _reflectionCamera.worldToCameraMatrix *= reflection;
 
             //2) Compute ProjectionMatrix
             // Setup oblique projection matrix so that near plane is our reflection
@@ -77,7 +59,7 @@ namespace QuickVR
             }
             else
             {
-                Vector4 clipPlane = CameraSpacePlane(worldToCameraMatrix, pos, normal, 1.0f);
+                Vector4 clipPlane = CameraSpacePlane(_reflectionCamera.worldToCameraMatrix, pos, normal, 1.0f);
                 _reflectionCamera.projectionMatrix = MakeProjectionMatrixOblique(_reflectionCamera.projectionMatrix, clipPlane);
                 _reflectionCamera.Render();
             }
