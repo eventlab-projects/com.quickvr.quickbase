@@ -1,4 +1,5 @@
-Shader "QuickVR/MirrorReflection"
+﻿// original source from: http://wiki.unity3d.com/index.php/MirrorReflection4
+Shader "QuickVR/MirrorReflection_v2"
 {
 	Properties
 	{
@@ -10,30 +11,25 @@ Shader "QuickVR/MirrorReflection"
 		_NoisePower("Noise Power", Range(0.0, 1.0)) = 0.0
 	}
 
-	// two texture cards: full thing
-	Subshader
+	SubShader
 	{
-
 		Tags
 		{
 			"RenderType" = "Opaque"
-			"Queue" = "Geometry"		
 		}
 
 		Pass
 		{
-			CGPROGRAM
+		CGPROGRAM
+			#pragma vertex vert
+			#pragma fragment frag
+			#include "UnityCG.cginc"
+			#include "QuickMirrorReflection.cginc"
 
-				#pragma vertex vert
-				#pragma fragment frag
-				#include "UnityCG.cginc"
-				#include "QuickMirrorReflection.cginc"
-
-				float4 frag(v2f i) : SV_Target
-				{
-					return ComputeFinalColor(float2(1.0 - i.uv.x, 1.0 - i.uv.y), i.uv);
-				}
-
+			fixed4 frag(v2f i) : SV_Target
+			{
+				return ComputeFinalColor(GetProjUV(i.screenPos), i.uv);
+			}
 			ENDCG
 		}
 	}
