@@ -8,10 +8,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 488600}
-  - component: {fileID: 114541201409102586}
   - component: {fileID: 33000011487588136}
   - component: {fileID: 23000011115875436}
   - component: {fileID: 65000010633033854}
+  - component: {fileID: 114777982434440394}
   m_Layer: 4
   m_Name: pf_Mirror
   m_TagString: Untagged
@@ -96,7 +96,7 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 2, y: 2, z: 0}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &114541201409102586
+--- !u!114 &114777982434440394
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -104,7 +104,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 182318}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0368b689d09538e46bf7d5309f52ccad, type: 3}
+  m_Script: {fileID: 11500000, guid: a571e854f69226b43a838f1e72408b05, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _disablePixelLights: 0
@@ -116,4 +116,3 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 4294967295
   _normalDirection: 0
-  _useRenderWithShader: 0
