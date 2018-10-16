@@ -91,6 +91,7 @@ namespace QuickVR
             _posYCicleStart = _posYLastFrame = _node.GetTrackedObject().transform.position.y;
             _timeCicleStart = Time.time;
             _timeStill = _fStepMax;
+            _desiredSpeed = 0.0f;
         }
 
         #endregion

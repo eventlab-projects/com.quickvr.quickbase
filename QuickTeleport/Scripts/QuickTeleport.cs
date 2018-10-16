@@ -39,8 +39,8 @@ namespace QuickVR
         {
             _cameraFade = QuickSingletonManager.GetInstance<CameraFade>();
             if (!_pfTrajectoryTarget) _pfTrajectoryTarget = Resources.Load<Transform>("Prefabs/pf_QuickTeleportTarget");
+            _trajectoryTarget = Instantiate<Transform>(_pfTrajectoryTarget);
 
-            LoadTrajectoryResources();
             SetTrajectoryVisible(false);
         }
 
@@ -53,11 +53,6 @@ namespace QuickVR
         protected virtual void OnDisable()
         {
             StopAllCoroutines();
-        }
-
-        protected virtual void LoadTrajectoryResources()
-        {
-            _trajectoryTarget = Instantiate<Transform>(_pfTrajectoryTarget);
         }
 
         #endregion
