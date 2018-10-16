@@ -125,8 +125,11 @@ namespace QuickVR
                     }
                     else
                     {
-                        _timeStill = Mathf.Min(_timeStill + Time.deltaTime, _fStepMax);
-                        _desiredSpeed = Mathf.Lerp(_speedCurve.Evaluate(_fStepMax), 0.0f, _timeStill / _fStepMax);
+                        //No step has been detected. The user is stopping. 
+                        _timeStill = Mathf.Min(_timeStill + Time.deltaTime, _fStepMin);
+                        _desiredSpeed = Mathf.Lerp(_speedCurve.Evaluate(_fStepMax), 0.0f, _timeStill / _fStepMin);
+                        //_desiredSpeed = Mathf.Lerp(_desiredSpeed, 0.0f, _timeStill / _fStepMax);
+                        //_targetLinearVelocity = _currentLinearVelocity = transform.forward * _desiredSpeed;
                     }
 
                     _desiredSpeed *= _speedMultiplier;
