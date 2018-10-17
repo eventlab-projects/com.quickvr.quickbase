@@ -62,6 +62,7 @@ namespace QuickVR {
         public static Action OnCalibrating;
         public static Action OnRunning;
         public static Action OnFinished;
+        public static Action OnMovedPlayer;
 
         #endregion
 
@@ -241,6 +242,9 @@ namespace QuickVR {
 
             GetPlayer().rotation = target.rotation;
             SetInitialPositionAndRotation();
+
+            if (OnMovedPlayer != null)
+                OnMovedPlayer();
         }
 
         public void EnableTeleport(bool b)
