@@ -16,6 +16,12 @@ fixed4 _Color;
 float3 MIRROR_PLANE_POS;
 float3 MIRROR_PLANE_NORMAL;
 
+void clipPlaneTest(float3 wPos) 
+{
+	float3 v = wPos - MIRROR_PLANE_POS;
+	if (dot(v, MIRROR_PLANE_NORMAL) < 0) discard;
+}
+
 void surfBase(Input IN, inout SurfaceOutputStandard o)
 {
 	// Albedo comes from a texture tinted by color
@@ -29,9 +35,7 @@ void surfBase(Input IN, inout SurfaceOutputStandard o)
 
 void surf(Input IN, inout SurfaceOutputStandard o)
 {
-	float3 v = IN.worldPos - MIRROR_PLANE_POS;
-	if (dot(v, MIRROR_PLANE_NORMAL) < 0) discard;
-
+	clipPlaneTest(IN.worldPos);
 	surfBase(IN, o);
 }
 
