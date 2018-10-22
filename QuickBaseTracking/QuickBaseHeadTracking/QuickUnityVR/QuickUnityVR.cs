@@ -47,6 +47,12 @@ namespace QuickVR {
             //Create the IKManager
             _ikManager = gameObject.GetOrCreateComponent<QuickIKManager>();
             _ikManager.enabled = false; //We control when to update the IK
+
+            //TEMPORARY SOLUTION FOR FEET ROTATION
+            _ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.LeftFoot);
+            _ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.RightFoot);
+            _ikManager.GetIKSolver(HumanBodyBones.LeftFoot)._weightIKRot = 0.0f;
+            _ikManager.GetIKSolver(HumanBodyBones.RightFoot)._weightIKRot = 0.0f;
         }
 
         protected override void CreateVRHands()
