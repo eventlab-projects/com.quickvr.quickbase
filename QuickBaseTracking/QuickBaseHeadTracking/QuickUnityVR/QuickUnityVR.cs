@@ -102,7 +102,19 @@ namespace QuickVR {
                 
                 //Correct the hands rotation
                 if (nodeType == QuickVRNode.Type.LeftHand) tObject.transform.Rotate(tObject.transform.forward, 90.0f, Space.World);
-                if (nodeType == QuickVRNode.Type.RightHand) tObject.transform.Rotate(tObject.transform.forward, -90.0f, Space.World);
+                else if (nodeType == QuickVRNode.Type.RightHand) tObject.transform.Rotate(tObject.transform.forward, -90.0f, Space.World);
+
+                //Correct the feet rotation
+                else if (nodeType == QuickVRNode.Type.LeftFoot)
+                {
+                    //float rotAngle = Vector3.Angle(tObject.transform.forward, transform.forward);
+                    //Vector3 rotAxis = Vector3.Cross(tObject.transform.forward, transform.forward).normalized;
+                    //tObject.transform.Rotate(rotAxis, rotAngle, Space.World);
+
+                    //tObject.transform.rotation = transform.rotation;
+
+                    tObject.transform.rotation = Quaternion.identity; //_ikManager.GetIKCalibrationTarget(HumanBodyBones.LeftFoot).rotation;
+                }
 
                 //Set the position of the hips
                 if (nodeType == QuickVRNode.Type.Waist)

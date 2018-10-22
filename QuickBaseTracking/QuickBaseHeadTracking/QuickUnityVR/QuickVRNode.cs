@@ -83,6 +83,8 @@ namespace QuickVR
 
             _id = id;
             _trackedObject.Reset();
+
+            Update();
         }
 
         public virtual State GetState()

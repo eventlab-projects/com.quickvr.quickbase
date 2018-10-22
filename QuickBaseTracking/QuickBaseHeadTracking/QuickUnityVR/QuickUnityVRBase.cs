@@ -206,6 +206,7 @@ namespace QuickVR
             }
             else if (numTrackers == 3)
             {
+                //Set a random assignation
                 waistNode.SetID(extraTrackers[0].uniqueID);
                 leftFootNode.SetID(extraTrackers[1].uniqueID);
                 rightFootNode.SetID(extraTrackers[2].uniqueID);
