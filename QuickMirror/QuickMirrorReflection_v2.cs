@@ -19,11 +19,33 @@ namespace QuickVR
 
         #endregion
 
+        #region PROTECTED ATTRIBUTES
+
+        protected Shader _replacementShader = null;
+
+        #endregion
+
+        #region CREATION AND DESTRUCTION
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+
+            _replacementShader = Shader.Find(GetShaderReplacementName());
+        }
+
+        #endregion
+
         #region GET AND SET
 
         protected override string GetShaderName()
         {
             return "QuickVR/MirrorReflection_v2";
+        }
+
+        protected virtual string GetShaderReplacementName()
+        {
+            return "QuickVR/QuickMirrorClipPlane";
         }
 
         #endregion
@@ -55,7 +77,7 @@ namespace QuickVR
             {
                 Shader.SetGlobalVector("MIRROR_PLANE_POS", transform.position);
                 Shader.SetGlobalVector("MIRROR_PLANE_NORMAL", normal);
-                _reflectionCamera.RenderWithShader(Shader.Find("QuickVR/QuickMirrorClipPlane"), "RenderType");
+                _reflectionCamera.RenderWithShader(_replacementShader, "RenderType");
             }
             else
             {

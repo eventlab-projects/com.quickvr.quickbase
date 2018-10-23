@@ -1,6 +1,8 @@
 #ifndef QUICK_MIRROR_CLIP_PLANE_INC
 #define QUICK_MIRROR_CLIP_PLANE_INC
 
+#include "QuickMirrorClipPlaneDefinitions.cginc"
+
 sampler2D _MainTex;
 
 struct Input {
@@ -12,18 +14,10 @@ half _Glossiness;
 half _Metallic;
 fixed4 _Color;
 
-//Clipping plane definition in WS
-float3 MIRROR_PLANE_POS;
-float3 MIRROR_PLANE_NORMAL;
-
-void clipPlaneTest(float3 wPos) 
+void clipSurf(Input IN, inout SurfaceOutputStandard o)
 {
-	float3 v = wPos - MIRROR_PLANE_POS;
-	if (dot(v, MIRROR_PLANE_NORMAL) < 0) discard;
-}
+	clipPlaneTest(IN.worldPos);
 
-void surfBase(Input IN, inout SurfaceOutputStandard o)
-{
 	// Albedo comes from a texture tinted by color
 	fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
 	o.Albedo = c.rgb;
@@ -31,12 +25,6 @@ void surfBase(Input IN, inout SurfaceOutputStandard o)
 	o.Metallic = _Metallic;
 	o.Smoothness = _Glossiness;
 	o.Alpha = c.a;
-}
-
-void surf(Input IN, inout SurfaceOutputStandard o)
-{
-	clipPlaneTest(IN.worldPos);
-	surfBase(IN, o);
 }
 
 #endif

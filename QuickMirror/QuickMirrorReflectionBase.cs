@@ -269,7 +269,7 @@ namespace QuickVR {
             _reflectionCamera.farClipPlane = Camera.current.farClipPlane;
             _reflectionCamera.nearClipPlane = Camera.current.nearClipPlane;
             _reflectionCamera.orthographic = Camera.current.orthographic;
-            _reflectionCamera.fieldOfView = Camera.current.fieldOfView;
+            //_reflectionCamera.fieldOfView = Camera.current.fieldOfView;
             _reflectionCamera.aspect = Camera.current.aspect;
             _reflectionCamera.orthographicSize = Camera.current.orthographicSize;
         }
