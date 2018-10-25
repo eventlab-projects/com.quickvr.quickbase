@@ -78,6 +78,12 @@ namespace QuickVR {
                 _renderer.sharedMaterial = new Material(Shader.Find(shaderName));
             }
         }
+
+        protected virtual void OnDisable()
+        {
+            DestroyImmediate(_reflectionTextureLeft);
+            DestroyImmediate(_reflectionTextureRight);
+        }
 		
 		protected virtual void CreateReflectionTexture() {
 			int texSize = GetTextureSize(_reflectionQuality);
@@ -99,13 +105,13 @@ namespace QuickVR {
             _oldReflectionQuality = _reflectionQuality;
         }
 
-        protected virtual RenderTexture CreateRenderTexture(string name, int size, int aaLevel = 1)
+        protected virtual RenderTexture CreateRenderTexture(string name, int size, RenderTextureFormat format = RenderTextureFormat.Default)
         {
-            RenderTexture rTex = new RenderTexture(size, size, 24);
+            RenderTexture rTex = new RenderTexture(size, size, 24, format);
             rTex.name = name;
             rTex.isPowerOfTwo = true;
             rTex.hideFlags = HideFlags.DontSave;
-            rTex.antiAliasing = aaLevel;
+            rTex.antiAliasing = 1;
 
             return rTex;
         }
@@ -266,8 +272,8 @@ namespace QuickVR {
             // update other values to match current camera.
             // even if we are supplying custom camera&projection matrices,
             // some of values are used elsewhere (e.g. skybox uses far plane)
-            _reflectionCamera.farClipPlane = Camera.current.farClipPlane;
-            _reflectionCamera.nearClipPlane = Camera.current.nearClipPlane;
+            _reflectionCamera.nearClipPlane = Mathf.Max(Camera.current.nearClipPlane, 0.1f);
+            _reflectionCamera.farClipPlane = Mathf.Min(Camera.current.farClipPlane, 1000.0f);
             _reflectionCamera.orthographic = Camera.current.orthographic;
             //_reflectionCamera.fieldOfView = Camera.current.fieldOfView;
             _reflectionCamera.aspect = Camera.current.aspect;
