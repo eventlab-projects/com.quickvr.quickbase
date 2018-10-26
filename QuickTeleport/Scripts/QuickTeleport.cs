@@ -20,8 +20,9 @@ namespace QuickVR
         #region PROTECTED PARAMETERS
 
         protected Transform _trajectoryTarget = null;
-        protected QuickUICursor _cursor = null;
         protected CameraFade _cameraFade = null;
+
+        protected QuickHeadTracking _hTracking = null;
 
         #endregion
 
@@ -44,9 +45,14 @@ namespace QuickVR
             SetTrajectoryVisible(false);
         }
 
+        protected virtual void Start()
+        {
+            _hTracking = GetComponentInChildren<QuickHeadTracking>();
+
+        }
+
         protected virtual void OnEnable()
         {
-            _cursor = GetComponentInChildren<QuickHeadTracking>().GetVRCursor(_vrCursorType);
             StartCoroutine(CoUpdate());
         }
 
@@ -59,6 +65,11 @@ namespace QuickVR
 
         #region GET AND SET
 
+        protected virtual QuickUICursor GetCursor()
+        {
+            return _hTracking.GetVRCursor(_vrCursorType);
+        }
+
         public virtual void SetTrajectoryVisible(bool v)
         {
             _trajectoryTarget.gameObject.SetActive(v);
@@ -66,12 +77,14 @@ namespace QuickVR
 
         protected virtual Vector3 GetPositionEnd()
         {
-            return _cursor.GetRaycastResult().point;
+            QuickUICursor cursor = GetCursor();
+            return cursor? cursor.GetRaycastResult().point : transform.position;
         }
 
         public virtual bool IsTeleportWalkableObjectSelected()
         {
-            QuickUIInteractiveItem selectedItem = _cursor.GetCurrentInteractible();
+            QuickUICursor cursor = GetCursor();
+            QuickUIInteractiveItem selectedItem = cursor? cursor.GetCurrentInteractible() : null;
             return selectedItem && (selectedItem.GetComponent<QuickTeleportWalkableObject>() != null);
         }
 

@@ -46,7 +46,6 @@ namespace QuickVR
 
         protected static Canvas _canvasCursors = null;
 
-        [SerializeField]
         protected Transform _CursorTransform;      // We need to affect the Cursor's transform.
 
         protected QuickUIInteractiveItem _CurrentInteractible;                //The current interactive item
