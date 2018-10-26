@@ -54,6 +54,7 @@ namespace QuickVR
         protected virtual void OnEnable()
         {
             StartCoroutine(CoUpdate());
+            StartCoroutine(CoUpdateColor());
         }
 
         protected virtual void OnDisable()
@@ -99,6 +100,8 @@ namespace QuickVR
 
         protected virtual IEnumerator CoUpdate()
         {
+            yield return null;
+
             while (true)
             {
                 //1) Wait while the teleport key is not pressed
@@ -112,6 +115,21 @@ namespace QuickVR
                 {
                     yield return StartCoroutine(StartTeleport());
                 }
+            }
+        }
+
+        protected virtual IEnumerator CoUpdateColor()
+        {
+            yield return null;
+
+            while (true)
+            {
+                Color c = IsTeleportWalkableObjectSelected() ? Color.green : Color.red;
+                SetTrajectoryTargetColor(c);
+                QuickUICursor cursor = GetCursor();
+                if (cursor) cursor.SetColor(c);
+
+                yield return null;
             }
         }
 

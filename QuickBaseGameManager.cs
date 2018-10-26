@@ -390,10 +390,6 @@ namespace QuickVR {
 
                     bool isPointing = hTracking.GetVRHand(QuickVRNode.Type.RightHand).IsPointing();
                     hTracking.SetVRCursorActive(cType, isPointing);
-
-                    Color c = _teleport.IsTeleportWalkableObjectSelected() ? Color.green : Color.red;
-                    _teleport.SetTrajectoryTargetColor(c);
-                    hTracking.GetVRCursor(cType).SetColor(c);
                 }
             }
         }

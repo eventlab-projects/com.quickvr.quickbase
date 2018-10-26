@@ -111,7 +111,7 @@ namespace QuickVR
         protected virtual void OnDisable()
         {
             QuickVRManager.OnPostUpdateTracking -= UpdateRaycast;
-            _CursorTransform.gameObject.SetActive(false);
+            if (_CursorTransform) _CursorTransform.gameObject.SetActive(false);
             _rayRender.enabled = false;
         }
 
