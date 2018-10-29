@@ -1,57 +1,40 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-namespace QuickVR {
+namespace QuickVR
+{
 
-	public abstract class QuickCharacterControllerBase : MonoBehaviour {
+    public class QuickCharacterControllerManager : MonoBehaviour
+    {
 
-        #region PUBLIC PARAMETERS
-
-        public bool _move = true;
-        public bool _hasPriority = false;
+        #region PUBLIC ATTRIBUTES
 
         public float _radius = 0.25f;               //Character radius
         public float _height = 2.0f;                //Character height
 
-        public float _maxLinearSpeed = 2.5f;		//Max linear speed in m/s
-		public float _linearAcceleration = 1.0f;	//Max linear acceleration in m/s^2
-		public float _linearDrag = 4.0f;			//The drag applied to the linear speed when no input is applied
-
-		public float _maxAngularSpeed = 45.0f;		//Max angular speed in degrees/second
-		public float _angularAcceleration = 45.0f;	//Angular acceleration in degrees/second^2
-		public float _angularDrag = 4.0f;			//The drag applied to the angular speed when no input is applied. 
-
-        public float _maxStepHeight = 0.3f;         //The step offset used for stepping stairs and so on. 
-
-        public bool _canJump = true;
-		public float _jumpHeight = 2.0f;
+        public float _maxStepHeight = 0.3f;			//The step offset used for stepping stairs and so on. 
 
         #endregion
 
-        #region PROTECTED PARAMETERS
+        #region PROTECTED ATTRIBUTES
 
         protected Rigidbody _rigidBody = null;
         protected CapsuleCollider _collider = null;
         protected static PhysicMaterial _physicMaterial = null;
 
-        protected Vector3 _targetLinearVelocity = Vector3.zero;
-        protected Vector3 _currentLinearVelocity = Vector3.zero;
-		protected Vector3 _targetAngularVelocity = Vector3.zero;
-
-		protected float _gravity = 0.0f;
+        protected HashSet<QuickCharacterControllerBase> _characterControllers = new HashSet<QuickCharacterControllerBase>();
 
         protected Vector3 _preLinearVelocity = Vector3.zero;    //The linear velocity the object had before Unity's internal physics update
 
-        protected bool _grounded = false;
         protected bool _stepping = false;
 
         #endregion
 
         #region CREATION AND DESTRUCTION
 
-        protected virtual void Awake() {
-			_gravity = Physics.gravity.magnitude;
-
+        protected virtual void Awake()
+        {
             CreatePhysicMaterial();
 
             InitCollider();
@@ -84,7 +67,7 @@ namespace QuickVR {
         {
             _rigidBody = gameObject.GetOrCreateComponent<Rigidbody>();
             _rigidBody.freezeRotation = true;
-            _rigidBody.maxAngularVelocity = _maxAngularSpeed * Mathf.Deg2Rad;
+            //_rigidBody.maxAngularVelocity = _maxAngularSpeed * Mathf.Deg2Rad;
             _rigidBody.useGravity = true;
             _rigidBody.drag = 0.0f;
         }
@@ -92,6 +75,16 @@ namespace QuickVR {
         #endregion
 
         #region GET AND SET
+
+        public virtual void AddCharacterController(QuickCharacterControllerBase characterController)
+        {
+            _characterControllers.Add(characterController);
+        }
+
+        public virtual void RemoveCharacterController(QuickCharacterControllerBase characterController)
+        {
+            _characterControllers.Remove(characterController);
+        }
 
         public static int GetLayerPlayer()
         {
@@ -103,113 +96,26 @@ namespace QuickVR {
             return LayerMask.NameToLayer("AutonomousAgent");
         }
 
-        public virtual Vector3 GetCurrentLinearVelocity()
+        #endregion
+
+        #region UPDATE
+
+        protected virtual void FixedUpdate()
         {
-            return _currentLinearVelocity;
-        }
+            _rigidBody.velocity = Vector3.Scale(_rigidBody.velocity, Vector3.up);
 
-        public virtual void SetCurrentLinearVelocity(Vector3 v)
-        {
-            _currentLinearVelocity = v;
-        }
-
-		public virtual float GetMaxLinearSpeed() {
-			return _maxLinearSpeed;
-		}
-
-		protected virtual float GetJumpVerticalSpeed(float jumpHeight) {
-			// From the jump height and gravity we deduce the upwards speed 
-			// for the character to reach at the apex.
-			return Mathf.Sqrt(2.0f * jumpHeight * _gravity);
-		}
-
-        protected virtual void ComputeTargetLinearVelocity() { }
-        protected virtual void ComputeTargetAngularVelocity() { }
-
-		protected virtual void ClampLinearVelocity() {
-			Vector2 vHor = new Vector2(_currentLinearVelocity.x, _currentLinearVelocity.z);
-			float mSpeed = GetMaxLinearSpeed();
-			if (vHor.sqrMagnitude > (mSpeed * mSpeed)) {
-				vHor.Normalize();
-				vHor *= mSpeed;
-                _currentLinearVelocity = new Vector3(vHor.x, _currentLinearVelocity.y, vHor.y);
-			}
-		}
-
-        protected virtual bool CanMove()
-        {
-            return _move;
-        }
-
-		#endregion
-
-		#region UPDATE
-
-		protected virtual void FixedUpdate()
-        {
-            if (CanMove())
+            foreach (QuickCharacterControllerBase characterController in _characterControllers)
             {
-                UpdateLinearVelocity();
-                UpdateAngularVelocity();
-                UpdateJump();
+                //characterController.UpdateMovement();
+                _rigidBody.velocity += characterController.GetCurrentLinearVelocity();
             }
-            else _currentLinearVelocity = Vector3.zero;
 
-            _rigidBody.velocity = Vector3.Scale(_rigidBody.velocity, Vector3.up) + _currentLinearVelocity;
             _preLinearVelocity = _rigidBody.velocity;
-        }
-
-		protected virtual void UpdateLinearVelocity() {
-            ComputeTargetLinearVelocity();
-
-            //We are moving in the desired direction. 
-            if (_targetLinearVelocity == Vector3.zero)
-            {
-                _currentLinearVelocity = Vector3.zero;
-            }
-            else
-            {
-                //Apply a force that attempts to reach our target velocity
-                Vector3 offset = (_targetLinearVelocity - _currentLinearVelocity);
-                Vector2 v = new Vector2(offset.x, offset.z);
-                v.Normalize();
-                _currentLinearVelocity += new Vector3(v.x, 0.0f, v.y) * _linearAcceleration * Time.deltaTime;
-            }
-			
-			ClampLinearVelocity();
-		}
-
-		protected virtual void UpdateAngularVelocity() {
-            ComputeTargetAngularVelocity();
-
-   //         _rigidBody.angularDrag = (_targetAngularVelocity == Vector3.zero)? _angularDrag : 0.0f;
-			//_rigidBody.AddTorque(_targetAngularVelocity, ForceMode.Acceleration);
-		}
-
-        protected virtual void UpdateJump()
-        {
-            // Jump
-            //if (_grounded && _canJump && Input.GetButton("Jump"))
-            //{
-            //    _rigidBody.velocity = new Vector3(_rigidBody.velocity.x, GetJumpVerticalSpeed(_jumpHeight), _rigidBody.velocity.z);
-            //    _grounded = false;
-            //}
         }
 
         #endregion
 
         #region PHYSICS MANAGEMENT
-
-        //protected virtual void OnCollisionStay(Collision collision)
-        //{
-        //    //Allow this character to overcome step stairs according to the defined maxStepHeight. 
-        //    //Ignore other agents. 
-        //    if (_hasPriority && (collision.gameObject.layer == _layerAutonomousAgent))
-        //    {
-        //        Vector3 offset = (collision.transform.position - transform.position).normalized;
-        //        collision.gameObject.GetComponent<Rigidbody>().AddForce(offset * 10.0f, ForceMode.Impulse);
-        //    }
-        //}
 
         protected virtual void OnCollisionStay(Collision collision)
         {
@@ -279,6 +185,7 @@ namespace QuickVR {
         }
 
         #endregion
+
 
     }
 
