@@ -337,7 +337,7 @@ namespace QuickVR
 
             //Update the position
             Vector3 disp = GetDisplacement();
-            Vector3 offset = _vrNodesOrigin.InverseTransformVector(GetDisplacement());
+            Vector3 offset = _vrNodesOrigin.InverseTransformVector(disp);
             _vrNodesOrigin.Translate(new Vector3(offset.x, 0.0f, offset.z), Space.Self);
 
             _playerVelocity = (Quaternion.Inverse(_vrNodesOrigin.rotation) * transform.rotation * disp) / Time.deltaTime;
