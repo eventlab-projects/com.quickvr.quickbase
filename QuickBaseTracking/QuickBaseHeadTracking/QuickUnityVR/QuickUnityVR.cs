@@ -4,6 +4,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
+using UnityEngine.Animations;
+
 namespace QuickVR {
 
     public class QuickUnityVR : QuickUnityVRBase

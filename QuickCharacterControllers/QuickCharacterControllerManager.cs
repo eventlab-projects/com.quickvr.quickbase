@@ -15,6 +15,19 @@ namespace QuickVR
 
         public float _maxStepHeight = 0.3f;			//The step offset used for stepping stairs and so on. 
 
+        public float _defaultMaxLinearSpeed = 2.5f;        //Max linear speed in m/s
+        public float _linearAcceleration = 1.0f;    //Max linear acceleration in m/s^2
+        public float _linearDrag = 4.0f;            //The drag applied to the linear speed when no input is applied
+
+        public float _defaultMaxAngularSpeed = 45.0f;      //Max angular speed in degrees/second
+        public float _angularAcceleration = 45.0f;  //Angular acceleration in degrees/second^2
+        public float _angularDrag = 4.0f;			//The drag applied to the angular speed when no input is applied. 
+
+        public bool _hasPriority = false;
+
+        public bool _canJump = true;
+        public float _jumpHeight = 2.0f;
+
         #endregion
 
         #region PROTECTED ATTRIBUTES
@@ -25,7 +38,7 @@ namespace QuickVR
 
         protected HashSet<QuickCharacterControllerBase> _characterControllers = new HashSet<QuickCharacterControllerBase>();
 
-        protected Vector3 _preLinearVelocity = Vector3.zero;    //The linear velocity the object had before Unity's internal physics update
+        protected Vector3 _totalLinearVelocity = Vector3.zero;    //The linear velocity the object had before Unity's internal physics update
 
         protected bool _stepping = false;
 
@@ -41,15 +54,6 @@ namespace QuickVR
             InitRigidBody();
         }
 
-        protected virtual void InitCollider()
-        {
-            _collider = gameObject.GetOrCreateComponent<CapsuleCollider>();
-            _collider.radius = _radius;
-            _collider.height = _height;
-            _collider.center = new Vector3(0.0f, _height * 0.5f, 0.0f);
-            _collider.material = _physicMaterial;
-        }
-
         protected virtual void CreatePhysicMaterial()
         {
             if (!_physicMaterial)
@@ -61,6 +65,15 @@ namespace QuickVR
                 _physicMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
                 _physicMaterial.bounceCombine = PhysicMaterialCombine.Minimum;
             }
+        }
+
+        protected virtual void InitCollider()
+        {
+            _collider = gameObject.GetOrCreateComponent<CapsuleCollider>();
+            _collider.radius = _radius;
+            _collider.height = _height;
+            _collider.center = new Vector3(0.0f, _height * 0.5f, 0.0f);
+            _collider.material = _physicMaterial;
         }
 
         protected virtual void InitRigidBody()
@@ -102,20 +115,31 @@ namespace QuickVR
 
         protected virtual void FixedUpdate()
         {
-            _rigidBody.velocity = Vector3.Scale(_rigidBody.velocity, Vector3.up);
+            _totalLinearVelocity = Vector3.zero;
 
             foreach (QuickCharacterControllerBase characterController in _characterControllers)
             {
-                //characterController.UpdateMovement();
-                _rigidBody.velocity += characterController.GetCurrentLinearVelocity();
+                characterController.UpdateMovement();
+                _totalLinearVelocity += characterController.GetCurrentLinearVelocity();
             }
 
-            _preLinearVelocity = _rigidBody.velocity;
+            _rigidBody.velocity = Vector3.Scale(_rigidBody.velocity, Vector3.up) + _totalLinearVelocity;
         }
 
         #endregion
 
         #region PHYSICS MANAGEMENT
+
+        //protected virtual void OnCollisionStay(Collision collision)
+        //{
+        //    //Allow this character to overcome step stairs according to the defined maxStepHeight. 
+        //    //Ignore other agents. 
+        //    if (_hasPriority && (collision.gameObject.layer == _layerAutonomousAgent))
+        //    {
+        //        Vector3 offset = (collision.transform.position - transform.position).normalized;
+        //        collision.gameObject.GetComponent<Rigidbody>().AddForce(offset * 10.0f, ForceMode.Impulse);
+        //    }
+        //}
 
         protected virtual void OnCollisionStay(Collision collision)
         {
@@ -128,7 +152,7 @@ namespace QuickVR
 
             //Check if the current speed is significant enough to consider that we are, at least, walking
             float minSpeed = 0.25f;
-            float speed2 = Vector3.Scale(_preLinearVelocity, new Vector3(1, 0, 1)).sqrMagnitude;
+            float speed2 = _totalLinearVelocity.sqrMagnitude;
             if (speed2 < minSpeed * minSpeed) return;
 
             //If we arrive here, we consider that we are walking and we have collided with an obstacle. Let's check if
@@ -140,7 +164,7 @@ namespace QuickVR
                 //We are only interested on those contact points pointing on the same direction
                 //that the linear velocity and in a higher elevation than current character's position.
                 Vector3 offset = contact.point - transform.position;
-                if ((offset.y > stepOffset.y) && (Vector3.Dot(offset, _preLinearVelocity) > 0))
+                if ((offset.y > stepOffset.y) && (Vector3.Dot(offset, _totalLinearVelocity) > 0))
                 {
                     stepOffset = offset;
                 }
@@ -149,23 +173,23 @@ namespace QuickVR
             float minStepHeight = 0.05f;
             if ((stepOffset.y > minStepHeight) && (stepOffset.y <= _maxStepHeight))
             {
-                StartCoroutine(CoUpdateStepping(stepOffset, _preLinearVelocity));
+                StartCoroutine(CoUpdateStepping(stepOffset));
             }
         }
 
-        protected virtual IEnumerator CoUpdateStepping(Vector3 stepOffset, Vector3 linearVelocity)
+        protected virtual IEnumerator CoUpdateStepping(Vector3 stepOffset)
         {
             _stepping = true;
             _rigidBody.isKinematic = true;
 
-            float speed = _preLinearVelocity.magnitude; //0.5f;
+            float speed = _totalLinearVelocity.magnitude; //0.5f;
 
             //Move upwards until the step height is reached. 
             yield return StartCoroutine(CoUpdateStepping(transform.position + Vector3.up * stepOffset.y, stepOffset.y, speed));
 
             //Move in the direction of the velocity in order to ensure that the 
-            float d = _collider.radius * 1.01f;    //The horizontal distance
-            yield return StartCoroutine(CoUpdateStepping(transform.position + linearVelocity.normalized * d, d, speed));
+            float d = _collider.radius * 1.1f;    //The horizontal distance
+            yield return StartCoroutine(CoUpdateStepping(transform.position + _totalLinearVelocity.normalized * d, d, speed));
 
             _rigidBody.isKinematic = false;
             _stepping = false;
@@ -182,6 +206,16 @@ namespace QuickVR
                 transform.position = Vector3.Lerp(initialPos, targetPos, elapsedTime / totalTime);
                 yield return null;
             }
+        }
+
+        protected virtual void UpdateJump()
+        {
+            // Jump
+            //if (_grounded && _canJump && Input.GetButton("Jump"))
+            //{
+            //    _rigidBody.velocity = new Vector3(_rigidBody.velocity.x, GetJumpVerticalSpeed(_jumpHeight), _rigidBody.velocity.z);
+            //    _grounded = false;
+            //}
         }
 
         #endregion

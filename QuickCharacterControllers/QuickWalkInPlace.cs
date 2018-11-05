@@ -72,17 +72,19 @@ namespace QuickVR
             ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.RightFoot);
         }            
 
-        protected virtual void OnEnable()
+        protected override void OnEnable()
         {
+            base.OnEnable();
+
             QuickUnityVRBase.OnCalibrate += Init;
-            _rigidBody.isKinematic = false;
             _coUpdateTrackedNode = StartCoroutine(CoUpdateTrackedNode());
         }
 
-        protected virtual void OnDisable()
+        protected override void OnDisable()
         {
+            base.OnDisable();
+
             QuickUnityVRBase.OnCalibrate -= Init;
-            _rigidBody.isKinematic = true;
             StopCoroutine(_coUpdateTrackedNode);
         }
 
