@@ -36,6 +36,7 @@ namespace QuickVR {
         protected virtual void Reset()
         {
             _priority = GetDefaultPriority();
+            _animator = GetComponent<Animator>();
         }
 
         protected virtual void Awake() {
