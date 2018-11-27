@@ -21,13 +21,14 @@ namespace QuickVR {
 
         #region PROTECTED PARAMETERS
 
-        protected Transform _ikTargetsRoot = null;
-
-        protected Transform _ikSolversRoot = null;
-
         protected static List<IKLimbBones> _ikLimbBones = null;
 
+        protected Transform _ikTargetsRoot = null;
+        protected Transform _ikSolversRoot = null;
         protected Transform _ikCalibrationTargetsRoot = null;
+
+        protected HumanPoseHandler _srcPoseHandler = null;
+        protected HumanPose _srcPose = new HumanPose();
 
         #endregion
 
@@ -52,6 +53,9 @@ namespace QuickVR {
                 QuickIKSolver ikSolver = CreateIKSolver(uBone);
                 ikSolver.enabled = false;
             }
+
+            _srcPoseHandler = new HumanPoseHandler(_animator.avatar, _animator.transform);
+            _srcPoseHandler.GetHumanPose(ref _srcPose);
         }
 
         protected override void Awake() {
