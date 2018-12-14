@@ -370,6 +370,8 @@ namespace QuickVR
         protected virtual void OnHMDConnected()
         {
             Calibrate();
+
+            UpdateReferenceNode();
         }
 
         protected virtual void OnLeftHandConnected()
@@ -402,6 +404,13 @@ namespace QuickVR
                     GetQuickVRNode(_handsSwaped ? QuickVRNode.Type.LeftHand : QuickVRNode.Type.RightHand).SetID(s.uniqueID);
                 }
             }
+        }
+
+        public virtual void UpdateReferenceNode()
+        {
+            Transform t = GetQuickVRNode(QuickVRNode.Type.Reference).transform;
+            t.position = _vrNodesOrigin.position;
+            t.rotation = _vrNodesOrigin.rotation;
         }
 
         #endregion

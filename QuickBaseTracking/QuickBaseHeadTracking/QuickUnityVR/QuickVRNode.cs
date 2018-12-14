@@ -20,6 +20,8 @@ namespace QuickVR
             Waist,
             LeftFoot, 
             RightFoot,
+
+            Reference,
         };
 
         public enum State

@@ -312,7 +312,7 @@ namespace QuickVR {
             Debug.Log("PREPARING FOR CALIBRATION");
             if (OnCalibrating != null) OnCalibrating();
 
-            QuickHeadTracking hTracking = _player? _player.GetComponent<QuickHeadTracking>() : null;
+            QuickUnityVRBase hTracking = _player? _player.GetComponent<QuickUnityVRBase>() : null;
 			if (hTracking)
             {
                 yield return StartCoroutine(CoShowLogos());
@@ -336,6 +336,7 @@ namespace QuickVR {
 #endif
 
                 QuickSingletonManager.GetInstance<QuickVRManager>().Calibrate(true);
+                hTracking.UpdateReferenceNode();
 				_debugManager.Clear();
 			}
 			else _debugManager.Log("NO HEAD TRACKING FOUND!!!");
