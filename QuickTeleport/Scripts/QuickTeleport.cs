@@ -89,6 +89,14 @@ namespace QuickVR
             return selectedItem && (selectedItem.GetComponent<QuickTeleportWalkableObject>() != null);
         }
 
+        public virtual bool IsNoRayObjectSelected()
+        {
+            QuickUICursor cursor = GetCursor();
+            if (cursor.GetRaycastResult().collider != null)
+                return cursor.GetRaycastResult().collider.gameObject.CompareTag("NoRay");            
+            return false;
+        }
+
         public virtual void SetTrajectoryTargetColor(Color c)
         {
             _trajectoryTarget.GetComponent<Renderer>().material.color = c;
@@ -124,10 +132,12 @@ namespace QuickVR
 
             while (true)
             {
-                Color c = IsTeleportWalkableObjectSelected() ? Color.green : Color.red;
+                Color c = IsTeleportWalkableObjectSelected() ? Color.green : Color.red;                
                 SetTrajectoryTargetColor(c);
                 QuickUICursor cursor = GetCursor();
                 if (cursor) cursor.SetColor(c);
+                                
+                cursor._drawRay = !IsNoRayObjectSelected();
 
                 yield return null;
             }
