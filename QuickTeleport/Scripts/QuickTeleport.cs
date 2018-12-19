@@ -138,6 +138,7 @@ namespace QuickVR
                 if (cursor) cursor.SetColor(c);
                                 
                 cursor._drawRay = !IsNoRayObjectSelected();
+                cursor._drawCursor = false;
 
                 yield return null;
             }
