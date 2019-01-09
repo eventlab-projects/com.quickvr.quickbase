@@ -21,7 +21,7 @@ namespace QuickVR
             LeftFoot, 
             RightFoot,
 
-            Reference,
+            TrackingReference,  //Represents a stationary physical device that can be used as a point of reference in the tracked area.
         };
 
         public enum State

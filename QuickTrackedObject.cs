@@ -11,8 +11,7 @@ namespace QuickVR
         #region PROTECTED ATTRIBUTES
 
         protected Vector3 _lastPosition = Vector3.zero;
-        protected Vector3 _displacement = Vector3.zero;
-
+        
         protected Vector3 _velocity = Vector3.zero;
         protected Vector3 _lastVelocity = Vector3.zero;
 
@@ -44,7 +43,6 @@ namespace QuickVR
         public virtual void Reset()
         {
             _lastPosition = transform.position;
-            _displacement = Vector3.zero;
             
             _velocity = Vector3.zero;
             _lastVelocity = Vector3.zero;
@@ -58,7 +56,7 @@ namespace QuickVR
         public Vector3 GetDisplacement()
         {
             //return IsTracked() ? _displacement : Vector3.zero;
-            return _displacement;
+            return transform.position - _lastPosition;
         }
 
         public Quaternion GetRotationOffset()
@@ -93,11 +91,10 @@ namespace QuickVR
 
         public virtual void UpdateTrackedData()
         {
-            _displacement = transform.position - _lastPosition;
             float dt = Time.deltaTime;
             if (!Mathf.Approximately(dt, 0))
             {
-                _velocity = _displacement / dt;
+                _velocity = GetDisplacement() / dt;
                 _speed = _velocity.magnitude;
 
                 _accelerationFull.x = _velocity.x - _lastVelocity.x;

@@ -15,5 +15,7 @@ public class QuickUnityVRBaseAsset : ScriptableObject
     public UnityEngine.Vector3 _handControllerPositionOffset;
     [BitMask(typeof(QuickVR.IKLimbBones), 0, 4)]
     public System.Int32 _trackedJoints;
+    public System.Boolean _useFootprints;
+    public UnityEngine.Transform _footprints;
  
 }

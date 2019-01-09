@@ -18,8 +18,8 @@ namespace QuickVR {
         public Transform _playerMale = null;
         public Transform _playerFemale = null;
 
-        public bool _useFootprints = true;
-        public Transform _footprints = null;
+        //public bool _useFootprints = true;
+        //public Transform _footprints = null;
         public float _minDistToFootPrints = 0.5f;        
 
         public AudioClip _headTrackingCalibrationInstructions = null;
@@ -106,16 +106,6 @@ namespace QuickVR {
             AwakePlayer();
 
             _hTracking = GetPlayer().GetComponentInChildren<QuickUnityVRBase>(true);
-
-            if (_useFootprints && _footprints == null)
-            {
-                _footprints = Instantiate<GameObject>(Resources.Load<GameObject>("Footprints/Footprints")).transform;
-            }
-            else if (!_useFootprints && _footprints != null)
-                _footprints.gameObject.SetActive(false);
-
-            if (_footprints != null)
-                _footprints.parent = GetPlayer().parent;            
         }
 
         protected virtual void Start()
@@ -197,31 +187,31 @@ namespace QuickVR {
         {
             Transform target = GetPlayer().transform;
 
-            Vector3 footPrintsLocalPos = Vector3.zero;
-            Vector3 footPrintsLocalForward = Vector3.forward;
-            if (_footprints != null)
-            {
-                footPrintsLocalPos = _relativeMatrix.MultiplyPoint(_footprints.position);
-                footPrintsLocalForward = _relativeMatrix.MultiplyVector(_footprints.forward);
-            }
+            //Vector3 footPrintsLocalPos = Vector3.zero;
+            //Vector3 footPrintsLocalForward = Vector3.forward;
+            //if (_footprints != null)
+            //{
+            //    footPrintsLocalPos = _relativeMatrix.MultiplyPoint(_footprints.position);
+            //    footPrintsLocalForward = _relativeMatrix.MultiplyVector(_footprints.forward);
+            //}
 
             _hTracking.SetInitialPosition(target.position);
             _hTracking.SetInitialRotation(target.rotation);
 
-            if (_footprints != null)
-            {
-                _footprints.position = target.localToWorldMatrix.MultiplyPoint(footPrintsLocalPos);
-                _footprints.forward = target.localToWorldMatrix.MultiplyVector(footPrintsLocalForward);
-            }
+            //if (_footprints != null)
+            //{
+            //    _footprints.position = target.localToWorldMatrix.MultiplyPoint(footPrintsLocalPos);
+            //    _footprints.forward = target.localToWorldMatrix.MultiplyVector(footPrintsLocalForward);
+            //}
 
             _relativeMatrix = Matrix4x4.identity;
         }
 
         protected bool IsPlayerOnSpot()
         {
-            if (_footprints != null)
-                return Vector3.Distance(GetPlayer().transform.position, _footprints.position) <= _minDistToFootPrints;
-            else
+            //if (_footprints != null)
+            //    return Vector3.Distance(GetPlayer().transform.position, _footprints.position) <= _minDistToFootPrints;
+            //else
                 return true;
         }
 
@@ -303,8 +293,8 @@ namespace QuickVR {
 					Finish();
 				}
 
-                if (_footprints != null)
-                    _footprints.transform.position = new Vector3(_footprints.transform.position.x, GetPlayer().position.y, _footprints.transform.position.z);
+                //if (_footprints != null)
+                //    _footprints.transform.position = new Vector3(_footprints.transform.position.x, GetPlayer().position.y, _footprints.transform.position.z);
             }
 		}
 
@@ -336,7 +326,7 @@ namespace QuickVR {
 #endif
 
                 QuickSingletonManager.GetInstance<QuickVRManager>().Calibrate(true);
-                hTracking.UpdateReferenceNode();
+                //hTracking.UpdateReferenceNode();
 				_debugManager.Clear();
 			}
 			else _debugManager.Log("NO HEAD TRACKING FOUND!!!");

@@ -24,6 +24,9 @@ namespace QuickVR
         [BitMask(typeof(IKLimbBones))]
         public int _trackedJoints = -1;
 
+        public bool _useFootprints = true;
+        public Transform _footprints = null;
+
         #endregion
 
         #region PROTECTED ATTRIBUTES
@@ -55,6 +58,8 @@ namespace QuickVR
             base.Awake();
 
             gameObject.GetOrCreateComponent<QuickCharacterControllerPlayer>(); //Make sure this component exists, so the transform is moved with the translation of the player
+            _footprints = Instantiate<GameObject>(Resources.Load<GameObject>("Footprints/Footprints")).transform;
+            _footprints.gameObject.SetActive(_useFootprints);
 
             _initialPosition = transform.position;
             _initialRotation = transform.rotation;
@@ -322,11 +327,21 @@ namespace QuickVR
 
             UpdateTransformRoot();
             UpdateTransformNodes();
+            //UpdateFootPrints();
 
             UpdateCameraPosition();
 
             UpdateVRCursors();
         }
+
+        //protected virtual void UpdateFootPrints()
+        //{
+        //    Transform tReference = GetQuickVRNode(QuickVRNode.Type.Reference).transform;
+
+        //    Vector3 posOffset = Vector3.ProjectOnPlane(tReference.position - _vrNodesOrigin.position, Vector3.up);
+        //    _footprints.position = transform.position + transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * posOffset;
+        //    //_footprints.rotation = transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * _footprints.rotation;
+        //}
 
         protected virtual void UpdateTransformRoot()
         {
@@ -371,7 +386,7 @@ namespace QuickVR
         {
             Calibrate();
 
-            UpdateReferenceNode();
+            //UpdateReferenceNode();
         }
 
         protected virtual void OnLeftHandConnected()
@@ -403,15 +418,23 @@ namespace QuickVR
                 {
                     GetQuickVRNode(_handsSwaped ? QuickVRNode.Type.LeftHand : QuickVRNode.Type.RightHand).SetID(s.uniqueID);
                 }
+                else if (s.nodeType == XRNode.TrackingReference)
+                {
+                    QuickVRNode n = GetQuickVRNode(QuickVRNode.Type.TrackingReference);
+                    if (!n.IsTracked())
+                    {
+                        n.SetID(s.uniqueID);
+                    }
+                }
             }
         }
 
-        public virtual void UpdateReferenceNode()
-        {
-            Transform t = GetQuickVRNode(QuickVRNode.Type.Reference).transform;
-            t.position = _vrNodesOrigin.position;
-            t.rotation = _vrNodesOrigin.rotation;
-        }
+        //public virtual void UpdateReferenceNode()
+        //{
+        //    Transform t = GetQuickVRNode(QuickVRNode.Type.Reference).transform;
+        //    t.position = _vrNodesOrigin.position;
+        //    t.rotation = _vrNodesOrigin.rotation;
+        //}
 
         #endregion
 
@@ -422,6 +445,8 @@ namespace QuickVR
             if (Application.isPlaying)
             {
                 DebugVRNodesOrigin();
+
+                DebugVRNode(QuickVRNode.Type.TrackingReference, Color.yellow);
 
                 DebugVRNode(QuickVRNode.Type.Head, Color.grey);
                 DebugVRNode(QuickVRNode.Type.LeftHand, Color.blue);
