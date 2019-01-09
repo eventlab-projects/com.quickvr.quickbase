@@ -457,18 +457,12 @@ namespace QuickVR
 
                 DebugVRNodeConnection(QuickVRNode.Type.Head, QuickVRNode.Type.LeftHand);
                 DebugVRNodeConnection(QuickVRNode.Type.Head, QuickVRNode.Type.RightHand);
-
-                Gizmos.color = Color.white;
-                QuickVRNode.Type tNode = GetQuickVRNode(QuickVRNode.Type.Waist).IsTracked() ? QuickVRNode.Type.Waist : QuickVRNode.Type.Head;
-                Gizmos.DrawLine(GetQuickVRNode(tNode).GetTrackedObject().transform.position, _vrNodesOrigin.position);
             }
         }
 
         protected virtual void DebugVRNodesOrigin()
         {
-            float s = 0.1f;
-            Gizmos.color = Color.blue;
-            Gizmos.DrawLine(_vrNodesOrigin.position, _vrNodesOrigin.position + _vrNodesOrigin.forward * s);
+            DebugExtension.DrawCoordinatesSystem(_vrNodesOrigin.position, _vrNodesOrigin.right, _vrNodesOrigin.up, _vrNodesOrigin.forward, 0.1f);
         }
 
         protected virtual void DebugVRNode(QuickVRNode.Type nType, Color color, float scale = 0.05f)

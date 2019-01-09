@@ -242,12 +242,13 @@ namespace QuickVR {
             QuickVRNode node = GetQuickVRNode(nType);
             if (node.IsTracked() && QuickUtils.IsEnumValue<HumanBodyBones>(nType.ToString()))
             {
-                Transform hips = _animator.GetBoneTransform(HumanBodyBones.Hips);
-                QuickIKSolver ikSolver = _ikManager.GetIKSolver(QuickUtils.ParseEnum<HumanBodyBones>(nType.ToString()));
-                
                 QuickTrackedObject tObject = node.GetTrackedObject();
-                Vector3 posOffset = tObject.transform.position - _vrNodesOrigin.position;
-                ikSolver._targetLimb.position = hips.position + transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * posOffset;
+                Transform tCalibrationHead = GetCalibrationPose(QuickVRNode.Type.Head);
+                Vector3 posOffset = tObject.transform.position - tCalibrationHead.position;
+
+                Transform head = _ikManager.GetIKCalibrationTarget(IKLimbBones.Head);
+                QuickIKSolver ikSolver = _ikManager.GetIKSolver(QuickUtils.ParseEnum<HumanBodyBones>(nType.ToString()));
+                ikSolver._targetLimb.position = head.position + transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * posOffset;
                 ikSolver._targetLimb.rotation = transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * tObject.transform.rotation;
             }
         }
@@ -258,6 +259,34 @@ namespace QuickVR {
             _ikManager.GetIKSolver(HumanBodyBones.Head)._weightIKRot = _applyHeadRotation ? 1.0f : 0.0f;
 
             _ikManager.UpdateTracking();
+        }
+
+        #endregion
+
+        #region DEBUG
+
+        protected override void OnDrawGizmos()
+        {
+            base.OnDrawGizmos();
+
+            if (Application.isPlaying)
+            {
+                DebugVRNodeCalibrationPose(QuickVRNode.Type.Head, Color.grey);
+                DebugVRNodeCalibrationPose(QuickVRNode.Type.LeftHand, Color.blue);
+                DebugVRNodeCalibrationPose(QuickVRNode.Type.LeftFoot, Color.cyan);
+                DebugVRNodeCalibrationPose(QuickVRNode.Type.RightHand, Color.red);
+                DebugVRNodeCalibrationPose(QuickVRNode.Type.RightFoot, Color.magenta);
+                DebugVRNodeCalibrationPose(QuickVRNode.Type.Waist, Color.black);
+            }
+        }
+
+        protected virtual void DebugVRNodeCalibrationPose(QuickVRNode.Type nType, Color color, float scale = 0.05f)
+        {
+            Transform t = GetCalibrationPose(nType);
+            QuickVRNode qNode = GetQuickVRNode(nType);
+
+            Gizmos.color = color;
+            Gizmos.DrawWireSphere(t.position, scale * 0.5f);
         }
 
         #endregion
