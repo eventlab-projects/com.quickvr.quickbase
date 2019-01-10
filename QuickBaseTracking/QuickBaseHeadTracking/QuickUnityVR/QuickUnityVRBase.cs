@@ -132,6 +132,26 @@ namespace QuickVR
             QuickVRManager.OnPreUpdateTracking -= ComputeVRNodesState;
         }
 
+        public virtual void InitVRNodeFootPrints()
+        {
+            InitVRNodeFootPrintsPosition();
+            InitVRNodeFootPrintsRotation();
+        }
+
+        public virtual void InitVRNodeFootPrintsPosition()
+        {
+            Transform tHead = GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject().transform;
+            Transform tFootPrints = GetQuickVRNode(QuickVRNode.Type.FootPrints).transform;
+            tFootPrints.position = new Vector3(tHead.position.x, _vrNodesOrigin.position.y, tHead.position.z);
+        }
+
+        public virtual void InitVRNodeFootPrintsRotation()
+        {
+            Transform tHead = GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject().transform;
+            Transform tFootPrints = GetQuickVRNode(QuickVRNode.Type.FootPrints).transform;
+            tFootPrints.rotation = _vrNodesOrigin.rotation;
+        }
+
         #endregion
 
         #region GET AND SET
@@ -295,6 +315,8 @@ namespace QuickVR
         protected virtual void CalibrateVRNodeHead(QuickVRNode node)
         {
             _vrNodesOrigin.forward = Vector3.ProjectOnPlane(node.transform.forward, transform.up);
+
+            InitVRNodeFootPrintsRotation();
         }
 
         protected virtual void CalibrateCameraForward()
@@ -327,21 +349,24 @@ namespace QuickVR
 
             UpdateTransformRoot();
             UpdateTransformNodes();
-            //UpdateFootPrints();
-
+            
             UpdateCameraPosition();
+
+            UpdateFootPrints();
 
             UpdateVRCursors();
         }
 
-        //protected virtual void UpdateFootPrints()
-        //{
-        //    Transform tReference = GetQuickVRNode(QuickVRNode.Type.Reference).transform;
+        protected virtual void UpdateFootPrints()
+        {
+            Transform rFootPrints = GetQuickVRNode(QuickVRNode.Type.FootPrints).transform;
+            Transform rHead = GetQuickVRNode(QuickVRNode.Type.Head).transform;
+            Vector3 offset = rFootPrints.position - rHead.position;
 
-        //    Vector3 posOffset = Vector3.ProjectOnPlane(tReference.position - _vrNodesOrigin.position, Vector3.up);
-        //    _footprints.position = transform.position + transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * posOffset;
-        //    //_footprints.rotation = transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * _footprints.rotation;
-        //}
+            _footprints.position = _camera.transform.position + transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * offset;
+            _footprints.position = new Vector3(_footprints.position.x, transform.position.y, _footprints.position.z);
+            _footprints.rotation = transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * rFootPrints.rotation;
+        }
 
         protected virtual void UpdateTransformRoot()
         {
@@ -386,7 +411,7 @@ namespace QuickVR
         {
             Calibrate();
 
-            //UpdateReferenceNode();
+            InitVRNodeFootPrints();
         }
 
         protected virtual void OnLeftHandConnected()
@@ -428,13 +453,6 @@ namespace QuickVR
                 }
             }
         }
-
-        //public virtual void UpdateReferenceNode()
-        //{
-        //    Transform t = GetQuickVRNode(QuickVRNode.Type.Reference).transform;
-        //    t.position = _vrNodesOrigin.position;
-        //    t.rotation = _vrNodesOrigin.rotation;
-        //}
 
         #endregion
 

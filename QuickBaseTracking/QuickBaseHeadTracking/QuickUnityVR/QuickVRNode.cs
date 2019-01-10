@@ -22,6 +22,7 @@ namespace QuickVR
             RightFoot,
 
             TrackingReference,  //Represents a stationary physical device that can be used as a point of reference in the tracked area.
+            FootPrints,         //A virtual node that represents the physical position where the user starts. 
         };
 
         public enum State

@@ -326,7 +326,7 @@ namespace QuickVR {
 #endif
 
                 QuickSingletonManager.GetInstance<QuickVRManager>().Calibrate(true);
-                //hTracking.UpdateReferenceNode();
+                hTracking.InitVRNodeFootPrints();
 				_debugManager.Clear();
 			}
 			else _debugManager.Log("NO HEAD TRACKING FOUND!!!");
