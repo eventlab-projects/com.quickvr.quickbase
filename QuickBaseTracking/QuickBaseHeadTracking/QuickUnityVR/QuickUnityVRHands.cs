@@ -127,8 +127,8 @@ namespace QuickVR {
 
                 QuickTrackedObject tObject = node.GetTrackedObject();
                 Vector3 posOffset = tObject.transform.position - _vrNodesOrigin.position;
-                vrHandRoot.position = transform.position + transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * posOffset;
-                vrHandRoot.rotation = transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * tObject.transform.rotation;
+                vrHandRoot.position = transform.position + ToAvatarSpace(posOffset);
+                vrHandRoot.rotation = ToAvatarSpace(tObject.transform.rotation);
             }
         }
 

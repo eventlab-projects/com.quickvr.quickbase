@@ -35,14 +35,16 @@ namespace QuickVR
         protected Transform _vrNodesRoot = null;
         protected Transform _vrNodesOrigin = null;
 
+        protected Vector3 _userDisplacement = Vector3.zero; //The accumulated real displacement of the user
+
         protected Vector3 _initialPosition = Vector3.zero;
         protected Quaternion _initialRotation = Quaternion.identity;
 
         protected bool _handsSwaped = false;
 
-        protected Vector3 _playerVelocity = Vector3.zero;
+        protected QuickCharacterControllerManager _characterControllerManager = null;
 
-        #endregion
+       #endregion
 
         #region EVENTS
 
@@ -57,7 +59,7 @@ namespace QuickVR
         {
             base.Awake();
 
-            gameObject.GetOrCreateComponent<QuickCharacterControllerPlayer>(); //Make sure this component exists, so the transform is moved with the translation of the player
+            _characterControllerManager = gameObject.GetOrCreateComponent<QuickCharacterControllerManager>(); //Make sure this component exists, so the transform is moved with the translation of the player
             _footprints = Instantiate<GameObject>(Resources.Load<GameObject>("Footprints/Footprints")).transform;
             _footprints.gameObject.SetActive(_useFootprints);
 
@@ -134,6 +136,7 @@ namespace QuickVR
 
         public virtual void InitVRNodeFootPrints()
         {
+            _userDisplacement = Vector3.zero;
             InitVRNodeFootPrintsPosition();
             InitVRNodeFootPrintsRotation();
         }
@@ -155,6 +158,16 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
+
+        protected virtual Vector3 ToAvatarSpace(Vector3 v)
+        {
+            return transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * v;
+        }
+
+        protected virtual Quaternion ToAvatarSpace(Quaternion q)
+        {
+            return transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * q;
+        }
 
         public virtual void SetInitialPosition(Vector3 initialPosition)
         {
@@ -185,11 +198,6 @@ namespace QuickVR
         protected abstract Vector3 GetDisplacement();
         protected abstract float GetRotationOffset();
 
-        public virtual Vector3 GetPlayerVelocity()
-        {
-            return _playerVelocity;
-        }
-        
         protected virtual void CheckVRHands()
         {
             //Check if the hands are reversed
@@ -349,7 +357,7 @@ namespace QuickVR
 
             UpdateTransformRoot();
             UpdateTransformNodes();
-            
+
             UpdateCameraPosition();
 
             UpdateFootPrints();
@@ -359,13 +367,16 @@ namespace QuickVR
 
         protected virtual void UpdateFootPrints()
         {
-            Transform rFootPrints = GetQuickVRNode(QuickVRNode.Type.FootPrints).transform;
-            Transform rHead = GetQuickVRNode(QuickVRNode.Type.Head).transform;
-            Vector3 offset = rFootPrints.position - rHead.position;
+            //Transform rFootPrints = GetQuickVRNode(QuickVRNode.Type.FootPrints).transform;
+            //Transform rHead = GetQuickVRNode(QuickVRNode.Type.Head).transform;
+            //Vector3 offset = rFootPrints.position - rHead.position;
 
-            _footprints.position = _camera.transform.position + transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * offset;
-            _footprints.position = new Vector3(_footprints.position.x, transform.position.y, _footprints.position.z);
-            _footprints.rotation = transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * rFootPrints.rotation;
+            //_footprints.position = _camera.transform.position + ToAvatarSpace(offset);
+            //_footprints.position = new Vector3(_footprints.position.x, transform.position.y, _footprints.position.z);
+            //_footprints.rotation = ToAvatarSpace(rFootPrints.rotation);
+
+            _footprints.position = transform.position - _userDisplacement;
+            _footprints.rotation = ToAvatarSpace(_vrNodesOrigin.rotation);
         }
 
         protected virtual void UpdateTransformRoot()
@@ -376,11 +387,13 @@ namespace QuickVR
             _vrNodesOrigin.Rotate(_vrNodesOrigin.up, rotOffset, Space.World);
 
             //Update the position
-            Vector3 disp = GetDisplacement();
-            Vector3 offset = _vrNodesOrigin.InverseTransformVector(disp);
-            _vrNodesOrigin.Translate(new Vector3(offset.x, 0.0f, offset.z), Space.Self);
+            Vector3 disp = Vector3.Scale(GetDisplacement(), Vector3.right + Vector3.forward);
+            _vrNodesOrigin.Translate(_vrNodesOrigin.InverseTransformVector(disp), Space.Self);
 
-            _playerVelocity = (Quaternion.Inverse(_vrNodesOrigin.rotation) * transform.rotation * disp) / Time.deltaTime;
+            Vector3 userDisp = ToAvatarSpace(disp);
+            transform.Translate(userDisp, Space.World);
+            _characterControllerManager.SetStepVelocity(userDisp / Time.deltaTime);
+            _userDisplacement += userDisp;
         }
 
         protected abstract void UpdateTransformNodes();

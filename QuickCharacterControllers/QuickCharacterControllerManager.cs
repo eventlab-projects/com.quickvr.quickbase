@@ -38,9 +38,8 @@ namespace QuickVR
 
         protected HashSet<QuickCharacterControllerBase> _characterControllers = new HashSet<QuickCharacterControllerBase>();
 
-        protected Vector3 _totalLinearVelocity = Vector3.zero;    //The linear velocity the object had before Unity's internal physics update
-
         protected bool _stepping = false;
+        protected Vector3 _stepVelocity = Vector3.zero;
 
         #endregion
 
@@ -109,21 +108,31 @@ namespace QuickVR
             return LayerMask.NameToLayer("AutonomousAgent");
         }
 
+        public virtual void SetStepVelocity(Vector3 v)
+        {
+            _stepVelocity = v;
+        }
+
+        protected virtual Vector3 GetTotalLinearVelocity()
+        {
+            return _stepVelocity + _rigidBody.velocity;
+        }
+
         #endregion
 
         #region UPDATE
 
         protected virtual void FixedUpdate()
         {
-            _totalLinearVelocity = Vector3.zero;
+            Vector3 linearVelocity = Vector3.zero;
 
             foreach (QuickCharacterControllerBase characterController in _characterControllers)
             {
                 characterController.UpdateMovement();
-                _totalLinearVelocity += characterController.GetCurrentLinearVelocity();
+                linearVelocity += characterController.GetCurrentLinearVelocity();
             }
 
-            _rigidBody.velocity = Vector3.Scale(_rigidBody.velocity, Vector3.up) + _totalLinearVelocity;
+            _rigidBody.velocity = Vector3.Scale(_rigidBody.velocity, Vector3.up) + linearVelocity;
         }
 
         #endregion
@@ -151,8 +160,9 @@ namespace QuickVR
             if ((collision.gameObject.layer == GetLayerPlayer()) || (collision.gameObject.layer == GetLayerAutonomousAgent())) return;
 
             //Check if the current speed is significant enough to consider that we are, at least, walking
+            Vector3 totalLinearVelocity = GetTotalLinearVelocity();
             float minSpeed = 0.25f;
-            float speed2 = _totalLinearVelocity.sqrMagnitude;
+            float speed2 = totalLinearVelocity.sqrMagnitude;
             if (speed2 < minSpeed * minSpeed) return;
 
             //If we arrive here, we consider that we are walking and we have collided with an obstacle. Let's check if
@@ -164,7 +174,7 @@ namespace QuickVR
                 //We are only interested on those contact points pointing on the same direction
                 //that the linear velocity and in a higher elevation than current character's position.
                 Vector3 offset = contact.point - transform.position;
-                if ((offset.y > stepOffset.y) && (Vector3.Dot(offset, _totalLinearVelocity) > 0))
+                if ((offset.y > stepOffset.y) && (Vector3.Dot(offset, totalLinearVelocity) > 0))
                 {
                     stepOffset = offset;
                 }
@@ -182,14 +192,15 @@ namespace QuickVR
             _stepping = true;
             _rigidBody.isKinematic = true;
 
-            float speed = _totalLinearVelocity.magnitude; //0.5f;
+            Vector3 totalLinearVelocity = GetTotalLinearVelocity();
+            float speed = totalLinearVelocity.magnitude; //0.5f;
 
             //Move upwards until the step height is reached. 
             yield return StartCoroutine(CoUpdateStepping(transform.position + Vector3.up * stepOffset.y, stepOffset.y, speed));
 
             //Move in the direction of the velocity in order to ensure that the 
             float d = _collider.radius * 1.1f;    //The horizontal distance
-            yield return StartCoroutine(CoUpdateStepping(transform.position + _totalLinearVelocity.normalized * d, d, speed));
+            yield return StartCoroutine(CoUpdateStepping(transform.position + totalLinearVelocity.normalized * d, d, speed));
 
             _rigidBody.isKinematic = false;
             _stepping = false;

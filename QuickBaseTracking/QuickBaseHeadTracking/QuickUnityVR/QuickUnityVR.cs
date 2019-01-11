@@ -231,9 +231,8 @@ namespace QuickVR {
 
                 Vector3 posOffset = tObject.transform.position - GetCalibrationPose(nType).position;
 
-                //tObject.transform.rotation = nodeType == QuickVRNode.Type.Head ? node.transform.rotation : _vrNodesOrigin.rotation * Quaternion.Inverse(transform.rotation) * ikTarget.rotation;
-                ikSolver._targetLimb.position += transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * posOffset;
-                ikSolver._targetLimb.rotation = transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * tObject.transform.rotation;
+                ikSolver._targetLimb.position += ToAvatarSpace(posOffset);
+                ikSolver._targetLimb.rotation = ToAvatarSpace(tObject.transform.rotation);
             }
         }
 
@@ -248,8 +247,8 @@ namespace QuickVR {
 
                 Transform head = _ikManager.GetIKCalibrationTarget(IKLimbBones.Head);
                 QuickIKSolver ikSolver = _ikManager.GetIKSolver(QuickUtils.ParseEnum<HumanBodyBones>(nType.ToString()));
-                ikSolver._targetLimb.position = head.position + transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * posOffset;
-                ikSolver._targetLimb.rotation = transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * tObject.transform.rotation;
+                ikSolver._targetLimb.position = head.position + ToAvatarSpace(posOffset);
+                ikSolver._targetLimb.rotation = ToAvatarSpace(tObject.transform.rotation);
             }
         }
 
