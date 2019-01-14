@@ -145,7 +145,8 @@ namespace QuickVR
 
         protected virtual Vector3 ToAvatarSpace(Vector3 v)
         {
-            return transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * v;
+            //return transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * v;
+            return transform.TransformVector(_vrNodesOrigin.InverseTransformVector(v));
         }
 
         protected virtual Quaternion ToAvatarSpace(Quaternion q)
@@ -307,6 +308,7 @@ namespace QuickVR
         protected virtual void CalibrateVRNodeHead(QuickVRNode node)
         {
             _vrNodesOrigin.forward = Vector3.ProjectOnPlane(node.transform.forward, transform.up);
+            _footprints.rotation = ToAvatarSpace(_vrNodesOrigin.rotation);
         }
 
         protected virtual void CalibrateCameraForward()
@@ -350,7 +352,6 @@ namespace QuickVR
         protected virtual void UpdateFootPrints()
         {
             _footprints.position = transform.position - _userDisplacement;
-            _footprints.rotation = ToAvatarSpace(_vrNodesOrigin.rotation);
         }
 
         protected virtual void UpdateTransformRoot()
@@ -462,6 +463,10 @@ namespace QuickVR
 
                 DebugVRNodeConnection(QuickVRNode.Type.Head, QuickVRNode.Type.LeftHand);
                 DebugVRNodeConnection(QuickVRNode.Type.Head, QuickVRNode.Type.RightHand);
+
+                Gizmos.color = Color.white;
+                QuickVRNode.Type tNode = GetQuickVRNode(QuickVRNode.Type.Waist).IsTracked() ? QuickVRNode.Type.Waist : QuickVRNode.Type.Head;
+                Gizmos.DrawLine(GetQuickVRNode(tNode).GetTrackedObject().transform.position, _vrNodesOrigin.position);
             }
         }
 

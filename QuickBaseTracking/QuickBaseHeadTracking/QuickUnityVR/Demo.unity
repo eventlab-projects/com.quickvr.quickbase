@@ -1062,7 +1062,7 @@ MonoBehaviour:
   _trackedJoints: -1
   _useFootprints: 1
   _footprints: {fileID: 0}
-  _displaceWithCamera: 1
+  _displaceWithCamera: 0
   _rotateWithCamera: 0
   _updateReference: 0
   _ikManager: {fileID: 0}
@@ -2144,7 +2144,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &962990293
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3560,7 +3560,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!65 &1432887041
 BoxCollider:
   m_ObjectHideFlags: 0

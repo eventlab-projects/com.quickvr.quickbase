@@ -32,6 +32,8 @@ namespace QuickVR {
         protected QuickTrackedObject _verticalReference = null;
         protected float _initialVerticalReferencePosY = 0.0f;
 
+        protected float _unscaledHeadHeight = 0.0f;
+
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -41,6 +43,7 @@ namespace QuickVR {
             base.Awake();
 
             _initialHipsLocalPosition = _animator.GetBoneTransform(HumanBodyBones.Hips).localPosition;
+            _unscaledHeadHeight = (_animator.GetBoneTransform(HumanBodyBones.Head).position.y - transform.position.y);
             
             //Create the IKManager
             _ikManager = gameObject.GetOrCreateComponent<QuickIKManager>();
@@ -76,6 +79,11 @@ namespace QuickVR {
         #endregion
 
         #region GET AND SET
+
+        protected virtual float GetHeadHeight()
+        {
+            return _unscaledHeadHeight * (1.0f / transform.lossyScale.y);
+        }
 
         protected Transform GetCalibrationPose(QuickVRNode.Type tNode)
         {
@@ -146,8 +154,9 @@ namespace QuickVR {
         {
             QuickTrackedObject tObject = node.GetTrackedObject();
 
-            tObject.transform.localPosition = Quaternion.Inverse(transform.rotation) * (_animator.GetBoneTransform(HumanBodyBones.Head).position - GetEyeCenterPosition());
-            _vrNodesOrigin.position = tObject.transform.position - transform.up * _ikManager.GetIKSolver(HumanBodyBones.Head).GetChainLength();
+            Transform tHead = _animator.GetBoneTransform(HumanBodyBones.Head);
+            tObject.transform.localPosition = Quaternion.Inverse(transform.rotation) * (tHead.position - GetEyeCenterPosition());
+            _vrNodesOrigin.position = tObject.transform.position - transform.up * GetHeadHeight();
 
             base.CalibrateVRNodeHead(node);
         }
@@ -197,6 +206,10 @@ namespace QuickVR {
         {
             base.UpdateTransformRoot();
 
+            Transform t = GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject().transform;
+            float h = t.position.y - _vrNodesOrigin.position.y;
+            _vrNodesOrigin.position = new Vector3(_vrNodesOrigin.position.x, t.position.y - Mathf.Min(h, GetHeadHeight()), _vrNodesOrigin.position.z);
+
             float hipsOffsetY = Mathf.Min(0, _verticalReference.transform.position.y - _initialVerticalReferencePosY);
             Transform tHips = _animator.GetBoneTransform(HumanBodyBones.Hips);
             tHips.localPosition = _initialHipsLocalPosition;
@@ -242,12 +255,10 @@ namespace QuickVR {
             if (node.IsTracked() && QuickUtils.IsEnumValue<HumanBodyBones>(nType.ToString()))
             {
                 QuickTrackedObject tObject = node.GetTrackedObject();
-                Transform tCalibrationHead = GetCalibrationPose(QuickVRNode.Type.Head);
-                Vector3 posOffset = tObject.transform.position - tCalibrationHead.position;
+                Vector3 posOffset = tObject.transform.position - _vrNodesOrigin.position;
 
-                Transform head = _ikManager.GetIKCalibrationTarget(IKLimbBones.Head);
                 QuickIKSolver ikSolver = _ikManager.GetIKSolver(QuickUtils.ParseEnum<HumanBodyBones>(nType.ToString()));
-                ikSolver._targetLimb.position = head.position + ToAvatarSpace(posOffset);
+                ikSolver._targetLimb.position = transform.position + ToAvatarSpace(posOffset);
                 ikSolver._targetLimb.rotation = ToAvatarSpace(tObject.transform.rotation);
             }
         }
