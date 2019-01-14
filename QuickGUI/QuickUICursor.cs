@@ -27,6 +27,7 @@ namespace QuickVR
         public float _RayLength = 500f;                 // How far into the scene the ray is cast.
         public LayerMask _RayCastMask = -1 & ~(1 << 2);	// Layers to exclude from the raycast.
         public bool _drawRay = false;
+        public bool _drawCursor = true;
 
         public string _TriggerVirtualKey = InputManager.DEFAULT_BUTTON_CONTINUE;
 
@@ -168,7 +169,7 @@ namespace QuickVR
 
             bool hit = _raycastResult.collider != null;
             bool draw = (hit || (!hit && !_hideIfNoHit));
-            _CursorTransform.gameObject.SetActive(draw);
+            _CursorTransform.gameObject.SetActive(draw && _drawCursor);
             _rayRender.enabled = draw && _drawRay;
         }
 
