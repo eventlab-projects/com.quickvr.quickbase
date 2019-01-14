@@ -1100,34 +1100,6 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 437895852}
   m_PrefabAsset: {fileID: 0}
---- !u!114 &437895858
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 437895853}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 722d9d863ce332148b6eebcec6e8b34a, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _teleportTime: 0.3
-  _pfTrajectoryTarget: {fileID: 0}
-  _vrCursorType: 2
-  _teleportKey: Teleport
---- !u!114 &437895859
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 437895853}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b6b111e3dc366324eb7d5c093caacc22, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &455655024
 GameObject:
   m_ObjectHideFlags: 0
@@ -1269,7 +1241,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _showInInspector: 1
-  _axisCode: None
+  _axisCode: TriggerIndexLeft
   _value: 0
   _positiveButton: {fileID: 400647991}
   _negativeButton: {fileID: 400647990}
@@ -1319,7 +1291,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _showInInspector: 1
-  _axisCode: None
+  _axisCode: TriggerIndexRight
   _value: 0
   _positiveButton: {fileID: 641876892}
   _negativeButton: {fileID: 641876891}
@@ -2791,6 +2763,7 @@ GameObject:
   - component: {fileID: 1263695278}
   - component: {fileID: 1263695277}
   - component: {fileID: 1263695281}
+  - component: {fileID: 1263695282}
   m_Layer: 0
   m_Name: Plane
   m_TagString: Untagged
@@ -2872,6 +2845,20 @@ Transform:
   m_RootOrder: 4
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1263695281
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1263695276}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef506f82638b8f24d9d3267d4dec6bb7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _description: Item Description
+  HighLightPrefab: {fileID: 0}
+--- !u!114 &1263695282
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}

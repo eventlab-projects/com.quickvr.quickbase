@@ -137,22 +137,6 @@ namespace QuickVR
         public virtual void InitVRNodeFootPrints()
         {
             _userDisplacement = Vector3.zero;
-            InitVRNodeFootPrintsPosition();
-            InitVRNodeFootPrintsRotation();
-        }
-
-        public virtual void InitVRNodeFootPrintsPosition()
-        {
-            Transform tHead = GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject().transform;
-            Transform tFootPrints = GetQuickVRNode(QuickVRNode.Type.FootPrints).transform;
-            tFootPrints.position = new Vector3(tHead.position.x, _vrNodesOrigin.position.y, tHead.position.z);
-        }
-
-        public virtual void InitVRNodeFootPrintsRotation()
-        {
-            Transform tHead = GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject().transform;
-            Transform tFootPrints = GetQuickVRNode(QuickVRNode.Type.FootPrints).transform;
-            tFootPrints.rotation = _vrNodesOrigin.rotation;
         }
 
         #endregion
@@ -323,8 +307,6 @@ namespace QuickVR
         protected virtual void CalibrateVRNodeHead(QuickVRNode node)
         {
             _vrNodesOrigin.forward = Vector3.ProjectOnPlane(node.transform.forward, transform.up);
-
-            InitVRNodeFootPrintsRotation();
         }
 
         protected virtual void CalibrateCameraForward()
@@ -367,14 +349,6 @@ namespace QuickVR
 
         protected virtual void UpdateFootPrints()
         {
-            //Transform rFootPrints = GetQuickVRNode(QuickVRNode.Type.FootPrints).transform;
-            //Transform rHead = GetQuickVRNode(QuickVRNode.Type.Head).transform;
-            //Vector3 offset = rFootPrints.position - rHead.position;
-
-            //_footprints.position = _camera.transform.position + ToAvatarSpace(offset);
-            //_footprints.position = new Vector3(_footprints.position.x, transform.position.y, _footprints.position.z);
-            //_footprints.rotation = ToAvatarSpace(rFootPrints.rotation);
-
             _footprints.position = transform.position - _userDisplacement;
             _footprints.rotation = ToAvatarSpace(_vrNodesOrigin.rotation);
         }
@@ -456,14 +430,14 @@ namespace QuickVR
                 {
                     GetQuickVRNode(_handsSwaped ? QuickVRNode.Type.LeftHand : QuickVRNode.Type.RightHand).SetID(s.uniqueID);
                 }
-                else if (s.nodeType == XRNode.TrackingReference)
-                {
-                    QuickVRNode n = GetQuickVRNode(QuickVRNode.Type.TrackingReference);
-                    if (!n.IsTracked())
-                    {
-                        n.SetID(s.uniqueID);
-                    }
-                }
+                //else if (s.nodeType == XRNode.TrackingReference)
+                //{
+                //    QuickVRNode n = GetQuickVRNode(QuickVRNode.Type.TrackingReference);
+                //    if (!n.IsTracked())
+                //    {
+                //        n.SetID(s.uniqueID);
+                //    }
+                //}
             }
         }
 
@@ -477,7 +451,7 @@ namespace QuickVR
             {
                 DebugVRNodesOrigin();
 
-                DebugVRNode(QuickVRNode.Type.TrackingReference, Color.yellow);
+                //DebugVRNode(QuickVRNode.Type.TrackingReference, Color.yellow);
 
                 DebugVRNode(QuickVRNode.Type.Head, Color.grey);
                 DebugVRNode(QuickVRNode.Type.LeftHand, Color.blue);
