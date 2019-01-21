@@ -28,7 +28,7 @@ namespace QuickVR
 
         #region PROTECTED PARAMETERS
 
-        [SerializeField] protected ulong _id = 0;
+        [SerializeField, ReadOnly] protected ulong _id = 0;
 
         protected QuickTrackedObject _trackedObject = null;
 

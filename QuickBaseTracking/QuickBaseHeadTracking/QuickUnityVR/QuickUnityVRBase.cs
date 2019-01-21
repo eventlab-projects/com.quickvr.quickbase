@@ -329,8 +329,6 @@ namespace QuickVR
 
         protected virtual void CalibrateVRNodes()
         {
-            Debug.Log("CALIBRATE VR NODES");
-
             CheckVRExtraTrackers();
             CheckVRHands();
             CheckVRFeet();
@@ -458,8 +456,6 @@ namespace QuickVR
 
         protected virtual void OnLeftHandConnected(XRNodeState state)
         {
-            Debug.Log("ON LEFT HAND CONNECTED");
-
             GetQuickVRNode(QuickVRNode.Type.LeftHand).SetID(state.uniqueID);
             CheckVRHands();
             CalibrateVRNode(QuickVRNode.Type.LeftHand);
@@ -467,8 +463,6 @@ namespace QuickVR
 
         protected virtual void OnRightHandConnected(XRNodeState state)
         {
-            Debug.Log("ON RIGHT HAND CONNECTED");
-
             GetQuickVRNode(QuickVRNode.Type.RightHand).SetID(state.uniqueID);
             CheckVRHands();
             CalibrateVRNode(QuickVRNode.Type.RightHand);
