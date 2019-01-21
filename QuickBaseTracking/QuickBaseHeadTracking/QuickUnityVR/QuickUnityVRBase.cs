@@ -31,7 +31,6 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected List<XRNodeState> _vrNodesState = new List<XRNodeState>();
         protected Transform _vrNodesRoot = null;
         protected Transform _vrNodesOrigin = null;
 
@@ -39,8 +38,6 @@ namespace QuickVR
 
         protected Vector3 _initialPosition = Vector3.zero;
         protected Quaternion _initialRotation = Quaternion.identity;
-
-        protected bool _handsSwaped = false;
 
         protected QuickCharacterControllerManager _characterControllerManager = null;
 
@@ -111,27 +108,36 @@ namespace QuickVR
         {
             base.OnEnable();
 
-            GetQuickVRNode(QuickVRNode.Type.Head).OnConnected += OnHMDConnected;
-            GetQuickVRNode(QuickVRNode.Type.LeftHand).OnConnected += OnLeftHandConnected;
-            GetQuickVRNode(QuickVRNode.Type.RightHand).OnConnected += OnRightHandConnected;
-
-            QuickVRManager.OnPreUpdateTracking += ComputeVRNodesState;
+            InputTracking.trackingAcquired += OnXRNodeTracked;
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
 
-            QuickVRNode vrNode = GetQuickVRNode(QuickVRNode.Type.Head);
-            if (vrNode) vrNode.OnConnected -= OnHMDConnected;
+            InputTracking.trackingAcquired -= OnXRNodeTracked;
+        }
 
-            vrNode = GetQuickVRNode(QuickVRNode.Type.LeftHand);
-            if (vrNode) vrNode.OnConnected -= OnLeftHandConnected;
+        protected virtual void OnXRNodeTracked(XRNodeState state)
+        {
+            StartCoroutine(CoXRNodeTracked(state));
+        }
 
-            vrNode = GetQuickVRNode(QuickVRNode.Type.RightHand);
-            if (vrNode) vrNode.OnConnected -= OnRightHandConnected;
+        protected virtual IEnumerator CoXRNodeTracked(XRNodeState state)
+        {
+            yield return null;
 
-            QuickVRManager.OnPreUpdateTracking -= ComputeVRNodesState;
+            List<XRNodeState> xRNodeStates = new List<XRNodeState>();
+            InputTracking.GetNodeStates(xRNodeStates);
+            foreach (XRNodeState s in xRNodeStates)
+            {
+                if (s.nodeType == state.nodeType)
+                {
+                    if (s.nodeType == XRNode.Head) OnHMDConnected(s);
+                    else if (s.nodeType == XRNode.LeftHand) OnLeftHandConnected(s); 
+                    else if (s.nodeType == XRNode.RightHand) OnRightHandConnected(s); 
+                }
+            }
         }
 
         public virtual void InitVRNodeFootPrints()
@@ -142,6 +148,14 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
+
+        protected virtual List<XRNodeState> GetXRNodeStates()
+        {
+            List<XRNodeState> xRNodeStates = new List<XRNodeState>();
+            InputTracking.GetNodeStates(xRNodeStates);
+
+            return xRNodeStates;
+        }
 
         protected virtual Vector3 ToAvatarSpace(Vector3 v)
         {
@@ -167,7 +181,7 @@ namespace QuickVR
         protected List<XRNodeState> GetExtraTrackers()
         {
             List<XRNodeState> extraTrackers = new List<XRNodeState>();
-            foreach (XRNodeState s in _vrNodesState)
+            foreach (XRNodeState s in GetXRNodeStates())
             {
                 if (s.tracked && s.nodeType == XRNode.HardwareTracker) extraTrackers.Add(s);
             }
@@ -189,13 +203,51 @@ namespace QuickVR
             QuickVRNode hmdNode = GetQuickVRNode(QuickVRNode.Type.Head);
             QuickVRNode leftHandNode = GetQuickVRNode(QuickVRNode.Type.LeftHand);
             QuickVRNode rightHandNode = GetQuickVRNode(QuickVRNode.Type.RightHand);
-            if (
-                Vector3.Dot(leftHandNode.transform.position - hmdNode.transform.position, hmdNode.transform.right) >
-                Vector3.Dot(rightHandNode.transform.position - hmdNode.transform.position, hmdNode.transform.right)
-                )
+
+            leftHandNode.SetID(0);
+            rightHandNode.SetID(0);
+
+            foreach (XRNodeState s in GetXRNodeStates())
             {
-                SwapQuickVRNode(leftHandNode, rightHandNode);
-                _handsSwaped = !_handsSwaped;
+                if (!s.tracked) continue;
+
+                if (s.nodeType == XRNode.LeftHand)
+                {
+                    leftHandNode.SetID(s.uniqueID);
+                }
+                else if (s.nodeType == XRNode.RightHand)
+                {
+                    rightHandNode.SetID(s.uniqueID);
+                }
+            }
+
+            if (!leftHandNode.IsTracked() && !rightHandNode.IsTracked()) return;
+
+            float dLeft = Vector3.Dot(leftHandNode.transform.position - hmdNode.transform.position, hmdNode.transform.right);
+            float dRight = Vector3.Dot(rightHandNode.transform.position - hmdNode.transform.position, hmdNode.transform.right);
+
+            if (leftHandNode.IsTracked() && rightHandNode.IsTracked())
+            {
+                if (dLeft > dRight)
+                {
+                    SwapQuickVRNode(leftHandNode, rightHandNode);
+                }
+            } 
+            else if (leftHandNode.IsTracked())
+            {
+                if (dLeft > 0)
+                {
+                    rightHandNode.SetID(leftHandNode.GetID());
+                    leftHandNode.SetID(0);
+                }
+            }
+            else if (rightHandNode.IsTracked())
+            {
+                if (dRight < 0)
+                {
+                    leftHandNode.SetID(rightHandNode.GetID());
+                    rightHandNode.SetID(0);
+                }
             }
         }
 
@@ -277,6 +329,8 @@ namespace QuickVR
 
         protected virtual void CalibrateVRNodes()
         {
+            Debug.Log("CALIBRATE VR NODES");
+
             CheckVRExtraTrackers();
             CheckVRHands();
             CheckVRFeet();
@@ -395,51 +449,29 @@ namespace QuickVR
             GetVRCursor(VRCursorType.RIGHT).transform.position = _vrHandRight._handBoneIndexDistal.position;
         }
 
-        protected virtual void OnHMDConnected()
+        protected virtual void OnHMDConnected(XRNodeState state)
         {
+            GetQuickVRNode(QuickVRNode.Type.Head).SetID(state.uniqueID);
             Calibrate();
-
             InitVRNodeFootPrints();
         }
 
-        protected virtual void OnLeftHandConnected()
+        protected virtual void OnLeftHandConnected(XRNodeState state)
         {
+            Debug.Log("ON LEFT HAND CONNECTED");
+
+            GetQuickVRNode(QuickVRNode.Type.LeftHand).SetID(state.uniqueID);
+            CheckVRHands();
             CalibrateVRNode(QuickVRNode.Type.LeftHand);
         }
 
-        protected virtual void OnRightHandConnected()
+        protected virtual void OnRightHandConnected(XRNodeState state)
         {
+            Debug.Log("ON RIGHT HAND CONNECTED");
+
+            GetQuickVRNode(QuickVRNode.Type.RightHand).SetID(state.uniqueID);
+            CheckVRHands();
             CalibrateVRNode(QuickVRNode.Type.RightHand);
-        }
-
-        protected virtual void ComputeVRNodesState()
-        {
-            InputTracking.GetNodeStates(_vrNodesState);
-            foreach (XRNodeState s in _vrNodesState)
-            {
-                if (!s.tracked) continue;
-
-                if (s.nodeType == XRNode.Head)
-                {
-                    GetQuickVRNode(QuickVRNode.Type.Head).SetID(s.uniqueID);
-                }
-                else if (s.nodeType == XRNode.LeftHand)
-                {
-                    GetQuickVRNode(_handsSwaped ? QuickVRNode.Type.RightHand : QuickVRNode.Type.LeftHand).SetID(s.uniqueID);
-                }
-                else if (s.nodeType == XRNode.RightHand)
-                {
-                    GetQuickVRNode(_handsSwaped ? QuickVRNode.Type.LeftHand : QuickVRNode.Type.RightHand).SetID(s.uniqueID);
-                }
-                //else if (s.nodeType == XRNode.TrackingReference)
-                //{
-                //    QuickVRNode n = GetQuickVRNode(QuickVRNode.Type.TrackingReference);
-                //    if (!n.IsTracked())
-                //    {
-                //        n.SetID(s.uniqueID);
-                //    }
-                //}
-            }
         }
 
         #endregion

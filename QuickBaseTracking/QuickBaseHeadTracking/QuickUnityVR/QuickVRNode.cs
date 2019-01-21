@@ -24,42 +24,17 @@ namespace QuickVR
             //TrackingReference,  //Represents a stationary physical device that can be used as a point of reference in the tracked area.
         };
 
-        public enum State
-        {
-            DISCONNECTED,
-            CONNECTED,
-            TRACKED,
-            STANDBY,
-        };
-
         #endregion
 
         #region PROTECTED PARAMETERS
 
-        protected ulong _id = 0;
-        protected State _state = State.DISCONNECTED;
+        [SerializeField] protected ulong _id = 0;
 
         protected QuickTrackedObject _trackedObject = null;
 
         protected static List<Type> _typeList = new List<Type>();
 
         protected List<XRNodeState> _vrNodesStates = new List<XRNodeState>();
-
-        #endregion
-
-        #region EVENTS
-
-        public delegate void ConnectedAction();
-        public event ConnectedAction OnConnected;
-
-        public delegate void TrackedAction();
-        public event TrackedAction OnTracked;
-
-        public delegate void StandbyAction();
-        public event StandbyAction OnStandby;
-
-        public delegate void DisconnectedAction();
-        public event DisconnectedAction OnDisconnected;
 
         #endregion
 
@@ -89,37 +64,6 @@ namespace QuickVR
             Update();
         }
 
-        public virtual State GetState()
-        {
-            return _state;
-        }
-
-        protected virtual void SetState(State newState)
-        {
-            if (_state == newState) return;
-
-            _state = newState;
-
-            if (_state == State.CONNECTED)
-            {
-                Update();
-                _trackedObject.Reset();
-                if (OnConnected != null) OnConnected();
-            }
-            else if (_state == State.TRACKED)
-            {
-                if (OnTracked != null) OnTracked();
-            }
-            else if (_state == State.STANDBY)
-            {
-                if (OnStandby != null) OnStandby();
-            }
-            else if (_state == State.DISCONNECTED)
-            {
-                if (OnDisconnected != null) OnDisconnected();
-            }
-        }
-
         protected virtual XRNodeState? GetUnityVRNodeState()
         {
             XRNodeState? result = null;
@@ -138,7 +82,7 @@ namespace QuickVR
 
         public virtual bool IsTracked()
         {
-            return _state == State.CONNECTED || _state == State.TRACKED;
+            return _id != 0;
         }
 
         public Type GetNodeType()
@@ -165,7 +109,6 @@ namespace QuickVR
         protected virtual void Update()
         {
             InputTracking.GetNodeStates(_vrNodesStates);
-            UpdateState();
 
             if (IsTracked())
             {
@@ -180,28 +123,6 @@ namespace QuickVR
                 {
                     transform.localRotation = rot;
                 }
-            }
-        }
-
-        protected virtual void UpdateState()
-        {
-            XRNodeState? uState = GetUnityVRNodeState();
-
-            if (!uState.HasValue)
-            {
-                SetState(State.DISCONNECTED);
-            }
-            else if (_state == State.DISCONNECTED)
-            {
-                SetState(State.CONNECTED);
-            }
-            else if (_state == State.CONNECTED || _state == State.TRACKED)
-            {
-                SetState(uState.Value.tracked ? State.TRACKED : State.STANDBY);
-            }
-            else if (_state == State.STANDBY && uState.Value.tracked)
-            {
-                SetState(State.TRACKED);
             }
         }
 

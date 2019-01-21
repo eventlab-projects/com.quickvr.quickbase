@@ -132,18 +132,18 @@ namespace QuickVR {
             }
         }
 
-        protected override void OnLeftHandConnected()
+        protected override void OnLeftHandConnected(XRNodeState state)
         {
             _vrHandLeft.gameObject.SetActive(true);
 
-            base.OnLeftHandConnected();
+            base.OnLeftHandConnected(state);
         }
 
-        protected override void OnRightHandConnected()
+        protected override void OnRightHandConnected(XRNodeState state)
         {
             _vrHandRight.gameObject.SetActive(true);
 
-            base.OnRightHandConnected();
+            base.OnRightHandConnected(state);
         }
 
         #endregion
