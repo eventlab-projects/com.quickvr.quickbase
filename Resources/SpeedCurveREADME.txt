@@ -11,3 +11,8 @@ Oscillation frequency (s)		Linear Speed (m/s)		Movement Type
 0.2								2.57 					Run
 0.25							1.62					Walk Fast
 0.3								1.07					Walk
+
+								5.4
+								2.4
+								1.52	
+								1
