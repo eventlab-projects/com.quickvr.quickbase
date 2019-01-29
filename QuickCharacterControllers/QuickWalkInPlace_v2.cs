@@ -12,11 +12,14 @@ namespace QuickVR
 
         protected const float DY_THRESHOLD = 0.004f;
 
+        protected const float MIN_TIME_STEP = 0.2f;    //5 steps per second
+        protected const float MAX_TIME_STEP = 2.0f;    //0.5 steps per second
+
         #endregion
 
         #region PUBLIC ATTRIBUTES
 
-        public float _speedMin = 1.4f;
+        public float _speedMin = 1.0f;
         public float _speedMax = 5.0f;
 
         public float _speedMultiplier = 1.0f;
@@ -25,28 +28,20 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected float _timeLastStep = -1; //The time when the last step has been detected
+        protected float _timeLastStep = -1.0f;
+
+        protected float _speedYLastSample = 0.0f;
+
+        [SerializeField, ReadOnly]
+        protected float _speedYNewSample = 0.0f;
 
         [SerializeField, ReadOnly]
         protected float _desiredSpeed = 0.0f;
 
-        protected QuickVRNode _node = null;
+        protected QuickTrackedObject _trackedObject = null;
 
         protected Coroutine _coUpdateTrackedNode = null;
 
-        protected float _minAcceleration = 0.0f;
-        protected float _maxAcceleration = 0.0f;
-
-        protected float _sampleNew = 0.0f;
-        protected float _sampleOld = 0.0f;
-
-        #endregion
-
-        #region CONSTANTS
-
-        protected const float MIN_TIME_STEP = 0.2f;    //5 steps per second
-        protected const float MAX_TIME_STEP = 2.0f;    //0.5 steps per second
-        
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -56,24 +51,22 @@ namespace QuickVR
             QuickIKManager ikManager = GetComponent<QuickIKManager>();
             ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.LeftFoot);
             ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.RightFoot);
-        }            
+        }
 
         protected virtual void OnEnable()
         {
             QuickUnityVRBase.OnCalibrate += Init;
-            _coUpdateTrackedNode = StartCoroutine(CoUpdateTrackedNode());
-
-            StartCoroutine(CoUpdateDynamicThreshold());
+            StartCoroutine(CoUpdate());
         }
 
         protected virtual void OnDisable()
         {
             QuickUnityVRBase.OnCalibrate -= Init;
-            StopCoroutine(_coUpdateTrackedNode);
         }
 
         protected virtual void Init()
         {
+            _speedYLastSample = _speedYNewSample = 0.0f;
             _timeLastStep = -1;
             _desiredSpeed = 0.0f;
         }
@@ -82,69 +75,14 @@ namespace QuickVR
 
         #region GET AND SET
 
-        protected virtual float GetDynamicThreshold()
-        {
-            return (_minAcceleration + _maxAcceleration) * 0.5f;
-        }
-
         protected override void ComputeTargetLinearVelocity()
         {
-            if (_node && _node.IsTracked())
-            {
 
-                QuickTrackedObject tObject = _node.GetTrackedObject();
-
-                _sampleOld = _sampleNew;
-                _sampleNew = tObject.GetAccelerationFull().y;
-
-                float dynamicThreshold = GetDynamicThreshold();
-                if 
-                (
-                    (_sampleNew < _sampleOld) && 
-                    (_sampleOld >= dynamicThreshold) &&
-                    (_sampleNew <= dynamicThreshold)
-                )
-                {
-                    //A step has been detected if there is a negative slope of the acceleration plot (_sampleNew < _sampleOld) 
-                    //when the acceleration curve crosses below the dynamic threshold
-                    if (_timeLastStep == -1)
-                    {
-                        //This is the first step detected, no previous step has been detected yet. 
-                        _timeLastStep = Time.time;
-                    }
-                    else
-                    {
-                        float tStep = Time.time - _timeLastStep;
-
-                        if (tStep > MAX_TIME_STEP)
-                        {
-                            //A step has not been detected in some time (the user has been standing still before they took this step)
-                            _desiredSpeed = _speedMin;
-                        }
-                        else if (tStep < MIN_TIME_STEP)
-                        {
-                            _desiredSpeed = _speedMax;
-                        }
-                        else
-                        {
-                            float t = MAX_TIME_STEP - MIN_TIME_STEP;
-                            _desiredSpeed = (1.0f - ((tStep - MIN_TIME_STEP) / t)) * (_speedMax - _speedMin) + _speedMin;
-                        }
-
-                        _timeLastStep = Time.time;
-                    }
-                }
-            }
-            else _desiredSpeed = 0.0f;
-
-            // Calculate how fast we should be moving
-            _targetLinearVelocity = transform.forward * _desiredSpeed;
-            _rigidBody.velocity = transform.forward * _rigidBody.velocity.magnitude;
         }
 
         protected override void ComputeTargetAngularVelocity()
         {
-            
+
         }
 
         public override float GetMaxLinearSpeed()
@@ -152,51 +90,104 @@ namespace QuickVR
             return _speedMax;
         }
 
-        protected virtual IEnumerator CoUpdateTrackedNode()
+        protected virtual IEnumerator CoUpdate()
         {
+            //Wait for the node of the head to be created. 
             QuickUnityVRBase hTracking = GetComponent<QuickUnityVRBase>();
+            QuickVRNode nodeHead = null;
+            while (nodeHead == null)
+            {
+                nodeHead = hTracking.GetQuickVRNode(QuickVRNode.Type.Head);
+                yield return null;
+            }
+            _trackedObject = nodeHead.GetTrackedObject();
 
             while (true)
             {
-                QuickVRNode hipsNode = hTracking.GetQuickVRNode(QuickVRNode.Type.Waist);
-                if (hipsNode)
-                {
-                    QuickVRNode n = hipsNode.IsTracked() ? hipsNode : hTracking.GetQuickVRNode(QuickVRNode.Type.Head);
-                    if (n != _node)
-                    {
-                        _node = n;
-                        Init();
-                    }
-                }
+                CoUpdateTrackedNode();
 
-                yield return null;
+                //Wait for a new sample
+                yield return StartCoroutine(CoUpdateSample());
+
+                CoUpdateTargetLinearVelocity();
             }
         }
 
-        protected virtual IEnumerator CoUpdateDynamicThreshold()
+        protected virtual void CoUpdateTrackedNode()
         {
-            QuickTrackedObject tObject = _node.GetTrackedObject();
-
-            while (true)
+            QuickUnityVRBase hTracking = GetComponent<QuickUnityVRBase>();
+            QuickVRNode hipsNode = hTracking.GetQuickVRNode(QuickVRNode.Type.Waist);
+            if (hipsNode)
             {
-                float min = tObject.GetAccelerationFull().y;
-                float max = tObject.GetAccelerationFull().y;
-
-                for (int i = 0; i < 50; i++)
+                QuickTrackedObject tObject = hipsNode.IsTracked() ? hipsNode.GetTrackedObject() : hTracking.GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject();
+                if (tObject != _trackedObject)
                 {
-                    yield return null;
+                    _trackedObject = tObject;
 
-                    float a = tObject.GetAccelerationFull().y;
-                    if (a < min) min = a;
-                    if (a > min) max = a;
+                    Debug.Log("tObject = " + _trackedObject.transform.parent.name);
+
+                    Init();
+                }
+            }
+        }
+
+        protected virtual void CoUpdateTargetLinearVelocity()
+        {
+            if (Mathf.Approximately(_speedYLastSample, _speedYNewSample))
+            {
+                _desiredSpeed = 0.0f;
+            }
+            else if ((_speedYLastSample <= 0) && (_speedYNewSample > 0))
+            {
+                //We have found a local min. 
+                if (_timeLastStep == -1)
+                {
+                    //It is the first step, no previous step has been detected
+                    _timeLastStep = Time.time;
+                }
+                else
+                {
+                    float tStep = Time.time - _timeLastStep;
+                    _timeLastStep = Time.time;
+
+                    if (tStep < MIN_TIME_STEP)
+                    {
+                        //The time between steps is considered to be too slow => noise. Discard it
+                        _timeLastStep = -1;
+                        //_desiredSpeed = 0.0f;
+                    }
+                    else if (tStep > MAX_TIME_STEP) _desiredSpeed = _speedMin;
+                    else
+                    {
+                        float t = MAX_TIME_STEP - MIN_TIME_STEP;
+                        _desiredSpeed = (1.0f - ((tStep - MIN_TIME_STEP) / t)) * (_speedMax - _speedMin) + _speedMin;
+                    }
                 }
 
-                _minAcceleration = min;
-                _maxAcceleration = max;
-
-                Debug.Log("minAcceleration = " + _minAcceleration.ToString("f3"));
-                Debug.Log("maxAcceleration = " + _maxAcceleration.ToString("f3"));
+                _desiredSpeed *= _speedMultiplier;
             }
+
+            _speedYLastSample = _speedYNewSample;
+
+            // Calculate how fast we should be moving
+            _targetLinearVelocity = transform.forward * _desiredSpeed;
+            _rigidBody.velocity = transform.forward * _rigidBody.velocity.magnitude;
+        }
+
+        protected virtual IEnumerator CoUpdateSample()
+        {
+            float speedY = 0.0f;
+            int numSamples = 5;
+
+            for (int i = 0; i < numSamples; i++)
+            {
+                yield return null;
+
+                speedY += _trackedObject.GetVelocity().y;
+            }
+            speedY /= (float)numSamples;
+
+            if (Mathf.Abs(speedY - _speedYNewSample) > 0.05f) _speedYNewSample = speedY;
         }
 
         #endregion
