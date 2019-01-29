@@ -12,13 +12,17 @@ namespace QuickVR
 
         protected const float DY_THRESHOLD = 0.004f;
 
+        protected const float MIN_TIME_STEP = 0.2f;    //5 steps per second
+        protected const float MAX_TIME_STEP = 2.0f;    //0.5 steps per second
+
         #endregion
 
         #region PUBLIC ATTRIBUTES
 
-        public QuickSpeedCurveAsset _speedCurve = null;
+        public float _speedMin = 1.0f;
+        public float _speedMax = 5.0f;
 
-        public float _speedMultiplier = 0.75f;
+        public float _speedMultiplier = 1.0f;
 
         #endregion
 
@@ -29,41 +33,22 @@ namespace QuickVR
         protected float _posYCicleStart = 0.0f;
         protected float _posYLastFrame = 0.0f;
 
+        protected float _posYNewSample = 0.0f;
+
         [SerializeField, ReadOnly]
         protected float _desiredSpeed = 0.0f;
 
-        protected QuickVRNode _node = null;
+        protected QuickTrackedObject _trackedObject = null;
 
         protected bool _trend = false;  //true => going towards a local max; false => going towards a local min
 
         protected float _timeStill = 0.0f;  //How many seconds the user remains (almost) still
-
-        protected float _fStepMin = 0.0f;
-        protected float _fStepMax = 0.0f;
 
         protected Coroutine _coUpdateTrackedNode = null;
 
         #endregion
 
         #region CREATION AND DESTRUCTION
-
-        protected override void Awake()
-        {
-            base.Awake();
-
-            if (!_speedCurve) _speedCurve = Resources.Load<QuickSpeedCurveAsset>("QuickSpeedCurveDefault");
-            _speedCurve._animationCurve.postWrapMode = WrapMode.Clamp;
-            _speedCurve._animationCurve.preWrapMode = WrapMode.Clamp;
-
-            Keyframe[] keys = _speedCurve._animationCurve.keys;
-            _fStepMin = _fStepMax = keys[0].time;
-            for (int i = 1; i < keys.Length; i++)
-            {
-                float t = keys[i].time;
-                if (t < _fStepMin) _fStepMin = t;
-                else if (t > _fStepMax) _fStepMax = t;
-            }
-        }
 
         protected virtual void Start()
         {
@@ -72,27 +57,22 @@ namespace QuickVR
             ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.RightFoot);
         }            
 
-        protected override void OnEnable()
+        protected virtual void OnEnable()
         {
-            base.OnEnable();
-
             QuickUnityVRBase.OnCalibrate += Init;
-            _coUpdateTrackedNode = StartCoroutine(CoUpdateTrackedNode());
+            StartCoroutine(CoUpdate());
         }
 
-        protected override void OnDisable()
+        protected virtual void OnDisable()
         {
-            base.OnDisable();
-
             QuickUnityVRBase.OnCalibrate -= Init;
-            StopCoroutine(_coUpdateTrackedNode);
         }
 
         protected virtual void Init()
         {
-            _posYCicleStart = _posYLastFrame = _node.GetTrackedObject().transform.position.y;
+            _posYCicleStart = _posYLastFrame = _posYNewSample = _trackedObject.transform.position.y;
             _timeCicleStart = Time.time;
-            _timeStill = _fStepMax;
+            _timeStill = MIN_TIME_STEP;
             _desiredSpeed = 0.0f;
         }
 
@@ -102,54 +82,7 @@ namespace QuickVR
 
         protected override void ComputeTargetLinearVelocity()
         {
-            if (_node && _node.IsTracked())
-            {
-
-                QuickTrackedObject tObject = _node.GetTrackedObject();
-
-                float posY = tObject.transform.position.y;
-                if ((_trend && (posY < _posYLastFrame)) || (!_trend && (posY > _posYLastFrame)))
-                {
-                    //1) If the trend is positive, but the current posY is less than posY at previous frame (_posYLastFrame), 
-                    //we have found a local max
-
-                    //2) If the trend is negative, but the current posY is greater than posY at previous frame (_posYLastFrame), 
-                    //we have found a local min
-
-                    //On either case, we have found the end of the current cicle. 
-
-                    float dy = Mathf.Abs(posY - _posYCicleStart);
-                    if (dy > DY_THRESHOLD)
-                    {
-                        //A real step has been detected
-                        float dt = Time.time - _timeCicleStart;
-                        _desiredSpeed = _speedCurve.Evaluate(dt);
-                        _timeStill = 0.0f;
-                    }
-                    else
-                    {
-                        //No step has been detected. The user is stopping. 
-                        _timeStill = Mathf.Min(_timeStill + Time.deltaTime, _fStepMin);
-                        _desiredSpeed = Mathf.Lerp(_speedCurve.Evaluate(_fStepMax), 0.0f, _timeStill / _fStepMin);
-                        //_desiredSpeed = Mathf.Lerp(_desiredSpeed, 0.0f, _timeStill / _fStepMax);
-                        //_targetLinearVelocity = _currentLinearVelocity = transform.forward * _desiredSpeed;
-                    }
-
-                    _desiredSpeed *= _speedMultiplier;
-
-                    _posYCicleStart = posY;
-                    _timeCicleStart = Time.time;
-
-                    _trend = !_trend;
-                }
-
-                _posYLastFrame = posY;
-            }
-            else _desiredSpeed = 0.0f;
-
-            // Calculate how fast we should be moving
-            _targetLinearVelocity = transform.forward * _desiredSpeed;
-            _currentLinearVelocity = transform.forward * _currentLinearVelocity.magnitude;
+            
         }
 
         protected override void ComputeTargetAngularVelocity()
@@ -159,28 +92,108 @@ namespace QuickVR
 
         public override float GetMaxLinearSpeed()
         {
-            return _speedCurve.Evaluate(0);
+            return _speedMax;
         }
-
-        protected virtual IEnumerator CoUpdateTrackedNode()
+        
+        protected virtual IEnumerator CoUpdate()
         {
-            QuickUnityVRBase hTracking = GetComponent<QuickUnityVRBase>();
+            _trackedObject = GetComponent<QuickUnityVRBase>().GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject();
 
             while (true)
             {
-                QuickVRNode hipsNode = hTracking.GetQuickVRNode(QuickVRNode.Type.Waist);
-                if (hipsNode)
+                CoUpdateTrackedNode();
+                
+                //Wait for a new sample
+                yield return StartCoroutine(CoUpdateSample());
+
+                CoUpdateTargetLinearVelocity();
+            }
+        }
+
+        protected virtual void CoUpdateTrackedNode()
+        {
+            QuickUnityVRBase hTracking = GetComponent<QuickUnityVRBase>();
+            QuickVRNode hipsNode = hTracking.GetQuickVRNode(QuickVRNode.Type.Waist);
+            if (hipsNode)
+            {
+                QuickTrackedObject tObject = hipsNode.IsTracked() ? hipsNode.GetTrackedObject() : hTracking.GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject();
+                if (tObject != _trackedObject)
                 {
-                    QuickVRNode n = hipsNode.IsTracked() ? hipsNode : hTracking.GetQuickVRNode(QuickVRNode.Type.Head);
-                    if (n != _node)
+                    _trackedObject = tObject;
+
+                    Debug.Log("tObject = " + _trackedObject.transform.parent.name);
+
+                    Init();
+                }
+            }
+        }
+
+        protected virtual void CoUpdateTargetLinearVelocity()
+        {
+            if ((_trend && (_posYNewSample < _posYLastFrame)) || (!_trend && (_posYNewSample > _posYLastFrame)))
+            {
+                //1) If the trend is positive, but the current posY is less than posY at previous frame (_posYLastFrame), 
+                //we have found a local max
+
+                //2) If the trend is negative, but the current posY is greater than posY at previous frame (_posYLastFrame), 
+                //we have found a local min
+
+                //On either case, we have found the end of the current cicle. 
+
+                float dy = Mathf.Abs(_posYNewSample - _posYCicleStart);
+                if (dy > DY_THRESHOLD)
+                {
+                    //A real step has been detected
+                    float tStep = (Time.time - _timeCicleStart) * 2.0f;
+                    if (tStep > MAX_TIME_STEP) _desiredSpeed = _speedMin;
+                    else if (tStep < MIN_TIME_STEP) _desiredSpeed = _speedMax;
+                    else
                     {
-                        _node = n;
-                        Init();
+                        float t = MAX_TIME_STEP - MIN_TIME_STEP;
+                        _desiredSpeed = (1.0f - ((tStep - MIN_TIME_STEP) / t)) * (_speedMax - _speedMin) + _speedMin;
+                        _timeStill = 0.0f;
                     }
                 }
+                else
+                {
+                    _desiredSpeed = 0.0f;
+                    //_targetLinearVelocity = Vector3.zero;
+                    ////No step has been detected. The user is stopping. 
+                    //_timeStill = Mathf.Min(_timeStill + Time.deltaTime, MIN_TIME_STEP);
+                    //_desiredSpeed = Mathf.Lerp(_desiredSpeed, 0.0f, _timeStill / MIN_TIME_STEP);
+                    ////_desiredSpeed = Mathf.Lerp(_desiredSpeed, 0.0f, _timeStill / _fStepMax);
+                    ////_targetLinearVelocity = _currentLinearVelocity = transform.forward * _desiredSpeed;
+                }
 
-                yield return null;
+                _desiredSpeed *= _speedMultiplier;
+
+                _posYCicleStart = _posYNewSample;
+                _timeCicleStart = Time.time;
+
+                _trend = !_trend;
             }
+
+            _posYLastFrame = _posYNewSample;
+
+            // Calculate how fast we should be moving
+            _targetLinearVelocity = transform.forward * _desiredSpeed;
+            _rigidBody.velocity = transform.forward * _rigidBody.velocity.magnitude;
+        }
+
+        protected virtual IEnumerator CoUpdateSample()
+        {
+            float posY = 0.0f;
+            int numSamples = 5;
+
+            for (int i = 0; i < numSamples; i++)
+            {
+                yield return null;
+
+                posY += _trackedObject.transform.position.y;
+            }
+            posY /= (float)numSamples;
+
+            _posYNewSample = posY;
         }
 
         #endregion

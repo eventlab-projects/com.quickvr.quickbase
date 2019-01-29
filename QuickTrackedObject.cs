@@ -27,9 +27,6 @@ namespace QuickVR
         protected Quaternion _lastRotation = Quaternion.identity;
         protected Quaternion _rotationOffset = Quaternion.identity;
 
-        [SerializeField, ReadOnly]
-        protected float _meanSpeed = 0.0f;
-
         #endregion
 
         #region GET AND SET
@@ -38,7 +35,6 @@ namespace QuickVR
         {
             QuickVRManager.OnPostUpdateTracking += UpdateTrackedData;
             StartCoroutine(CoUpdateAcceleration());
-            StartCoroutine(CoUpdateMeanSpeed());
         }
 
         protected virtual void OnDisable()
@@ -121,18 +117,6 @@ namespace QuickVR
             _lastVelocity = _velocity;
         }
 
-        protected virtual IEnumerator CoUpdateMeanSpeed()
-        {
-            int numSamples = 0;
-            while (true)
-            {
-                _meanSpeed = ((_meanSpeed * numSamples) + _speed) / (numSamples + 1);
-                numSamples++;
-
-                yield return null;
-            }
-        }
-
         protected virtual IEnumerator CoUpdateAcceleration()
         {
             while (true)
@@ -141,7 +125,7 @@ namespace QuickVR
                 int numSamples = 0;
                 Vector3 velocityChange = Vector3.zero;
 
-                while (numSamples < 4)
+                while (numSamples < 5)
                 {
                     Vector3 velocityBefore = _velocity;
 

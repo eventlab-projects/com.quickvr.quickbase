@@ -16,52 +16,40 @@ namespace QuickVR
 
         #region PUBLIC ATTRIBUTES
 
-        public QuickSpeedCurveAsset _speedCurve = null;
+        public float _speedMin = 1.4f;
+        public float _speedMax = 5.0f;
 
-        public float _speedMultiplier = 0.75f;
+        public float _speedMultiplier = 1.0f;
 
         #endregion
 
         #region PROTECTED ATTRIBUTES
 
-        protected float _timeLastMin = -1;  //The time when the last local min has been detected. 
-
-        protected float _speedYCicleStart = 0.0f;
-        protected float _speedYLastFrame = 0.0f;
+        protected float _timeLastStep = -1; //The time when the last step has been detected
 
         [SerializeField, ReadOnly]
         protected float _desiredSpeed = 0.0f;
 
         protected QuickVRNode _node = null;
 
-        protected float _timeStill = 0.0f;  //How many seconds the user remains (almost) still
-
-        protected float _fStepMin = 0.0f;
-        protected float _fStepMax = 0.0f;
-
         protected Coroutine _coUpdateTrackedNode = null;
+
+        protected float _minAcceleration = 0.0f;
+        protected float _maxAcceleration = 0.0f;
+
+        protected float _sampleNew = 0.0f;
+        protected float _sampleOld = 0.0f;
 
         #endregion
 
+        #region CONSTANTS
+
+        protected const float MIN_TIME_STEP = 0.2f;    //5 steps per second
+        protected const float MAX_TIME_STEP = 2.0f;    //0.5 steps per second
+        
+        #endregion
+
         #region CREATION AND DESTRUCTION
-
-        protected override void Awake()
-        {
-            base.Awake();
-
-            if (!_speedCurve) _speedCurve = Resources.Load<QuickSpeedCurveAsset>("QuickSpeedCurveDefault");
-            _speedCurve._animationCurve.postWrapMode = WrapMode.Clamp;
-            _speedCurve._animationCurve.preWrapMode = WrapMode.Clamp;
-
-            Keyframe[] keys = _speedCurve._animationCurve.keys;
-            _fStepMin = _fStepMax = keys[0].time;
-            for (int i = 1; i < keys.Length; i++)
-            {
-                float t = keys[i].time;
-                if (t < _fStepMin) _fStepMin = t;
-                else if (t > _fStepMax) _fStepMax = t;
-            }
-        }
 
         protected virtual void Start()
         {
@@ -70,33 +58,34 @@ namespace QuickVR
             ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.RightFoot);
         }            
 
-        protected override void OnEnable()
+        protected virtual void OnEnable()
         {
-            base.OnEnable();
-
             QuickUnityVRBase.OnCalibrate += Init;
             _coUpdateTrackedNode = StartCoroutine(CoUpdateTrackedNode());
+
+            StartCoroutine(CoUpdateDynamicThreshold());
         }
 
-        protected override void OnDisable()
+        protected virtual void OnDisable()
         {
-            base.OnDisable();
-
             QuickUnityVRBase.OnCalibrate -= Init;
             StopCoroutine(_coUpdateTrackedNode);
         }
 
         protected virtual void Init()
         {
-            _speedYCicleStart = _speedYLastFrame = _node.GetTrackedObject().GetVelocity().y;
-            _timeLastMin = -1;
-            _timeStill = _fStepMax;
+            _timeLastStep = -1;
             _desiredSpeed = 0.0f;
         }
 
         #endregion
 
         #region GET AND SET
+
+        protected virtual float GetDynamicThreshold()
+        {
+            return (_minAcceleration + _maxAcceleration) * 0.5f;
+        }
 
         protected override void ComputeTargetLinearVelocity()
         {
@@ -105,56 +94,52 @@ namespace QuickVR
 
                 QuickTrackedObject tObject = _node.GetTrackedObject();
 
-                float speedY = tObject.GetVelocity().y;
-                if (speedY > _speedYLastFrame)
+                _sampleOld = _sampleNew;
+                _sampleNew = tObject.GetAccelerationFull().y;
+
+                float dynamicThreshold = GetDynamicThreshold();
+                if 
+                (
+                    (_sampleNew < _sampleOld) && 
+                    (_sampleOld >= dynamicThreshold) &&
+                    (_sampleNew <= dynamicThreshold)
+                )
                 {
-                    if (_timeLastMin == -1)
+                    //A step has been detected if there is a negative slope of the acceleration plot (_sampleNew < _sampleOld) 
+                    //when the acceleration curve crosses below the dynamic threshold
+                    if (_timeLastStep == -1)
                     {
-                        //This is the first local min detected. 
-                        _timeLastMin = Time.time;
+                        //This is the first step detected, no previous step has been detected yet. 
+                        _timeLastStep = Time.time;
                     }
                     else
                     {
-                        //We have found a new local min
-                        float dt = Time.time - _timeLastMin;
-                        _timeLastMin = Time.time;
+                        float tStep = Time.time - _timeLastStep;
 
-                        if (dt >= 0.2f && dt <= 2.0f)
+                        if (tStep > MAX_TIME_STEP)
                         {
-                            //A valid step has been detected. 
+                            //A step has not been detected in some time (the user has been standing still before they took this step)
+                            _desiredSpeed = _speedMin;
                         }
+                        else if (tStep < MIN_TIME_STEP)
+                        {
+                            _desiredSpeed = _speedMax;
+                        }
+                        else
+                        {
+                            float t = MAX_TIME_STEP - MIN_TIME_STEP;
+                            _desiredSpeed = (1.0f - ((tStep - MIN_TIME_STEP) / t)) * (_speedMax - _speedMin) + _speedMin;
+                        }
+
+                        _timeLastStep = Time.time;
                     }
-
-                    //float dy = Mathf.Abs(posY - _posYCicleStart);
-                    //if (dy > DY_THRESHOLD)
-                    //{
-                    //    //A real step has been detected
-                    //    float dt = Time.time - _timeCicleStart;
-                    //    _desiredSpeed = _speedCurve.Evaluate(dt);
-                    //    _timeStill = 0.0f;
-                    //}
-                    //else
-                    //{
-                    //    //No step has been detected. The user is stopping. 
-                    //    _timeStill = Mathf.Min(_timeStill + Time.deltaTime, _fStepMin);
-                    //    _desiredSpeed = Mathf.Lerp(_speedCurve.Evaluate(_fStepMax), 0.0f, _timeStill / _fStepMin);
-                    //    //_desiredSpeed = Mathf.Lerp(_desiredSpeed, 0.0f, _timeStill / _fStepMax);
-                    //    //_targetLinearVelocity = _currentLinearVelocity = transform.forward * _desiredSpeed;
-                    //}
-
-                    //_desiredSpeed *= _speedMultiplier;
-
-                    //_posYCicleStart = posY;
-                    //_timeCicleStart = Time.time;
                 }
-
-                //_posYLastFrame = posY;
             }
             else _desiredSpeed = 0.0f;
 
             // Calculate how fast we should be moving
             _targetLinearVelocity = transform.forward * _desiredSpeed;
-            _currentLinearVelocity = transform.forward * _currentLinearVelocity.magnitude;
+            _rigidBody.velocity = transform.forward * _rigidBody.velocity.magnitude;
         }
 
         protected override void ComputeTargetAngularVelocity()
@@ -164,7 +149,7 @@ namespace QuickVR
 
         public override float GetMaxLinearSpeed()
         {
-            return _speedCurve.Evaluate(0);
+            return _speedMax;
         }
 
         protected virtual IEnumerator CoUpdateTrackedNode()
@@ -174,14 +159,43 @@ namespace QuickVR
             while (true)
             {
                 QuickVRNode hipsNode = hTracking.GetQuickVRNode(QuickVRNode.Type.Waist);
-                QuickVRNode n = hipsNode.IsTracked() ? hipsNode : hTracking.GetQuickVRNode(QuickVRNode.Type.Head);
-                if (n != _node)
+                if (hipsNode)
                 {
-                    _node = n;
-                    Init();
+                    QuickVRNode n = hipsNode.IsTracked() ? hipsNode : hTracking.GetQuickVRNode(QuickVRNode.Type.Head);
+                    if (n != _node)
+                    {
+                        _node = n;
+                        Init();
+                    }
                 }
 
                 yield return null;
+            }
+        }
+
+        protected virtual IEnumerator CoUpdateDynamicThreshold()
+        {
+            QuickTrackedObject tObject = _node.GetTrackedObject();
+
+            while (true)
+            {
+                float min = tObject.GetAccelerationFull().y;
+                float max = tObject.GetAccelerationFull().y;
+
+                for (int i = 0; i < 50; i++)
+                {
+                    yield return null;
+
+                    float a = tObject.GetAccelerationFull().y;
+                    if (a < min) min = a;
+                    if (a > min) max = a;
+                }
+
+                _minAcceleration = min;
+                _maxAcceleration = max;
+
+                Debug.Log("minAcceleration = " + _minAcceleration.ToString("f3"));
+                Debug.Log("maxAcceleration = " + _maxAcceleration.ToString("f3"));
             }
         }
 
