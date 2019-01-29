@@ -13,7 +13,7 @@ namespace QuickVR
         protected const float DY_THRESHOLD = 0.004f;
 
         protected const float MIN_TIME_STEP = 0.2f;    //5 steps per second
-        protected const float MAX_TIME_STEP = 2.0f;    //0.5 steps per second
+        protected const float MAX_TIME_STEP = 1.0f;    //1 steps per second
 
         #endregion
 
@@ -29,6 +29,7 @@ namespace QuickVR
         #region PROTECTED ATTRIBUTES
 
         protected float _timeLastStep = -1.0f;
+        protected float _timeStep = Mathf.Infinity;
 
         protected float _speedYLastSample = 0.0f;
 
@@ -68,6 +69,7 @@ namespace QuickVR
         {
             _speedYLastSample = _speedYNewSample = 0.0f;
             _timeLastStep = -1;
+            _timeStep = Mathf.Infinity;
             _desiredSpeed = 0.0f;
         }
 
@@ -102,6 +104,8 @@ namespace QuickVR
             }
             _trackedObject = nodeHead.GetTrackedObject();
 
+            StartCoroutine(CoUpdateBraking());
+
             while (true)
             {
                 CoUpdateTrackedNode();
@@ -133,11 +137,7 @@ namespace QuickVR
 
         protected virtual void CoUpdateTargetLinearVelocity()
         {
-            if (Mathf.Approximately(_speedYLastSample, _speedYNewSample))
-            {
-                _desiredSpeed = 0.0f;
-            }
-            else if ((_speedYLastSample <= 0) && (_speedYNewSample > 0))
+            if ((_speedYLastSample <= 0) && (_speedYNewSample > 0))
             {
                 //We have found a local min. 
                 if (_timeLastStep == -1)
@@ -147,20 +147,20 @@ namespace QuickVR
                 }
                 else
                 {
-                    float tStep = Time.time - _timeLastStep;
+                    _timeStep = Time.time - _timeLastStep;
                     _timeLastStep = Time.time;
 
-                    if (tStep < MIN_TIME_STEP)
+                    if (_timeStep < MIN_TIME_STEP)
                     {
                         //The time between steps is considered to be too slow => noise. Discard it
                         _timeLastStep = -1;
                         //_desiredSpeed = 0.0f;
                     }
-                    else if (tStep > MAX_TIME_STEP) _desiredSpeed = _speedMin;
+                    else if (_timeStep > MAX_TIME_STEP) _desiredSpeed = _speedMin;
                     else
                     {
                         float t = MAX_TIME_STEP - MIN_TIME_STEP;
-                        _desiredSpeed = (1.0f - ((tStep - MIN_TIME_STEP) / t)) * (_speedMax - _speedMin) + _speedMin;
+                        _desiredSpeed = (1.0f - ((_timeStep - MIN_TIME_STEP) / t)) * (_speedMax - _speedMin) + _speedMin;
                     }
                 }
 
@@ -188,6 +188,17 @@ namespace QuickVR
             speedY /= (float)numSamples;
 
             if (Mathf.Abs(speedY - _speedYNewSample) > 0.05f) _speedYNewSample = speedY;
+        }
+
+        protected virtual IEnumerator CoUpdateBraking()
+        {
+            while (true)
+            {
+                float dt = Time.time - _timeLastStep;
+                _desiredSpeed = Mathf.Lerp(_desiredSpeed, 0.0f, dt / MAX_TIME_STEP);
+
+                yield return null;
+            }
         }
 
         #endregion
