@@ -10,8 +10,6 @@ namespace QuickVR
 
         #region CONSTANTS
 
-        protected const float DY_THRESHOLD = 0.004f;
-
         protected const float MIN_TIME_STEP = 0.2f;    //5 steps per second
         protected const float MAX_TIME_STEP = 1.0f;    //1 steps per second
 
@@ -22,8 +20,6 @@ namespace QuickVR
         public float _speedMin = 1.0f;
         public float _speedMax = 5.0f;
 
-        public float _speedMultiplier = 1.0f;
-
         #endregion
 
         #region PROTECTED ATTRIBUTES
@@ -31,10 +27,10 @@ namespace QuickVR
         protected float _timeLastStep = -1.0f;
         protected float _timeStep = Mathf.Infinity;
 
-        protected float _speedYLastSample = 0.0f;
+        protected float _sampleLast = 0.0f;
 
         [SerializeField, ReadOnly]
-        protected float _speedYNewSample = 0.0f;
+        protected float _sampleNew = 0.0f;
 
         [SerializeField, ReadOnly]
         protected float _desiredSpeed = 0.0f;
@@ -56,19 +52,15 @@ namespace QuickVR
 
         protected virtual void OnEnable()
         {
-            QuickUnityVRBase.OnCalibrate += Init;
             StartCoroutine(CoUpdate());
-        }
-
-        protected virtual void OnDisable()
-        {
-            QuickUnityVRBase.OnCalibrate -= Init;
         }
 
         protected virtual void Init()
         {
-            _speedYLastSample = _speedYNewSample = 0.0f;
-            _timeLastStep = -1;
+            Debug.Log("trackedObject = " + _trackedObject.transform.parent.name);
+
+            _sampleLast = _sampleNew = 0.0f;
+            _timeLastStep = Time.time;
             _timeStep = Mathf.Infinity;
             _desiredSpeed = 0.0f;
         }
@@ -91,6 +83,22 @@ namespace QuickVR
         {
             return _speedMax;
         }
+
+        protected virtual float ComputeDesiredSpeed(float tStep)
+        {
+            if (tStep > MAX_TIME_STEP) return 0.0f;
+
+            return (1.0f - ((tStep - MIN_TIME_STEP) / (MAX_TIME_STEP - MIN_TIME_STEP))) * (_speedMax - _speedMin) + _speedMin;
+        }
+
+        protected virtual float GetSample()
+        {
+            return _trackedObject.GetVelocity().y;
+        }
+
+        #endregion
+
+        #region UPDATE
 
         protected virtual IEnumerator CoUpdate()
         {
@@ -128,8 +136,6 @@ namespace QuickVR
                 {
                     _trackedObject = tObject;
 
-                    Debug.Log("tObject = " + _trackedObject.transform.parent.name);
-
                     Init();
                 }
             }
@@ -137,37 +143,18 @@ namespace QuickVR
 
         protected virtual void CoUpdateTargetLinearVelocity()
         {
-            if ((_speedYLastSample <= 0) && (_speedYNewSample > 0))
+            if ((_sampleLast <= 0) && (_sampleNew > 0))
             {
-                //We have found a local min. 
-                if (_timeLastStep == -1)
-                {
-                    //It is the first step, no previous step has been detected
-                    _timeLastStep = Time.time;
-                }
-                else
-                {
-                    _timeStep = Time.time - _timeLastStep;
-                    _timeLastStep = Time.time;
+                _timeStep = Time.time - _timeLastStep;
+                _timeLastStep = Time.time;
 
-                    if (_timeStep < MIN_TIME_STEP)
-                    {
-                        //The time between steps is considered to be too slow => noise. Discard it
-                        _timeLastStep = -1;
-                        //_desiredSpeed = 0.0f;
-                    }
-                    else if (_timeStep > MAX_TIME_STEP) _desiredSpeed = _speedMin;
-                    else
-                    {
-                        float t = MAX_TIME_STEP - MIN_TIME_STEP;
-                        _desiredSpeed = (1.0f - ((_timeStep - MIN_TIME_STEP) / t)) * (_speedMax - _speedMin) + _speedMin;
-                    }
+                if (_timeStep >= MIN_TIME_STEP)
+                {
+                    _desiredSpeed = ComputeDesiredSpeed(_timeStep);
                 }
-
-                _desiredSpeed *= _speedMultiplier;
             }
 
-            _speedYLastSample = _speedYNewSample;
+            _sampleLast = _sampleNew;
 
             // Calculate how fast we should be moving
             _targetLinearVelocity = transform.forward * _desiredSpeed;
@@ -176,26 +163,30 @@ namespace QuickVR
 
         protected virtual IEnumerator CoUpdateSample()
         {
-            float speedY = 0.0f;
+            float sample = 0.0f;
             int numSamples = 5;
 
             for (int i = 0; i < numSamples; i++)
             {
                 yield return null;
 
-                speedY += _trackedObject.GetVelocity().y;
+                sample += GetSample();
             }
-            speedY /= (float)numSamples;
+            sample /= (float)numSamples;
 
-            if (Mathf.Abs(speedY - _speedYNewSample) > 0.05f) _speedYNewSample = speedY;
+            if (Mathf.Abs(sample - _sampleNew) > 0.05f) _sampleNew = sample;
         }
 
         protected virtual IEnumerator CoUpdateBraking()
         {
             while (true)
             {
-                float dt = Time.time - _timeLastStep;
-                _desiredSpeed = Mathf.Lerp(_desiredSpeed, 0.0f, dt / MAX_TIME_STEP);
+                float timeSinceLastStep = Time.time - _timeLastStep;
+
+                if (timeSinceLastStep >= MIN_TIME_STEP)
+                {
+                    _desiredSpeed = Mathf.Lerp(ComputeDesiredSpeed(_timeStep), 0.0f, timeSinceLastStep / _timeStep);
+                }
 
                 yield return null;
             }
