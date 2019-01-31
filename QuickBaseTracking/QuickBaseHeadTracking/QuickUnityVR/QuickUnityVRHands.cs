@@ -65,7 +65,7 @@ namespace QuickVR {
             return transform.position + transform.up * yOffset;
         }
 
-        protected override Vector3 GetDisplacement()
+        public override Vector3 GetDisplacement()
         {
             return GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject().GetDisplacement();
         }

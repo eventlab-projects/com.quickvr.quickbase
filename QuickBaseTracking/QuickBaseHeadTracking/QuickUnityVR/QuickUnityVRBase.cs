@@ -191,7 +191,7 @@ namespace QuickVR
             return GetExtraTrackers().Count;
         }
 
-        protected abstract Vector3 GetDisplacement();
+        public abstract Vector3 GetDisplacement();
         protected abstract float GetRotationOffset();
 
         protected virtual void CheckVRHands()

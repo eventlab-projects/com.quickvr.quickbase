@@ -161,7 +161,7 @@ namespace QuickVR {
             base.CalibrateVRNodeHead(node);
         }
 
-        protected override Vector3 GetDisplacement()
+        public override Vector3 GetDisplacement()
         {
             QuickVRNode waistNode = GetQuickVRNode(QuickVRNode.Type.Waist);
             if (waistNode.IsTracked()) return waistNode.GetTrackedObject().GetDisplacement();

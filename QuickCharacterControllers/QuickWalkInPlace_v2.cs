@@ -37,7 +37,7 @@ namespace QuickVR
 
         protected QuickTrackedObject _trackedObject = null;
 
-        protected Coroutine _coUpdateTrackedNode = null;
+        protected QuickUnityVRBase _headTracking = null;
 
         #endregion
 
@@ -45,6 +45,7 @@ namespace QuickVR
 
         protected virtual void Start()
         {
+            _headTracking = GetComponent<QuickUnityVRBase>();
             QuickIKManager ikManager = GetComponent<QuickIKManager>();
             ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.LeftFoot);
             ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.RightFoot);
@@ -112,26 +113,35 @@ namespace QuickVR
             }
             _trackedObject = nodeHead.GetTrackedObject();
 
-            StartCoroutine(CoUpdateBraking());
-
             while (true)
             {
+                //Debug.Log("disp = " + disp.ToString("f3"));
+
                 CoUpdateTrackedNode();
 
                 //Wait for a new sample
                 yield return StartCoroutine(CoUpdateSample());
 
                 CoUpdateTargetLinearVelocity();
+
+                //Check the real displacement of the user in the room. If it is big enough, the contribution
+                //of the WiP is ignored. 
+                Vector3 disp = Vector3.Scale(_headTracking.GetDisplacement(), Vector3.forward + Vector3.right);
+
+                if (disp.magnitude > 0.005f)
+                {
+                    _rigidBody.velocity = Vector3.Scale(_rigidBody.velocity, Vector3.up);
+                    Init();
+                }
             }
         }
 
         protected virtual void CoUpdateTrackedNode()
         {
-            QuickUnityVRBase hTracking = GetComponent<QuickUnityVRBase>();
-            QuickVRNode hipsNode = hTracking.GetQuickVRNode(QuickVRNode.Type.Waist);
+            QuickVRNode hipsNode = _headTracking.GetQuickVRNode(QuickVRNode.Type.Waist);
             if (hipsNode)
             {
-                QuickTrackedObject tObject = hipsNode.IsTracked() ? hipsNode.GetTrackedObject() : hTracking.GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject();
+                QuickTrackedObject tObject = hipsNode.IsTracked() ? hipsNode.GetTrackedObject() : _headTracking.GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject();
                 if (tObject != _trackedObject)
                 {
                     _trackedObject = tObject;
@@ -156,6 +166,13 @@ namespace QuickVR
 
             _sampleLast = _sampleNew;
 
+
+            float timeSinceLastStep = Time.time - _timeLastStep;
+            if (timeSinceLastStep >= MIN_TIME_STEP)
+            {
+                _desiredSpeed = Mathf.Lerp(ComputeDesiredSpeed(_timeStep), 0.0f, timeSinceLastStep / _timeStep);
+            }
+
             // Calculate how fast we should be moving
             _targetLinearVelocity = transform.forward * _desiredSpeed;
             _rigidBody.velocity = transform.forward * _rigidBody.velocity.magnitude;
@@ -175,21 +192,6 @@ namespace QuickVR
             sample /= (float)numSamples;
 
             if (Mathf.Abs(sample - _sampleNew) > 0.05f) _sampleNew = sample;
-        }
-
-        protected virtual IEnumerator CoUpdateBraking()
-        {
-            while (true)
-            {
-                float timeSinceLastStep = Time.time - _timeLastStep;
-
-                if (timeSinceLastStep >= MIN_TIME_STEP)
-                {
-                    _desiredSpeed = Mathf.Lerp(ComputeDesiredSpeed(_timeStep), 0.0f, timeSinceLastStep / _timeStep);
-                }
-
-                yield return null;
-            }
         }
 
         #endregion
