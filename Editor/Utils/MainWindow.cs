@@ -21,11 +21,11 @@ namespace AltProg.CleanEmptyDir
 
         const float DIR_LABEL_HEIGHT = 21;
 
-        [MenuItem("Window/AltProg Clean Empty Dir")]
+        [MenuItem("QuickVR/Clean Empty Dir")]
         public static void ShowWindow()
         {
             var w = GetWindow<MainWindow>();
-            w.title = "Clean";
+            w.titleContent.text = "Clean";
         }
 
         void OnEnable()

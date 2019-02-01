@@ -39,6 +39,8 @@ namespace QuickVR
         protected Vector3 _initialPosition = Vector3.zero;
         protected Quaternion _initialRotation = Quaternion.identity;
 
+        protected QuickCharacterControllerManager _characterControllerManager = null;
+
        #endregion
 
         #region EVENTS
@@ -53,6 +55,8 @@ namespace QuickVR
         protected override void Awake()
         {
             base.Awake();
+
+            _characterControllerManager = gameObject.GetOrCreateComponent<QuickCharacterControllerManager>();
 
             _footprints = Instantiate<GameObject>(Resources.Load<GameObject>("Footprints/Footprints")).transform;
             _footprints.gameObject.SetActive(_useFootprints);
@@ -416,7 +420,7 @@ namespace QuickVR
 
             Vector3 userDisp = ToAvatarSpace(disp);
             transform.Translate(userDisp, Space.World);
-            //_characterControllerManager.SetStepVelocity(userDisp / Time.deltaTime);
+            _characterControllerManager.SetStepVelocity(userDisp / Time.deltaTime);
             _userDisplacement += userDisp;
         }
 

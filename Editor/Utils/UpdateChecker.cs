@@ -1,9 +1,10 @@
 ﻿//#define DEVELOPMENT
 using UnityEngine;
+using UnityEngine.Networking;
+using Random = UnityEngine.Random;
 using UnityEditor;
 using System;
 using System.Collections;
-using Random = UnityEngine.Random;
 
 namespace AltProg.CleanEmptyDir
 {
@@ -19,7 +20,7 @@ namespace AltProg.CleanEmptyDir
 
         // Action: message, button text, button link
         public static Action<Message> OnDone;
-        static WWW www;
+        static UnityWebRequest www;
 
         static UpdateChecker()
         {
@@ -33,7 +34,7 @@ namespace AltProg.CleanEmptyDir
             if (www != null)
                 return;
 
-            www = new WWW("http://update.altprog.com/CleanEmptyDir.json");
+            www = new UnityWebRequest("http://update.altprog.com/CleanEmptyDir.json");
 
             EditorApplication.update += EditorApplication_Update;
         }
@@ -48,7 +49,7 @@ namespace AltProg.CleanEmptyDir
                 {
                     if (null != OnDone)
                     {
-                        OnDone( ParseMessage(www.text) );
+                        OnDone( ParseMessage(www.downloadHandler.text) );
                     }
                 } else
                 {
