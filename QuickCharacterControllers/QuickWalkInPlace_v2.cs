@@ -60,8 +60,6 @@ namespace QuickVR
 
         protected virtual void Init()
         {
-            Debug.Log("trackedObject = " + _trackedObject.transform.parent.name);
-
             _sampleLast = _sampleNew = 0.0f;
             _timeLastStep = Time.time;
             _timeStep = Mathf.Infinity;
