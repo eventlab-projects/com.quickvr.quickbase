@@ -2,55 +2,64 @@
 using UnityEditor;
 using System.Collections;
 
-namespace QuickVR {
+namespace QuickVR
+{
 
-	[CustomEditor(typeof(QuickUIMenuPage), true)]
+    [CustomEditor(typeof(QuickUIMenuPage), true)]
     [CanEditMultipleObjects]
-	public class QuickUIMenuPageEditor : QuickBaseEditor {
+    public class QuickUIMenuPageEditor : QuickBaseEditor
+    {
 
-		#region GET AND SET
+        #region GET AND SET
 
-		protected override void SaveConfiguration() {
-			string path = QuickUtils.GetRelativeAssetsPath(EditorUtility.SaveFilePanel("Save a Menu page", "Assets" + GetConfigurationFolderName(), "MenuPage", "prefab")); 
-			if (path != "") {
-				GameObject go = ((QuickUIMenuPage)target).gameObject;
-				GameObject goPrefab = PrefabUtility.SaveAsPrefabAssetAndConnect(go, path, InteractionMode.AutomatedAction);
-				goPrefab.name = go.name;
-			}
-		}
+        protected override void SaveConfiguration()
+        {
+            string path = QuickUtils.GetRelativeAssetsPath(EditorUtility.SaveFilePanel("Save a Menu page", "Assets" + GetConfigurationFolderName(), "MenuPage", "prefab"));
+            if (path != "")
+            {
+                GameObject go = ((QuickUIMenuPage)target).gameObject;
+                GameObject goPrefab = PrefabUtility.CreatePrefab(path, go, ReplacePrefabOptions.ConnectToPrefab);
+                goPrefab.name = go.name;
+            }
+        }
 
-		protected override void LoadConfiguration() {
-			string path = QuickUtils.GetRelativeAssetsPath(EditorUtility.OpenFilePanel("Load a Menu page", "Assets" + GetConfigurationFolderName(), "prefab"));
-			if (path != "") {
-				GameObject go = ((QuickUIMenuPage)target).gameObject;
-				GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-				PrefabUtility.RevertPrefabInstance(go, InteractionMode.AutomatedAction);
-			}
-		}
+        protected override void LoadConfiguration()
+        {
+            string path = QuickUtils.GetRelativeAssetsPath(EditorUtility.OpenFilePanel("Load a Menu page", "Assets" + GetConfigurationFolderName(), "prefab"));
+            if (path != "")
+            {
+                GameObject go = ((QuickUIMenuPage)target).gameObject;
+                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
+                PrefabUtility.ConnectGameObjectToPrefab(go, prefab);
+            }
+        }
 
-		#endregion
+        #endregion
 
-		#region UPDATE
+        #region UPDATE
 
-		protected override void DrawGUI() {
+        protected override void DrawGUI()
+        {
             QuickUIMenuPage page = (QuickUIMenuPage)target;
-			if (DrawButton("Add Child Page")) {
-				page.AddChildPage();
-				MarkSceneDirty();
-			}
-			if (DrawButton("Remove Child Page")) {
-				page.RemoveChildPage();
-				MarkSceneDirty();
-			}
+            if (DrawButton("Add Child Page"))
+            {
+                page.AddChildPage();
+                MarkSceneDirty();
+            }
+            if (DrawButton("Remove Child Page"))
+            {
+                page.RemoveChildPage();
+                MarkSceneDirty();
+            }
 
-			EditorGUILayout.Space();
+            EditorGUILayout.Space();
 
-			if (DrawButton("Save Configuration")) SaveConfiguration();
-			if (DrawButton("Load Configuration")) LoadConfiguration();
-		}
+            if (DrawButton("Save Configuration")) SaveConfiguration();
+            if (DrawButton("Load Configuration")) LoadConfiguration();
+        }
 
-		#endregion
+        #endregion
 
-	}
+    }
 
 }
