@@ -27,6 +27,8 @@ namespace QuickVR
         public bool _useFootprints = true;
         public Transform _footprints = null;
 
+        public static bool _handsSwaped = false;
+
         #endregion
 
         #region PROTECTED ATTRIBUTES
@@ -41,7 +43,7 @@ namespace QuickVR
 
         protected QuickCharacterControllerManager _characterControllerManager = null;
 
-       #endregion
+        #endregion
 
         #region EVENTS
 
@@ -227,11 +229,13 @@ namespace QuickVR
             float dLeft = Vector3.Dot(leftHandNode.transform.position - hmdNode.transform.position, hmdNode.transform.right);
             float dRight = Vector3.Dot(rightHandNode.transform.position - hmdNode.transform.position, hmdNode.transform.right);
 
+            _handsSwaped = false;
             if (leftHandNode.IsTracked() && rightHandNode.IsTracked())
             {
                 if (dLeft > dRight)
                 {
                     SwapQuickVRNode(leftHandNode, rightHandNode);
+                    _handsSwaped = true;
                 }
             } 
             else if (leftHandNode.IsTracked())
@@ -240,6 +244,7 @@ namespace QuickVR
                 {
                     rightHandNode.SetID(leftHandNode.GetID());
                     leftHandNode.SetID(0);
+                    _handsSwaped = true;
                 }
             }
             else if (rightHandNode.IsTracked())
@@ -248,6 +253,7 @@ namespace QuickVR
                 {
                     leftHandNode.SetID(rightHandNode.GetID());
                     rightHandNode.SetID(0);
+                    _handsSwaped = true;
                 }
             }
         }
@@ -392,6 +398,8 @@ namespace QuickVR
         {
             base.UpdateTracking();
 
+            UpdateQuickVRNodeIDs();
+
             UpdateTransformRoot();
             UpdateTransformNodes();
 
@@ -400,6 +408,20 @@ namespace QuickVR
             UpdateFootPrints();
 
             UpdateVRCursors();
+        }
+
+        protected virtual void UpdateQuickVRNodeIDs()
+        {
+            List<XRNodeState> xRNodeStates = new List<XRNodeState>();
+            InputTracking.GetNodeStates(xRNodeStates);
+            foreach (XRNodeState s in xRNodeStates)
+            {
+                if (!s.tracked) continue;
+
+                if (s.nodeType == XRNode.Head) GetQuickVRNode(QuickVRNode.Type.Head).SetID(s.uniqueID);
+                else if (s.nodeType == XRNode.LeftHand) GetQuickVRNode(!_handsSwaped? QuickVRNode.Type.LeftHand : QuickVRNode.Type.RightHand).SetID(s.uniqueID);
+                else if (s.nodeType == XRNode.RightHand) GetQuickVRNode(!_handsSwaped? QuickVRNode.Type.RightHand : QuickVRNode.Type.LeftHand).SetID(s.uniqueID);
+            }
         }
 
         protected virtual void UpdateFootPrints()
