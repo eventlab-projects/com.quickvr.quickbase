@@ -16,10 +16,16 @@ namespace QuickVR
             Head, 
             LeftHand, 
             RightHand,
-            
+
             Waist,
             LeftFoot, 
             RightFoot,
+
+            LeftElbow, 
+            RightElbow, 
+
+            LeftKnee, 
+            RightKnee,
 
             //TrackingReference,  //Represents a stationary physical device that can be used as a point of reference in the tracked area.
         };

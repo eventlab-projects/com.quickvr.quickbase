@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
 
+using QuickExtraTracker = System.Collections.Generic.KeyValuePair<UnityEngine.XR.XRNodeState, UnityEngine.Vector3>;
+using System.Linq;
+
 namespace QuickVR
 {
 
@@ -181,12 +184,17 @@ namespace QuickVR
             _initialRotation = initialRotation;
         }
 
-        protected List<XRNodeState> GetExtraTrackers()
+        protected List<QuickExtraTracker> GetExtraTrackers()
         {
-            List<XRNodeState> extraTrackers = new List<XRNodeState>();
+            List<QuickExtraTracker> extraTrackers = new List<QuickExtraTracker>();
             foreach (XRNodeState s in GetXRNodeStates())
             {
-                if (s.tracked && s.nodeType == XRNode.HardwareTracker) extraTrackers.Add(s);
+                if (s.tracked && s.nodeType == XRNode.HardwareTracker)
+                {
+                    Vector3 pos;
+                    s.TryGetPosition(out pos);
+                    extraTrackers.Add(new QuickExtraTracker(s, pos));
+                }
             }
 
             return extraTrackers;
@@ -260,43 +268,46 @@ namespace QuickVR
 
         protected virtual void CheckVRExtraTrackers()
         {
-            List<XRNodeState> extraTrackers = GetExtraTrackers();
+            //Get all the tracked extratrackers and sort them by Y, from lowest to higher. 
+            List<QuickExtraTracker> extraTrackers = GetExtraTrackers();
+            extraTrackers = extraTrackers.OrderBy(o => o.Value.y).ToList();
+
+
+            Debug.Log("NUM EXTRA TRACKERS = " + extraTrackers.Count());
+            Debug.Log("??????????????????????????");
+            foreach (QuickExtraTracker t in extraTrackers)
+            {
+                Debug.Log(t.Value.y.ToString("f3"));
+            }
+
+            //Reset all the extraTrackers
+            for (int i = (int)QuickVRNode.Type.Waist; i <= (int)QuickVRNode.Type.RightKnee; i++)
+            {
+                GetQuickVRNode((QuickVRNode.Type)i).SetID(0);
+            }
+
             int numTrackers = extraTrackers.Count;
             QuickVRNode waistNode = GetQuickVRNode(QuickVRNode.Type.Waist);
             QuickVRNode leftFootNode = GetQuickVRNode(QuickVRNode.Type.LeftFoot);
             QuickVRNode rightFootNode = GetQuickVRNode(QuickVRNode.Type.RightFoot);
 
-            waistNode.SetID(0);
-            leftFootNode.SetID(0);
-            rightFootNode.SetID(0);
-
             if (numTrackers == 1)
             {
                 //We guess the extra tracker is the waist
-                waistNode.SetID(extraTrackers[0].uniqueID);
+                waistNode.SetID(extraTrackers[0].Key.uniqueID);
             }
             else if (numTrackers == 2)
             {
                 //We guess the extra trackers are the two feet
-                leftFootNode.SetID(extraTrackers[0].uniqueID);
-                rightFootNode.SetID(extraTrackers[1].uniqueID);
+                leftFootNode.SetID(extraTrackers[0].Key.uniqueID);
+                rightFootNode.SetID(extraTrackers[1].Key.uniqueID);
             }
             else if (numTrackers == 3)
             {
                 //Set a random assignation
-                waistNode.SetID(extraTrackers[0].uniqueID);
-                leftFootNode.SetID(extraTrackers[1].uniqueID);
-                rightFootNode.SetID(extraTrackers[2].uniqueID);
-
-                //Let's determine which is the waist node
-                if (waistNode.transform.position.y < leftFootNode.transform.position.y)
-                {
-                    SwapQuickVRNode(waistNode, leftFootNode);
-                }
-                if (waistNode.transform.position.y < rightFootNode.transform.position.y)
-                {
-                    SwapQuickVRNode(waistNode, rightFootNode);
-                }
+                waistNode.SetID(extraTrackers[2].Key.uniqueID);
+                leftFootNode.SetID(extraTrackers[0].Key.uniqueID);
+                rightFootNode.SetID(extraTrackers[1].Key.uniqueID);
             }
         }
 
