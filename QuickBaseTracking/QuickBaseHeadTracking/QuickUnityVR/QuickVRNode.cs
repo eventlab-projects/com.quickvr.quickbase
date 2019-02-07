@@ -14,6 +14,7 @@ namespace QuickVR
         public enum Type
         {
             Head, 
+
             LeftHand, 
             RightHand,
 
