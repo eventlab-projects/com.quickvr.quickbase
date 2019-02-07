@@ -15,18 +15,23 @@ namespace QuickVR
         {
             Head, 
 
-            LeftHand, 
+            LeftUpperArm, 
+            LeftLowerArm, 
+            LeftHand,
+
+            RightUpperArm, 
+            RightLowerArm,
             RightHand,
 
-            Waist,
+            Hips,
+
+            LeftUpperLeg,
+            LeftLowerLeg,
             LeftFoot, 
+
+            RightUpperLeg,
+            RightLowerLeg,
             RightFoot,
-
-            LeftElbow, 
-            RightElbow, 
-
-            LeftKnee, 
-            RightKnee,
 
             //TrackingReference,  //Represents a stationary physical device that can be used as a point of reference in the tracked area.
         };
@@ -120,15 +125,18 @@ namespace QuickVR
             if (IsTracked())
             {
                 XRNodeState? uState = GetUnityVRNodeState();
-                Vector3 pos;
-                Quaternion rot;
-                if (uState.Value.TryGetPosition(out pos))
+                if (uState.HasValue)
                 {
-                    transform.localPosition = pos;
-                }
-                if (uState.Value.TryGetRotation(out rot))
-                {
-                    transform.localRotation = rot;
+                    Vector3 pos;
+                    Quaternion rot;
+                    if (uState.Value.TryGetPosition(out pos))
+                    {
+                        transform.localPosition = pos;
+                    }
+                    if (uState.Value.TryGetRotation(out rot))
+                    {
+                        transform.localRotation = rot;
+                    }
                 }
             }
         }

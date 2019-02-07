@@ -114,6 +114,8 @@ namespace QuickVR {
 
         protected override void UpdateTransformNodes()
         {
+            base.UpdateTransformNodes();
+
             UpdateVRHand(QuickVRNode.Type.LeftHand);
             UpdateVRHand(QuickVRNode.Type.RightHand);
         }

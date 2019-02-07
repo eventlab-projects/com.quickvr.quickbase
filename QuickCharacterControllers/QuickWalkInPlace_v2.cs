@@ -138,7 +138,7 @@ namespace QuickVR
 
         protected virtual void CoUpdateTrackedNode()
         {
-            QuickVRNode hipsNode = _headTracking.GetQuickVRNode(QuickVRNode.Type.Waist);
+            QuickVRNode hipsNode = _headTracking.GetQuickVRNode(QuickVRNode.Type.Hips);
             if (hipsNode)
             {
                 QuickTrackedObject tObject = hipsNode.IsTracked() ? hipsNode.GetTrackedObject() : _headTracking.GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject();

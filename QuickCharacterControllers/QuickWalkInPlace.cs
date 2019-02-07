@@ -113,7 +113,7 @@ namespace QuickVR
         protected virtual void CoUpdateTrackedNode()
         {
             QuickUnityVRBase hTracking = GetComponent<QuickUnityVRBase>();
-            QuickVRNode hipsNode = hTracking.GetQuickVRNode(QuickVRNode.Type.Waist);
+            QuickVRNode hipsNode = hTracking.GetQuickVRNode(QuickVRNode.Type.Hips);
             if (hipsNode)
             {
                 QuickTrackedObject tObject = hipsNode.IsTracked() ? hipsNode.GetTrackedObject() : hTracking.GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject();

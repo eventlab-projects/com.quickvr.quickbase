@@ -19,6 +19,5 @@ public class QuickUnityVRAsset : ScriptableObject
     public UnityEngine.Transform _footprints;
     public System.Boolean _displaceWithCamera;
     public System.Boolean _rotateWithCamera;
-    public QuickVR.QuickUnityVR.UpdateReference _updateReference;
  
 }
