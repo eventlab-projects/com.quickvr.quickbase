@@ -354,11 +354,8 @@ namespace QuickVR
 
             //numTrackers == 9 => ... + LeftLowerLeg
             GetQuickVRNode(QuickVRNode.Type.LeftLowerLeg).SetID(extraTrackers[0].Key.uniqueID);
-            SwapQuickVRNode(QuickVRNode.Type.LeftHand, QuickVRNode.Type.LeftLowerLeg);
-            SwapQuickVRNode(QuickVRNode.Type.RightHand, QuickVRNode.Type.RightLowerArm);
-            SwapQuickVRNode(QuickVRNode.Type.LeftFoot, QuickVRNode.Type.RightLowerArm);
-            SwapQuickVRNode(QuickVRNode.Type.RightFoot, QuickVRNode.Type.LeftLowerArm);
-            SwapQuickVRNode(QuickVRNode.Type.RightLowerArm, QuickVRNode.Type.RightLowerLeg);
+            SwapQuickVRNode(QuickVRNode.Type.LeftHand, QuickVRNode.Type.LeftLowerArm);
+            SwapQuickVRNode(QuickVRNode.Type.LeftLowerArm, QuickVRNode.Type.LeftLowerLeg);
             extraTrackers.RemoveAt(0);
             if (numTrackers == 9) return;
         }
@@ -622,17 +619,21 @@ namespace QuickVR
                 DebugVRNode(QuickVRNode.Type.Head, Color.grey);
 
                 DebugVRNode(QuickVRNode.Type.LeftUpperArm, Color.yellow, true);
+                DebugVRNode(QuickVRNode.Type.LeftLowerArm, new Color(0.0f, 0.5f, 0.5f));
                 DebugVRNode(QuickVRNode.Type.LeftHand, Color.blue);
 
                 DebugVRNode(QuickVRNode.Type.RightUpperArm, Color.yellow, true);
+                DebugVRNode(QuickVRNode.Type.RightLowerArm, new Color(1.0f, 0.0f, 0.5f));
                 DebugVRNode(QuickVRNode.Type.RightHand, Color.red);
 
                 DebugVRNode(QuickVRNode.Type.Hips, Color.black, true);
 
                 DebugVRNode(QuickVRNode.Type.LeftUpperLeg, Color.yellow, true);
+                DebugVRNode(QuickVRNode.Type.LeftLowerLeg, new Color(0.0f, 1.0f, 0.5f));
                 DebugVRNode(QuickVRNode.Type.LeftFoot, Color.cyan);
 
                 DebugVRNode(QuickVRNode.Type.RightUpperLeg, Color.yellow, true);
+                DebugVRNode(QuickVRNode.Type.RightLowerLeg, new Color(1.0f, 0.5f, 0.0f));
                 DebugVRNode(QuickVRNode.Type.RightFoot, Color.magenta);
 
                 DebugVRNodeConnection(QuickVRNode.Type.Head, QuickVRNode.Type.LeftUpperArm, true);
