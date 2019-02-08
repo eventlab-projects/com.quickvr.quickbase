@@ -358,6 +358,13 @@ namespace QuickVR
             SwapQuickVRNode(QuickVRNode.Type.LeftLowerArm, QuickVRNode.Type.LeftLowerLeg);
             extraTrackers.RemoveAt(0);
             if (numTrackers == 9) return;
+
+            //numTrackers == 10 => ... + RightLowerLeg
+            GetQuickVRNode(QuickVRNode.Type.RightLowerLeg).SetID(extraTrackers[0].Key.uniqueID);
+            SwapQuickVRNode(QuickVRNode.Type.RightHand, QuickVRNode.Type.RightLowerArm);
+            SwapQuickVRNode(QuickVRNode.Type.RightLowerArm, QuickVRNode.Type.RightLowerLeg);
+            extraTrackers.RemoveAt(0);
+            if (numTrackers == 10) return;
         }
 
         protected int GetHipsIndex(List<QuickExtraTracker> extraTrackers)
