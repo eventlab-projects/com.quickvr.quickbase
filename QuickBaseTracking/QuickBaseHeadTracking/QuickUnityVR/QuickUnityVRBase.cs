@@ -133,9 +133,7 @@ namespace QuickVR
         {
             yield return null;
 
-            List<XRNodeState> xRNodeStates = new List<XRNodeState>();
-            InputTracking.GetNodeStates(xRNodeStates);
-            foreach (XRNodeState s in xRNodeStates)
+            foreach (XRNodeState s in GetXRNodeStates())
             {
                 if (s.nodeType == state.nodeType)
                 {
@@ -191,9 +189,15 @@ namespace QuickVR
 
         protected virtual bool IsExtraTracker(ulong id)
         {
-            string nodeName = InputTracking.GetNodeName(id);
+            foreach (XRNodeState s in GetXRNodeStates())
+            {
+                if (s.uniqueID == id)
+                {
+                    return s.nodeType == XRNode.HardwareTracker;
+                }
+            }
 
-            return nodeName != null ? nodeName.CompareTo(XRNode.HardwareTracker.ToString()) == 0 : false;
+            return false;
         }
 
         protected virtual List<QuickExtraTracker> GetExtraTrackers()
@@ -428,8 +432,7 @@ namespace QuickVR
         protected virtual void CalibrateVRNodes()
         {
             //Reset the IDs of the VRNodes
-            List<QuickVRNode.Type> nodeTypes = QuickUtils.GetEnumValues<QuickVRNode.Type>();
-            foreach (QuickVRNode.Type t in nodeTypes) GetQuickVRNode(t).SetID(0);
+            foreach (QuickVRNode.Type t in QuickVRNode.GetTypeList()) GetQuickVRNode(t).SetID(0);
 
             //Get all the tracked extratrackers and sort them by Y, from lowest to higher. 
             List<QuickExtraTracker> extraTrackers = GetExtraTrackers();
@@ -542,9 +545,7 @@ namespace QuickVR
 
         protected virtual void UpdateQuickVRNodeIDs()
         {
-            List<XRNodeState> xRNodeStates = new List<XRNodeState>();
-            InputTracking.GetNodeStates(xRNodeStates);
-            foreach (XRNodeState s in xRNodeStates)
+            foreach (XRNodeState s in GetXRNodeStates())
             {
                 if (!s.tracked) continue;
 
