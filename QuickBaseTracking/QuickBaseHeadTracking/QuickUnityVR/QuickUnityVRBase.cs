@@ -189,7 +189,14 @@ namespace QuickVR
             _initialRotation = initialRotation;
         }
 
-        protected List<QuickExtraTracker> GetExtraTrackers()
+        protected virtual bool IsExtraTracker(ulong id)
+        {
+            string nodeName = InputTracking.GetNodeName(id);
+
+            return nodeName != null ? nodeName.CompareTo(XRNode.HardwareTracker.ToString()) == 0 : false;
+        }
+
+        protected virtual List<QuickExtraTracker> GetExtraTrackers()
         {
             List<QuickExtraTracker> extraTrackers = new List<QuickExtraTracker>();
             foreach (XRNodeState s in GetXRNodeStates())
@@ -213,29 +220,6 @@ namespace QuickVR
         public abstract Vector3 GetDisplacement();
         protected abstract float GetRotationOffset();
 
-        protected virtual void CheckVRHands()
-        {
-            //Check if the hands are reversed
-            QuickVRNode leftHandNode = GetQuickVRNode(QuickVRNode.Type.LeftHand);
-            QuickVRNode rightHandNode = GetQuickVRNode(QuickVRNode.Type.RightHand);
-
-            foreach (XRNodeState s in GetXRNodeStates())
-            {
-                if (!s.tracked) continue;
-
-                if (s.nodeType == XRNode.LeftHand)
-                {
-                    leftHandNode.SetID(s.uniqueID);
-                }
-                else if (s.nodeType == XRNode.RightHand)
-                {
-                    rightHandNode.SetID(s.uniqueID);
-                }
-            }
-
-            _handsSwaped = IsVRNodesSwaped(leftHandNode, rightHandNode);
-        }
-
         protected bool IsVRNodesSwaped(QuickVRNode.Type typeNodeLeft, QuickVRNode.Type typeNodeRight, bool doSwaping = true)
         {
             return IsVRNodesSwaped(GetQuickVRNode(typeNodeLeft), GetQuickVRNode(typeNodeRight), doSwaping);
@@ -257,114 +241,141 @@ namespace QuickVR
             return swaped;
         }
 
-        protected virtual void CheckVRExtraTrackers()
-        {
-            //Get all the tracked extratrackers and sort them by Y, from lowest to higher. 
-            List<QuickExtraTracker> extraTrackers = GetExtraTrackers();
-            extraTrackers = extraTrackers.OrderBy(o => o.Value.y).ToList();
-
-            Debug.Log("NUM EXTRA TRACKERS = " + extraTrackers.Count());
-            //Debug.Log("??????????????????????????");
-            //foreach (QuickExtraTracker t in extraTrackers)
-            //{
-            //    Debug.Log(t.Value.y.ToString("f3"));
-            //}
-
-            if (extraTrackers.Count > 0)
-            {
-                if (IsHMDPresent()) ConfigureVRExtraTrackersHMD(extraTrackers);
-                else ConfigureVRExtraTrackersNoHMD(extraTrackers);
-            }
-        }
-
         protected virtual void ConfigureVRExtraTrackersHMD(List<QuickExtraTracker> extraTrackers)
         {
-            int numTrackers = extraTrackers.Count;
-            QuickVRNode HipsNode = GetQuickVRNode(QuickVRNode.Type.Hips);
-            QuickVRNode leftFootNode = GetQuickVRNode(QuickVRNode.Type.LeftFoot);
-            QuickVRNode rightFootNode = GetQuickVRNode(QuickVRNode.Type.RightFoot);
+            XRNodeState sHead = new XRNodeState();
+            XRNodeState sLeftHand = new XRNodeState();
+            XRNodeState sRightHand = new XRNodeState();
+            sHead.uniqueID = sLeftHand.uniqueID = sRightHand.uniqueID = 0;
 
-            if (numTrackers == 1)
+            foreach (XRNodeState s in GetXRNodeStates())
             {
-                //We guess the extra tracker is the Hips. 
-                HipsNode.SetID(extraTrackers[0].Key.uniqueID);
+                if (!s.tracked) continue;
+
+                if (s.nodeType == XRNode.Head) sHead = s;
+                else if (s.nodeType == XRNode.LeftHand) sLeftHand = s;
+                else if (s.nodeType == XRNode.RightHand) sRightHand = s;
             }
-            else if (numTrackers == 2)
+            
+            if (sLeftHand.uniqueID != 0 && sRightHand.uniqueID != 0)
             {
-                //We guess the extra trackers are the two feet. 
-                leftFootNode.SetID(extraTrackers[0].Key.uniqueID);
-                rightFootNode.SetID(extraTrackers[1].Key.uniqueID);
+                GetQuickVRNode(QuickVRNode.Type.Head).SetID(sHead.uniqueID);
+                GetQuickVRNode(QuickVRNode.Type.LeftHand).SetID(sLeftHand.uniqueID);
+                GetQuickVRNode(QuickVRNode.Type.RightHand).SetID(sRightHand.uniqueID);
+
+                if (extraTrackers.Count() == 0) return;
+
+                //numTrackers == 1 => Hips
+                int hipsIndex = GetHipsIndex(extraTrackers);
+                GetQuickVRNode(QuickVRNode.Type.Hips).SetID(extraTrackers[hipsIndex].Key.uniqueID);
+                extraTrackers.RemoveAt(hipsIndex);
+                if (extraTrackers.Count() == 0) return;
+
+                //numTrackers == 2 => ... + LeftFoot
+                GetQuickVRNode(QuickVRNode.Type.LeftFoot).SetID(extraTrackers[0].Key.uniqueID);
+                extraTrackers.RemoveAt(0);
+                if (extraTrackers.Count() == 0) return;
+
+                //numTrackers == 3 => ... + RightFoot
+                GetQuickVRNode(QuickVRNode.Type.RightFoot).SetID(extraTrackers[0].Key.uniqueID);
+                extraTrackers.RemoveAt(0);
+                if (extraTrackers.Count() == 0) return;
+
+                //numTrackers == 4 => ... + LeftLowerArm
+                GetQuickVRNode(QuickVRNode.Type.LeftLowerArm).SetID(extraTrackers[0].Key.uniqueID);
+                extraTrackers.RemoveAt(0);
+                if (extraTrackers.Count() == 0) return;
+
+                //numTrackers == 5 => ... + RightLowerArm
+                GetQuickVRNode(QuickVRNode.Type.RightLowerArm).SetID(extraTrackers[0].Key.uniqueID);
+                extraTrackers.RemoveAt(0);
+                if (extraTrackers.Count() == 0) return;
+
+                //numTrackers == 6 => ... + LeftLowerLeg
+                GetQuickVRNode(QuickVRNode.Type.LeftLowerLeg).SetID(extraTrackers[0].Key.uniqueID);
+                SwapQuickVRNode(QuickVRNode.Type.LeftLowerArm, QuickVRNode.Type.LeftLowerLeg);
+                extraTrackers.RemoveAt(0);
+                if (extraTrackers.Count() == 0) return;
+
+                //numTrackers == 7 => ... + RightLowerLeg
+                GetQuickVRNode(QuickVRNode.Type.RightLowerLeg).SetID(extraTrackers[0].Key.uniqueID);
+                SwapQuickVRNode(QuickVRNode.Type.RightLowerArm, QuickVRNode.Type.RightLowerLeg);
+                extraTrackers.RemoveAt(0);
+                if (extraTrackers.Count() == 0) return;
             }
-            else if (numTrackers == 3)
+            else
             {
-                //The tracker with the higher Y position is the Hips. The other 2 are the feet. 
-                HipsNode.SetID(extraTrackers[2].Key.uniqueID);
-                leftFootNode.SetID(extraTrackers[0].Key.uniqueID);
-                rightFootNode.SetID(extraTrackers[1].Key.uniqueID);
+                //Add the HMD Node to the end of the list and make the auto-assignation
+                //as in the case where NoHMD is detected.
+                Vector3 pos;
+                sHead.TryGetPosition(out pos);
+                extraTrackers.Add(new QuickExtraTracker(sHead, pos));
+
+                ConfigureVRExtraTrackersNoHMD(extraTrackers);
             }
         }
 
         protected virtual void ConfigureVRExtraTrackersNoHMD(List<QuickExtraTracker> extraTrackers)
         {
-            int numTrackers = extraTrackers.Count;
+            if (extraTrackers.Count() == 0) return;
 
             //numTrackers == 1 => Head
             //The head is always considered to be the tracker on the top. 
-            GetQuickVRNode(QuickVRNode.Type.Head).SetID(extraTrackers[numTrackers - 1].Key.uniqueID);
-            extraTrackers.RemoveAt(numTrackers - 1);
-            if (numTrackers == 1) return;
+            GetQuickVRNode(QuickVRNode.Type.Head).SetID(extraTrackers[extraTrackers.Count() - 1].Key.uniqueID);
+            extraTrackers.RemoveAt(extraTrackers.Count() - 1);
+            if (extraTrackers.Count() == 0) return;
 
             //numTrackers == 2 => ... + Hips
             int HipsIndex = GetHipsIndex(extraTrackers);
             GetQuickVRNode(QuickVRNode.Type.Hips).SetID(extraTrackers[HipsIndex].Key.uniqueID);
             extraTrackers.RemoveAt(HipsIndex);
-            if (numTrackers == 2) return;
+            if (extraTrackers.Count() == 0) return;
 
             //numTrackers == 3 => ... + LeftHand
             GetQuickVRNode(QuickVRNode.Type.LeftHand).SetID(extraTrackers[0].Key.uniqueID);
             extraTrackers.RemoveAt(0);
-            if (numTrackers == 3) return;
+            if (extraTrackers.Count() == 0) return;
 
             //numTrackers == 4 => ... + RightHand
             GetQuickVRNode(QuickVRNode.Type.RightHand).SetID(extraTrackers[0].Key.uniqueID);
             extraTrackers.RemoveAt(0);
-            if (numTrackers == 4) return;
+            if (extraTrackers.Count() == 0) return;
 
             //numTrackers == 5 => ... + LeftFoot
             GetQuickVRNode(QuickVRNode.Type.LeftFoot).SetID(extraTrackers[0].Key.uniqueID);
             SwapQuickVRNode(QuickVRNode.Type.LeftHand, QuickVRNode.Type.LeftFoot);
             extraTrackers.RemoveAt(0);
-            if (numTrackers == 5) return;
+            if (extraTrackers.Count() == 0) return;
 
             //numTrackers == 6 => ... + RightFoot
             GetQuickVRNode(QuickVRNode.Type.RightFoot).SetID(extraTrackers[0].Key.uniqueID);
             SwapQuickVRNode(QuickVRNode.Type.RightHand, QuickVRNode.Type.RightFoot);
             extraTrackers.RemoveAt(0);
-            if (numTrackers == 6) return;
+            if (extraTrackers.Count() == 0) return;
 
             //numTrackers == 7 => ... + LeftLowerArm
             GetQuickVRNode(QuickVRNode.Type.LeftLowerArm).SetID(extraTrackers[0].Key.uniqueID);
             extraTrackers.RemoveAt(0);
-            if (numTrackers == 7) return;
+            if (extraTrackers.Count() == 0) return;
 
             //numTrackers == 8 => ... + RightLowerArm
             GetQuickVRNode(QuickVRNode.Type.RightLowerArm).SetID(extraTrackers[0].Key.uniqueID);
             extraTrackers.RemoveAt(0);
-            if (numTrackers == 8) return;
+            if (extraTrackers.Count() == 0) return;
 
             //numTrackers == 9 => ... + LeftLowerLeg
             GetQuickVRNode(QuickVRNode.Type.LeftLowerLeg).SetID(extraTrackers[0].Key.uniqueID);
             SwapQuickVRNode(QuickVRNode.Type.LeftHand, QuickVRNode.Type.LeftLowerArm);
             SwapQuickVRNode(QuickVRNode.Type.LeftLowerArm, QuickVRNode.Type.LeftLowerLeg);
             extraTrackers.RemoveAt(0);
-            if (numTrackers == 9) return;
+            if (extraTrackers.Count() == 0) return;
 
             //numTrackers == 10 => ... + RightLowerLeg
             GetQuickVRNode(QuickVRNode.Type.RightLowerLeg).SetID(extraTrackers[0].Key.uniqueID);
             SwapQuickVRNode(QuickVRNode.Type.RightHand, QuickVRNode.Type.RightLowerArm);
             SwapQuickVRNode(QuickVRNode.Type.RightLowerArm, QuickVRNode.Type.RightLowerLeg);
             extraTrackers.RemoveAt(0);
-            if (numTrackers == 10) return;
+            if (extraTrackers.Count() == 0) return;
         }
 
         protected int GetHipsIndex(List<QuickExtraTracker> extraTrackers)
@@ -419,12 +430,18 @@ namespace QuickVR
             //Reset the IDs of the VRNodes
             List<QuickVRNode.Type> nodeTypes = QuickUtils.GetEnumValues<QuickVRNode.Type>();
             foreach (QuickVRNode.Type t in nodeTypes) GetQuickVRNode(t).SetID(0);
-            
-            CheckVRExtraTrackers();
-            CheckVRHands();
 
+            //Get all the tracked extratrackers and sort them by Y, from lowest to higher. 
+            List<QuickExtraTracker> extraTrackers = GetExtraTrackers();
+            extraTrackers = extraTrackers.OrderBy(o => o.Value.y).ToList();
+
+            Debug.Log("NUM EXTRA TRACKERS = " + extraTrackers.Count());
+
+            if (IsHMDPresent()) ConfigureVRExtraTrackersHMD(extraTrackers);
+            else ConfigureVRExtraTrackersNoHMD(extraTrackers);
+            
             //Check if left/right nodes are set in the correct side, and swap them if necessary. 
-            IsVRNodesSwaped(QuickVRNode.Type.LeftHand, QuickVRNode.Type.RightHand);
+            _handsSwaped = IsVRNodesSwaped(QuickVRNode.Type.LeftHand, QuickVRNode.Type.RightHand);
             IsVRNodesSwaped(QuickVRNode.Type.LeftLowerArm, QuickVRNode.Type.RightLowerArm);
 
             IsVRNodesSwaped(QuickVRNode.Type.LeftFoot, QuickVRNode.Type.RightFoot);
@@ -462,11 +479,13 @@ namespace QuickVR
             else if (nodeType == QuickVRNode.Type.LeftHand || nodeType == QuickVRNode.Type.RightHand)
             {
                 tObject.transform.localPosition = _handControllerPositionOffset;
-                tObject.transform.rotation = _vrNodesOrigin.rotation;
-                tObject.transform.Rotate(tObject.transform.right, 90.0f, Space.World);
-
-                float sign = nodeType == QuickVRNode.Type.LeftHand? 1.0f : -1.0f;
+                float sign = nodeType == QuickVRNode.Type.LeftHand ? 1.0f : -1.0f;
                 tObject.transform.Rotate(tObject.transform.forward, sign * 90.0f, Space.World);
+
+                if (IsExtraTracker(node.GetID()))
+                {
+                    tObject.transform.Rotate(tObject.transform.right, 90.0f, Space.World);
+                }
             }
             else if (nodeType == QuickVRNode.Type.LeftFoot || nodeType == QuickVRNode.Type.RightFoot)
             {
@@ -600,15 +619,15 @@ namespace QuickVR
         protected virtual void OnLeftHandConnected(XRNodeState state)
         {
             GetQuickVRNode(QuickVRNode.Type.LeftHand).SetID(state.uniqueID);
-            CheckVRHands();
-            CalibrateVRNode(QuickVRNode.Type.LeftHand);
+            _handsSwaped = IsVRNodesSwaped(QuickVRNode.Type.LeftHand, QuickVRNode.Type.RightHand);
+            CalibrateVRNode(_handsSwaped? QuickVRNode.Type.RightHand : QuickVRNode.Type.LeftHand);
         }
 
         protected virtual void OnRightHandConnected(XRNodeState state)
         {
             GetQuickVRNode(QuickVRNode.Type.RightHand).SetID(state.uniqueID);
-            CheckVRHands();
-            CalibrateVRNode(QuickVRNode.Type.RightHand);
+            _handsSwaped = IsVRNodesSwaped(QuickVRNode.Type.LeftHand, QuickVRNode.Type.RightHand);
+            CalibrateVRNode(_handsSwaped? QuickVRNode.Type.LeftHand : QuickVRNode.Type.RightHand);
         }
 
         #endregion

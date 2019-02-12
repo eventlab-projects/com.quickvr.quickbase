@@ -164,15 +164,29 @@ namespace QuickVR {
         protected virtual void UpdateTransformNodeReferenceUserPose(QuickVRNode.Type nType)
         {
             QuickVRNode node = GetQuickVRNode(nType);
-            if (node.IsTracked() && QuickUtils.IsEnumValue<IKLimbBones>(nType.ToString()))
-            {
-                QuickTrackedObject tObject = node.GetTrackedObject();
-                Vector3 posOffset = tObject.transform.position - _vrNodesOrigin.position;
+            if (!node.IsTracked()) return;
 
-                QuickIKSolver ikSolver = _ikManager.GetIKSolver(QuickUtils.ParseEnum<IKLimbBones>(nType.ToString()));
-                ikSolver._targetLimb.position = transform.position + ToAvatarSpace(posOffset);
-                ikSolver._targetLimb.rotation = ToAvatarSpace(tObject.transform.rotation);
+            HumanBodyBones boneID = QuickUtils.ParseEnum<HumanBodyBones>(nType.ToString());
+            QuickTrackedObject tObject = node.GetTrackedObject();
+            Vector3 posOffset = tObject.transform.position - _vrNodesOrigin.position;
+
+            QuickIKSolver ikSolver = _ikManager.GetIKSolver(boneID);
+            if (!ikSolver) return;
+
+            Transform t = null;
+            if (QuickIKManager.IsBoneLimb(boneID))
+            {
+                t = ikSolver._targetLimb;
             }
+            else if (QuickIKManager.IsBoneMid(boneID))
+            {
+                t = ikSolver._targetHint;
+            }
+
+            if (!t) return;
+
+            t.position = transform.position + ToAvatarSpace(posOffset);
+            t.rotation = ToAvatarSpace(tObject.transform.rotation);
         }
 
         protected virtual void UpdateTrackingIK()
@@ -180,6 +194,23 @@ namespace QuickVR {
             _ikManager.GetIKSolver(HumanBodyBones.Head)._weightIKPos = _applyHeadPosition ? 1.0f : 0.0f;
             _ikManager.GetIKSolver(HumanBodyBones.Head)._weightIKRot = _applyHeadRotation ? 1.0f : 0.0f;
 
+            if (GetQuickVRNode(QuickVRNode.Type.LeftLowerArm).IsTracked())
+            {
+                _ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.LeftHand);
+            }
+            if (GetQuickVRNode(QuickVRNode.Type.RightLowerArm).IsTracked())
+            {
+                _ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.RightHand);
+            }
+            if (GetQuickVRNode(QuickVRNode.Type.LeftLowerLeg).IsTracked())
+            {
+                _ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.LeftFoot);
+            }
+            if (GetQuickVRNode(QuickVRNode.Type.RightLowerLeg).IsTracked())
+            {
+                _ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.RightFoot);
+            }
+            
             _ikManager.UpdateTracking();
         }
 

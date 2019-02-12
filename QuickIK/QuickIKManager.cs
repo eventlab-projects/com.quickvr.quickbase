@@ -41,8 +41,7 @@ namespace QuickVR {
         [SerializeField, HideInInspector] 
         protected Transform _ikSolversRoot = null;
 
-        [SerializeField, HideInInspector]
-        protected List<IKLimbBones> _ikLimbBones = new List<IKLimbBones>();
+        protected static List<IKLimbBones> _ikLimbBones = null;
 
         [SerializeField, HideInInspector]
         protected Transform _boneRotator = null;
@@ -69,11 +68,10 @@ namespace QuickVR {
             base.Reset();
 
             _animator = GetComponent<Animator>();
-            _ikLimbBones = QuickUtils.GetEnumValues<IKLimbBones>();
             _ikTargetsRoot = transform.CreateChild("__IKTargets__");
             _ikSolversRoot = transform.CreateChild("__IKSolvers__");
 
-            foreach (IKLimbBones boneID in _ikLimbBones)
+            foreach (IKLimbBones boneID in GetIKLimbBones())
             {
                 HumanBodyBones uBone = ToUnity(boneID);
                 CreateIKSolver<QuickIKSolver>(uBone);
@@ -85,7 +83,7 @@ namespace QuickVR {
         protected override void Awake() {
 			base.Awake();
 
-            if (_ikLimbBones.Count == 0) Reset();
+            if (!_ikSolversRoot) Reset();
 
             Transform lShoulder = _animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
             Transform rShoulder = _animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
@@ -99,7 +97,7 @@ namespace QuickVR {
         protected virtual void CreateCalibrationTargets()
         {
             _ikCalibrationTargetsRoot = transform.CreateChild("__IKCalibrationTargets__");
-            foreach (IKLimbBones boneID in _ikLimbBones)
+            foreach (IKLimbBones boneID in GetIKLimbBones())
             {
                 CreateCalibrationTarget(ToUnity(boneID));
             }
@@ -206,6 +204,16 @@ namespace QuickVR {
 
         #region GET AND SET
 
+        protected static List<IKLimbBones> GetIKLimbBones()
+        {
+            if (_ikLimbBones == null)
+            {
+                _ikLimbBones = QuickUtils.GetEnumValues<IKLimbBones>();
+            }
+
+            return _ikLimbBones;
+        }
+        
         public virtual bool IsIKLimbBoneTracked(IKLimbBones ikLimbBone)
         {
             return (_ikMask & (1 << (int)ikLimbBone)) != 0;
@@ -293,6 +301,24 @@ namespace QuickVR {
 
         public virtual QuickIKSolver GetIKSolver(HumanBodyBones boneID)
         {
+            HumanBodyBones limbBoneID = boneID;
+            if (boneID == HumanBodyBones.LeftLowerArm || boneID == HumanBodyBones.LeftUpperArm)
+            {
+                limbBoneID = HumanBodyBones.LeftHand;
+            }
+            else if (boneID == HumanBodyBones.RightLowerArm || boneID == HumanBodyBones.RightUpperArm)
+            {
+                limbBoneID = HumanBodyBones.RightHand;
+            }
+            else if (boneID == HumanBodyBones.LeftLowerLeg || boneID == HumanBodyBones.LeftUpperLeg)
+            {
+                limbBoneID = HumanBodyBones.LeftFoot;
+            }
+            else if (boneID == HumanBodyBones.RightLowerLeg || boneID == HumanBodyBones.RightUpperLeg)
+            {
+                limbBoneID = HumanBodyBones.RightFoot;
+            }
+
             Transform t = _ikSolversRoot.Find("_IKSolver_" + boneID.ToString());
             if (!t) return null;
 
@@ -321,10 +347,20 @@ namespace QuickVR {
 			return null;
 		}
 
-        protected virtual bool IsBoneLimb(HumanBodyBones boneID)
+        public static bool IsBoneLimb(HumanBodyBones boneID)
         {
             List<string> limbBones = QuickUtils.GetEnumValuesToString<IKLimbBones>();
             return limbBones.Contains(boneID.ToString());
+        }
+
+        public static bool IsBoneMid(HumanBodyBones boneID)
+        {
+            foreach (IKLimbBones b in GetIKLimbBones())
+            {
+                if (boneID == (HumanBodyBones)HumanTrait.GetParentBone((int)ToUnity(b))) return true;
+            }
+
+            return false;
         }
 
         protected virtual Transform GetBoneLimb(HumanBodyBones boneID) {
@@ -344,7 +380,7 @@ namespace QuickVR {
         [ButtonMethod]
         public virtual void ResetIKTargets()
         {
-            foreach (IKLimbBones boneID in _ikLimbBones)
+            foreach (IKLimbBones boneID in GetIKLimbBones())
             {
                 QuickIKSolver ikSolver = GetIKSolver(ToUnity(boneID));
                 
