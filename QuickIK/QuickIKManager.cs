@@ -319,7 +319,7 @@ namespace QuickVR {
                 limbBoneID = HumanBodyBones.RightFoot;
             }
 
-            Transform t = _ikSolversRoot.Find("_IKSolver_" + boneID.ToString());
+            Transform t = _ikSolversRoot.Find("_IKSolver_" + limbBoneID.ToString());
             if (!t) return null;
 
             return t.GetComponent<QuickIKSolver>();
