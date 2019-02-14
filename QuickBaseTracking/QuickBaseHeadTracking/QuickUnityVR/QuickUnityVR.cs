@@ -150,18 +150,15 @@ namespace QuickVR {
         {
             base.UpdateTransformNodes();
 
-            QuickIKSolver ikSolverHead = _ikManager.GetIKSolver(HumanBodyBones.Head);
-            QuickTrackedObject tObjectHead = GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject();
-            //_vrNodesOrigin.position = tObjectHead.transform.position + (_vrNodesOrigin.position - tObjectHead.transform.position).normalized * ikSolverHead.GetChainLength();
-
             foreach (QuickVRNode.Type t in QuickVRNode.GetTypeList())
             {
-                UpdateTransformNodeReferenceUserPose(t);
+                UpdateTransformNode(t);
             }
+
             UpdateTrackingIK();
         }
 
-        protected virtual void UpdateTransformNodeReferenceUserPose(QuickVRNode.Type nType)
+        protected virtual void UpdateTransformNode(QuickVRNode.Type nType)
         {
             QuickVRNode node = GetQuickVRNode(nType);
             if (!node.IsTracked()) return;
