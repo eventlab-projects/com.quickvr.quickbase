@@ -462,7 +462,18 @@ namespace QuickVR
             }
         }
 
-#endregion
+        public static Vector3 GetEyeCenterPosition(this Animator animator)
+        {
+            Transform lEye = animator.GetBoneTransform(HumanBodyBones.LeftEye);
+            Transform rEye = animator.GetBoneTransform(HumanBodyBones.RightEye);
+            if (lEye && rEye) return Vector3.Lerp(lEye.position, rEye.position, 0.5f);
+            if (lEye) return lEye.position;
+            if (rEye) return rEye.position;
+
+            return animator.GetBoneTransform(HumanBodyBones.Head).position;
+        }
+
+        #endregion
 
     }
 }
