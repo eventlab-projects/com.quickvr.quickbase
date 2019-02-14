@@ -523,12 +523,36 @@ namespace QuickVR
 
         protected override Vector3 GetTrackingJointPosition(QuickVRNode.Type jointID)
         {
-            return Vector3.zero;
+            return GetQuickVRNode(jointID).GetTrackedObject().transform.position;
         }
 
         protected override Quaternion GetTrackingJointRotation(QuickVRNode.Type jointID)
         {
-            return Quaternion.identity;
+            return GetQuickVRNode(jointID).GetTrackedObject().transform.rotation;
+        }
+
+        protected override QuickJoint.State GetTrackingJointState(QuickVRNode.Type jointID)
+        {
+            QuickJoint.State state = base.GetTrackingJointState(jointID);
+            if (state != QuickJoint.State.UNTRACKED)
+            {
+                if 
+                (
+                    jointID == QuickVRNode.Type.LeftUpperArm ||
+                    jointID == QuickVRNode.Type.RightUpperArm ||
+                    jointID == QuickVRNode.Type.LeftUpperLeg ||
+                    jointID == QuickVRNode.Type.RightUpperLeg
+                )
+                {
+                    state = QuickJoint.State.INFERRED;
+                }
+                else
+                {
+                    state = GetQuickVRNode(jointID).IsTracked() ? QuickJoint.State.TRACKED : QuickJoint.State.UNTRACKED;
+                }
+            }
+
+            return state;            
         }
 
         #endregion
@@ -638,7 +662,7 @@ namespace QuickVR
 
         protected override void OnDrawGizmos()
         {
-            //base.OnDrawGizmos();
+            base.OnDrawGizmos();
 
             if (Application.isPlaying)
             {

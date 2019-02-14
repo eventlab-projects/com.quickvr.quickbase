@@ -83,7 +83,7 @@ namespace QuickVR {
 			INFERRED,
 			UNTRACKED,
 		};
-		public State _state = State.TRACKED;
+		public State _state = State.UNTRACKED;
 
 		#endregion
 		
@@ -140,67 +140,8 @@ namespace QuickVR {
 			return (_historyPosition[1] - _historyPosition[0]);
 		}
 
-        public virtual void SetData(Vector3 rawPosition, Quaternion rawRotation, State state, bool isWorldSpace)
-        {
-            UpdateState(state);
-
-        }
-
         #endregion
 
-        #region UPDATE
-
-        public virtual void Update(Vector3 rawPosition, Quaternion rawRotation, State state, bool isWorldSpace) {
-			UpdateState(state);
-			//UpdatePosition(rawPosition, isWorldSpace);
-			//UpdateRotation(rawRotation, isWorldSpace);
-		}
-
-		protected virtual void UpdateState(State newState) {
-			if (_state == State.TRACKED) {
-				if (newState != State.TRACKED) {
-					_state = newState;
-					_untrackedStateCounter = 15;
-				}
-			}
-			else {
-				if (newState == State.TRACKED) {
-					_untrackedStateCounter--;
-					if (_untrackedStateCounter == 0) _state = State.TRACKED;
-				}
-				else _untrackedStateCounter = 15;
-			}
-		}
-
-		protected virtual void UpdatePosition(Vector3 rawPosition, bool isWorldSpace) {
-			Vector3 pos = rawPosition;
-            if (_smoothPositionMethod != null) pos = _smoothPositionMethod.Filter(rawPosition);
-            if (Vector3.Distance(pos, _accumulatedAveragePosition.GetCurrentValue()) > 0.15f)
-            {
-                _accumulatedAveragePosition.Reset();
-            }
-            _accumulatedAveragePosition.AddSample(pos);
-
-            if (isWorldSpace) _transform.position = pos;
-			else _transform.localPosition = pos;
-
-			UpdateLastPosition(_transform.position);
-		}
-
-		protected virtual void UpdateRotation(Quaternion rawRotation, bool isWorldSpace) {
-			if (isWorldSpace) _transform.rotation = rawRotation;
-			else _transform.localRotation = rawRotation;
-		}
-
-		protected virtual void UpdateLastPosition(Vector3 pos) {
-			if (_historyPosition.Count < 2) _historyPosition.Add(pos);
-			else {
-				_historyPosition[0] = _historyPosition[1];
-				_historyPosition[1] = pos;
-			}
-		}
-		
-		#endregion
 	}
 
 }

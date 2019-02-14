@@ -12,7 +12,7 @@ namespace QuickVR {
 		public Color _debugJointInferredColor = Color.yellow;
 		public Color _debugJointUntrackedColor = Color.red;
 		
-		public Color _debugBoneColor = Color.grey;
+		public Color _debugBoneColor = Color.white;
 		
 		#endregion
 		
@@ -166,7 +166,7 @@ namespace QuickVR {
             if (jointID == QuickJointType.SPINE_BASE) return QuickJointType.SPINE_BASE;
 
             QuickJointType qParentID = _parentJoint[jointID];
-            if (GetJoint(qParentID).GetTransform().localPosition != Vector3.zero)
+            if (GetJoint(qParentID)._state != QuickJoint.State.UNTRACKED)
             {
                 return qParentID;
             }
@@ -246,22 +246,24 @@ namespace QuickVR {
             QuickJoint q = GetJoint(qJoint);
             Transform t = q.GetTransform();
 
-            //Draw the bone as a cube. 
-            Gizmos.color = GetColorFromState(q._state);
-            Gizmos.DrawCube(t.position, Vector3.one * 0.025f);
+            if (q._state != QuickJoint.State.UNTRACKED)
+            {
+                //Draw the bone as a cube. 
+                Gizmos.color = GetColorFromState(q._state);
+                Gizmos.DrawCube(t.position, Vector3.one * 0.025f);
 
-            //Draw the coordinate system of the bone. 
-            float axisLength = 0.05f;
-            Debug.DrawRay(t.position, t.forward * axisLength, Color.blue);
-            Debug.DrawRay(t.position, t.right * axisLength, Color.red);
-            Debug.DrawRay(t.position, t.up * axisLength, Color.green);
-
+                //Draw the coordinate system of the bone. 
+                DebugExtension.DrawCoordinatesSystem(t.position, t.right, t.up, t.forward, 0.05f);
+            }
+            
             List<QuickJointType> childs = GetChilds(qJoint);
             foreach (QuickJointType c in childs)
             {
                 QuickJoint tChild = GetJoint(c);
+                if (tChild._state == QuickJoint.State.UNTRACKED) continue;
+
                 Gizmos.color = _debugBoneColor;
-                Gizmos.DrawLine(q.GetTransform().position, tChild.GetTransform().position);
+                Gizmos.DrawLine(tChild.GetTransform().position, GetParent(c).GetTransform().position);
             }
         }
 

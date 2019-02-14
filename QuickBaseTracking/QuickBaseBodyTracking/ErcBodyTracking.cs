@@ -249,11 +249,6 @@ public class ErcBodyTracking : QuickBodyTracking<ErcBodyJoints> {
         return Quaternion.identity;
     }
 
-    protected override QuickJoint.State GetTrackingJointState(ErcBodyJoints jointID)
-    {
-        return QuickJoint.State.TRACKED;
-    }
-
     protected virtual float GetScaleFactor()
     {
         float d1 = Vector3.Distance(_skeleton.GetJoint(QuickJointType.SPINE_BASE).GetTransform().position, _skeleton.GetJoint(QuickJointType.NECK).GetTransform().position);
