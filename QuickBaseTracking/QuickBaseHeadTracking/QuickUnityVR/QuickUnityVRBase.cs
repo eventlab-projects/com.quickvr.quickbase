@@ -515,6 +515,11 @@ namespace QuickVR
             _cameraControllerRoot.rotation = transform.rotation;
         }
 
+        public virtual QuickVRNode GetQuickVRNode(HumanBodyBones boneID)
+        {
+            return GetQuickVRNode(QuickUtils.ParseEnum<QuickVRNode.Type>(boneID.ToString()));
+        }
+
         public virtual QuickVRNode GetQuickVRNode(QuickVRNode.Type node)
         {
             return _vrNodesRoot ? _vrNodesRoot.Find(node.ToString()).GetComponent<QuickVRNode>() : null;

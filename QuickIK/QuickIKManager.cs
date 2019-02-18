@@ -204,7 +204,7 @@ namespace QuickVR {
 
         #region GET AND SET
 
-        protected static List<IKLimbBones> GetIKLimbBones()
+        public static List<IKLimbBones> GetIKLimbBones()
         {
             if (_ikLimbBones == null)
             {
@@ -335,7 +335,12 @@ namespace QuickVR {
             return _ikCalibrationTargetsRoot.Find("_IKCalibrationTarget_" + boneID.ToString());
         }
 
-        public virtual HumanBodyBones? GetIKTargetMidBoneID(HumanBodyBones limbBoneID) {
+        public static HumanBodyBones? GetIKTargetMidBoneID(IKLimbBones limbBoneID)
+        {
+            return GetIKTargetMidBoneID(ToUnity(limbBoneID));
+        }
+
+        public static HumanBodyBones? GetIKTargetMidBoneID(HumanBodyBones limbBoneID) {
 			if (limbBoneID == HumanBodyBones.Head) return HumanBodyBones.Spine;
 
 			if (limbBoneID == HumanBodyBones.LeftHand) return HumanBodyBones.LeftLowerArm;
