@@ -480,15 +480,22 @@ namespace QuickVR
             }
             else if (nodeType == QuickVRNode.Type.LeftHand || nodeType == QuickVRNode.Type.RightHand)
             {
-                float sign = nodeType == QuickVRNode.Type.LeftHand ? 1.0f : -1.0f;
-                tObject.transform.Rotate(tObject.transform.forward, sign * 90.0f, Space.World);
-
                 if (IsExtraTracker(node.GetID()))
                 {
-                    tObject.transform.Rotate(tObject.transform.right, 90.0f, Space.World);
+                    //tObject.transform.Rotate(tObject.transform.right, 90.0f, Space.World);
+                    tObject.transform.rotation = _vrNodesOrigin.rotation;
+                    float d = Vector3.Dot(node.transform.forward, _vrNodesOrigin.up);
+                    if (d < 0.5f)
+                    {
+                        tObject.transform.Rotate(_vrNodesOrigin.right, 90.0f, Space.World);
+                        tObject.transform.Rotate(_vrNodesOrigin.up, nodeType == QuickVRNode.Type.LeftHand? -90.0f : 90.0f, Space.World);
+                    }
                 }
                 else
                 {
+                    //This is a controller
+                    float sign = nodeType == QuickVRNode.Type.LeftHand ? 1.0f : -1.0f;
+                    tObject.transform.Rotate(tObject.transform.forward, sign * 90.0f, Space.World);
                     tObject.transform.localPosition = HAND_CONTROLLER_POSITION_OFFSET;
                 }
             }
