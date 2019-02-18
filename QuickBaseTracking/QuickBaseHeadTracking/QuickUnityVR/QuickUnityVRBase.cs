@@ -18,11 +18,11 @@ namespace QuickVR
         protected static float HUMAN_HEADS_TALL_EYES = HUMAN_HEADS_TALL - 0.5f;
         protected static float HUMAN_HEADS_TALL_HEAD = HUMAN_HEADS_TALL - 1.0f;
 
+        protected static Vector3 HAND_CONTROLLER_POSITION_OFFSET = new Vector3(0, 0, -0.1f);
+
         #endregion
 
         #region PUBLIC ATTRIBUTES
-
-        public Vector3 _handControllerPositionOffset = new Vector3(0, 0, -0.1f);
 
         [BitMask(typeof(IKLimbBones))]
         public int _trackedJoints = -1;
@@ -460,7 +460,7 @@ namespace QuickVR
         {
             QuickVRNode node = GetQuickVRNode(nodeType);
             QuickTrackedObject tObject = node.GetTrackedObject();
-            tObject.transform.rotation = node.transform.rotation;
+            tObject.transform.ResetTransformation();
             
             if (nodeType == QuickVRNode.Type.Head)
             {
@@ -475,13 +475,11 @@ namespace QuickVR
                 }
                 else
                 {
-                    tObject.transform.localPosition = Vector3.zero;
                     node.transform.position = new Vector3(tObjectHead.transform.position.x, tObjectHead.transform.position.y - 0.8f, tObjectHead.transform.position.z);
                 }
             }
             else if (nodeType == QuickVRNode.Type.LeftHand || nodeType == QuickVRNode.Type.RightHand)
             {
-                tObject.transform.localPosition = _handControllerPositionOffset;
                 float sign = nodeType == QuickVRNode.Type.LeftHand ? 1.0f : -1.0f;
                 tObject.transform.Rotate(tObject.transform.forward, sign * 90.0f, Space.World);
 
@@ -489,12 +487,20 @@ namespace QuickVR
                 {
                     tObject.transform.Rotate(tObject.transform.right, 90.0f, Space.World);
                 }
+                else
+                {
+                    tObject.transform.localPosition = HAND_CONTROLLER_POSITION_OFFSET;
+                }
             }
             else if (nodeType == QuickVRNode.Type.LeftFoot || nodeType == QuickVRNode.Type.RightFoot)
             {
                 tObject.transform.rotation = _vrNodesOrigin.rotation;
+                tObject.transform.position += -_vrNodesOrigin.forward * 0.1f;
             }
-
+            else if (nodeType.ToString().Contains("Lower"))
+            {
+                tObject.transform.position += (-node.transform.forward * 0.1f) + (-_vrNodesOrigin.up * 0.1f);
+            }
         }
 
         protected virtual void CalibrateVRNodeHead(QuickVRNode node)

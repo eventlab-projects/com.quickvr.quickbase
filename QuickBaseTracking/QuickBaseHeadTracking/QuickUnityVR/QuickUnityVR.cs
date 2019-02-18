@@ -178,6 +178,7 @@ namespace QuickVR {
             else if (QuickIKManager.IsBoneMid(boneID))
             {
                 t = ikSolver._targetHint;
+                posOffset += node.transform.forward * 0.25f;
             }
 
             if (!t) return;
