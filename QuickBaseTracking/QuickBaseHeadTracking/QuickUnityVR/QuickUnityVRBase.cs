@@ -495,11 +495,11 @@ namespace QuickVR
             else if (nodeType == QuickVRNode.Type.LeftFoot || nodeType == QuickVRNode.Type.RightFoot)
             {
                 tObject.transform.rotation = _vrNodesOrigin.rotation;
-                tObject.transform.position += -_vrNodesOrigin.forward * 0.1f;
+                tObject.transform.position += -_vrNodesOrigin.forward * 0.075f;
             }
-            else if (nodeType.ToString().Contains("Lower"))
+            else if (nodeType == QuickVRNode.Type.LeftLowerArm || nodeType == QuickVRNode.Type.RightLowerArm)
             {
-                tObject.transform.position += (-node.transform.forward * 0.1f) + (-_vrNodesOrigin.up * 0.1f);
+                tObject.transform.position += (-node.transform.forward * 0.1f);// + (-_vrNodesOrigin.up * 0.1f);
             }
         }
 
