@@ -185,7 +185,7 @@ namespace QuickVR
 
             for (int i = 0; i < numSamples; i++)
             {
-                yield return null;
+                yield return new WaitForFixedUpdate();
 
                 sample += GetSample();
             }
