@@ -108,17 +108,26 @@ namespace QuickVR
         {
             if (!_enableIK || !_boneUpper || !_boneMid || !_boneLimb || !_targetLimb) return;
 
-            _weightIKPos = Mathf.Clamp01(_weightIKPos);
-            _weightIKRot = Mathf.Clamp01(_weightIKRot);
-
             if (_weightIKPos > 0) ComputeIKPosition();
             if (_weightIKRot > 0) ComputeIKRotation();
         }
 
         protected virtual void ComputeIKPosition()
         {
+            Quaternion animBoneUpperRot = _boneUpper.rotation;
+            Quaternion animBoneMidRot = _boneMid.rotation;
+
             ResetIKChain();
 
+            Quaternion ikBoneUpperRot, ikBoneMidRot;
+            ComputeIKPosition(out ikBoneUpperRot, out ikBoneMidRot);
+
+            _boneUpper.rotation = Quaternion.Lerp(animBoneUpperRot, ikBoneUpperRot, _weightIKPos);
+            _boneMid.rotation = Quaternion.Lerp(animBoneMidRot, ikBoneMidRot, _weightIKPos);
+        }
+
+        protected virtual void ComputeIKPosition(out Quaternion boneUpperRot, out Quaternion boneMidRot)
+        {
             float upperLength = GetUpperLength();
             float midLength = GetMidLength();
             float chainLength = GetChainLength() * 0.9999f;
@@ -127,7 +136,7 @@ namespace QuickVR
             Vector3 ikTargetLimbPos = GetIKTargetLimbPosition();
             Vector3 u = (_boneMid.position - _boneUpper.position);
             Vector3 v = (ikTargetLimbPos - _boneUpper.position);
-            float rotAngle = Mathf.LerpAngle(0.0f, Vector3.Angle(u, v), _weightIKPos);
+            float rotAngle = Vector3.Angle(u, v);
             _boneUpper.Rotate(Vector3.Cross(u, v).normalized, rotAngle, Space.World);
 
             if (_targetHint && _boneLimb)
@@ -136,7 +145,6 @@ namespace QuickVR
                 float targetDistance = Mathf.Min(Vector3.Distance(_boneUpper.position, ikTargetLimbPos), chainLength);
                 float cos = (Mathf.Pow(midLength, 2) - Mathf.Pow(upperLength, 2) - Mathf.Pow(targetDistance, 2)) / (-2 * upperLength * targetDistance);
                 float ikAngle = Mathf.Acos(cos) * Mathf.Rad2Deg;
-                ikAngle = Mathf.LerpAngle(0.0f, ikAngle, _weightIKPos);
                 v = _boneMid.position - _boneUpper.position;
                 Vector3 w = _targetHint.position - _boneUpper.position;
                 _boneUpper.Rotate(Vector3.Cross(v, w).normalized, ikAngle, Space.World);
@@ -145,8 +153,11 @@ namespace QuickVR
             //Rotate the mid limb towards the target position. 
             Vector3 currentMidDir = (_boneLimb.position - _boneMid.position).normalized;
             Vector3 targetMidDir = (ikTargetLimbPos - _boneMid.position).normalized;
-            rotAngle = Mathf.LerpAngle(0.0f, Vector3.Angle(currentMidDir, targetMidDir), _weightIKPos);
+            rotAngle = Vector3.Angle(currentMidDir, targetMidDir);
             _boneMid.Rotate(Vector3.Cross(currentMidDir, targetMidDir).normalized, rotAngle, Space.World);
+
+            boneUpperRot = _boneUpper.rotation;
+            boneMidRot = _boneMid.rotation;
         }
 
         protected virtual void ComputeIKRotation()
