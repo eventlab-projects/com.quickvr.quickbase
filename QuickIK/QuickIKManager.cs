@@ -352,6 +352,24 @@ namespace QuickVR {
 			return null;
 		}
 
+        public static HumanBodyBones? GetIKTargetUpperBoneID(IKLimbBones limbBoneID)
+        {
+            return GetIKTargetUpperBoneID(ToUnity(limbBoneID));
+        }
+
+        public static HumanBodyBones? GetIKTargetUpperBoneID(HumanBodyBones limbBoneID)
+        {
+            if (limbBoneID == HumanBodyBones.Head) return HumanBodyBones.Spine;
+
+            if (limbBoneID == HumanBodyBones.LeftHand) return HumanBodyBones.LeftUpperArm;
+            if (limbBoneID == HumanBodyBones.LeftFoot) return HumanBodyBones.LeftUpperLeg;
+
+            if (limbBoneID == HumanBodyBones.RightHand) return HumanBodyBones.RightUpperArm;
+            if (limbBoneID == HumanBodyBones.RightFoot) return HumanBodyBones.RightUpperLeg;
+
+            return null;
+        }
+
         public static bool IsBoneLimb(HumanBodyBones boneID)
         {
             List<string> limbBones = QuickUtils.GetEnumValuesToString<IKLimbBones>();

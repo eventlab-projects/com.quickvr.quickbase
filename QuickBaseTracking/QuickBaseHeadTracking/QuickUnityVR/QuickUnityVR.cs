@@ -196,10 +196,37 @@ namespace QuickVR {
             foreach (IKLimbBones boneLimbID in QuickIKManager.GetIKLimbBones())
             {
                 HumanBodyBones? boneMidID = QuickIKManager.GetIKTargetMidBoneID(boneLimbID);
+                QuickIKSolver ikSolver = _ikManager.GetIKSolver(boneLimbID);
                 if (boneMidID.HasValue && GetQuickVRNode(boneMidID.Value).IsTracked())
                 {
                     _ikManager._ikHintMaskUpdate &= ~(1 << (int)boneLimbID);
+                    ikSolver.ResetIKChain();
+
+                    //Compute the rotation of the Bone Upper
+                    HumanBodyBones? boneUpperID = QuickIKManager.GetIKTargetUpperBoneID(boneLimbID);
+                    Vector3 userBoneMidPos = GetQuickVRNode(boneMidID.Value).GetTrackedObject().transform.position;
+                    Vector3 userBoneUpperPos = GetQuickVRNode(boneUpperID.Value).GetTrackedObject().transform.position;
+
+                    Vector3 currentBoneDir = ikSolver._boneMid.position - ikSolver._boneUpper.position;
+                    Vector3 targetBoneDir = ToAvatarSpace(userBoneMidPos - userBoneUpperPos);
+
+                    Vector3 rotAxis = Vector3.Cross(currentBoneDir, targetBoneDir).normalized;
+                    float rotAngle = Vector3.Angle(currentBoneDir, targetBoneDir);
+                    ikSolver._boneUpper.Rotate(rotAxis, rotAngle, Space.World);
+
+                    //Compute the rotation of the Bone Mid
+                    Vector3 userBoneLimbPos = GetQuickVRNode(QuickIKManager.ToUnity(boneLimbID)).GetTrackedObject().transform.position;
+
+                    currentBoneDir = ikSolver._boneLimb.position - ikSolver._boneMid.position;
+                    targetBoneDir = ToAvatarSpace(userBoneLimbPos - userBoneMidPos);
+
+                    rotAxis = Vector3.Cross(currentBoneDir, targetBoneDir).normalized;
+                    rotAngle = Vector3.Angle(currentBoneDir, targetBoneDir);
+                    ikSolver._boneMid.Rotate(rotAxis, rotAngle, Space.World);
+
+                    ikSolver._weightIKPos = 0.0f;
                 }
+                else ikSolver._weightIKPos = 1.0f;
             }
 
             _ikManager.UpdateTracking();
