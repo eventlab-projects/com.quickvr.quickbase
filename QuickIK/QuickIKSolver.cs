@@ -108,8 +108,8 @@ namespace QuickVR
         {
             if (!_enableIK || !_boneUpper || !_boneMid || !_boneLimb || !_targetLimb) return;
 
-            if (_weightIKPos > 0) ComputeIKPosition();
-            if (_weightIKRot > 0) ComputeIKRotation();
+            ComputeIKPosition();
+            ComputeIKRotation();
         }
 
         protected virtual void ComputeIKPosition()
