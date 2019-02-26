@@ -108,22 +108,20 @@ namespace QuickVR
         {
             if (!_enableIK || !_boneUpper || !_boneMid || !_boneLimb || !_targetLimb) return;
 
-            ComputeIKPosition();
-            ComputeIKRotation();
-        }
-
-        protected virtual void ComputeIKPosition()
-        {
             Quaternion animBoneUpperRot = _boneUpper.rotation;
             Quaternion animBoneMidRot = _boneMid.rotation;
+            Quaternion animBoneLimbRot = _boneLimb.rotation;
 
             ResetIKChain();
 
-            Quaternion ikBoneUpperRot, ikBoneMidRot;
+            Quaternion ikBoneUpperRot, ikBoneMidRot, ikBoneLimbRot;
+
             ComputeIKPosition(out ikBoneUpperRot, out ikBoneMidRot);
+            ComputeIKRotation(out ikBoneLimbRot);
 
             _boneUpper.rotation = Quaternion.Lerp(animBoneUpperRot, ikBoneUpperRot, _weightIKPos);
             _boneMid.rotation = Quaternion.Lerp(animBoneMidRot, ikBoneMidRot, _weightIKPos);
+            _boneLimb.rotation = Quaternion.Lerp(animBoneLimbRot, ikBoneLimbRot, _weightIKRot);
         }
 
         protected virtual void ComputeIKPosition(out Quaternion boneUpperRot, out Quaternion boneMidRot)
@@ -160,10 +158,9 @@ namespace QuickVR
             boneMidRot = _boneMid.rotation;
         }
 
-        protected virtual void ComputeIKRotation()
+        protected virtual void ComputeIKRotation(out Quaternion boneLimbRot)
         {
-            Transform boneRotation = _targetLimb.childCount > 0 ? _targetLimb.GetChild(0) : _targetLimb;
-            _boneLimb.rotation = Quaternion.Lerp(_boneLimb.rotation, boneRotation.rotation, _weightIKRot);
+            boneLimbRot = _targetLimb.childCount > 0 ? _targetLimb.GetChild(0).rotation : _targetLimb.rotation;
         }
 
         #endregion
