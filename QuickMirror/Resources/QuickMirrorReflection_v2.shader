@@ -11,25 +11,42 @@ Shader "QuickVR/MirrorReflection_v2"
 		_NoisePower("Noise Power", Range(0.0, 1.0)) = 0.0
 	}
 
-	SubShader
-	{
-		Tags
+		SubShader
 		{
-			"RenderType" = "Opaque"
-		}
-
-		Pass
-		{
-		CGPROGRAM
-			#pragma vertex vert
-			#pragma fragment frag
-			#include "UnityCG.cginc"
-			#include "QuickMirrorReflection.cginc"
-
-			fixed4 frag(v2f i) : SV_Target
+			Tags
 			{
-				return ComputeFinalColor(GetProjUV(i.screenPos), i.uv);
+				"RenderType" = "Opaque"
 			}
+
+			Pass
+			{
+			CGPROGRAM
+				#pragma vertex vert_v2
+				#pragma fragment frag
+				#include "UnityCG.cginc"
+				#include "QuickMirrorReflection.cginc"
+
+				uniform float4x4 _mvpEyeLeft;
+				uniform float4x4 _mvpEyeRight;
+
+				v2f vert_v2(float4 pos : POSITION, float2 uv : TEXCOORD0)
+				{
+					v2f o;
+					o.pos = UnityObjectToClipPos(pos);
+					o.uv = uv;
+					float4x4 mvp = (unity_StereoEyeIndex == 0) ? _mvpEyeLeft : _mvpEyeRight;
+					o.screenPos = ComputeScreenPos(mul(mvp, pos)); //ComputeScreenPos(o.pos);
+
+					return o;
+				}
+
+				fixed4 frag(v2f i) : SV_Target
+				{
+					//return ComputeFinalColor(GetProjUV(i.screenPos), i.uv);
+
+					float2 projUV = GetProjUV(i.screenPos);
+					return ComputeFinalColor(float2(projUV.x, 1.0 - projUV.y), i.uv);
+				}
 			ENDCG
 		}
 	}

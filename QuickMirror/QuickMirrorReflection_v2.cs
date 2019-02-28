@@ -52,6 +52,23 @@ namespace QuickVR
 
         #region UPDATE
 
+        protected override void RenderReflection()
+        {
+            base.RenderReflection();
+
+            Material mat = GetMaterial();
+            Camera cam = Camera.current;
+            if (cam.stereoEnabled)
+            {
+                mat.SetMatrix("_mvpEyeLeft", cam.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left) * cam.GetStereoViewMatrix(Camera.StereoscopicEye.Left) * transform.localToWorldMatrix);
+            }
+            else
+            {
+                mat.SetMatrix("_mvpEyeLeft", cam.projectionMatrix * cam.worldToCameraMatrix * transform.localToWorldMatrix);
+            }
+            mat.SetMatrix("_mvpEyeRight", cam.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right) * cam.GetStereoViewMatrix(Camera.StereoscopicEye.Right) * transform.localToWorldMatrix);
+        }
+
         protected override void RenderVirtualImage(RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0)
         {
             //1) Compute ModelViewMatrix

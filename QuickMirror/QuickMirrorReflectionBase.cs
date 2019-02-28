@@ -56,6 +56,8 @@ namespace QuickVR {
 		protected MeshFilter _mFilter;
         protected Renderer _renderer;
 
+        protected static Queue<QuickMirrorReflectionBase> _mirrorQueue = new Queue<QuickMirrorReflectionBase>();
+
         #endregion
 		
 		#region CREATION AND DESTRUCTION
@@ -173,12 +175,22 @@ namespace QuickVR {
             return transform.position + reflectionPosToPlane;
         }
 
+        protected bool IsEditorCamera(Camera cam)
+        {
+            return !Application.isPlaying || (Application.isPlaying && Application.isEditor && cam.name == "SceneCamera");
+        }
+
         #endregion
 
         #region MIRROR RENDER
 
         protected virtual bool AllowRender() {
-            return (!_insideRendering && Vector3.Distance(Camera.current.transform.position, transform.position) < _reflectionDistance);
+            return (Vector3.Distance(Camera.current.transform.position, transform.position) < _reflectionDistance);
+        }
+
+        protected virtual void AddToMirrorQueue()
+        {
+            _mirrorQueue.Enqueue(this);
         }
 
         // This is called when it's known that the object will be rendered by some
@@ -191,23 +203,30 @@ namespace QuickVR {
 
             if (AllowRender())
             {
-                _insideRendering = true;    // Safeguard from recursive reflections.        
+                if (!_insideRendering && (_mirrorQueue.Count == 0 || _mirrorQueue.Peek() == this))
+                {
+                    if (_mirrorQueue.Count > 0) _mirrorQueue.Dequeue();
 
-                //Tune the quality settings for the reflected image
-                int oldPixelLightCount = QualitySettings.pixelLightCount;
-                if (_disablePixelLights) QualitySettings.pixelLightCount = 0;
-                ShadowQuality oldShadowQuality = QualitySettings.shadows;
-                QualitySettings.shadows = (ShadowQuality)(Mathf.Min((int)_reflectionShadowType, (int)oldShadowQuality));
+                    StartCoroutine(CoUpdateInsideRendering());
+                    
+                    //Tune the quality settings for the reflected image
+                    int oldPixelLightCount = QualitySettings.pixelLightCount;
+                    if (_disablePixelLights) QualitySettings.pixelLightCount = 0;
+                    ShadowQuality oldShadowQuality = QualitySettings.shadows;
+                    QualitySettings.shadows = (ShadowQuality)(Mathf.Min((int)_reflectionShadowType, (int)oldShadowQuality));
 
-                CreateReflectionTexture();
-                CreateReflectionCamera();
-                RenderReflection();
+                    CreateReflectionTexture();
+                    CreateReflectionCamera();
+                    RenderReflection();
 
-                _insideRendering = false;
-
-                // Restore the quality settings
-                QualitySettings.pixelLightCount = oldPixelLightCount;
-                QualitySettings.shadows = oldShadowQuality;
+                    // Restore the quality settings
+                    QualitySettings.pixelLightCount = oldPixelLightCount;
+                    QualitySettings.shadows = oldShadowQuality;
+                }
+                else if (!_mirrorQueue.Contains(this))
+                {
+                    AddToMirrorQueue();
+                }
             }
             else
             {
@@ -215,6 +234,15 @@ namespace QuickVR {
                 ClearRenderTexture(_reflectionTextureRight, Color.black);
             }
 		}
+
+        protected virtual IEnumerator CoUpdateInsideRendering()
+        {
+            _insideRendering = true;    // Safeguard from recursive reflections.        
+
+            yield return null;
+
+            _insideRendering = false;
+        }
 		
 		protected virtual void RenderReflection() {
             UpdateCameraModes();
