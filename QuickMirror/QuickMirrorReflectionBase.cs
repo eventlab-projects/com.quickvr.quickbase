@@ -58,6 +58,8 @@ namespace QuickVR {
 
         protected static Queue<QuickMirrorReflectionBase> _mirrorQueue = new Queue<QuickMirrorReflectionBase>();
 
+        protected bool _interleavedRendering = false;
+
         #endregion
 		
 		#region CREATION AND DESTRUCTION
@@ -207,7 +209,8 @@ namespace QuickVR {
                 {
                     if (_mirrorQueue.Count > 0) _mirrorQueue.Dequeue();
 
-                    StartCoroutine(CoUpdateInsideRendering());
+                    _insideRendering = true;
+                    //StartCoroutine(CoUpdateInsideRendering());
                     
                     //Tune the quality settings for the reflected image
                     int oldPixelLightCount = QualitySettings.pixelLightCount;
@@ -219,13 +222,15 @@ namespace QuickVR {
                     CreateReflectionCamera();
                     RenderReflection();
 
+                    _insideRendering = false;
+
                     // Restore the quality settings
                     QualitySettings.pixelLightCount = oldPixelLightCount;
                     QualitySettings.shadows = oldShadowQuality;
                 }
                 else if (!_mirrorQueue.Contains(this))
                 {
-                    AddToMirrorQueue();
+                    //AddToMirrorQueue();
                 }
             }
             else
@@ -240,6 +245,7 @@ namespace QuickVR {
             _insideRendering = true;    // Safeguard from recursive reflections.        
 
             yield return null;
+            //yield return new WaitForFixedUpdate();
 
             _insideRendering = false;
         }
