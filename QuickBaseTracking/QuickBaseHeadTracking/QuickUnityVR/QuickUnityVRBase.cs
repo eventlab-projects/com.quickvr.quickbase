@@ -524,7 +524,14 @@ namespace QuickVR
 
         public virtual QuickVRNode GetQuickVRNode(HumanBodyBones boneID)
         {
-            return GetQuickVRNode(QuickUtils.ParseEnum<QuickVRNode.Type>(boneID.ToString()));
+            string s = boneID.ToString();
+            if (QuickUtils.IsEnumValue<QuickVRNode.Type>(s))
+            {
+                return GetQuickVRNode(QuickUtils.ParseEnum<QuickVRNode.Type>(s));
+            }
+            else if (boneID == HumanBodyBones.Spine) return GetQuickVRNode(QuickVRNode.Type.Hips);
+
+            return null;
         }
 
         public virtual QuickVRNode GetQuickVRNode(QuickVRNode.Type node)
