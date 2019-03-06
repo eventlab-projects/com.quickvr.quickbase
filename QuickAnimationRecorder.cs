@@ -17,6 +17,8 @@ namespace QuickVR
 
         public string _fileName = "animation";
 
+        public bool _loop = false;
+
         #endregion
 
         #region PROTECTED ATTRIBUTES
@@ -33,7 +35,7 @@ namespace QuickVR
         protected Animator _animator = null;
         protected List<Dictionary<HumanBodyBones, Quaternion>> _animationFrames = new List<Dictionary<HumanBodyBones, Quaternion>>();
         protected Dictionary<HumanBodyBones, Quaternion> _lastLocalRotations = new Dictionary<HumanBodyBones, Quaternion>();
-        protected AnimationCurve _timeCurve = new AnimationCurve();
+        protected float _fps = 0.0f;
 
         #endregion
 
@@ -42,8 +44,6 @@ namespace QuickVR
         protected virtual void Awake()
         {
             _animator = GetComponent<Animator>();
-            _timeCurve.postWrapMode = WrapMode.Loop;
-            _timeCurve.preWrapMode = WrapMode.Loop;
         }
 
         #endregion
@@ -104,12 +104,11 @@ namespace QuickVR
             XmlDocument document = new XmlDocument();
             document.Load(GetFilePath());
 
-            int frameID = 0;
+            _fps = float.Parse(document.DocumentElement.GetAttribute("fps"));
+
             foreach (XmlElement frameNode in document.DocumentElement.GetElementsByTagName("FrameData"))
             {
                 Dictionary<HumanBodyBones, Quaternion> frameData = new Dictionary<HumanBodyBones, Quaternion>();
-                float frameTime = float.Parse(frameNode.GetAttribute("time"));
-
                 foreach (XmlElement boneNode in frameNode.GetElementsByTagName("BoneData"))
                 {
                     HumanBodyBones boneID = QuickUtils.ParseEnum<HumanBodyBones>(boneNode.GetAttribute("name"));
@@ -121,9 +120,7 @@ namespace QuickVR
 
                     frameData[boneID] = new Quaternion(x, y, z, w);
                 }
-                _timeCurve.AddKey(frameTime, frameID);
-                frameID++;
-
+                
                 _animationFrames.Add(frameData);
             }
         }
@@ -132,26 +129,17 @@ namespace QuickVR
 
         #region UPDATE
 
-        protected virtual void Update()
-        {
-            if (Input.GetKeyDown(KeyCode.R)) RecordAnimation();
-            if (Input.GetKeyDown(KeyCode.P)) PlaybackAnimation();
-            if (Input.GetKeyDown(KeyCode.S)) Stop();
-        }
-
         protected virtual IEnumerator CoRecordAnimation()
         {
             XmlDocument document = new XmlDocument();
-            XmlElement rootNode = document.CreateElement("AnimationData");
+            XmlNode rootNode = document.CreateElement("AnimationData");
+            WriteAttribute(document, "fps", ref rootNode, 1.0f / Time.fixedDeltaTime);
             document.AppendChild(rootNode);
-            float time = 0.0f;
-
+            
             while (_state == State.Recording)
             {
                 XmlNode frameNode = document.CreateElement("FrameData");
-                time += Time.deltaTime;
-                WriteAttribute(document, "time", ref frameNode, time);
-
+                
                 for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
                 {
                     HumanBodyBones b = (HumanBodyBones)i;
@@ -159,7 +147,7 @@ namespace QuickVR
                     if (!tBone || tBone.localRotation == GetLastLocalRotation(b)) continue;
 
                     XmlNode boneNode = document.CreateElement("BoneData");
-                    Quaternion rot = tBone.localRotation;
+                    Quaternion rot = tBone.rotation;
                     WriteAttribute(document, "name", ref boneNode, b);
                     WriteAttribute(document, "x", ref boneNode, rot.x);
                     WriteAttribute(document, "y", ref boneNode, rot.y);
@@ -182,6 +170,7 @@ namespace QuickVR
             LoadAnimationFrames();
             
             float time = 0.0f;
+            int numFrames = _animationFrames.Count;
             while (_state == State.Playback)
             {
                 time += Time.deltaTime;
@@ -192,12 +181,15 @@ namespace QuickVR
                     Transform tBone = _animator.GetBoneTransform(b);
                     if (!tBone) continue;
 
-                    float value = _timeCurve.Evaluate(time);
-                    int floor = Mathf.FloorToInt(value);
+                    float value = time / (1.0f / _fps);
                     int ceil = Mathf.CeilToInt(value);
-                    Quaternion initialRotation = _animationFrames[floor].ContainsKey(b)? _animationFrames[floor][b] : tBone.localRotation;
-                    Quaternion finalRotation = _animationFrames[ceil].ContainsKey(b)? _animationFrames[ceil][b] : tBone.localRotation;
-                    tBone.localRotation = Quaternion.Lerp(initialRotation, finalRotation, value - (float)floor);
+                    if (_loop) ceil %= numFrames;
+                    else ceil = Mathf.Min(ceil, numFrames - 1);
+                    int floor = Mathf.Max(0, ceil - 1);
+
+                    Quaternion initialRotation = _animationFrames[floor].ContainsKey(b)? _animationFrames[floor][b] : tBone.rotation;
+                    Quaternion finalRotation = _animationFrames[ceil].ContainsKey(b)? _animationFrames[ceil][b] : tBone.rotation;
+                    tBone.rotation = Quaternion.Lerp(initialRotation, finalRotation, Mathf.Repeat(value, 1.0f));
                 }
 
                 yield return new WaitForEndOfFrame();
