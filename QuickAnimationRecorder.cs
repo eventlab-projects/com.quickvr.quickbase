@@ -30,7 +30,8 @@ namespace QuickVR
 
         public string _fileName = "animation";
 
-        public bool _loop = false;
+        public bool _loop = true;
+        public bool _applyRootMotion = true;
 
         #endregion
 
@@ -219,29 +220,50 @@ namespace QuickVR
         protected virtual IEnumerator CoPlaybackAnimation()
         {
             LoadAnimationFrames();
-            
-            float time = 0.0f;
+
             int numFrames = _animationFrames.Count;
+            float time = 0.0f;
+            float animTime = numFrames * (1.0f / _fps);
+            
+            Vector3 initialPosition = transform.position;
+
             while (_state == State.Playback)
             {
                 time += Time.deltaTime;
+                if (time >= animTime)
+                {
+                    if (_loop)
+                    {
+                        time = Mathf.Repeat(time, animTime);
+                        initialPosition = transform.position;
+                    }
+                    else time = animTime;
+                }
 
+                float value = time / (1.0f / _fps);
+                int ceil = Mathf.Min(Mathf.CeilToInt(value), numFrames - 1);
+                int floor = Mathf.Max(0, ceil - 1);
+                float t = Mathf.Repeat(value, 1.0f);
+
+                if (_applyRootMotion)
+                {
+                    Vector3 posOffsetFloor = transform.rotation * Quaternion.Inverse(_animationFrames[floor]._rootRot) * (_animationFrames[floor]._rootPos - _animationFrames[0]._rootPos);
+                    Vector3 posOffsetCeil = transform.rotation * Quaternion.Inverse(_animationFrames[floor]._rootRot) * (_animationFrames[ceil]._rootPos - _animationFrames[0]._rootPos);
+
+                    transform.position = Vector3.Lerp(initialPosition + posOffsetFloor, initialPosition + posOffsetCeil, t);
+                }
+
+                //Apply the rotation to each bone
                 for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
                 {
                     HumanBodyBones b = (HumanBodyBones)i;
                     Transform tBone = _animator.GetBoneTransform(b);
                     if (!tBone) continue;
 
-                    float value = time / (1.0f / _fps);
-                    int ceil = Mathf.CeilToInt(value);
-                    if (_loop) ceil %= numFrames;
-                    else ceil = Mathf.Min(ceil, numFrames - 1);
-                    int floor = Mathf.Max(0, ceil - 1);
-
                     Quaternion initialRotation = GetBoneRotationAtFrame(b, floor);
                     Quaternion finalRotation = GetBoneRotationAtFrame(b, ceil);
                     
-                    tBone.rotation = Quaternion.Lerp(initialRotation, finalRotation, Mathf.Repeat(value, 1.0f));
+                    tBone.rotation = Quaternion.Lerp(initialRotation, finalRotation, t);
                 }
 
                 yield return new WaitForEndOfFrame();
