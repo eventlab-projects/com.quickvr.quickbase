@@ -432,6 +432,21 @@ namespace QuickVR
             return t;
         }
 
+        public static Transform Find(this Transform transform, string name, bool recursive = false)
+        {
+            if (!recursive) return transform.Find(name);
+
+            Queue<Transform> queue = new Queue<Transform>();
+            queue.Enqueue(transform);
+            while (queue.Count > 0)
+            {
+                Transform c = queue.Dequeue();
+                if (c.name.CompareTo(name) == 0) return c;
+                foreach (Transform t in c) queue.Enqueue(t);
+            }
+            return null;
+        }
+
         public static void DestroyChild(this Transform transform, int childID)
         {
             if ((transform.childCount == 0) || (childID >= transform.childCount)) return;
