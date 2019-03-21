@@ -160,9 +160,9 @@ namespace QuickVR {
 
         protected virtual void UpdateTransformNode(QuickVRNode.Type nType)
         {
-            QuickVRNode node = GetQuickVRNode(nType);
-            if (!node.IsTracked()) return;
+            if (!IsNodeTracked(nType)) return;
 
+            QuickVRNode node = GetQuickVRNode(nType);
             HumanBodyBones boneID = QuickUtils.ParseEnum<HumanBodyBones>(nType.ToString());
             QuickTrackedObject tObject = node.GetTrackedObject();
             Vector3 posOffset = tObject.transform.position - _vrNodesOrigin.position;
@@ -189,9 +189,7 @@ namespace QuickVR {
 
         protected virtual void UpdateTrackingIK()
         {
-            _ikManager.GetIKSolver(HumanBodyBones.Head)._weightIKPos = _applyHeadPosition ? 1.0f : 0.0f;
-            _ikManager.GetIKSolver(HumanBodyBones.Head)._weightIKRot = _applyHeadRotation ? 1.0f : 0.0f;
-
+            //_ikManager._ikMask = _trackedJoints;
             //Check if the IKHint targets are actually tracked. 
             foreach (IKLimbBones boneLimbID in QuickIKManager.GetIKLimbBones())
             {
@@ -228,6 +226,9 @@ namespace QuickVR {
                 }
                 else ikSolver._weightIKPos = 1.0f;
             }
+
+            _ikManager.GetIKSolver(HumanBodyBones.Head)._weightIKPos = _applyHeadPosition ? 1.0f : 0.0f;
+            _ikManager.GetIKSolver(HumanBodyBones.Head)._weightIKRot = _applyHeadRotation ? 1.0f : 0.0f;
 
             _ikManager.UpdateTracking();
         }

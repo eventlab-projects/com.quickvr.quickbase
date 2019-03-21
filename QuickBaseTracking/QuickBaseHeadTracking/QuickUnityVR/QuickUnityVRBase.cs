@@ -153,6 +153,19 @@ namespace QuickVR
 
         #region GET AND SET
 
+        protected virtual bool IsNodeTracked(QuickVRNode.Type nodeType)
+        {
+            if (!GetQuickVRNode(nodeType).IsTracked()) return false;
+
+            if (nodeType == QuickVRNode.Type.Head) return (_trackedJoints & (1 << (int)IKLimbBones.Head)) != 0;
+            if (nodeType == QuickVRNode.Type.LeftHand) return (_trackedJoints & (1 << (int)IKLimbBones.LeftHand)) != 0;
+            if (nodeType == QuickVRNode.Type.RightHand) return (_trackedJoints & (1 << (int)IKLimbBones.RightHand)) != 0;
+            if (nodeType == QuickVRNode.Type.LeftFoot) return (_trackedJoints & (1 << (int)IKLimbBones.LeftFoot)) != 0;
+            if (nodeType == QuickVRNode.Type.RightFoot) return (_trackedJoints & (1 << (int)IKLimbBones.RightFoot)) != 0;
+
+            return true;
+        }
+
         protected virtual bool IsHMDPresent()
         {
             return (XRDevice.isPresent && !XRDevice.model.ToLower().StartsWith("null"));
@@ -688,38 +701,38 @@ namespace QuickVR
                 DebugVRNode(QuickVRNode.Type.RightFoot, Color.magenta);
 
                 DebugVRNodeConnection(QuickVRNode.Type.Head, QuickVRNode.Type.LeftUpperArm, true);
-                if (GetQuickVRNode(QuickVRNode.Type.LeftLowerArm).IsTracked())
+                if (IsNodeTracked(QuickVRNode.Type.LeftLowerArm))
                 {
                     DebugVRNodeConnection(QuickVRNode.Type.LeftUpperArm, QuickVRNode.Type.LeftLowerArm, true);
                     DebugVRNodeConnection(QuickVRNode.Type.LeftLowerArm, QuickVRNode.Type.LeftHand);
                 }
-                else DebugVRNodeConnection(QuickVRNode.Type.LeftUpperArm, QuickVRNode.Type.LeftHand, GetQuickVRNode(QuickVRNode.Type.LeftHand).IsTracked());
+                else DebugVRNodeConnection(QuickVRNode.Type.LeftUpperArm, QuickVRNode.Type.LeftHand, IsNodeTracked(QuickVRNode.Type.LeftHand));
 
                 DebugVRNodeConnection(QuickVRNode.Type.Head, QuickVRNode.Type.RightUpperArm, true);
-                if (GetQuickVRNode(QuickVRNode.Type.RightLowerArm).IsTracked())
+                if (IsNodeTracked(QuickVRNode.Type.RightLowerArm))
                 {
                     DebugVRNodeConnection(QuickVRNode.Type.RightUpperArm, QuickVRNode.Type.RightLowerArm, true);
                     DebugVRNodeConnection(QuickVRNode.Type.RightLowerArm, QuickVRNode.Type.RightHand);
                 }
-                else DebugVRNodeConnection(QuickVRNode.Type.RightUpperArm, QuickVRNode.Type.RightHand, GetQuickVRNode(QuickVRNode.Type.RightHand).IsTracked());
+                else DebugVRNodeConnection(QuickVRNode.Type.RightUpperArm, QuickVRNode.Type.RightHand, IsNodeTracked(QuickVRNode.Type.RightHand));
 
                 DebugVRNodeConnection(QuickVRNode.Type.Head, QuickVRNode.Type.Hips, true);
 
                 DebugVRNodeConnection(QuickVRNode.Type.Hips, QuickVRNode.Type.LeftUpperLeg, true);
-                if (GetQuickVRNode(QuickVRNode.Type.LeftLowerLeg).IsTracked())
+                if (IsNodeTracked(QuickVRNode.Type.LeftLowerLeg))
                 {
                     DebugVRNodeConnection(QuickVRNode.Type.LeftUpperLeg, QuickVRNode.Type.LeftLowerLeg, true);
                     DebugVRNodeConnection(QuickVRNode.Type.LeftLowerLeg, QuickVRNode.Type.LeftFoot);
                 }
-                else DebugVRNodeConnection(QuickVRNode.Type.LeftUpperLeg, QuickVRNode.Type.LeftFoot, GetQuickVRNode(QuickVRNode.Type.LeftFoot).IsTracked());
+                else DebugVRNodeConnection(QuickVRNode.Type.LeftUpperLeg, QuickVRNode.Type.LeftFoot, IsNodeTracked(QuickVRNode.Type.LeftFoot));
 
                 DebugVRNodeConnection(QuickVRNode.Type.Hips, QuickVRNode.Type.RightUpperLeg, true);
-                if (GetQuickVRNode(QuickVRNode.Type.RightLowerLeg).IsTracked())
+                if (IsNodeTracked(QuickVRNode.Type.RightLowerLeg))
                 {
                     DebugVRNodeConnection(QuickVRNode.Type.RightUpperLeg, QuickVRNode.Type.RightLowerLeg, true);
                     DebugVRNodeConnection(QuickVRNode.Type.RightLowerLeg, QuickVRNode.Type.RightFoot);
                 }
-                else DebugVRNodeConnection(QuickVRNode.Type.RightUpperLeg, QuickVRNode.Type.RightFoot, GetQuickVRNode(QuickVRNode.Type.RightFoot).IsTracked());
+                else DebugVRNodeConnection(QuickVRNode.Type.RightUpperLeg, QuickVRNode.Type.RightFoot, IsNodeTracked(QuickVRNode.Type.RightFoot));
 
                 //Gizmos.color = Color.white;
                 //QuickVRNode.Type tNode = GetQuickVRNode(QuickVRNode.Type.Hips).IsTracked() ? QuickVRNode.Type.Hips : QuickVRNode.Type.Head;
@@ -736,7 +749,7 @@ namespace QuickVR
         {
             float scale = 0.05f;
             QuickVRNode qNode = GetQuickVRNode(nType);
-            if (qNode.IsTracked() || forceDraw)
+            if (IsNodeTracked(nType) || forceDraw)
             {
                 Transform tNode = qNode.transform;
                 Transform tTracked = qNode.GetTrackedObject().transform;
@@ -754,7 +767,7 @@ namespace QuickVR
         {
             QuickVRNode n1 = GetQuickVRNode(n1Type);
             QuickVRNode n2 = GetQuickVRNode(n2Type);
-            if ((n1.IsTracked() && n2.IsTracked()) || forceDraw)
+            if ((IsNodeTracked(n1Type) && IsNodeTracked(n2Type)) || forceDraw)
             {
                 Gizmos.color = Color.white;
                 Gizmos.DrawLine(n1.GetTrackedObject().transform.position, n2.GetTrackedObject().transform.position);

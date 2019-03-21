@@ -51,8 +51,6 @@ namespace QuickVR {
         protected HumanPose _pose = new HumanPose();
         protected HumanPoseHandler _poseHandler = null;
 
-        protected Transform _ikCalibrationTargetsRoot = null;
-
         #endregion
 
         #region CONSTANTS
@@ -90,37 +88,6 @@ namespace QuickVR {
             _boundingRadius = Vector3.Distance(lShoulder.position, rShoulder.position) * 0.5f;
 
             _poseHandler = new HumanPoseHandler(_animator.avatar, _animator.transform);
-
-            CreateCalibrationTargets();
-        }
-
-        protected virtual void CreateCalibrationTargets()
-        {
-            _ikCalibrationTargetsRoot = transform.CreateChild("__IKCalibrationTargets__");
-            foreach (IKLimbBones boneID in GetIKLimbBones())
-            {
-                CreateCalibrationTarget(ToUnity(boneID));
-            }
-        }
-
-        protected virtual void CreateCalibrationTarget(HumanBodyBones boneID)
-        {
-            Transform cTarget = _ikCalibrationTargetsRoot.CreateChild("_IKCalibrationTarget_" + boneID.ToString());
-            QuickIKSolver ikSolver = GetIKSolver(boneID);
-
-            cTarget.rotation = ikSolver._targetLimb.rotation;
-            if (boneID.ToString().Contains("Hand"))
-            {
-                bool isLeft = boneID.ToString().Contains("Left");
-                Vector3 v = isLeft ? -transform.right : transform.right;
-                Vector3 w = Vector3.Lerp(v, -transform.up, 0.9f).normalized;
-                cTarget.position = ikSolver._boneUpper.position + w * ikSolver.GetChainLength();
-                cTarget.Rotate(cTarget.right, 90.0f, Space.World);
-            }
-            else
-            {
-                cTarget.position = ikSolver._targetLimb.position;
-            }
         }
 
         protected virtual T CreateIKSolver<T>(HumanBodyBones boneID) where T : QuickIKSolver
@@ -237,9 +204,8 @@ namespace QuickVR {
         public override void Calibrate()
         {
             QuickIKSolver ikSolver = null;
-            for (int i = 0; i < _ikLimbBones.Count; i++)
+            foreach (IKLimbBones boneID in GetIKLimbBones())
             {
-                IKLimbBones boneID = _ikLimbBones[i];
                 ResetIKSolver(boneID);
             }
 
@@ -269,9 +235,6 @@ namespace QuickVR {
             if ((_ikMask & (1 << (int)boneID)) != 0)
             {
                 ikSolver.ResetIKChain();
-                Transform cTarget = GetIKCalibrationTarget(boneID);
-                ikSolver._targetLimb.position = cTarget.position;
-                ikSolver._targetLimb.rotation = cTarget.rotation;
             }
         }
 
@@ -324,16 +287,6 @@ namespace QuickVR {
 
             return t.GetComponent<QuickIKSolver>();
 		}
-
-        public virtual Transform GetIKCalibrationTarget(IKLimbBones boneID)
-        {
-            return GetIKCalibrationTarget(ToUnity(boneID));
-        }
-
-        public virtual Transform GetIKCalibrationTarget(HumanBodyBones boneID)
-        {
-            return _ikCalibrationTargetsRoot.Find("_IKCalibrationTarget_" + boneID.ToString());
-        }
 
         public static HumanBodyBones? GetIKTargetMidBoneID(IKLimbBones limbBoneID)
         {
@@ -439,11 +392,10 @@ namespace QuickVR {
 		#region UPDATE
 
         public override void UpdateTracking() {
-            for (int i = 0; i < _ikLimbBones.Count; i++)
+            foreach (IKLimbBones boneID in GetIKLimbBones())
             {
-                IKLimbBones boneID = _ikLimbBones[i];
                 QuickIKSolver ikSolver = GetIKSolver(ToUnity(boneID));
-                if (ikSolver && ((_ikMask & (1 << i)) != 0))
+                if (ikSolver && ((_ikMask & (1 << (int)boneID)) != 0))
                 {
                     //Correct the rotations of the limb bones by accounting for human body constraints
                     if (boneID == IKLimbBones.LeftHand || boneID == IKLimbBones.RightHand)
