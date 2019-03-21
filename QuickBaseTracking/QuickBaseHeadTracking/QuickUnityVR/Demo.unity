@@ -815,10 +815,6 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 9500000, guid: 920b88643f1a9ff408b6c50ac59bbd41, type: 3}
-      propertyPath: m_Controller
-      value: 
-      objectReference: {fileID: 0}
     - target: {fileID: 400246, guid: 920b88643f1a9ff408b6c50ac59bbd41, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -866,6 +862,10 @@ PrefabInstance:
     - target: {fileID: 400246, guid: 920b88643f1a9ff408b6c50ac59bbd41, type: 3}
       propertyPath: m_LocalScale.z
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9500000, guid: 920b88643f1a9ff408b6c50ac59bbd41, type: 3}
+      propertyPath: m_Controller
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 400000, guid: 920b88643f1a9ff408b6c50ac59bbd41, type: 3}
       propertyPath: m_LocalRotation.x
@@ -938,7 +938,13 @@ MonoBehaviour:
   _fileName: animationDisplacement2
   _loop: 1
   _applyRootMotion: 1
---- !u!114 &437895857
+--- !u!95 &437895855 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 9500000, guid: 920b88643f1a9ff408b6c50ac59bbd41,
+    type: 3}
+  m_PrefabInstance: {fileID: 437895852}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &437895856
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -946,6 +952,39 @@ MonoBehaviour:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 437895853}
   m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 39695b9dba667a74d931d98210c83a43, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _priority: 2000
+  _animator: {fileID: 437895855}
+  _isCalibrated: 0
+  _calibrationTexture: {fileID: 0}
+  _visibleLayers:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  _applyHeadRotation: 1
+  _applyHeadPosition: 1
+  _pfCamera: {fileID: 0}
+  _cameraNearPlane: 0.035
+  _cameraFarPlane: 500
+  _camera: {fileID: 0}
+  _cameraControllerRoot: {fileID: 0}
+  _showCalibrationScreen: 1
+  _trackedJoints: -1
+  _useFootprints: 1
+  _footprints: {fileID: 0}
+  _displaceWithCamera: 0
+  _rotateWithCamera: 0
+  _ikManager: {fileID: 0}
+--- !u!114 &437895857
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 437895853}
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4cf989f4050bf8f49bd1090274b2fda8, type: 3}
   m_Name: 
