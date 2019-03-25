@@ -49,6 +49,7 @@ namespace QuickVR
         protected Animator _animator = null;
         protected List<QuickAnimationFrame> _animationFrames = new List<QuickAnimationFrame>();
         protected Dictionary<HumanBodyBones, Quaternion> _lastLocalRotations = new Dictionary<HumanBodyBones, Quaternion>();
+        protected Dictionary<HumanBodyBones, Quaternion> _tPoseRotations = new Dictionary<HumanBodyBones, Quaternion>();
         protected float _fps = 0.0f;
 
         #endregion
@@ -58,6 +59,15 @@ namespace QuickVR
         protected virtual void Awake()
         {
             _animator = GetComponent<Animator>();
+
+            foreach (int i in QuickHumanTrait.GetBonesHierarchy())
+            {
+                HumanBodyBones b = (HumanBodyBones)i;
+                Transform tBone = _animator.GetBoneTransform(b);
+                if (!tBone) continue;
+
+                _tPoseRotations[b] = tBone.rotation;
+            }
         }
 
         #endregion
@@ -165,6 +175,14 @@ namespace QuickVR
             }
         }
 
+        protected virtual void WriteQuaternion(Quaternion q, XmlDocument document, ref XmlNode node)
+        {
+            WriteAttribute(document, "rotX", ref node, q.x);
+            WriteAttribute(document, "rotY", ref node, q.y);
+            WriteAttribute(document, "rotZ", ref node, q.z);
+            WriteAttribute(document, "rotW", ref node, q.w);
+        }
+
         #endregion
 
         #region UPDATE
@@ -175,7 +193,23 @@ namespace QuickVR
             XmlNode animationDataNode = document.CreateElement("AnimationData");
             WriteAttribute(document, "fps", ref animationDataNode, 1.0f / Time.fixedDeltaTime);
             document.AppendChild(animationDataNode);
-            
+
+            XmlNode tPoseData = document.CreateElement("TPoseData");
+            foreach (var pair in _tPoseRotations)
+            {
+                WriteAttribute(document, "name", ref tPoseData, pair.Key);
+                WriteQuaternion(pair.Value, document, ref tPoseData);
+            }
+
+            foreach (int i in QuickHumanTrait.GetBonesHierarchy())
+            {
+                HumanBodyBones b = (HumanBodyBones)i;
+                Transform tBone = _animator.GetBoneTransform(b);
+                if (!tBone) continue;
+
+
+            }
+
             while (_state == State.Recording)
             {
                 XmlNode frameNode = document.CreateElement("FrameData");
@@ -185,14 +219,11 @@ namespace QuickVR
                 WriteAttribute(document, "posY", ref rootNode, transform.position.y);
                 WriteAttribute(document, "posZ", ref rootNode, transform.position.z);
 
-                WriteAttribute(document, "rotX", ref rootNode, transform.rotation.x);
-                WriteAttribute(document, "rotY", ref rootNode, transform.rotation.y);
-                WriteAttribute(document, "rotZ", ref rootNode, transform.rotation.z);
-                WriteAttribute(document, "rotW", ref rootNode, transform.rotation.w);
+                WriteQuaternion(transform.rotation, document, ref rootNode);
 
                 frameNode.AppendChild(rootNode);
 
-                for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+                foreach (int i in QuickHumanTrait.GetBonesHierarchy())
                 {
                     HumanBodyBones b = (HumanBodyBones)i;
                     Transform tBone = _animator.GetBoneTransform(b);
@@ -201,10 +232,7 @@ namespace QuickVR
                     XmlNode boneNode = document.CreateElement("BoneData");
                     Quaternion rot = tBone.rotation;
                     WriteAttribute(document, "name", ref boneNode, b);
-                    WriteAttribute(document, "rotX", ref boneNode, rot.x);
-                    WriteAttribute(document, "rotY", ref boneNode, rot.y);
-                    WriteAttribute(document, "rotZ", ref boneNode, rot.z);
-                    WriteAttribute(document, "rotW", ref boneNode, rot.w);
+                    WriteQuaternion(rot, document, ref boneNode);
 
                     _lastLocalRotations[b] = tBone.localRotation;
                     frameNode.AppendChild(boneNode);
@@ -254,7 +282,7 @@ namespace QuickVR
                 }
 
                 //Apply the rotation to each bone
-                for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+                foreach (int i in QuickHumanTrait.GetBonesHierarchy())
                 {
                     HumanBodyBones b = (HumanBodyBones)i;
                     Transform tBone = _animator.GetBoneTransform(b);

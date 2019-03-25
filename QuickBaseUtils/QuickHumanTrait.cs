@@ -11,6 +11,8 @@ public static class QuickHumanTrait
     private static Dictionary<int, List<int>> _childBones = null;
     private static List<int> _bonesHierarchy = null;
 
+    private static Dictionary<HumanBodyBones, HumanBodyBones> _lookAtBone = null;
+
     #endregion
 
     #region CREATION AND DESTRUCTION
@@ -27,6 +29,65 @@ public static class QuickHumanTrait
 
                 _childBones[parentID].Add(i);
             }
+        }
+    }
+
+    private static void InitLookAtBones()
+    {
+        if (_lookAtBone == null)
+        {
+            _lookAtBone = new Dictionary<HumanBodyBones, HumanBodyBones>();
+
+            //Spine
+            _lookAtBone[HumanBodyBones.Hips] = HumanBodyBones.Spine;
+            _lookAtBone[HumanBodyBones.Spine] = HumanBodyBones.Chest;
+            _lookAtBone[HumanBodyBones.Chest] = HumanBodyBones.UpperChest;
+            _lookAtBone[HumanBodyBones.UpperChest] = HumanBodyBones.Neck;
+            _lookAtBone[HumanBodyBones.Neck] = HumanBodyBones.Head;
+
+            //LeftArm
+            _lookAtBone[HumanBodyBones.LeftShoulder] = HumanBodyBones.LeftUpperArm;
+            _lookAtBone[HumanBodyBones.LeftUpperArm] = HumanBodyBones.LeftLowerArm;
+            _lookAtBone[HumanBodyBones.LeftLowerArm] = HumanBodyBones.LeftHand;
+
+            //RightArm
+            _lookAtBone[HumanBodyBones.RightShoulder] = HumanBodyBones.RightUpperArm;
+            _lookAtBone[HumanBodyBones.RightUpperArm] = HumanBodyBones.RightLowerArm;
+            _lookAtBone[HumanBodyBones.RightLowerArm] = HumanBodyBones.RightHand;
+
+            //LeftLeg
+            _lookAtBone[HumanBodyBones.LeftUpperLeg] = HumanBodyBones.LeftLowerLeg;
+            _lookAtBone[HumanBodyBones.LeftLowerLeg] = HumanBodyBones.LeftFoot;
+            _lookAtBone[HumanBodyBones.LeftFoot] = HumanBodyBones.LeftToes;
+
+            //RightLeg
+            _lookAtBone[HumanBodyBones.RightUpperLeg] = HumanBodyBones.RightLowerLeg;
+            _lookAtBone[HumanBodyBones.RightLowerLeg] = HumanBodyBones.RightFoot;
+            _lookAtBone[HumanBodyBones.RightFoot] = HumanBodyBones.RightToes;
+
+            //LeftHand
+            _lookAtBone[HumanBodyBones.LeftThumbProximal] = HumanBodyBones.LeftThumbIntermediate;
+            _lookAtBone[HumanBodyBones.LeftThumbIntermediate] = HumanBodyBones.LeftThumbDistal;
+            _lookAtBone[HumanBodyBones.LeftIndexProximal] = HumanBodyBones.LeftIndexIntermediate;
+            _lookAtBone[HumanBodyBones.LeftIndexIntermediate] = HumanBodyBones.LeftIndexDistal;
+            _lookAtBone[HumanBodyBones.LeftMiddleProximal] = HumanBodyBones.LeftMiddleIntermediate;
+            _lookAtBone[HumanBodyBones.LeftMiddleIntermediate] = HumanBodyBones.LeftMiddleDistal;
+            _lookAtBone[HumanBodyBones.LeftRingProximal] = HumanBodyBones.LeftRingIntermediate;
+            _lookAtBone[HumanBodyBones.LeftRingIntermediate] = HumanBodyBones.LeftRingDistal;
+            _lookAtBone[HumanBodyBones.LeftLittleProximal] = HumanBodyBones.LeftLittleIntermediate;
+            _lookAtBone[HumanBodyBones.LeftLittleIntermediate] = HumanBodyBones.LeftLittleDistal;
+
+            //RightHand
+            _lookAtBone[HumanBodyBones.RightThumbProximal] = HumanBodyBones.RightThumbIntermediate;
+            _lookAtBone[HumanBodyBones.RightThumbIntermediate] = HumanBodyBones.RightThumbDistal;
+            _lookAtBone[HumanBodyBones.RightIndexProximal] = HumanBodyBones.RightIndexIntermediate;
+            _lookAtBone[HumanBodyBones.RightIndexIntermediate] = HumanBodyBones.RightIndexDistal;
+            _lookAtBone[HumanBodyBones.RightMiddleProximal] = HumanBodyBones.RightMiddleIntermediate;
+            _lookAtBone[HumanBodyBones.RightMiddleIntermediate] = HumanBodyBones.RightMiddleDistal;
+            _lookAtBone[HumanBodyBones.RightRingProximal] = HumanBodyBones.RightRingIntermediate;
+            _lookAtBone[HumanBodyBones.RightRingIntermediate] = HumanBodyBones.RightRingDistal;
+            _lookAtBone[HumanBodyBones.RightLittleProximal] = HumanBodyBones.RightLittleIntermediate;
+            _lookAtBone[HumanBodyBones.RightLittleIntermediate] = HumanBodyBones.RightLittleDistal;
         }
     }
 
@@ -125,6 +186,30 @@ public static class QuickHumanTrait
     public static bool IsRequiredBone(int boneID)
     {
         return HumanTrait.RequiredBone(boneID);
+    }
+
+    public static HumanBodyBones? GetLookAtBone(HumanBodyBones boneID)
+    {
+        InitLookAtBones();
+
+        HumanBodyBones? result = null;
+        if (_lookAtBone.ContainsKey(boneID)) result = _lookAtBone[boneID];
+
+        return result;
+    }
+
+    public static Vector3 GetDefaultLookAtDirection(HumanBodyBones boneID)
+    {
+        string bName = boneID.ToString();
+
+        if (bName.Contains("Foot")) return Vector3.forward + Vector3.down;
+
+        if (bName.Contains("Proximal") || bName.Contains("Intermediate") || bName.Contains("Distal"))
+        {
+            return bName.Contains("Left") ? Vector3.left : Vector3.right;
+        }
+
+        return Vector3.zero;
     }
 
     #endregion
