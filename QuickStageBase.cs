@@ -22,6 +22,9 @@ namespace QuickVR {
         public string _debugMessage = "";
 		public Color _debugMessageColor = Color.white;
 
+        public int _markerIDStart = -1;
+        public int _markerIDEnd = -1;
+
 		public delegate void OnInitAction(QuickStageBase stageManager);
 		public static event OnInitAction OnInit;
 
@@ -34,6 +37,7 @@ namespace QuickVR {
 
 		protected QuickBaseGameManager _gameManager = null;
 		protected DebugManager _debugManager = null;
+        protected QuickEventMarkers _eventMarkers = null; 
 
 		protected string _testName = "";
 
@@ -55,15 +59,18 @@ namespace QuickVR {
 			_testName = gameObject.name;
             _gameManager = QuickSingletonManager.GetInstance<QuickBaseGameManager>();
             _debugManager = QuickSingletonManager.GetInstance<DebugManager>();
+            _eventMarkers = QuickSingletonManager.GetInstance<QuickEventMarkers>();
         }
 
-		protected virtual void Start() {
-
+		protected virtual void Start()
+        {
             enabled = false;
 		}
 
 		public virtual void Init() {
-			if (_sendOnInitEvent && (OnInit != null)) OnInit(this);
+            if (_markerIDStart != -1) _eventMarkers.SendEventMarker(_markerIDStart);
+
+            if (_sendOnInitEvent && (OnInit != null)) OnInit(this);
 
             _finished = false;
 			_readyToFinish = false;
@@ -102,7 +109,9 @@ namespace QuickVR {
 		}
 
 		public virtual void Finish() {
-			FinishSilently();
+            if (_markerIDEnd != -1) _eventMarkers.SendEventMarker(_markerIDEnd);
+
+            FinishSilently();
 
 			if (_finishGameWhenOver) _gameManager.Finish();
 			else {
@@ -111,7 +120,8 @@ namespace QuickVR {
 				foreach (QuickStageBase bManager in _nextStages) bManager.Init();
 			}
 			enabled = false;
-			if (_sendOnFinishedEvent && (OnFinished != null)) OnFinished(this);
+            
+            if (_sendOnFinishedEvent && (OnFinished != null)) OnFinished(this);
 		}
 
 		/// <summary>
