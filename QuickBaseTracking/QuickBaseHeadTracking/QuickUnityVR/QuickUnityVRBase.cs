@@ -64,8 +64,7 @@ namespace QuickVR
             _characterControllerManager = gameObject.GetOrCreateComponent<QuickCharacterControllerManager>();
 
             _footprints = Instantiate<GameObject>(Resources.Load<GameObject>("Footprints/Footprints")).transform;
-            _footprints.gameObject.SetActive(_useFootprints);
-
+            
             _initialPosition = transform.position;
             _initialRotation = transform.rotation;
 
@@ -595,6 +594,7 @@ namespace QuickVR
         protected virtual void UpdateFootPrints()
         {
             _footprints.position = transform.position - _userDisplacement;
+            _footprints.gameObject.SetActive(_useFootprints);
         }
 
         protected virtual void UpdateTransformRoot()
