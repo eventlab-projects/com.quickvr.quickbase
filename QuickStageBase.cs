@@ -25,21 +25,24 @@ namespace QuickVR {
         public int _markerIDStart = -1;
         public int _markerIDEnd = -1;
 
+        public List<AudioClip> _instructionsSpanish = new List<AudioClip>();
+        public List<AudioClip> _instructionsEnglish = new List<AudioClip>();
+
 		public delegate void OnInitAction(QuickStageBase stageManager);
 		public static event OnInitAction OnInit;
 
 		public delegate void OnFinishedAction(QuickStageBase stageManager);
 		public static event OnFinishedAction OnFinished;
 
-		#endregion
+        #endregion
 
-		#region PROTECTED PARAMETERS
+        #region PROTECTED PARAMETERS
 
-		protected QuickBaseGameManager _gameManager = null;
+        protected QuickInstructionsManager _instructionsManager = null;
+
+        protected QuickBaseGameManager _gameManager = null;
 		protected DebugManager _debugManager = null;
         protected QuickEventMarkers _eventMarkers = null; 
-
-		protected string _testName = "";
 
 		protected bool _finished = true;
 
@@ -56,7 +59,7 @@ namespace QuickVR {
 		#region CREATION AND DESTRUCTION
 
 		protected virtual void Awake() {
-			_testName = gameObject.name;
+            _instructionsManager = QuickSingletonManager.GetInstance<QuickInstructionsManager>();
             _gameManager = QuickSingletonManager.GetInstance<QuickBaseGameManager>();
             _debugManager = QuickSingletonManager.GetInstance<DebugManager>();
             _eventMarkers = QuickSingletonManager.GetInstance<QuickEventMarkers>();
@@ -68,24 +71,33 @@ namespace QuickVR {
 		}
 
 		public virtual void Init() {
+            _finished = false;
+            _readyToFinish = false;
+            gameObject.SetActive(true);
+            enabled = true;
+
+            _timeStart = Time.time;
+
+            if (_debugMessage.Length == 0) _debugMessage = "RUNNING STAGE: " + GetName();
+            _debugManager.Log(_debugMessage, _debugMessageColor);
+
+            StartCoroutine(CoInit());
+		}
+
+        protected virtual IEnumerator CoInit()
+        {
+            SettingsBase.Languages lang = SettingsBase.GetLanguage();
+            if (lang == SettingsBase.Languages.SPANISH) _instructionsManager.Play(_instructionsSpanish);
+            else if (lang == SettingsBase.Languages.ENGLISH) _instructionsManager.Play(_instructionsEnglish);
+
+            while (_instructionsManager.IsPlaying()) yield return null;
+
             if (_markerIDStart != -1) _eventMarkers.SendEventMarker(_markerIDStart);
 
             if (_sendOnInitEvent && (OnInit != null)) OnInit(this);
 
-            _finished = false;
-			_readyToFinish = false;
-			gameObject.SetActive(true);
-			enabled = true;
-
-			if (_maxTimeOut > 0) StartCoroutine("CoTimeOut");
-
-			_timeStart = Time.time;
-
-            if (_debugMessage.Length == 0) _debugMessage = name;
-			_debugManager.Log(_debugMessage, _debugMessageColor);
-
-			Debug.Log("RUNNING STAGE: " + _testName);
-		}
+            if (_maxTimeOut > 0) StartCoroutine("CoTimeOut");
+        }
 
 		protected virtual T CreateStageManager<T>(string stageName) where T : QuickStageBase {
 			GameObject go = new GameObject(stageName);
@@ -98,6 +110,11 @@ namespace QuickVR {
 		#endregion
 
 		#region GET AND SET
+
+        protected virtual string GetName()
+        {
+            return GetType().Name + " (" + name + ")";
+        }
 
 		protected virtual void SetReadyToFinish(bool isReadyToFinish) {
 			_readyToFinish = isReadyToFinish;
@@ -131,7 +148,7 @@ namespace QuickVR {
 			_debugManager.Clear();
 			float totalTime = Time.time - _timeStart;
 			Debug.Log("===============================");
-			Debug.Log("TEST FINISHED: " + _testName);
+			Debug.Log("STAGE FINISHED: " + GetName());
 			Debug.Log("Total Time = " + totalTime);
 			Debug.Log("===============================");
 

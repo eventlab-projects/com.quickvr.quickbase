@@ -120,6 +120,11 @@ namespace QuickVR
             return names;
         }
 
+        public static List<int> GetEnumValuesToInt<T>() where T : IConvertible
+        {
+            return new List<int>((IEnumerable<int>)(Enum.GetValues(typeof(T))));
+        }
+
         public static int ParseInt(string value)
         {
             int result;
