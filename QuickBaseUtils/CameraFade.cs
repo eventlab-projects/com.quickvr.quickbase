@@ -53,6 +53,16 @@ namespace QuickVR
             Camera.main.AddCommandBuffer(CameraEvent.AfterImageEffects, _commandBuffer);
         }
 
+        protected virtual void OnEnable()
+        {
+            QuickVRManager.OnPostUpdateTracking += UpdatePosition; 
+        }
+
+        protected virtual void OnDisable()
+        {
+            QuickVRManager.OnPostUpdateTracking -= UpdatePosition;
+        }
+
         #endregion
 
         #region GET AND SET
@@ -103,7 +113,7 @@ namespace QuickVR
 
         #region UPDATE
 
-        protected virtual void Update()
+        protected virtual void UpdatePosition()
         {
             if (!Camera.main) return;
 
