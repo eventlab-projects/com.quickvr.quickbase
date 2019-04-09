@@ -22,9 +22,6 @@ namespace QuickVR {
         public string _debugMessage = "";
 		public Color _debugMessageColor = Color.white;
 
-        public int _markerIDStart = -1;
-        public int _markerIDEnd = -1;
-
         public List<AudioClip> _instructionsSpanish = new List<AudioClip>();
         public List<AudioClip> _instructionsEnglish = new List<AudioClip>();
 
@@ -42,7 +39,6 @@ namespace QuickVR {
 
         protected QuickBaseGameManager _gameManager = null;
 		protected DebugManager _debugManager = null;
-        protected QuickEventMarkers _eventMarkers = null; 
 
 		protected bool _finished = true;
 
@@ -62,7 +58,6 @@ namespace QuickVR {
             _instructionsManager = QuickSingletonManager.GetInstance<QuickInstructionsManager>();
             _gameManager = QuickSingletonManager.GetInstance<QuickBaseGameManager>();
             _debugManager = QuickSingletonManager.GetInstance<DebugManager>();
-            _eventMarkers = QuickSingletonManager.GetInstance<QuickEventMarkers>();
         }
 
 		protected virtual void Start()
@@ -91,8 +86,6 @@ namespace QuickVR {
             else if (lang == SettingsBase.Languages.ENGLISH) _instructionsManager.Play(_instructionsEnglish);
 
             while (_instructionsManager.IsPlaying()) yield return null;
-
-            if (_markerIDStart != -1) _eventMarkers.SendEventMarker(_markerIDStart);
 
             if (_sendOnInitEvent && (OnInit != null)) OnInit(this);
 
@@ -126,8 +119,6 @@ namespace QuickVR {
 		}
 
 		public virtual void Finish() {
-            if (_markerIDEnd != -1) _eventMarkers.SendEventMarker(_markerIDEnd);
-
             FinishSilently();
 
 			if (_finishGameWhenOver) _gameManager.Finish();
