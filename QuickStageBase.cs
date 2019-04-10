@@ -22,14 +22,14 @@ namespace QuickVR {
         public string _debugMessage = "";
 		public Color _debugMessageColor = Color.white;
 
+        [Space()]
+        [Header("Stage Instructions")]
         public List<AudioClip> _instructionsSpanish = new List<AudioClip>();
         public List<AudioClip> _instructionsEnglish = new List<AudioClip>();
-
-		public delegate void OnInitAction(QuickStageBase stageManager);
-		public static event OnInitAction OnInit;
-
-		public delegate void OnFinishedAction(QuickStageBase stageManager);
-		public static event OnFinishedAction OnFinished;
+        public AudioSource _instructionsAudioSource = null;
+        [Range(0.0f, 1.0f)]
+        public float _instructionsVolume = 1.0f;
+        public float _instructionsTimePause = 0.5f;
 
         #endregion
 
@@ -50,11 +50,21 @@ namespace QuickVR {
 
 		private bool _readyToFinish = false;
 
-		#endregion
+        #endregion
 
-		#region CREATION AND DESTRUCTION
+        #region EVENTS
 
-		protected virtual void Awake() {
+        public delegate void OnInitAction(QuickStageBase stageManager);
+        public static event OnInitAction OnInit;
+
+        public delegate void OnFinishedAction(QuickStageBase stageManager);
+        public static event OnFinishedAction OnFinished;
+
+        #endregion
+
+        #region CREATION AND DESTRUCTION
+
+        protected virtual void Awake() {
             _instructionsManager = QuickSingletonManager.GetInstance<QuickInstructionsManager>();
             _gameManager = QuickSingletonManager.GetInstance<QuickBaseGameManager>();
             _debugManager = QuickSingletonManager.GetInstance<DebugManager>();
@@ -81,6 +91,9 @@ namespace QuickVR {
 
         protected virtual IEnumerator CoInit()
         {
+            _instructionsManager.SetAudioSource(_instructionsAudioSource);
+            _instructionsManager._timePauseBetweenInstructions = _instructionsTimePause;
+            _instructionsManager._volume = _instructionsVolume;
             SettingsBase.Languages lang = SettingsBase.GetLanguage();
             if (lang == SettingsBase.Languages.SPANISH) _instructionsManager.Play(_instructionsSpanish);
             else if (lang == SettingsBase.Languages.ENGLISH) _instructionsManager.Play(_instructionsEnglish);
@@ -136,7 +149,8 @@ namespace QuickVR {
 		/// The test is finished silently, i.e., nor the child tests are forced to start nor the kill tests are forced to finish. 
 		/// </summary>
 		public virtual void FinishSilently() {
-			_debugManager.Clear();
+            _instructionsManager.Stop();
+            _debugManager.Clear();
 			float totalTime = Time.time - _timeStart;
 			Debug.Log("===============================");
 			Debug.Log("STAGE FINISHED: " + GetName());

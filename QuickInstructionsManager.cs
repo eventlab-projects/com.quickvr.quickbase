@@ -36,6 +36,11 @@ namespace QuickVR
 
         #region GET AND SET
 
+        public virtual void SetAudioSource(AudioSource aSource)
+        {
+            _audioSource = !aSource ? gameObject.GetComponent<AudioSource>() : aSource;
+        }
+
         public virtual void Play(AudioClip instruction)
         {
             List<AudioClip> tmp = new List<AudioClip>();
