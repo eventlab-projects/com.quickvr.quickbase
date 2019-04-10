@@ -332,7 +332,7 @@ namespace QuickVR {
         protected virtual IEnumerator CoPlayInstructions(AudioClip clip, string message = "", Color color = new Color())
         {
             _debugManager.Log(message, color);
-            _instructionsManager.Play(_headTrackingCalibrationInstructions);
+            _instructionsManager.Play(clip);
             while (_instructionsManager.IsPlaying() && !InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE))
             {
                 yield return null;
