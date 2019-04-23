@@ -499,6 +499,11 @@ namespace QuickVR
             return animator.GetLookAtBone(lookAtBone.Value);
         }
 
+        public static float GetElapsedSeconds(this System.Diagnostics.Stopwatch watch)
+        {
+            return watch.ElapsedMilliseconds / 1000.0f;
+        }
+
         #endregion
 
     }
