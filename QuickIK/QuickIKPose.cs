@@ -8,15 +8,15 @@ namespace QuickVR
     [System.Serializable]
     public class QuickIKData
     {
-        public Vector3 _targetLimbPosition = Vector3.zero;
-        public Quaternion _targetLimbRotation = Quaternion.identity;
-        public Vector3 _targetHintPosition = Vector3.zero;
+        public Vector3 _targetLimbLocalPosition = Vector3.zero;
+        public Quaternion _targetLimbLocalRotation = Quaternion.identity;
+        public Vector3 _targetHintLocalPosition = Vector3.zero;
 
-        public QuickIKData(Vector3 limbPos, Quaternion limbRot, Vector3 hintPos)
+        public QuickIKData(Vector3 limbLocalPos, Quaternion limbLocalRot, Vector3 hintLocalPos)
         {
-            _targetLimbPosition = limbPos;
-            _targetLimbRotation = limbRot;
-            _targetHintPosition = hintPos;
+            _targetLimbLocalPosition = limbLocalPos;
+            _targetLimbLocalRotation = limbLocalRot;
+            _targetHintLocalPosition = hintLocalPos;
         }
     }
 

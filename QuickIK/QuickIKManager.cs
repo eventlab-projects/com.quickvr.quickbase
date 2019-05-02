@@ -51,6 +51,8 @@ namespace QuickVR {
         protected HumanPose _pose = new HumanPose();
         protected HumanPoseHandler _poseHandler = null;
 
+        protected Dictionary<IKLimbBones, QuickIKData> _initialIKPose = new Dictionary<IKLimbBones, QuickIKData>();
+
         #endregion
 
         #region CONSTANTS
@@ -82,6 +84,12 @@ namespace QuickVR {
 			base.Awake();
 
             if (!_ikSolversRoot) Reset();
+
+            foreach (IKLimbBones boneID in GetIKLimbBones())
+            {
+                QuickIKSolver ikSolver = GetIKSolver(boneID);
+                _initialIKPose[boneID] = new QuickIKData(ikSolver._targetLimb.localPosition, ikSolver._targetLimb.localRotation, ikSolver._targetHint.localPosition);
+            }
 
             Transform lShoulder = _animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
             Transform rShoulder = _animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
@@ -203,23 +211,28 @@ namespace QuickVR {
 
         public override void Calibrate()
         {
-            QuickIKSolver ikSolver = null;
+            //QuickIKSolver ikSolver = null;
             foreach (IKLimbBones boneID in GetIKLimbBones())
             {
                 ResetIKSolver(boneID);
+                QuickIKSolver ikSolver = GetIKSolver(boneID);
+                QuickIKData initialIKData = _initialIKPose[boneID];
+                ikSolver._targetLimb.localPosition = initialIKData._targetLimbLocalPosition;
+                ikSolver._targetLimb.localRotation = initialIKData._targetLimbLocalRotation;
+                ikSolver._targetHint.localPosition = initialIKData._targetHintLocalPosition;
             }
 
-            if (IsIKHintBoneActive(IKLimbBones.LeftHand))
-            {
-                ikSolver = GetIKSolver(IKLimbBones.LeftHand);
-                ikSolver._targetHint.position = ikSolver._boneMid.position - transform.forward * DEFAULT_TARGET_HINT_DISTANCE;
-            }
+            //if (IsIKHintBoneActive(IKLimbBones.LeftHand))
+            //{
+            //    ikSolver = GetIKSolver(IKLimbBones.LeftHand);
+            //    ikSolver._targetHint.position = ikSolver._boneMid.position - transform.forward * DEFAULT_TARGET_HINT_DISTANCE;
+            //}
 
-            if (IsIKHintBoneActive(IKLimbBones.RightHand))
-            {
-                ikSolver = GetIKSolver(IKLimbBones.RightHand);
-                ikSolver._targetHint.position = ikSolver._boneMid.position - transform.forward * DEFAULT_TARGET_HINT_DISTANCE;
-            }
+            //if (IsIKHintBoneActive(IKLimbBones.RightHand))
+            //{
+            //    ikSolver = GetIKSolver(IKLimbBones.RightHand);
+            //    ikSolver._targetHint.position = ikSolver._boneMid.position - transform.forward * DEFAULT_TARGET_HINT_DISTANCE;
+            //}
 
             base.Calibrate();
         }

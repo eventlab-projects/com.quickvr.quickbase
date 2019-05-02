@@ -405,9 +405,9 @@ namespace QuickVR
         {
             base.Calibrate();
 
-            CalibrateVRNodes();
-
             _ikManager.Calibrate();
+
+            CalibrateVRNodes();
         }
 
         protected virtual void CalibrateVRNodes()

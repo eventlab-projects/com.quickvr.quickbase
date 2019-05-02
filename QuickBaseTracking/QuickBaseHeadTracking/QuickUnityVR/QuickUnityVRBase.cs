@@ -178,6 +178,11 @@ namespace QuickVR
             return xRNodeStates;
         }
 
+        protected virtual Vector3 ToTrackingSpace(Vector3 v)
+        {
+            return _vrNodesOrigin.TransformVector(transform.InverseTransformVector(v));
+        }
+
         protected virtual Vector3 ToAvatarSpace(Vector3 v)
         {
             //return transform.rotation * Quaternion.Inverse(_vrNodesOrigin.rotation) * v;

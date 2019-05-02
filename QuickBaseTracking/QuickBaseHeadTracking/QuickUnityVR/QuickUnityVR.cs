@@ -80,13 +80,17 @@ namespace QuickVR {
 
         protected override void CalibrateVRNodeHead(QuickVRNode node)
         {
-            QuickTrackedObject tObject = node.GetTrackedObject();
-
-            Transform tHead = _animator.GetBoneTransform(HumanBodyBones.Head);
-            tObject.transform.localPosition = Quaternion.Inverse(transform.rotation) * (tHead.position - GetEyeCenterPosition());
-            _vrNodesOrigin.position = tObject.transform.position - transform.up * GetHeadHeight();
-
             base.CalibrateVRNodeHead(node);
+
+            //Set the offset of the TrackedObject of the head
+            QuickTrackedObject tObject = node.GetTrackedObject();
+            QuickIKSolver ikSolverHead = _ikManager.GetIKSolver(IKLimbBones.Head);
+            tObject.transform.localPosition = Quaternion.Inverse(transform.rotation) * (ikSolverHead._boneLimb.position - GetEyeCenterPosition());
+
+            //Set the position of the vrNodesOrigin
+            Vector3 offset1 = ikSolverHead._boneUpper.position - ikSolverHead._targetLimb.position;
+            Vector3 offset2 = transform.position - ikSolverHead._boneUpper.position;
+            _vrNodesOrigin.position = tObject.transform.position + ToTrackingSpace(offset1 + offset2);
         }
 
         public override Vector3 GetDisplacement()
