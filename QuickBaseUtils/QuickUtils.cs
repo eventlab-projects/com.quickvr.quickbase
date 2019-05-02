@@ -517,6 +517,11 @@ namespace QuickVR
             }
         }
 
+        public static float GetElapsedSeconds(this System.Diagnostics.Stopwatch watch)
+        {
+            return watch.ElapsedMilliseconds / 1000.0f;
+        }
+
         #endregion
 
     }
