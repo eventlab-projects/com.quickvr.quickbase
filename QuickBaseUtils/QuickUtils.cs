@@ -120,6 +120,11 @@ namespace QuickVR
             return names;
         }
 
+        public static List<int> GetEnumValuesToInt<T>() where T : IConvertible
+        {
+            return new List<int>((IEnumerable<int>)(Enum.GetValues(typeof(T))));
+        }
+
         public static int ParseInt(string value)
         {
             int result;
@@ -499,9 +504,17 @@ namespace QuickVR
             return animator.GetLookAtBone(lookAtBone.Value);
         }
 
-        public static float GetElapsedSeconds(this System.Diagnostics.Stopwatch watch)
+        public static void Shuffle<T>(this IList<T> ts)
         {
-            return watch.ElapsedMilliseconds / 1000.0f;
+            var count = ts.Count;
+            var last = count - 1;
+            for (var i = 0; i < last; ++i)
+            {
+                var r = UnityEngine.Random.Range(i, count);
+                var tmp = ts[i];
+                ts[i] = ts[r];
+                ts[r] = tmp;
+            }
         }
 
         #endregion

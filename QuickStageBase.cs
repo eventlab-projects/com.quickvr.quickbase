@@ -22,20 +22,23 @@ namespace QuickVR {
         public string _debugMessage = "";
 		public Color _debugMessageColor = Color.white;
 
-		public delegate void OnInitAction(QuickStageBase stageManager);
-		public static event OnInitAction OnInit;
+        [Space()]
+        [Header("Stage Instructions")]
+        public List<AudioClip> _instructionsSpanish = new List<AudioClip>();
+        public List<AudioClip> _instructionsEnglish = new List<AudioClip>();
+        public AudioSource _instructionsAudioSource = null;
+        [Range(0.0f, 1.0f)]
+        public float _instructionsVolume = 1.0f;
+        public float _instructionsTimePause = 0.5f;
 
-		public delegate void OnFinishedAction(QuickStageBase stageManager);
-		public static event OnFinishedAction OnFinished;
+        #endregion
 
-		#endregion
+        #region PROTECTED PARAMETERS
 
-		#region PROTECTED PARAMETERS
+        protected QuickInstructionsManager _instructionsManager = null;
 
-		protected QuickBaseGameManager _gameManager = null;
+        protected QuickBaseGameManager _gameManager = null;
 		protected DebugManager _debugManager = null;
-
-		protected string _testName = "";
 
 		protected bool _finished = true;
 
@@ -47,38 +50,60 @@ namespace QuickVR {
 
 		private bool _readyToFinish = false;
 
-		#endregion
+        #endregion
 
-		#region CREATION AND DESTRUCTION
+        #region EVENTS
 
-		protected virtual void Awake() {
-			_testName = gameObject.name;
+        public delegate void OnInitAction(QuickStageBase stageManager);
+        public static event OnInitAction OnInit;
+
+        public delegate void OnFinishedAction(QuickStageBase stageManager);
+        public static event OnFinishedAction OnFinished;
+
+        #endregion
+
+        #region CREATION AND DESTRUCTION
+
+        protected virtual void Awake() {
+            _instructionsManager = QuickSingletonManager.GetInstance<QuickInstructionsManager>();
             _gameManager = QuickSingletonManager.GetInstance<QuickBaseGameManager>();
             _debugManager = QuickSingletonManager.GetInstance<DebugManager>();
         }
 
-		protected virtual void Start() {
-
+		protected virtual void Start()
+        {
             enabled = false;
 		}
 
 		public virtual void Init() {
-			if (_sendOnInitEvent && (OnInit != null)) OnInit(this);
-
             _finished = false;
-			_readyToFinish = false;
-			gameObject.SetActive(true);
-			enabled = true;
+            _readyToFinish = false;
+            gameObject.SetActive(true);
+            enabled = true;
 
-			if (_maxTimeOut > 0) StartCoroutine("CoTimeOut");
+            _timeStart = Time.time;
 
-			_timeStart = Time.time;
+            if (_debugMessage.Length == 0) _debugMessage = "RUNNING STAGE: " + GetName();
+            _debugManager.Log(_debugMessage, _debugMessageColor);
 
-            if (_debugMessage.Length == 0) _debugMessage = name;
-			_debugManager.Log(_debugMessage, _debugMessageColor);
-
-			Debug.Log("RUNNING STAGE: " + _testName);
+            StartCoroutine(CoInit());
 		}
+
+        protected virtual IEnumerator CoInit()
+        {
+            _instructionsManager.SetAudioSource(_instructionsAudioSource);
+            _instructionsManager._timePauseBetweenInstructions = _instructionsTimePause;
+            _instructionsManager._volume = _instructionsVolume;
+            SettingsBase.Languages lang = SettingsBase.GetLanguage();
+            if (lang == SettingsBase.Languages.SPANISH) _instructionsManager.Play(_instructionsSpanish);
+            else if (lang == SettingsBase.Languages.ENGLISH) _instructionsManager.Play(_instructionsEnglish);
+
+            while (_instructionsManager.IsPlaying()) yield return null;
+
+            if (_sendOnInitEvent && (OnInit != null)) OnInit(this);
+
+            if (_maxTimeOut > 0) StartCoroutine("CoTimeOut");
+        }
 
 		protected virtual T CreateStageManager<T>(string stageName) where T : QuickStageBase {
 			GameObject go = new GameObject(stageName);
@@ -92,6 +117,11 @@ namespace QuickVR {
 
 		#region GET AND SET
 
+        protected virtual string GetName()
+        {
+            return GetType().Name + " (" + name + ")";
+        }
+
 		protected virtual void SetReadyToFinish(bool isReadyToFinish) {
 			_readyToFinish = isReadyToFinish;
 			//if (_readyToFinish) _debugManager.Log("Click to continue. ");
@@ -102,7 +132,7 @@ namespace QuickVR {
 		}
 
 		public virtual void Finish() {
-			FinishSilently();
+            FinishSilently();
 
 			if (_finishGameWhenOver) _gameManager.Finish();
 			else {
@@ -111,17 +141,19 @@ namespace QuickVR {
 				foreach (QuickStageBase bManager in _nextStages) bManager.Init();
 			}
 			enabled = false;
-			if (_sendOnFinishedEvent && (OnFinished != null)) OnFinished(this);
+            
+            if (_sendOnFinishedEvent && (OnFinished != null)) OnFinished(this);
 		}
 
 		/// <summary>
 		/// The test is finished silently, i.e., nor the child tests are forced to start nor the kill tests are forced to finish. 
 		/// </summary>
 		public virtual void FinishSilently() {
-			_debugManager.Clear();
+            _instructionsManager.Stop();
+            _debugManager.Clear();
 			float totalTime = Time.time - _timeStart;
 			Debug.Log("===============================");
-			Debug.Log("TEST FINISHED: " + _testName);
+			Debug.Log("STAGE FINISHED: " + GetName());
 			Debug.Log("Total Time = " + totalTime);
 			Debug.Log("===============================");
 

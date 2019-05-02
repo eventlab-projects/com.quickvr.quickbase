@@ -49,13 +49,18 @@ namespace QuickVR
         {
             while (!Camera.main) yield return null;
 
-            transform.parent = Camera.main.transform;
-            transform.localPosition = Vector3.forward * 0.75f;
-            transform.localRotation = Quaternion.identity;
-            transform.Rotate(transform.up, 180.0f, Space.World);
-
             _commandBuffer = new CommandBuffer();
             Camera.main.AddCommandBuffer(CameraEvent.AfterImageEffects, _commandBuffer);
+        }
+
+        protected virtual void OnEnable()
+        {
+            QuickVRManager.OnPostUpdateTracking += UpdatePosition; 
+        }
+
+        protected virtual void OnDisable()
+        {
+            QuickVRManager.OnPostUpdateTracking -= UpdatePosition;
         }
 
         #endregion
@@ -107,6 +112,16 @@ namespace QuickVR
         #endregion
 
         #region UPDATE
+
+        protected virtual void UpdatePosition()
+        {
+            if (!Camera.main) return;
+
+            Transform tCamera = Camera.main.transform;
+
+            transform.position = tCamera.position + tCamera.forward * 0.75f;
+            transform.LookAt(tCamera.position, tCamera.up);
+        }
 
         protected virtual void OnWillRenderObject()
         {
