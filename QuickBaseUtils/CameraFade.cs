@@ -19,8 +19,6 @@ namespace QuickVR
         protected Material _material = null;
         protected MeshFilter _meshFilter = null;
 
-        protected CommandBuffer _commandBuffer = null;
-
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -36,21 +34,13 @@ namespace QuickVR
             MeshRenderer r = gameObject.GetOrCreateComponent<MeshRenderer>();
             r.shadowCastingMode = ShadowCastingMode.Off;
             r.receiveShadows = false;
-            r.material = new Material(Shader.Find("QuickVR/Dummy"));
 
             _material = new Material(Shader.Find("QuickVR/CalibrationScreen"));
+            r.material = _material;
 
             gameObject.layer = LayerMask.NameToLayer("UI");
 
             SetColor(Color.clear);
-        }
-
-        protected virtual IEnumerator Start()
-        {
-            while (!Camera.main) yield return null;
-
-            _commandBuffer = new CommandBuffer();
-            Camera.main.AddCommandBuffer(CameraEvent.AfterImageEffects, _commandBuffer);
         }
 
         protected virtual void OnEnable()
@@ -121,13 +111,6 @@ namespace QuickVR
 
             transform.position = tCamera.position + tCamera.forward * 0.75f;
             transform.LookAt(tCamera.position, tCamera.up);
-        }
-
-        protected virtual void OnWillRenderObject()
-        {
-            _commandBuffer.Clear();
-            Matrix4x4 m = Matrix4x4.TRS(transform.position, transform.rotation, transform.localScale);
-            _commandBuffer.DrawMesh(_meshFilter.mesh, m, _material);
         }
 
         protected virtual IEnumerator CoFade(Color fromColor, Color toColor, float fadeTime)
