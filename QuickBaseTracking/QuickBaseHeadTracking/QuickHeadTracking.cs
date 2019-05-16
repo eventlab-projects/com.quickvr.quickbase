@@ -45,7 +45,7 @@ namespace QuickVR {
         #region CONSTANTS
 
         protected const int DEFAULT_PRIORITY_TRACKING_HEAD = 2000;
-		protected const float DEFAULT_NEAR_CLIP_PLANE = 0.035f;
+		protected const float DEFAULT_NEAR_CLIP_PLANE = 0.05f;
 		protected const float DEFAULT_FAR_CLIP_PLANE = 500.0f;
 
         protected const string CAMERA_CONTROLLER_ROOT_NAME = "__CameraControllerRoot__";
