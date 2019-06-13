@@ -77,7 +77,6 @@ namespace QuickVR {
             _camera.tag = "MainCamera";
             _camera.gameObject.GetOrCreateComponent<AudioListener>();
             _camera.gameObject.GetOrCreateComponent<FlareLayer>();
-            _camera.gameObject.GetOrCreateComponent<GUILayer>();
             _camera.transform.rotation = transform.rotation;
         }
 

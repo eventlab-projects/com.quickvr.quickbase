@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+using UnityEngine.UI;
+
 namespace QuickVR {
 
     public class PerformanceFPS : MonoBehaviour
@@ -31,23 +33,22 @@ namespace QuickVR {
 		protected int _frames = 0; 			//frames drawn over the interval
 		protected float _timeLeft = 0.0f; 	//Left time for current interval
 
-        protected GUIText _guiText = null;
+        protected Canvas _canvas = null;
+        protected Text _text = null;
 
 		#endregion
 
 		#region CREATION AND DESTRUCTION
 
 		protected virtual void Start() {
-			//GUIText uses viewport coordinates, so X and Y are in the range (0, 1) and Z is used for ordering
-			transform.position = new Vector3(0.5f, 0.5f, 0.0f);
-            _guiText = gameObject.GetOrCreateComponent<GUIText>();
+			_timeLeft = _updateInterval;
 
-            _guiText.anchor = TextAnchor.UpperLeft;
-            _guiText.alignment = TextAlignment.Left;
-            _guiText.font = Resources.Load<Font>("Arial");
-            _guiText.fontSize = 32;
-			_timeLeft = _updateInterval;  
-		}
+            _canvas = transform.CreateChild("__Canvas__").gameObject.AddComponent<Canvas>();
+            _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            _text = _canvas.transform.CreateChild("__Text__").gameObject.AddComponent<Text>();
+            _text.fontSize = 20;
+            _text.font = Resources.Load<Font>("Fonts/arial");
+        }
 
 		#endregion
 
@@ -56,7 +57,7 @@ namespace QuickVR {
 		protected virtual void Update() {
 			if (Input.GetKeyDown(_showHideKey)) _showFPS = !_showFPS;
 
-            _guiText.enabled = _showFPS;
+            _canvas.gameObject.SetActive(_showFPS);
 
 			_timeLeft -= Time.deltaTime;
 			_accum += Time.timeScale * Time.deltaTime;
@@ -66,11 +67,11 @@ namespace QuickVR {
 			if (_timeLeft <= 0.0) {
 				// display two fractional digits (f2 format)
 				float fps = (float)_frames / _accum;
-                _guiText.text = fps.ToString("f2") + " FPS"; 
+                _text.text = fps.ToString("f2") + " FPS"; 
 
-				if(fps < 30) _guiText.material.color = Color.yellow;
-				else if (fps < 10) _guiText.material.color = Color.red;
-				else _guiText.material.color = Color.green;
+				if(fps < 30) _text.color = Color.yellow;
+				else if (fps < 10) _text.color = Color.red;
+				else _text.color = Color.green;
 
 				_timeLeft = _updateInterval;
 				_accum = 0.0F;

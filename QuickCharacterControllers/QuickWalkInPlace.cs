@@ -50,8 +50,10 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        protected virtual void Start()
+        protected override void Start()
         {
+            base.Start();
+
             QuickIKManager ikManager = GetComponent<QuickIKManager>();
             ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.LeftFoot);
             ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.RightFoot);

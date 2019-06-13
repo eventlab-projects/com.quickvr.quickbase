@@ -46,7 +46,7 @@ namespace QuickVR
 
         protected static List<Type> _typeList = new List<Type>();
 
-        protected List<XRNodeState> _vrNodesStates = new List<XRNodeState>();
+        protected static List<XRNodeState> _vrNodesStates = new List<XRNodeState>();
 
         #endregion
 
@@ -76,20 +76,35 @@ namespace QuickVR
             Update();
         }
 
-        protected virtual XRNodeState? GetUnityVRNodeState()
+        public static XRNodeState? GetUnityVRNodeState(XRNode nodeType)
         {
+            InputTracking.GetNodeStates(_vrNodesStates);
             XRNodeState? result = null;
 
-            foreach (XRNodeState s in _vrNodesStates)
+            for (int i = 0; i < _vrNodesStates.Count && !result.HasValue; i++)
             {
-                if (s.uniqueID == _id)
-                {
-                    result = s;
-                    break;
-                }
+                if (_vrNodesStates[i].nodeType == nodeType) result = _vrNodesStates[i];
             }
             
             return result;
+        }
+
+        public static XRNodeState? GetUnityVRNodeState(ulong id)
+        {
+            InputTracking.GetNodeStates(_vrNodesStates);
+            XRNodeState? result = null;
+
+            for (int i = 0; i < _vrNodesStates.Count && !result.HasValue; i++)
+            {
+                if (_vrNodesStates[i].uniqueID == id) result = _vrNodesStates[i];
+            }
+
+            return result;
+        }
+
+        protected virtual XRNodeState? GetUnityVRNodeState()
+        {
+            return GetUnityVRNodeState(_id);
         }
 
         public virtual bool IsTracked()

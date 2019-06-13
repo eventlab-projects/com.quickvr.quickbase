@@ -18,7 +18,7 @@ namespace QuickVR
             if (path != "")
             {
                 GameObject go = ((QuickUIMenuPage)target).gameObject;
-                GameObject goPrefab = PrefabUtility.CreatePrefab(path, go, ReplacePrefabOptions.ConnectToPrefab);
+                GameObject goPrefab = PrefabUtility.SaveAsPrefabAssetAndConnect(go, path, InteractionMode.AutomatedAction);
                 goPrefab.name = go.name;
             }
         }
@@ -29,8 +29,7 @@ namespace QuickVR
             if (path != "")
             {
                 GameObject go = ((QuickUIMenuPage)target).gameObject;
-                GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(path);
-                PrefabUtility.ConnectGameObjectToPrefab(go, prefab);
+                PrefabUtility.RevertPrefabInstance(go, InteractionMode.AutomatedAction);
             }
         }
 
