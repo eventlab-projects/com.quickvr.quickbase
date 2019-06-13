@@ -5,20 +5,13 @@ using System;
 
 using UnityEngine.SceneManagement;
 
+using UnityEngine.Animations.Rigging;
+
 namespace QuickVR {
 
 	[System.Serializable]
     
-    public enum IKLimbBones
-    {
-        Head,
-        LeftHand,
-        RightHand,
-        LeftFoot,
-        RightFoot,
-    };
-
-	public class QuickIKManager : QuickBaseTrackingManager 
+    public class QuickIKManager_v2 : QuickBaseTrackingManager 
     {
 
         #region PUBLIC PARAMETERS
@@ -43,15 +36,15 @@ namespace QuickVR {
 
         protected static List<IKLimbBones> _ikLimbBones = null;
 
-        [SerializeField, HideInInspector]
-        protected Transform _boneRotator = null;
-
         protected float _boundingRadius = 0.0f;
 
         protected HumanPose _pose = new HumanPose();
         protected HumanPoseHandler _poseHandler = null;
 
         protected Dictionary<IKLimbBones, QuickIKData> _initialIKPose = new Dictionary<IKLimbBones, QuickIKData>();
+
+        protected RigBuilder _rigBuilder = null;
+        protected BoneRenderer _boneRenderer = null;
 
         #endregion
 
@@ -67,17 +60,27 @@ namespace QuickVR {
         {
             base.Reset();
 
-            _animator = GetComponent<Animator>();
+            _rigBuilder = gameObject.GetOrCreateComponent<RigBuilder>();
+            _boneRenderer = gameObject.GetOrCreateComponent<BoneRenderer>();
+
+            List<Transform> boneTransforms = new List<Transform>();
+            for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+            {
+                Transform tBone = _animator.GetBoneTransform((HumanBodyBones)i);
+                if (tBone) boneTransforms.Add(tBone);
+            }
+
+            _boneRenderer.transforms = boneTransforms.ToArray();
+
             _ikTargetsRoot = transform.CreateChild("__IKTargets__");
             _ikSolversRoot = transform.CreateChild("__IKSolvers__");
 
             foreach (IKLimbBones boneID in GetIKLimbBones())
             {
                 HumanBodyBones uBone = ToUnity(boneID);
-                CreateIKSolver<QuickIKSolver>(uBone);
+                RigBuilder.RigLayer rigLayer = new RigBuilder.RigLayer(CreateIKSolver(uBone).GetComponent<Rig>());
+                _rigBuilder.layers.Add(rigLayer);
             }
-
-            _boneRotator = transform.CreateChild("__BoneRotator__");
         }
 
         protected override void Awake() {
@@ -98,24 +101,28 @@ namespace QuickVR {
             _poseHandler = new HumanPoseHandler(_animator.avatar, _animator.transform);
         }
 
-        protected virtual T CreateIKSolver<T>(HumanBodyBones boneID) where T : QuickIKSolver
+        protected virtual TwoBoneIKConstraint CreateIKSolver(HumanBodyBones boneID)
         {
             string tName = "_IKSolver_" + boneID.ToString();
             Transform t = _ikSolversRoot.CreateChild(tName);
-            T ikSolver = t.gameObject.GetOrCreateComponent<T>();
+            Rig rig = t.gameObject.GetOrCreateComponent<Rig>();
+            TwoBoneIKConstraint ikSolver = t.gameObject.GetOrCreateComponent<TwoBoneIKConstraint>();
 
             //And configure it according to the bone
-            ikSolver._boneUpper = GetBoneUpper(boneID);
-            ikSolver._boneMid = GetBoneMid(boneID);
-            ikSolver._boneLimb = GetBoneLimb(boneID);
+            ikSolver.data.root = GetBoneUpper(boneID);
+            ikSolver.data.mid = GetBoneMid(boneID);
+            ikSolver.data.tip = GetBoneLimb(boneID);
 
-            ikSolver._targetLimb = CreateIKTarget(boneID);
+            ikSolver.data.target = CreateIKTarget(boneID);
 
             HumanBodyBones? midBoneID = GetIKTargetMidBoneID(boneID);
             if (midBoneID.HasValue)
             {
-                ikSolver._targetHint = CreateIKTarget(midBoneID.Value);
+                ikSolver.data.hint = CreateIKTarget(midBoneID.Value);
             }
+
+            ikSolver.data.maintainTargetPositionOffset = false;
+            ikSolver.data.maintainTargetRotationOffset = true;
 
             return ikSolver;
         }
@@ -153,12 +160,6 @@ namespace QuickVR {
                 else if (boneID.Value == HumanBodyBones.RightHand)
                 {
                     ikTarget.LookAt(bone.position + transform.right, transform.up);
-                }
-
-                if (IsBoneLimb(boneID.Value))
-                {
-                    //Create a child that will contain the real rotation of the bone
-                    ikTarget.CreateChild("__BoneRotation__").rotation = bone.rotation;
                 }
             }
 
@@ -396,7 +397,6 @@ namespace QuickVR {
                         ikTargetMid.position += transform.forward * DEFAULT_TARGET_HINT_DISTANCE;
                     }
                 }
-                
             }
         }
 
@@ -410,31 +410,7 @@ namespace QuickVR {
                 QuickIKSolver ikSolver = GetIKSolver(ToUnity(boneID));
                 if (ikSolver && ((_ikMask & (1 << (int)boneID)) != 0))
                 {
-                    //Correct the rotations of the limb bones by accounting for human body constraints
-                    if (boneID == IKLimbBones.LeftHand || boneID == IKLimbBones.RightHand)
-                    {
-                        Transform tmpParent = ikSolver._targetLimb.parent;
-                        ikSolver._targetLimb.parent = transform;
-                        Vector3 localEuler = ikSolver._targetLimb.localEulerAngles;
-
-                        float rotAngle = localEuler.z;
-                        ikSolver._targetLimb.localRotation = Quaternion.Euler(localEuler.x, localEuler.y, rotAngle);
-
-                        ikSolver.UpdateIK();
-
-                        Vector3 rotAxis = (ikSolver._boneLimb.position - ikSolver._boneMid.position).normalized;
-
-                        float boneMidWeight = 0.5f;
-                        CorrectRotation(ikSolver._boneMid, rotAxis, rotAngle * boneMidWeight);
-                        CorrectRotation(ikSolver._boneLimb, rotAxis, -rotAngle * (1.0f - boneMidWeight));
-
-                        ikSolver._targetLimb.parent = tmpParent;
-                        ikSolver._targetLimb.localScale = Vector3.one;
-                    }
-                    else
-                    {
-                        ikSolver.UpdateIK();
-                    }
+                    ikSolver.UpdateIK();
                 }
             }
 
@@ -484,20 +460,6 @@ namespace QuickVR {
                 Vector3 n = ((u + v) * 0.5f).normalized;
                 ikSolver._targetHint.position = ikSolver._boneMid.position + n * DEFAULT_TARGET_HINT_DISTANCE;
                 //ikSolver._targetHint.position = ikSolver._boneMid.position + ikSolver._targetLimb.forward * DEFAULT_TARGET_HINT_DISTANCE;
-            }
-        }
-
-        protected virtual void CorrectRotation(Transform tBone, Vector3 rotAxis, float rotAngle)
-        {
-            _boneRotator.parent = tBone;
-            _boneRotator.localPosition = Vector3.zero;
-            _boneRotator.forward = rotAxis;
-            Vector3 upBefore = _boneRotator.up;
-            tBone.Rotate(rotAxis, rotAngle, Space.World);
-
-            if (Vector3.Dot(upBefore, _boneRotator.up) < 0)
-            {
-                tBone.Rotate(rotAxis, 180.0f, Space.World);
             }
         }
 

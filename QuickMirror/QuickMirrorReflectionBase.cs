@@ -276,7 +276,6 @@ namespace QuickVR {
                     eyeRightState.Value.TryGetPosition(out posEyeRight);
                     stereoSeparation = Vector3.Distance(posEyeLeft, posEyeRight);
                 }
-                Debug.Log(stereoSeparation);
 
                 if (Camera.current.stereoTargetEye == StereoTargetEyeMask.Both || Camera.current.stereoTargetEye == StereoTargetEyeMask.Left)
                 {
