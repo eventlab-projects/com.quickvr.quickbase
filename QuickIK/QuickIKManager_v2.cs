@@ -90,19 +90,29 @@ namespace QuickVR {
             _ikSolversRoot = transform.CreateChild("__IKSolvers__");
             Rig ikSolversRig = _ikSolversRoot.gameObject.GetOrCreateComponent<Rig>();
 
+            //Configure the IKSolver for the spine
             TwoBoneIKConstraint ikSolverHead = _ikSolversRoot.gameObject.GetOrCreateComponent<TwoBoneIKConstraint>();
             ikSolverHead.data.root = _animator.GetBoneTransform(HumanBodyBones.Hips);
             ikSolverHead.data.mid = _animator.GetBoneTransform(HumanBodyBones.Spine);
             ikSolverHead.data.tip = _animator.GetBoneTransform(HumanBodyBones.Head);
             ikSolverHead.data.target = GetIKTarget(HumanBodyBones.Head);
 
+            //Configure the IKSolver for the body
             QuickIKSolverHumanoid ikSolverBody = _ikSolversRoot.gameObject.GetOrCreateComponent<QuickIKSolverHumanoid>();
             ikSolverBody.data._ikTargetHips = GetIKTarget(HumanBodyBones.Hips);
+
             ikSolverBody.data._ikTargetLeftHand = GetIKTarget(HumanBodyBones.LeftHand);
+            ikSolverBody.data._ikTargetLeftHandHint = GetIKTarget(HumanBodyBones.LeftLowerArm);
+
             ikSolverBody.data._ikTargetRightHand = GetIKTarget(HumanBodyBones.RightHand);
+            ikSolverBody.data._ikTargetRightHandHint = GetIKTarget(HumanBodyBones.RightLowerArm);
+
             ikSolverBody.data._ikTargetLeftFoot = GetIKTarget(HumanBodyBones.LeftFoot);
+            ikSolverBody.data._ikTargetLeftFootHint = GetIKTarget(HumanBodyBones.LeftLowerLeg);
+
             ikSolverBody.data._ikTargetRightFoot = GetIKTarget(HumanBodyBones.RightFoot);
-            
+            ikSolverBody.data._ikTargetRightFootHint = GetIKTarget(HumanBodyBones.RightLowerLeg);
+
             if (!_rigBuilder)
             {
                 _rigBuilder = gameObject.GetOrCreateComponent<RigBuilder>();
