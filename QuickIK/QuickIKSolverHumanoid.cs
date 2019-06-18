@@ -9,19 +9,34 @@ using System;
 namespace QuickVR
 {
 
+    public struct QuickIKTarget
+    {
+        public ReadOnlyTransformHandle _handle;
+        public float _posWeight;
+        public float _rotWeight;
+
+        public QuickIKTarget(ReadOnlyTransformHandle handle, float pWeight, float rWeight)
+        {
+            _handle = handle;
+            _posWeight = pWeight;
+            _rotWeight = rWeight;
+        }
+
+    }
+
     public struct QuickIKSolverHumanoidJob : IWeightedAnimationJob
     {
 
         #region PUBLIC ATTRIBUTES
 
-        public ReadWriteTransformHandle _constrained;
-        public ReadOnlyTransformHandle _source;
+        public ReadWriteTransformHandle _hips;
+        public ReadOnlyTransformHandle _ikTargetHips;
 
-        public ReadOnlyTransformHandle _ikTargetLeftHand;
-        public ReadOnlyTransformHandle _ikTargetRightHand;
-        public ReadOnlyTransformHandle _ikTargetLeftFoot;
-        public ReadOnlyTransformHandle _ikTargetRightFoot;
-
+        public QuickIKTarget _ikTargetLeftHand;
+        public QuickIKTarget _ikTargetRightHand;
+        public QuickIKTarget _ikTargetLeftFoot;
+        public QuickIKTarget _ikTargetRightFoot;
+        
         public FloatProperty jobWeight { get; set; }
 
         #endregion
@@ -33,29 +48,36 @@ namespace QuickVR
 
         public void ProcessAnimation(AnimationStream stream)
         {
+            if (!stream.isHumanStream)
+            {
+                Debug.LogError("Character must be Humanoid!!!");
+                return;
+            }
+
             AnimationHumanStream hStream = stream.AsHuman();
 
             //1) Update the bodyPosition to match the hipsTarget
-            Vector3 offset = _source.GetPosition(stream) - _constrained.GetPosition(stream);
+            Vector3 offset = _ikTargetHips.GetPosition(stream) - _hips.GetPosition(stream);
             hStream.bodyPosition += offset;
 
             //2) Configure the IK Solver
-            hStream.SetGoalPosition(AvatarIKGoal.LeftHand, _ikTargetLeftHand.GetPosition(stream));
-            hStream.SetGoalWeightPosition(AvatarIKGoal.LeftHand, 1.0f);
-
-            hStream.SetGoalPosition(AvatarIKGoal.RightHand, _ikTargetRightHand.GetPosition(stream));
-            hStream.SetGoalWeightPosition(AvatarIKGoal.RightHand, 1.0f);
-
-            hStream.SetGoalPosition(AvatarIKGoal.LeftFoot, _ikTargetLeftFoot.GetPosition(stream));
-            hStream.SetGoalWeightPosition(AvatarIKGoal.LeftFoot, 1.0f);
-
-            hStream.SetGoalPosition(AvatarIKGoal.RightFoot, _ikTargetRightFoot.GetPosition(stream));
-            hStream.SetGoalWeightPosition(AvatarIKGoal.RightFoot, 1.0f);
+            SetGoal(stream, AvatarIKGoal.LeftHand, _ikTargetLeftHand);
+            SetGoal(stream, AvatarIKGoal.RightHand, _ikTargetRightHand);
+            SetGoal(stream, AvatarIKGoal.LeftFoot, _ikTargetLeftFoot);
+            SetGoal(stream, AvatarIKGoal.RightFoot, _ikTargetRightFoot);
 
             hStream.SolveIK();
+        }
 
-            //hStream.ResetToStancePose();
-            //Debug.Log(stream.isHumanStream);
+        private void SetGoal(AnimationStream stream, AvatarIKGoal ikGoal, QuickIKTarget ikTarget)
+        {
+            AnimationHumanStream hStream = stream.AsHuman();
+
+            hStream.SetGoalPosition(ikGoal, ikTarget._handle.GetPosition(stream));
+            hStream.SetGoalWeightPosition(ikGoal, ikTarget._posWeight);
+
+            hStream.SetGoalRotation(ikGoal, ikTarget._handle.GetRotation(stream));
+            hStream.SetGoalWeightRotation(ikGoal, ikTarget._rotWeight);
         }
     }
 
@@ -63,37 +85,53 @@ namespace QuickVR
     public struct QuickIKSolverHumanoidJobData : IAnimationJobData
     {
 
-        public Transform _constrainedObject;
-
         [SyncSceneToStream]
-        public Transform _sourceObject;
+        public Transform _ikTargetHips;
 
-        [SyncSceneToStream]
-        public Transform _ikTargetLeftHand;
+        [Header("Left Hand IK Solver")]
+        [SyncSceneToStream] public Transform _ikTargetLeftHand;
+        [Range(0.0f, 1.0f)] public float _posWeightLeftHand;
+        [Range(0.0f, 1.0f)] public float _rotWeightLeftHand;
 
-        [SyncSceneToStream]
-        public Transform _ikTargetRightHand;
+        [Header("Right Hand IK Solver")]
+        [SyncSceneToStream] public Transform _ikTargetRightHand;
+        [Range(0.0f, 1.0f)] public float _posWeightRightHand;
+        [Range(0.0f, 1.0f)] public float _rotWeightRightHand;
 
-        [SyncSceneToStream]
-        public Transform _ikTargetLeftFoot;
+        [Header("Left Foot IK Solver")]
+        [SyncSceneToStream] public Transform _ikTargetLeftFoot;
+        [Range(0.0f, 1.0f)] public float _posWeightLeftFoot;
+        [Range(0.0f, 1.0f)] public float _rotWeightLeftFoot;
 
-        [SyncSceneToStream]
-        public Transform _ikTargetRightFoot;
+        [Header("Right Foot IK Solver")]
+        [SyncSceneToStream] public Transform _ikTargetRightFoot;
+        [Range(0.0f, 1.0f)] public float _posWeightRightFoot;
+        [Range(0.0f, 1.0f)] public float _rotWeightRightFoot;
 
         public bool IsValid()
         {
-            return _constrainedObject && _sourceObject;
+            return true;
         }
 
         public void SetDefaultValues()
         {
-            _constrainedObject = null;
-            _sourceObject = null;
+            _ikTargetHips = null;
 
             _ikTargetLeftHand = null;
+            _posWeightLeftHand = 1.0f;
+            _rotWeightLeftHand = 1.0f;
+
             _ikTargetRightHand = null;
+            _posWeightRightHand = 1.0f;
+            _rotWeightRightHand = 1.0f;
+
             _ikTargetLeftFoot = null;
+            _posWeightLeftFoot = 1.0f;
+            _rotWeightLeftFoot = 1.0f;
+
             _ikTargetRightFoot = null;
+            _posWeightRightFoot = 1.0f;
+            _rotWeightRightFoot = 1.0f;
         }
 
     }
@@ -104,13 +142,13 @@ namespace QuickVR
         public override QuickIKSolverHumanoidJob Create(Animator animator, ref QuickIKSolverHumanoidJobData data, Component component)
         {
             QuickIKSolverHumanoidJob job = new QuickIKSolverHumanoidJob();
-            job._constrained = ReadWriteTransformHandle.Bind(animator, data._constrainedObject);
-            job._source = ReadOnlyTransformHandle.Bind(animator, data._sourceObject);
+            job._hips = ReadWriteTransformHandle.Bind(animator, animator.GetBoneTransform(HumanBodyBones.Hips));
+            job._ikTargetHips = ReadOnlyTransformHandle.Bind(animator, data._ikTargetHips);
 
-            job._ikTargetLeftHand = ReadOnlyTransformHandle.Bind(animator, data._ikTargetLeftHand);
-            job._ikTargetRightHand = ReadOnlyTransformHandle.Bind(animator, data._ikTargetRightHand);
-            job._ikTargetLeftFoot = ReadOnlyTransformHandle.Bind(animator, data._ikTargetLeftFoot);
-            job._ikTargetRightFoot = ReadOnlyTransformHandle.Bind(animator, data._ikTargetRightFoot);
+            job._ikTargetLeftHand = new QuickIKTarget(ReadOnlyTransformHandle.Bind(animator, data._ikTargetLeftHand), data._posWeightLeftHand, data._rotWeightLeftHand);
+            job._ikTargetRightHand = new QuickIKTarget(ReadOnlyTransformHandle.Bind(animator, data._ikTargetRightHand), data._posWeightRightHand, data._rotWeightRightHand);
+            job._ikTargetLeftFoot = new QuickIKTarget(ReadOnlyTransformHandle.Bind(animator, data._ikTargetLeftFoot), data._posWeightLeftFoot, data._rotWeightLeftFoot);
+            job._ikTargetRightFoot = new QuickIKTarget(ReadOnlyTransformHandle.Bind(animator, data._ikTargetRightFoot), data._posWeightRightFoot, data._rotWeightRightFoot);
 
             return job;
         }

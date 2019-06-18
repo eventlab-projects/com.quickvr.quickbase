@@ -57,13 +57,6 @@ namespace QuickVR {
 
         #region CREATION AND DESTRUCTION
 
-        protected override void Awake()
-        {
-            base.Awake();
-
-            Debug.Log(_animator.bodyPosition.ToString("f3"));
-        }
-
         protected override void Reset()
         {
             base.Reset();
@@ -104,8 +97,7 @@ namespace QuickVR {
             ikSolverHead.data.target = GetIKTarget(HumanBodyBones.Head);
 
             QuickIKSolverHumanoid ikSolverBody = _ikSolversRoot.gameObject.GetOrCreateComponent<QuickIKSolverHumanoid>();
-            ikSolverBody.data._constrainedObject = _animator.GetBoneTransform(HumanBodyBones.Hips);
-            ikSolverBody.data._sourceObject = GetIKTarget(HumanBodyBones.Hips);
+            ikSolverBody.data._ikTargetHips = GetIKTarget(HumanBodyBones.Hips);
             ikSolverBody.data._ikTargetLeftHand = GetIKTarget(HumanBodyBones.LeftHand);
             ikSolverBody.data._ikTargetRightHand = GetIKTarget(HumanBodyBones.RightHand);
             ikSolverBody.data._ikTargetLeftFoot = GetIKTarget(HumanBodyBones.LeftFoot);
