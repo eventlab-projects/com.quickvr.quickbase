@@ -9,6 +9,16 @@ using System;
 namespace QuickVR
 {
 
+    [System.Serializable]
+    public struct QuickIKSolverData
+    {
+        public Transform _ikTarget;
+        [SyncSceneToStream, Range(0.0f, 1.0f)] public float _posWeight;
+        [SyncSceneToStream, Range(0.0f, 1.0f)] public float _rotWeight;
+        [SyncSceneToStream] public Transform _hint;
+        [SyncSceneToStream, Range(0.0f, 1.0f)] public float _posWeightHint;
+    }
+
     public struct QuickIKTarget
     {
         public ReadOnlyTransformHandle _handle;
@@ -136,6 +146,9 @@ namespace QuickVR
         [SyncSceneToStream, Range(0.0f, 1.0f)] public float _rotWeightRightFoot;
         [SyncSceneToStream] public Transform _ikTargetRightFootHint;
         [SyncSceneToStream, Range(0.0f, 1.0f)] public float _posWeightRightFootHint;
+
+        [Header("Test")]
+        public QuickIKSolverData _test;
 
         public bool IsValid()
         {

@@ -44,9 +44,6 @@ namespace QuickVR {
         [SerializeField, HideInInspector]
         protected RigBuilder _rigBuilder = null;
 
-        [SerializeField, HideInInspector]
-        protected BoneRenderer _boneRenderer = null;
-
         #endregion
 
         #region CONSTANTS
@@ -61,19 +58,6 @@ namespace QuickVR {
         {
             base.Reset();
 
-            if (!_boneRenderer)
-            {
-                _boneRenderer = gameObject.GetOrCreateComponent<BoneRenderer>();
-                List<Transform> boneTransforms = new List<Transform>();
-                for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
-                {
-                    Transform tBone = _animator.GetBoneTransform((HumanBodyBones)i);
-                    if (tBone) boneTransforms.Add(tBone);
-                }
-
-                _boneRenderer.transforms = boneTransforms.ToArray();
-            }
-            
             _ikTargetsRoot = transform.CreateChild("__IKTargets__");
             
             CreateIKTarget(HumanBodyBones.Hips);
@@ -96,6 +80,8 @@ namespace QuickVR {
             ikSolverHead.data.mid = _animator.GetBoneTransform(HumanBodyBones.Spine);
             ikSolverHead.data.tip = _animator.GetBoneTransform(HumanBodyBones.Head);
             ikSolverHead.data.target = GetIKTarget(HumanBodyBones.Head);
+            ikSolverHead.data.maintainTargetPositionOffset = true;
+            ikSolverHead.data.maintainTargetRotationOffset = true;
 
             //Configure the IKSolver for the body
             QuickIKSolverHumanoid ikSolverBody = _ikSolversRoot.gameObject.GetOrCreateComponent<QuickIKSolverHumanoid>();
@@ -170,6 +156,16 @@ namespace QuickVR {
             return _ikTargetsRoot;
         }
 
+        public virtual TwoBoneIKConstraint GetIKSolverHead()
+        {
+            return _ikSolversRoot.GetComponent<TwoBoneIKConstraint>();
+        }
+
+        public virtual QuickIKSolverHumanoid GetIKSolverBody()
+        {
+            return _ikSolversRoot.GetComponent<QuickIKSolverHumanoid>();
+        }
+
         #endregion
 
         #region GET AND SET
@@ -239,6 +235,14 @@ namespace QuickVR {
         protected virtual string GetIKTargetName(HumanBodyBones boneID)
         {
             return "_IKTarget_" + boneID.ToString();
+        }
+
+        public virtual List<Transform> GetIKTargets()
+        {
+            List<Transform> result = new List<Transform>();
+            foreach (Transform t in _ikTargetsRoot) result.Add(t);
+
+            return result;
         }
 
         public virtual Transform GetIKTarget(HumanBodyBones boneID)
