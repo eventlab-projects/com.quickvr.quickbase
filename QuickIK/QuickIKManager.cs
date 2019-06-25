@@ -18,6 +18,15 @@ namespace QuickVR {
         RightFoot,
     };
 
+    public enum IKLimbBonesHand
+    {
+        Thumb, 
+        Index, 
+        Middle, 
+        Ring,
+        Little,
+    };
+
 	public class QuickIKManager : QuickBaseTrackingManager 
     {
 
