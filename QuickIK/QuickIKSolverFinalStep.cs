@@ -14,6 +14,9 @@ namespace QuickVR
 
         #region PUBLIC ATTRIBUTES
 
+        public MuscleHandle _jawMuscle;
+        public float _jawMuscleValue;
+
         public FloatProperty jobWeight { get; set; }
 
         #endregion
@@ -31,7 +34,10 @@ namespace QuickVR
                 return;
             }
 
-            stream.AsHuman().SolveIK();
+            AnimationHumanStream hStream = stream.AsHuman();
+            hStream.SetMuscle(_jawMuscle, _jawMuscleValue);
+
+            hStream.SolveIK();
         }
 
     }
@@ -57,7 +63,23 @@ namespace QuickVR
 
         public override QuickIKSolverFinalStepJob Create(Animator animator, ref QuickIKSolverFinalStepJobData data, Component component)
         {
-            return new QuickIKSolverFinalStepJob();
+            QuickIKSolverFinalStepJob job = new QuickIKSolverFinalStepJob();
+            job._jawMuscle = new MuscleHandle(HeadDof.JawDownUp);
+
+            HumanPoseHandler poseHandler = new HumanPoseHandler(animator.avatar, animator.transform);
+            HumanPose pose = new HumanPose();
+            poseHandler.GetHumanPose(ref pose);
+            for (int i = 0; i < pose.muscles.Length; i++)
+            {
+                string muscleName = QuickHumanTrait.GetMuscleName(i);
+                if (muscleName == job._jawMuscle.name)
+                {
+                    job._jawMuscleValue = pose.muscles[i];
+                    break;
+                }
+            }
+
+            return job;
         }
 
         public override void Destroy(QuickIKSolverFinalStepJob job)

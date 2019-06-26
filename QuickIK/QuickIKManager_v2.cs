@@ -92,6 +92,8 @@ namespace QuickVR {
 
         protected virtual void CreateGraphInitialPose()
         {
+            if (_animator.runtimeAnimatorController != null) return;
+
             _initialPoseGraph = PlayableGraph.Create(name + "__InitialPose__");
             AnimationPlayableOutput playableOutput = AnimationPlayableOutput.Create(_initialPoseGraph.Value, "Animation", _animator);
 
@@ -108,6 +110,7 @@ namespace QuickVR {
                 animation.SetCurve("", typeof(Animator), muscleName, curve);
                 //Debug.Log(muscleName + " = " + _pose.muscles[i].ToString("f3"));
             }
+
             AnimationClipPlayable clipPlayable = AnimationClipPlayable.Create(_initialPoseGraph.Value, animation);
             clipPlayable.SetApplyFootIK(false);
 
