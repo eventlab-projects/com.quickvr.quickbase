@@ -7,6 +7,9 @@ using UnityEngine.SceneManagement;
 using UnityEngine.Playables;
 
 using UnityEngine.Animations.Rigging;
+using UnityEngine.Animations;
+
+using UnityEngine.Experimental.Animations;
 
 namespace QuickVR {
 
@@ -48,10 +51,7 @@ namespace QuickVR {
 
         protected Dictionary<IKLimbBones, QuickIKData> _initialIKPose = new Dictionary<IKLimbBones, QuickIKData>();
 
-        protected HumanPoseHandler _poseHandler = null;
-        protected HumanPose _pose;
-
-        public AnimationClip _animation;
+        protected PlayableGraph? _initialPoseGraph = null;
 
         #endregion
 
@@ -81,6 +81,44 @@ namespace QuickVR {
 
             Reset();
 
+            CreateGraphInitialPose();
+            CreateGraphIK();
+        }
+
+        protected virtual void OnDestroy()
+        {
+            if (_initialPoseGraph != null) _initialPoseGraph.Value.Destroy();
+        }
+
+        protected virtual void CreateGraphInitialPose()
+        {
+            _initialPoseGraph = PlayableGraph.Create(name + "__InitialPose__");
+            AnimationPlayableOutput playableOutput = AnimationPlayableOutput.Create(_initialPoseGraph.Value, "Animation", _animator);
+
+            // Wrap the clip in a playable
+            AnimationClip animation = new AnimationClip();
+            HumanPoseHandler poseHandler = new HumanPoseHandler(_animator.avatar, _animator.transform);
+            HumanPose pose = new HumanPose();
+            poseHandler.GetHumanPose(ref pose);
+            for (int i = 0; i < pose.muscles.Length; i++)
+            {
+                string muscleName = QuickHumanTrait.GetMuscleName(i);
+                AnimationCurve curve = new AnimationCurve();
+                curve.AddKey(0, pose.muscles[i]);
+                animation.SetCurve("", typeof(Animator), muscleName, curve);
+                //Debug.Log(muscleName + " = " + _pose.muscles[i].ToString("f3"));
+            }
+            AnimationClipPlayable clipPlayable = AnimationClipPlayable.Create(_initialPoseGraph.Value, animation);
+            clipPlayable.SetApplyFootIK(false);
+
+            // Connect the Playable to an output
+            playableOutput.SetSourcePlayable(clipPlayable);
+
+            _initialPoseGraph.Value.Play();
+        }
+
+        protected virtual void CreateGraphIK()
+        {
             RigBuilder rigBuilder = gameObject.GetOrCreateComponent<RigBuilder>();
             //rigBuilder.layers.Add(new RigBuilder.RigLayer(transform.Find("GameObject").gameObject.GetOrCreateComponent<Rig>()));
             rigBuilder.layers.Add(new RigBuilder.RigLayer(_ikSolversBody.gameObject.GetOrCreateComponent<Rig>()));
@@ -89,24 +127,6 @@ namespace QuickVR {
             rigBuilder.layers.Add(new RigBuilder.RigLayer(_ikTargetsRightHand.gameObject.GetOrCreateComponent<Rig>()));
             rigBuilder.layers.Add(new RigBuilder.RigLayer(_ikSolversRightHand.gameObject.GetOrCreateComponent<Rig>()));
             rigBuilder.Build();
-
-            _poseHandler = new HumanPoseHandler(_animator.avatar, _animator.transform);
-            _pose = new HumanPose();
-            _poseHandler.GetHumanPose(ref _pose);
-            for (int i = 0; i < _pose.muscles.Length; i++)
-            {
-                string muscleName = QuickHumanTrait.GetMuscleName(i);
-                AnimationCurve curve = new AnimationCurve();
-                curve.AddKey(0, _pose.muscles[i]);
-                _animation.SetCurve("", typeof(Animator), muscleName, curve);
-                Debug.Log(muscleName + " = " + _pose.muscles[i].ToString("f3"));
-            }
-
-            Debug.Log(_animation.isHumanMotion);            
-
-            //Debug.Log("=========================================");
-            //Debug.Log("=========================================");
-            //Debug.Log("=========================================");
         }
 
         protected virtual Transform CreateIKSolverTransform(Transform ikSolversRoot, string name)

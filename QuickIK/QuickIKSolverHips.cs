@@ -23,7 +23,7 @@ namespace QuickVR
 
         public void ProcessRootMotion(AnimationStream stream)
         {
-
+            
         }
 
         public void ProcessAnimation(AnimationStream stream)

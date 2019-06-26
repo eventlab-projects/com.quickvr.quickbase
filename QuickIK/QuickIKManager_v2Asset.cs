@@ -14,6 +14,5 @@ public class QuickIKManager_v2Asset : ScriptableObject
     public System.Int32 _ikMaskRightHand;
     [BitMask(typeof(QuickVR.IKLimbBones), 0, 4)]
     public System.Int32 _ikHintMaskUpdate;
-    public UnityEngine.AnimationClip _animation;
  
 }
