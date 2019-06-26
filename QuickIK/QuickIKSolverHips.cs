@@ -38,7 +38,7 @@ namespace QuickVR
 
             //Update the bodyPosition to match the hipsTarget
             Vector3 offset = _ikTargetHips.GetPosition(stream) - _hips.GetPosition(stream);
-            hStream.bodyPosition += offset;
+            hStream.bodyPosition += offset * jobWeight.Get(stream);
         }
 
     }
@@ -79,8 +79,76 @@ namespace QuickVR
         }
     }
 
-    public class QuickIKSolverHips : RigConstraint<QuickIKSolverHipsJob, QuickIKSolverHipsJobData, QuickIKSolverHipsBinder>
+    public class QuickIKSolverHips : RigConstraint<QuickIKSolverHipsJob, QuickIKSolverHipsJobData, QuickIKSolverHipsBinder>, IQuickIKSolver
     {
+
+        protected Animator _animator
+        {
+            get
+            {
+                return GetComponentInParent<Animator>();
+            }
+        }
+
+        public Transform _boneUpper
+        {
+            get
+            {
+                return _animator.GetBoneTransform(HumanBodyBones.Hips);
+            }
+        }
+
+        public Transform _boneMid
+        {
+            get
+            {
+                return _animator.GetBoneTransform(HumanBodyBones.Hips);
+            }
+        }
+
+        public Transform _boneLimb
+        {
+            get
+            {
+                return _animator.GetBoneTransform(HumanBodyBones.Hips);
+            }
+        }
+
+        public Transform _targetLimb
+        {
+            get
+            {
+                return data._ikTargetHips;
+            }
+            set
+            {
+                data._ikTargetHips = value;
+            }
+        }
+
+        public Transform _targetHint
+        {
+            get
+            {
+                return null;
+            }
+            set
+            {
+                
+            }
+        }
+
+        public float _weight
+        {
+            get
+            {
+                return weight;
+            }
+            set
+            {
+                weight = value;
+            }
+        }
 
     }
 

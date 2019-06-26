@@ -35,7 +35,7 @@ namespace QuickVR
             }
 
             AnimationHumanStream hStream = stream.AsHuman();
-            hStream.SetMuscle(_jawMuscle, _jawMuscleValue);
+            hStream.SetMuscle(_jawMuscle, jobWeight.Get(stream) * _jawMuscleValue);
 
             hStream.SolveIK();
         }

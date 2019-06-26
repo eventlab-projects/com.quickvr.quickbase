@@ -188,6 +188,23 @@ public static class QuickHumanTrait
         return HumanTrait.RequiredBone(boneID);
     }
 
+    public static bool IsBoneFinger(HumanBodyBones boneID)
+    {
+        return IsBoneFingerLeft(boneID) || IsBoneFingerRight(boneID);
+    }
+
+    public static bool IsBoneFingerLeft(HumanBodyBones boneID)
+    {
+        int i = (int)boneID;
+        return (i >= (int)HumanBodyBones.LeftThumbProximal && i <= (int)HumanBodyBones.LeftLittleDistal);
+    }
+
+    public static bool IsBoneFingerRight(HumanBodyBones boneID)
+    {
+        int i = (int)boneID;
+        return (i >= (int)HumanBodyBones.RightThumbProximal && i <= (int)HumanBodyBones.RightLittleDistal);
+    }
+
     public static HumanBodyBones? GetLookAtBone(HumanBodyBones boneID)
     {
         InitLookAtBones();

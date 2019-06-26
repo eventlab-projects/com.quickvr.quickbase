@@ -47,18 +47,20 @@ namespace QuickVR
             AnimationHumanStream hStream = stream.AsHuman();
             AvatarIKHint ikHint = GetIKHint(ikGoal);
 
+            float jWeight = jobWeight.Get(stream);
+
             if (_ikTarget.IsValid(stream))
             {
                 hStream.SetGoalPosition(ikGoal, _ikTarget.GetPosition(stream));
-                hStream.SetGoalWeightPosition(ikGoal, _posWeight.value.GetFloat(stream));
+                hStream.SetGoalWeightPosition(ikGoal, jWeight * _posWeight.Get(stream));
 
                 hStream.SetGoalRotation(ikGoal, _ikTarget.GetRotation(stream));
-                hStream.SetGoalWeightRotation(ikGoal, _rotWeight.value.GetFloat(stream));
+                hStream.SetGoalWeightRotation(ikGoal, jWeight * _rotWeight.Get(stream));
                 
                 if (_ikTargetHint.IsValid(stream))
                 {
                     hStream.SetHintPosition(ikHint, _ikTargetHint.GetPosition(stream));
-                    hStream.SetHintWeightPosition(ikHint, _posWeightHint.value.GetFloat(stream));
+                    hStream.SetHintWeightPosition(ikHint, jWeight * _posWeightHint.Get(stream));
                 }
                 else hStream.SetHintWeightPosition(ikHint, 0.0f);
             }
@@ -84,10 +86,6 @@ namespace QuickVR
     [System.Serializable]
     public struct QuickIKSolverHumanoidJobData : IAnimationJobData
     {
-
-        [SyncSceneToStream]
-        public Transform _ikTargetHips;
-
         [SyncSceneToStream] public Transform _ikTarget;
         [SyncSceneToStream, Range(0.0f, 1.0f)] public float _posWeight;
         [SyncSceneToStream, Range(0.0f, 1.0f)] public float _rotWeight;
@@ -97,13 +95,11 @@ namespace QuickVR
 
         public bool IsValid()
         {
-            return _ikTarget != null;
+            return true;//_ikTarget != null;
         }
 
         public void SetDefaultValues()
         {
-            _ikTargetHips = null;
-
             _ikTarget= null;
             _posWeight = 1.0f;
             _rotWeight = 1.0f;
@@ -136,8 +132,88 @@ namespace QuickVR
         }
     }
 
-    public class QuickIKSolverHumanoid : RigConstraint<QuickIKSolverHumanoidJob, QuickIKSolverHumanoidJobData, QuickIKSolverHumanoidBinder>
+    public class QuickIKSolverHumanoid : RigConstraint<QuickIKSolverHumanoidJob, QuickIKSolverHumanoidJobData, QuickIKSolverHumanoidBinder>, IQuickIKSolver
     {
+
+        protected Animator _animator
+        {
+            get
+            {
+                return GetComponentInParent<Animator>();
+            }
+        }
+
+        public Transform _boneUpper
+        {
+            get
+            {
+                AvatarIKGoal ikGoal = (AvatarIKGoal)data._avatarIKGoal;
+                if (ikGoal == AvatarIKGoal.LeftHand) return _animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
+                if (ikGoal == AvatarIKGoal.RightHand) return _animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
+                if (ikGoal == AvatarIKGoal.LeftFoot) return _animator.GetBoneTransform(HumanBodyBones.LeftUpperLeg);
+                return _animator.GetBoneTransform(HumanBodyBones.RightUpperLeg);
+            }
+        }
+
+        public Transform _boneMid
+        {
+            get
+            {
+                AvatarIKGoal ikGoal = (AvatarIKGoal)data._avatarIKGoal;
+                if (ikGoal == AvatarIKGoal.LeftHand) return _animator.GetBoneTransform(HumanBodyBones.LeftLowerArm);
+                if (ikGoal == AvatarIKGoal.RightHand) return _animator.GetBoneTransform(HumanBodyBones.RightLowerArm);
+                if (ikGoal == AvatarIKGoal.LeftFoot) return _animator.GetBoneTransform(HumanBodyBones.LeftLowerLeg);
+                return _animator.GetBoneTransform(HumanBodyBones.RightLowerLeg);
+            }
+        }
+
+        public Transform _boneLimb
+        {
+            get
+            {
+                AvatarIKGoal ikGoal = (AvatarIKGoal)data._avatarIKGoal;
+                if (ikGoal == AvatarIKGoal.LeftHand) return _animator.GetBoneTransform(HumanBodyBones.LeftHand);
+                if (ikGoal == AvatarIKGoal.RightHand) return _animator.GetBoneTransform(HumanBodyBones.RightHand);
+                if (ikGoal == AvatarIKGoal.LeftFoot) return _animator.GetBoneTransform(HumanBodyBones.LeftFoot);
+                return _animator.GetBoneTransform(HumanBodyBones.RightFoot);
+            }
+        }
+
+        public Transform _targetLimb
+        {
+            get
+            {
+                return data._ikTarget;
+            }
+            set
+            {
+                data._ikTarget = value;
+            }
+        }
+
+        public Transform _targetHint
+        {
+            get
+            {
+                return data._ikTargetHint;
+            }
+            set
+            {
+                data._ikTargetHint = value;
+            }
+        }
+
+        public float _weight
+        {
+            get
+            {
+                return weight;
+            }
+            set
+            {
+                weight = value;
+            }
+        }
 
     }
 
