@@ -57,9 +57,6 @@ namespace QuickVR {
 
         protected float _boundingRadius = 0.0f;
 
-        protected HumanPose _pose = new HumanPose();
-        protected HumanPoseHandler _poseHandler = null;
-
         protected Dictionary<IKLimbBones, QuickIKData> _initialIKPose = new Dictionary<IKLimbBones, QuickIKData>();
 
         #endregion
@@ -103,8 +100,6 @@ namespace QuickVR {
             Transform lShoulder = _animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
             Transform rShoulder = _animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
             _boundingRadius = Vector3.Distance(lShoulder.position, rShoulder.position) * 0.5f;
-
-            _poseHandler = new HumanPoseHandler(_animator.avatar, _animator.transform);
         }
 
         protected virtual T CreateIKSolver<T>(HumanBodyBones boneID) where T : QuickIKSolver

@@ -97,7 +97,7 @@ namespace QuickVR
 
         public bool IsValid()
         {
-            return true;
+            return _ikTarget != null;
         }
 
         public void SetDefaultValues()

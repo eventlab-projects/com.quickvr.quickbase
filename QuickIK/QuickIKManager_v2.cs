@@ -47,7 +47,11 @@ namespace QuickVR {
         protected static List<IKLimbBonesHand> _ikLimbBonesHand = null;
 
         protected Dictionary<IKLimbBones, QuickIKData> _initialIKPose = new Dictionary<IKLimbBones, QuickIKData>();
-        protected RigBuilder _rigBuilder = null;
+
+        protected HumanPoseHandler _poseHandler = null;
+        protected HumanPose _pose;
+
+        public AnimationClip _animation;
 
         #endregion
 
@@ -77,13 +81,32 @@ namespace QuickVR {
 
             Reset();
 
-            _rigBuilder = gameObject.GetOrCreateComponent<RigBuilder>();
-            _rigBuilder.layers.Add(new RigBuilder.RigLayer(_ikSolversBody.gameObject.GetOrCreateComponent<Rig>()));
-            _rigBuilder.layers.Add(new RigBuilder.RigLayer(_ikTargetsLeftHand.gameObject.GetOrCreateComponent<Rig>()));
-            _rigBuilder.layers.Add(new RigBuilder.RigLayer(_ikSolversLeftHand.gameObject.GetOrCreateComponent<Rig>()));
-            _rigBuilder.layers.Add(new RigBuilder.RigLayer(_ikTargetsRightHand.gameObject.GetOrCreateComponent<Rig>()));
-            _rigBuilder.layers.Add(new RigBuilder.RigLayer(_ikSolversRightHand.gameObject.GetOrCreateComponent<Rig>()));
-            _rigBuilder.Build();
+            RigBuilder rigBuilder = gameObject.GetOrCreateComponent<RigBuilder>();
+            //rigBuilder.layers.Add(new RigBuilder.RigLayer(transform.Find("GameObject").gameObject.GetOrCreateComponent<Rig>()));
+            rigBuilder.layers.Add(new RigBuilder.RigLayer(_ikSolversBody.gameObject.GetOrCreateComponent<Rig>()));
+            rigBuilder.layers.Add(new RigBuilder.RigLayer(_ikTargetsLeftHand.gameObject.GetOrCreateComponent<Rig>()));
+            rigBuilder.layers.Add(new RigBuilder.RigLayer(_ikSolversLeftHand.gameObject.GetOrCreateComponent<Rig>()));
+            rigBuilder.layers.Add(new RigBuilder.RigLayer(_ikTargetsRightHand.gameObject.GetOrCreateComponent<Rig>()));
+            rigBuilder.layers.Add(new RigBuilder.RigLayer(_ikSolversRightHand.gameObject.GetOrCreateComponent<Rig>()));
+            rigBuilder.Build();
+
+            _poseHandler = new HumanPoseHandler(_animator.avatar, _animator.transform);
+            _pose = new HumanPose();
+            _poseHandler.GetHumanPose(ref _pose);
+            for (int i = 0; i < _pose.muscles.Length; i++)
+            {
+                string muscleName = QuickHumanTrait.GetMuscleName(i);
+                AnimationCurve curve = new AnimationCurve();
+                curve.AddKey(0, _pose.muscles[i]);
+                _animation.SetCurve("", typeof(Animator), muscleName, curve);
+                Debug.Log(muscleName + " = " + _pose.muscles[i].ToString("f3"));
+            }
+
+            Debug.Log(_animation.isHumanMotion);            
+
+            //Debug.Log("=========================================");
+            //Debug.Log("=========================================");
+            //Debug.Log("=========================================");
         }
 
         protected virtual Transform CreateIKSolverTransform(Transform ikSolversRoot, string name)
