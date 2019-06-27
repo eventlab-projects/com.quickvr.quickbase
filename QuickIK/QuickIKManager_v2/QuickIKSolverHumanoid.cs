@@ -238,6 +238,18 @@ namespace QuickVR
             }
         }
 
+        public float _weightIKHint
+        {
+            get
+            {
+                return data._posWeightHint;
+            }
+            set
+            {
+                data._posWeightHint = value;
+            }
+        }
+
     }
 
 }

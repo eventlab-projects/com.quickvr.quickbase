@@ -105,6 +105,18 @@ namespace QuickVR
                 data.targetRotationWeight = value;
             }
         }
+
+        public float _weightIKHint
+        {
+            get
+            {
+                return data.hintWeight;
+            }
+            set
+            {
+                data.hintWeight = value;
+            }
+        }
     }
 
 }

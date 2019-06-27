@@ -20,6 +20,10 @@ namespace QuickVR
         
         protected Animator _animator = null;
 
+        [SerializeField] protected bool _showCfgBody = false;
+        [SerializeField] protected bool _showCfgLeftHand = false;
+        [SerializeField] protected bool _showCfgRightHand = false;
+
         #endregion
 
         #region CONSTANTS
@@ -46,6 +50,55 @@ namespace QuickVR
         public override void OnInspectorGUI()
         {
             DrawDefaultInspector();
+
+            EditorGUILayout.Space();
+            _showCfgBody = EditorGUILayout.Foldout(_showCfgBody, "Body IK Solvers");
+            if (_showCfgBody)
+            {
+                EditorGUI.indentLevel++;
+                foreach (string boneName in QuickUtils.GetEnumValuesToString<IKLimbBones>())
+                {
+                    DrawIKSolverProperties(_ikManager.GetIKSolver(boneName), boneName);
+                    EditorGUILayout.Space();
+                }
+                EditorGUI.indentLevel--;
+            }
+
+            _showCfgLeftHand = EditorGUILayout.Foldout(_showCfgLeftHand, "Left Hand IK Solvers");
+            if (_showCfgLeftHand)
+            {
+                EditorGUI.indentLevel++;
+                foreach (string boneName in QuickUtils.GetEnumValuesToString<IKLimbBonesHand>())
+                {
+                    DrawIKSolverProperties(_ikManager.GetIKSolver("Left" + boneName + "Distal"), boneName);
+                    EditorGUILayout.Space();
+                }
+                EditorGUI.indentLevel--;
+            }
+
+            _showCfgRightHand = EditorGUILayout.Foldout(_showCfgRightHand, "Right Hand IK Solvers");
+            if (_showCfgRightHand)
+            {
+                EditorGUI.indentLevel++;
+                foreach (string boneName in QuickUtils.GetEnumValuesToString<IKLimbBonesHand>())
+                {
+                    DrawIKSolverProperties(_ikManager.GetIKSolver("Right" + boneName + "Distal"), boneName);
+                    EditorGUILayout.Space();
+                }
+                EditorGUI.indentLevel--;
+            }
+
+        }
+
+        protected virtual void DrawIKSolverProperties(IQuickIKSolver ikSolver, string boneName) 
+        {
+            EditorGUILayout.LabelField(boneName, EditorStyles.boldLabel);
+            ikSolver._weightIKPos = EditorGUILayout.Slider(" IK Pos Weight", ikSolver._weightIKPos, 0.0f, 1.0f);
+            ikSolver._weightIKRot = EditorGUILayout.Slider(" IK Rot Weight", ikSolver._weightIKRot, 0.0f, 1.0f);
+            if (ikSolver._targetHint)
+            {
+                ikSolver._weightIKHint = EditorGUILayout.Slider(" IK Rot Weight", ikSolver._weightIKHint, 0.0f, 1.0f);
+            }
         }
 
         protected virtual void UpdateDebug(SceneView sceneView)

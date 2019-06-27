@@ -133,7 +133,7 @@ namespace QuickVR
             }
             set
             {
-                
+
             }
         }
 
@@ -166,6 +166,18 @@ namespace QuickVR
             get
             {
                 return 1.0f;
+            }
+            set
+            {
+
+            }
+        }
+
+        public float _weightIKHint
+        {
+            get
+            {
+                return 0.0f;
             }
             set
             {

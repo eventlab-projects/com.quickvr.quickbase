@@ -125,6 +125,18 @@ namespace QuickVR
             }
         }
 
+        public float _weightIKHint
+        {
+            get
+            {
+                return _targetHint ? 1.0f : 0.0f;
+            }
+            set
+            {
+
+            }
+        }
+
         #endregion
 
         #region PROTECTED PARAMETERS

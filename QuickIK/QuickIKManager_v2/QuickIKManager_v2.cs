@@ -279,6 +279,12 @@ namespace QuickVR {
 
         #region GET AND SET
 
+        public virtual IQuickIKSolver GetIKSolver(string boneName)
+        {
+            if (QuickUtils.IsEnumValue<HumanBodyBones>(boneName)) return GetIKSolver(QuickUtils.ParseEnum<HumanBodyBones>(boneName));
+            return null;
+        }
+
         public virtual IQuickIKSolver GetIKSolver(HumanBodyBones boneID)
         {
             Transform ikSolversRoot = null;
@@ -423,54 +429,54 @@ namespace QuickVR {
                 ikSolver._weight = (_ikMaskRightHand & (1 << (int)boneID)) != 0 ? 1 : 0;
             }
 
-            ////Update the position of the hint targets
-            //if ((_ikHintMaskUpdate & (1 << (int)IKLimbBones.LeftHand)) > 0)
-            //{
-            //    UpdateHintTargetElbow(HumanBodyBones.LeftHand);
-            //}
-            //if ((_ikHintMaskUpdate & (1 << (int)IKLimbBones.RightHand)) > 0)
-            //{
-            //    UpdateHintTargetElbow(HumanBodyBones.RightHand);
-            //}
-            //if ((_ikHintMaskUpdate & (1 << (int)IKLimbBones.LeftFoot)) > 0)
-            //{
-            //    UpdateHintTargetKnee(HumanBodyBones.LeftFoot);
-            //}
-            //if ((_ikHintMaskUpdate & (1 << (int)IKLimbBones.RightFoot)) > 0)
-            //{
-            //    UpdateHintTargetKnee(HumanBodyBones.RightFoot);
-            //}
+            //Update the position of the hint targets
+            if ((_ikHintMaskUpdate & (1 << (int)IKLimbBones.LeftHand)) > 0)
+            {
+                UpdateHintTargetElbow(HumanBodyBones.LeftHand);
+            }
+            if ((_ikHintMaskUpdate & (1 << (int)IKLimbBones.RightHand)) > 0)
+            {
+                UpdateHintTargetElbow(HumanBodyBones.RightHand);
+            }
+            if ((_ikHintMaskUpdate & (1 << (int)IKLimbBones.LeftFoot)) > 0)
+            {
+                UpdateHintTargetKnee(HumanBodyBones.LeftFoot);
+            }
+            if ((_ikHintMaskUpdate & (1 << (int)IKLimbBones.RightFoot)) > 0)
+            {
+                UpdateHintTargetKnee(HumanBodyBones.RightFoot);
+            }
         }
 
-        //protected virtual void UpdateHintTargetElbow(HumanBodyBones boneLimbID)
-        //{
-        //    QuickIKSolverTwoBone ikSolver = GetIKSolver(boneLimbID);
-        //    Vector3 u = (ikSolver._boneMid.position - ikSolver._boneUpper.position).normalized;
-        //    Vector3 v = (ikSolver._boneMid.position - ikSolver._boneLimb.position).normalized;
-        //    if (Vector3.Angle(u, v) < 170.0f)
-        //    {
-        //        Vector3 n = Vector3.ProjectOnPlane((u + v) * 0.5f, transform.up).normalized;
-        //        Vector3 w = (ikSolver._boneMid.position + n) - ikSolver._boneUpper.position;
-        //        Vector3 t = ikSolver._boneLimb.position - ikSolver._boneUpper.position;
-        //        float d = Vector3.Dot(Vector3.Cross(w, t), transform.up);
-        //        if ((boneLimbID == HumanBodyBones.LeftHand && d < 0) || (boneLimbID == HumanBodyBones.RightHand && d > 0)) n *= -1.0f;
+        protected virtual void UpdateHintTargetElbow(HumanBodyBones boneLimbID)
+        {
+            IQuickIKSolver ikSolver = GetIKSolver(boneLimbID);
+            Vector3 u = (ikSolver._boneMid.position - ikSolver._boneUpper.position).normalized;
+            Vector3 v = (ikSolver._boneMid.position - ikSolver._boneLimb.position).normalized;
+            if (Vector3.Angle(u, v) < 170.0f)
+            {
+                Vector3 n = Vector3.ProjectOnPlane((u + v) * 0.5f, transform.up).normalized;
+                Vector3 w = (ikSolver._boneMid.position + n) - ikSolver._boneUpper.position;
+                Vector3 t = ikSolver._boneLimb.position - ikSolver._boneUpper.position;
+                float d = Vector3.Dot(Vector3.Cross(w, t), transform.up);
+                if ((boneLimbID == HumanBodyBones.LeftHand && d < 0) || (boneLimbID == HumanBodyBones.RightHand && d > 0)) n *= -1.0f;
 
-        //        ikSolver._targetHint.position = ikSolver._boneMid.position + n * DEFAULT_TARGET_HINT_DISTANCE;
-        //    }
-        //}
+                ikSolver._targetHint.position = ikSolver._boneMid.position + n * DEFAULT_TARGET_HINT_DISTANCE;
+            }
+        }
 
-        //protected virtual void UpdateHintTargetKnee(HumanBodyBones boneLimbID)
-        //{
-        //    QuickIKSolverTwoBone ikSolver = GetIKSolver(boneLimbID);
-        //    Vector3 u = (ikSolver._boneMid.position - ikSolver._boneUpper.position).normalized;
-        //    Vector3 v = (ikSolver._boneMid.position - ikSolver._boneLimb.position).normalized;
-        //    if (Vector3.Angle(u, v) < 170.0f)
-        //    {
-        //        Vector3 n = ((u + v) * 0.5f).normalized;
-        //        ikSolver._targetHint.position = ikSolver._boneMid.position + n * DEFAULT_TARGET_HINT_DISTANCE;
-        //        //ikSolver._targetHint.position = ikSolver._boneMid.position + ikSolver._targetLimb.forward * DEFAULT_TARGET_HINT_DISTANCE;
-        //    }
-        //}
+        protected virtual void UpdateHintTargetKnee(HumanBodyBones boneLimbID)
+        {
+            IQuickIKSolver ikSolver = GetIKSolver(boneLimbID);
+            Vector3 u = (ikSolver._boneMid.position - ikSolver._boneUpper.position).normalized;
+            Vector3 v = (ikSolver._boneMid.position - ikSolver._boneLimb.position).normalized;
+            if (Vector3.Angle(u, v) < 170.0f)
+            {
+                Vector3 n = ((u + v) * 0.5f).normalized;
+                ikSolver._targetHint.position = ikSolver._boneMid.position + n * DEFAULT_TARGET_HINT_DISTANCE;
+                //ikSolver._targetHint.position = ikSolver._boneMid.position + ikSolver._targetLimb.forward * DEFAULT_TARGET_HINT_DISTANCE;
+            }
+        }
 
         #endregion
 
