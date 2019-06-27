@@ -81,6 +81,30 @@ namespace QuickVR
                 weight = value;
             }
         }
+
+        public float _weightIKPos
+        {
+            get
+            {
+                return data.targetPositionWeight;
+            }
+            set
+            {
+                data.targetPositionWeight = value;
+            }
+        }
+
+        public float _weightIKRot
+        {
+            get
+            {
+                return data.targetRotationWeight;
+            }
+            set
+            {
+                data.targetRotationWeight = value;
+            }
+        }
     }
 
 }

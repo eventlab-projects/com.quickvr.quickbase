@@ -84,7 +84,7 @@ namespace QuickVR {
 
             //Set the offset of the TrackedObject of the head
             QuickTrackedObject tObject = node.GetTrackedObject();
-            QuickIKSolver ikSolverHead = _ikManager.GetIKSolver(IKLimbBones.Head);
+            IQuickIKSolver ikSolverHead = _ikManager.GetIKSolver(IKLimbBones.Head);
             tObject.transform.localPosition = Quaternion.Inverse(transform.rotation) * (ikSolverHead._boneLimb.position - GetEyeCenterPosition());
 
             //Set the position of the vrNodesOrigin
@@ -171,8 +171,8 @@ namespace QuickVR {
             QuickTrackedObject tObject = node.GetTrackedObject();
             Vector3 posOffset = tObject.transform.position - _vrNodesOrigin.position;
 
-            QuickIKSolver ikSolver = _ikManager.GetIKSolver(boneID);
-            if (!ikSolver) return;
+            IQuickIKSolver ikSolver = _ikManager.GetIKSolver(boneID);
+            if (ikSolver == null) return;
 
             Transform t = null;
             if (QuickIKManager.IsBoneLimb(boneID))
@@ -198,7 +198,7 @@ namespace QuickVR {
             foreach (IKLimbBones boneLimbID in QuickIKManager.GetIKLimbBones())
             {
                 HumanBodyBones? boneMidID = QuickIKManager.GetIKTargetMidBoneID(boneLimbID);
-                QuickIKSolver ikSolver = _ikManager.GetIKSolver(boneLimbID);
+                IQuickIKSolver ikSolver = _ikManager.GetIKSolver(boneLimbID);
                 if (boneMidID.HasValue && GetQuickVRNode(boneMidID.Value).IsTracked())
                 {
                     _ikManager._ikHintMaskUpdate &= ~(1 << (int)boneLimbID);

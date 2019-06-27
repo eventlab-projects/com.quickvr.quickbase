@@ -93,7 +93,7 @@ namespace QuickVR {
 
             foreach (IKLimbBones boneID in GetIKLimbBones())
             {
-                QuickIKSolver ikSolver = GetIKSolver(boneID);
+                IQuickIKSolver ikSolver = GetIKSolver(boneID);
                 _initialIKPose[boneID] = new QuickIKData(ikSolver._targetLimb.localPosition, ikSolver._targetLimb.localRotation, ikSolver._targetHint.localPosition);
             }
 
@@ -219,7 +219,7 @@ namespace QuickVR {
             foreach (IKLimbBones boneID in GetIKLimbBones())
             {
                 ResetIKSolver(boneID);
-                QuickIKSolver ikSolver = GetIKSolver(boneID);
+                IQuickIKSolver ikSolver = GetIKSolver(boneID);
                 QuickIKData initialIKData = _initialIKPose[boneID];
                 ikSolver._targetLimb.localPosition = initialIKData._targetLimbLocalPosition;
                 ikSolver._targetLimb.localRotation = initialIKData._targetLimbLocalRotation;
@@ -248,7 +248,7 @@ namespace QuickVR {
 
         public virtual void ResetIKSolver(HumanBodyBones boneID)
         {
-            QuickIKSolver ikSolver = GetIKSolver(boneID);
+            QuickIKSolver ikSolver = (QuickIKSolver)GetIKSolver(boneID);
             if ((_ikMask & (1 << (int)boneID)) != 0)
             {
                 ikSolver.ResetIKChain();
@@ -274,12 +274,12 @@ namespace QuickVR {
         //    }
         //}
 
-        public virtual QuickIKSolver GetIKSolver(IKLimbBones boneID)
+        public virtual IQuickIKSolver GetIKSolver(IKLimbBones boneID)
         {
             return GetIKSolver(ToUnity(boneID));
         }
 
-        public virtual QuickIKSolver GetIKSolver(HumanBodyBones boneID)
+        public virtual IQuickIKSolver GetIKSolver(HumanBodyBones boneID)
         {
             HumanBodyBones limbBoneID = boneID;
             if (boneID == HumanBodyBones.LeftLowerArm || boneID == HumanBodyBones.LeftUpperArm)
@@ -302,7 +302,7 @@ namespace QuickVR {
             Transform t = _ikSolversRoot.Find("_IKSolver_" + limbBoneID.ToString());
             if (!t) return null;
 
-            return t.GetComponent<QuickIKSolver>();
+            return t.GetComponent<IQuickIKSolver>();
 		}
 
         public static HumanBodyBones? GetIKTargetMidBoneID(IKLimbBones limbBoneID)
@@ -375,7 +375,7 @@ namespace QuickVR {
         {
             foreach (IKLimbBones boneID in GetIKLimbBones())
             {
-                QuickIKSolver ikSolver = GetIKSolver(ToUnity(boneID));
+                QuickIKSolver ikSolver = (QuickIKSolver)GetIKSolver(ToUnity(boneID));
                 
                 ikSolver.ResetIKChain();
                 Transform boneLimb = ikSolver._boneLimb;
@@ -411,7 +411,7 @@ namespace QuickVR {
         public override void UpdateTracking() {
             foreach (IKLimbBones boneID in GetIKLimbBones())
             {
-                QuickIKSolver ikSolver = GetIKSolver(ToUnity(boneID));
+                QuickIKSolver ikSolver = (QuickIKSolver)GetIKSolver(ToUnity(boneID));
                 if (ikSolver && ((_ikMask & (1 << (int)boneID)) != 0))
                 {
                     //Correct the rotations of the limb bones by accounting for human body constraints
@@ -463,7 +463,7 @@ namespace QuickVR {
 
         protected virtual void UpdateHintTargetElbow(HumanBodyBones boneLimbID)
         {
-            QuickIKSolver ikSolver = GetIKSolver(boneLimbID);
+            IQuickIKSolver ikSolver = GetIKSolver(boneLimbID);
             Vector3 u = (ikSolver._boneMid.position - ikSolver._boneUpper.position).normalized;
             Vector3 v = (ikSolver._boneMid.position - ikSolver._boneLimb.position).normalized;
             if (Vector3.Angle(u, v) < 170.0f)
@@ -480,7 +480,7 @@ namespace QuickVR {
 
         protected virtual void UpdateHintTargetKnee(HumanBodyBones boneLimbID)
         {
-            QuickIKSolver ikSolver = GetIKSolver(boneLimbID);
+            IQuickIKSolver ikSolver = GetIKSolver(boneLimbID);
             Vector3 u = (ikSolver._boneMid.position - ikSolver._boneUpper.position).normalized;
             Vector3 v = (ikSolver._boneMid.position - ikSolver._boneLimb.position).normalized;
             if (Vector3.Angle(u, v) < 170.0f)

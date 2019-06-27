@@ -149,6 +149,30 @@ namespace QuickVR
             }
         }
 
+        public float _weightIKPos
+        {
+            get
+            {
+                return 1.0f;
+            }
+            set
+            {
+                
+            }
+        }
+
+        public float _weightIKRot
+        {
+            get
+            {
+                return 1.0f;
+            }
+            set
+            {
+
+            }
+        }
+
     }
 
 }

@@ -5,7 +5,7 @@ using UnityEngine;
 namespace QuickVR
 {
 
-    public class QuickIKSolver : MonoBehaviour
+    public class QuickIKSolver : MonoBehaviour, IQuickIKSolver
     {
 
         #region PUBLIC PARAMETERS
@@ -13,31 +13,127 @@ namespace QuickVR
         public bool _enableIK = true;
 
         //The bone chain hierarchy
-        public Transform _boneUpper = null;
-        public Transform _boneMid = null;
-        public Transform _boneLimb = null;
+        public Transform m_boneUpper = null;
+        public Transform m_boneMid = null;
+        public Transform m_boneLimb = null;
 
         //The IK parameters
-        public Transform _targetLimb = null;
-        public Transform _targetHint = null;
+        public Transform m_targetLimb = null;
+        public Transform m_targetHint = null;
+
+        [Range(0.0f, 1.0f)]
+        public float m_weightIKPos = 1.0f;
+
+        [Range(0.0f, 1.0f)]
+        public float m_weightIKRot = 1.0f;
 
         public Vector3 _offsetTargetLimbPos = Vector3.zero;
 
-        [Range(0.0f, 1.0f)]
-        public float _weightIKPos = 1.0f;
+        public Transform _boneUpper
+        {
+            get
+            {
+                return m_boneUpper;
+            }
+            set
+            {
+                m_boneUpper = value;
+            }
+        }
 
-        [Range(0.0f, 1.0f)]
-        public float _weightIKRot = 1.0f;
+        public Transform _boneMid
+        {
+            get
+            {
+                return m_boneMid;
+            }
+            set
+            {
+                m_boneMid = value;
+            }
+        }
+
+        public Transform _boneLimb
+        {
+            get
+            {
+                return m_boneLimb;
+            }
+            set
+            {
+                m_boneLimb = value;
+            }
+        }
+
+        public Transform _targetLimb
+        {
+            get
+            {
+                return m_targetLimb;
+            }
+            set
+            {
+                m_targetLimb = value;
+            }
+        }
+
+        public Transform _targetHint
+        {
+            get
+            {
+                return m_targetHint;
+            }
+            set
+            {
+                m_targetHint = value;
+            }
+        }
+
+        public float _weight
+        {
+            get
+            {
+                return 1.0f;
+            }
+            set
+            {
+                
+            }
+        }
+
+        public float _weightIKPos
+        {
+            get
+            {
+                return m_weightIKPos;
+            }
+            set
+            {
+                m_weightIKPos = value;
+            }
+        }
+
+        public float _weightIKRot
+        {
+            get
+            {
+                return m_weightIKRot;
+            }
+            set
+            {
+                m_weightIKRot = value;
+            }
+        }
 
         #endregion
 
         #region PROTECTED PARAMETERS
 
+        protected bool _initialized = false;
+
         protected Quaternion _initialLocalRotationUpper = Quaternion.identity;
         protected Quaternion _initialLocalRotationMid = Quaternion.identity;
         protected Quaternion _initialLocalRotationLimb = Quaternion.identity;
-
-        protected bool _initialized = false;
 
         #endregion
 

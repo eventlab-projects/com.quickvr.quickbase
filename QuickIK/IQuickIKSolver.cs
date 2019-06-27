@@ -18,6 +18,9 @@ namespace QuickVR
 
         float _weight { get; set; }
 
+        float _weightIKPos { get; set; }
+        float _weightIKRot { get; set; }
+
     }
 
 }
