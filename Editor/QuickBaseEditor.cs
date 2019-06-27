@@ -183,12 +183,13 @@ namespace QuickVR {
 
         protected virtual void DrawGUI()
         {
-            SerializedProperty p = serializedObject.GetIterator();
-            bool showChildren = p.hasVisibleChildren;
-            while (p.NextVisible(showChildren))
-            {
-                showChildren = EditorGUILayout.PropertyField(p, true);
-            }
+            //SerializedProperty p = serializedObject.GetIterator();
+            //bool showChildren = p.hasVisibleChildren;
+            //while (p.NextVisible(showChildren))
+            //{
+            //    showChildren = EditorGUILayout.PropertyField(p, true);
+            //}
+            DrawDefaultInspector();
         }
 
         protected virtual void DrawMethodButtons()

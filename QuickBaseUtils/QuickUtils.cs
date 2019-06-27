@@ -359,7 +359,46 @@ namespace QuickVR
             return Derived.IsSubclassOf(Base) || Derived == Base;
         }
 
-#region EXTENSION METHODS
+        public static Mesh GetUnityPrimitiveMesh(PrimitiveType primitiveType)
+        {
+            Debug.Log("Getting Unity Primitive Mesh: " + primitiveType);
+            Mesh primMesh = Resources.GetBuiltinResource<Mesh>(GetPrimitiveMeshPath(primitiveType));
+
+            if (primMesh == null)
+            {
+                Debug.LogError("Couldn't load Unity Primitive Mesh: " + primitiveType);
+            }
+
+            return primMesh;
+        }
+
+        private static string GetPrimitiveMeshPath(PrimitiveType primitiveType)
+        {
+            switch (primitiveType)
+            {
+                case PrimitiveType.Sphere:
+                    return "New-Sphere.fbx";
+                case PrimitiveType.Capsule:
+                    return "New-Capsule.fbx";
+                case PrimitiveType.Cylinder:
+                    return "New-Cylinder.fbx";
+                case PrimitiveType.Cube:
+                    return "Cube.fbx";
+                case PrimitiveType.Plane:
+                    return "New-Plane.fbx";
+                case PrimitiveType.Quad:
+                    return "Quad.fbx";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(primitiveType), primitiveType, null);
+            }
+        }
+
+        #region EXTENSION METHODS
+
+        public static T GetOrCreateComponent<T>(this Component c) where T : Component
+        {
+            return c.gameObject.GetOrCreateComponent<T>();
+        }
 
         public static T GetOrCreateComponent<T>(this GameObject go) where T : Component
         {

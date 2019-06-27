@@ -38,13 +38,13 @@ namespace QuickVR {
 
         #region PROTECTED PARAMETERS
 
-        protected Transform _ikTargetsRoot = null;
-        protected Transform _ikTargetsLeftHand = null;
-        protected Transform _ikTargetsRightHand = null;
+        [SerializeField, HideInInspector] protected Transform _ikTargetsRoot = null;
+        [SerializeField, HideInInspector] protected Transform _ikTargetsLeftHand = null;
+        [SerializeField, HideInInspector] protected Transform _ikTargetsRightHand = null;
 
-        protected Transform _ikSolversBody = null;
-        protected Transform _ikSolversLeftHand = null;
-        protected Transform _ikSolversRightHand = null;
+        [SerializeField, HideInInspector] protected Transform _ikSolversBody = null;
+        [SerializeField, HideInInspector] protected Transform _ikSolversLeftHand = null;
+        [SerializeField, HideInInspector] protected Transform _ikSolversRightHand = null;
 
         protected static List<IKLimbBones> _ikLimbBones = null;
         protected static List<IKLimbBonesHand> _ikLimbBonesHand = null;
@@ -163,9 +163,10 @@ namespace QuickVR {
             QuickIKSolverTwoBone ikSolver = CreateIKSolverTransform(_ikSolversBody, HumanBodyBones.Head.ToString()).gameObject.GetOrCreateComponent<QuickIKSolverTwoBone>();
 
             ikSolver._boneUpper = _animator.GetBoneTransform(HumanBodyBones.Hips);
-            ikSolver._boneMid = _animator.GetBoneTransform(HumanBodyBones.Spine);
+            ikSolver._boneMid = _animator.GetBoneTransform(HumanBodyBones.Head);//_animator.GetBoneTransform(HumanBodyBones.Spine);
             ikSolver._boneLimb = _animator.GetBoneTransform(HumanBodyBones.Head);
             ikSolver._targetLimb = CreateIKTarget(HumanBodyBones.Head);
+            //ikSolver._targetHint = CreateIKTarget(HumanBodyBones.Spine);
             ikSolver.data.maintainTargetPositionOffset = true;
             ikSolver.data.maintainTargetRotationOffset = true;
 
@@ -176,13 +177,14 @@ namespace QuickVR {
         {
             QuickIKSolverHumanoid ikSolver = CreateIKSolverTransform(_ikSolversBody, boneID.ToString()).gameObject.GetOrCreateComponent<QuickIKSolverHumanoid>();
 
-            ikSolver.data._ikTarget = CreateIKTarget(boneID);
+            ikSolver._targetLimb = CreateIKTarget(boneID);
             HumanBodyBones? midBoneID = GetIKTargetMidBoneID(boneID);
             if (midBoneID.HasValue)
             {
-                ikSolver.data._ikTargetHint = CreateIKTarget(midBoneID.Value);
+                ikSolver._targetHint = CreateIKTarget(midBoneID.Value);
             }
 
+            ikSolver.data._posWeightHint = 1.0f;
             ikSolver.data._avatarIKGoal = (int)QuickUtils.ParseEnum<AvatarIKGoal>(boneID.ToString());
 
             return ikSolver;
@@ -297,7 +299,32 @@ namespace QuickVR {
         {
             return GetIKSolver(ToUnity(boneID));
         }
-        
+
+        public virtual List<IQuickIKSolver> GetIKSolversBody()
+        {
+            return new List<IQuickIKSolver>(_ikSolversBody.GetComponentsInChildren<IQuickIKSolver>());
+        }
+
+        public virtual List<IQuickIKSolver> GetIKSolversLeftHand()
+        {
+            return new List<IQuickIKSolver>(_ikSolversLeftHand.GetComponentsInChildren<IQuickIKSolver>());
+        }
+
+        public virtual List<IQuickIKSolver> GetIKSolversRightHand()
+        {
+            return new List<IQuickIKSolver>(_ikSolversRightHand.GetComponentsInChildren<IQuickIKSolver>());
+        }
+
+        public virtual List<IQuickIKSolver> GetIKSolvers()
+        {
+            List<IQuickIKSolver> result = new List<IQuickIKSolver>();
+            result.AddRange(GetIKSolversBody());
+            result.AddRange(GetIKSolversLeftHand());
+            result.AddRange(GetIKSolversRightHand());
+
+            return result;
+        }
+
         public static List<IKLimbBones> GetIKLimbBones()
         {
             if (_ikLimbBones == null)
@@ -315,16 +342,6 @@ namespace QuickVR {
             return _ikLimbBonesHand;
         }
         
-        public virtual bool IsIKLimbBoneTracked(IKLimbBones ikLimbBone)
-        {
-            return (_ikMaskBody & (1 << (int)ikLimbBone)) != 0;
-        }
-
-        public virtual bool IsIKHintBoneActive(IKLimbBones ikLimbBone)
-        {
-            return (_ikHintMaskUpdate & (1 << (int)ikLimbBone)) != 0;
-        }
-
         protected override int GetDefaultPriority()
         {
             return QuickBodyTracking.DEFAULT_PRIORITY_TRACKING_BODY - 1;
@@ -360,11 +377,6 @@ namespace QuickVR {
             //}
 
             base.Calibrate();
-        }
-
-        protected virtual bool IsIKLimbBoneActive(IKLimbBones boneID)
-        {
-            return ((_ikMaskBody & (1 << (int)boneID)) != 0);
         }
 
         protected virtual string GetIKTargetName(HumanBodyBones boneID)

@@ -104,7 +104,7 @@ namespace QuickVR
             _posWeight = 1.0f;
             _rotWeight = 1.0f;
             _ikTargetHint = null;
-            _posWeightHint = 0.0f;
+            _posWeightHint = 1.0f;
         }
 
     }
