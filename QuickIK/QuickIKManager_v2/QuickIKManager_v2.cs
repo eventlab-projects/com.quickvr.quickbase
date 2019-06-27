@@ -3,13 +3,10 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-using UnityEngine.SceneManagement;
 using UnityEngine.Playables;
 
 using UnityEngine.Animations.Rigging;
 using UnityEngine.Animations;
-
-using UnityEngine.Experimental.Animations;
 
 namespace QuickVR {
 
