@@ -213,9 +213,12 @@ namespace QuickVR {
             Transform ikTargetsRoot = boneHandID == HumanBodyBones.LeftHand ? _ikTargetsLeftHand : _ikTargetsRightHand;
             ikTargetsRoot.position = tBone.position;
             ikTargetsRoot.rotation = tBone.rotation;
-            QuickCopyTransformConstraint constraint = ikTargetsRoot.gameObject.GetOrCreateComponent<QuickCopyTransformConstraint>();
-            constraint.data._dstTransform = ikTargetsRoot;
-            constraint.data._srcTransform = tBone;
+            
+            MultiParentConstraint constraint = ikTargetsRoot.GetOrCreateComponent<MultiParentConstraint>();
+            constraint.data.constrainedObject = ikTargetsRoot;
+            WeightedTransformArray sourceObjects = new WeightedTransformArray();
+            sourceObjects.Add(new WeightedTransform(_animator.GetBoneTransform(boneHandID), 1.0f));
+            constraint.data.sourceObjects = sourceObjects;
 
             string prefix = boneHandID.ToString().Contains("Left") ? "Left" : "Right";
             foreach (IKLimbBonesHand b in GetIKLimbBonesHand())
