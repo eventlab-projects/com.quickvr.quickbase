@@ -10,6 +10,20 @@ namespace QuickVR
     public class QuickIKSolverTwoBone : TwoBoneIKConstraint, IQuickIKSolver
     {
 
+        #region PUBLIC PARAMETERS
+
+        public HumanBodyBones _boneID
+        {
+            get
+            {
+                return m_boneID;
+            }
+            set
+            {
+                m_boneID = value;
+            }
+        }
+
         public Transform _boneUpper
         {
             get
@@ -117,6 +131,14 @@ namespace QuickVR
                 data.hintWeight = value;
             }
         }
+
+        #endregion
+
+        #region PROTECTED ATTRIBUTES
+
+        protected HumanBodyBones m_boneID = HumanBodyBones.LastBone;
+
+        #endregion
     }
 
 }

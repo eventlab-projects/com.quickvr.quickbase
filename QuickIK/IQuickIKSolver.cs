@@ -7,10 +7,12 @@ namespace QuickVR
 
     public interface IQuickIKSolver
     {
+        HumanBodyBones _boneID { get; set; }
+
         //The bone chain hierarchy
-        Transform _boneUpper { get; }
-        Transform _boneMid { get; }
-        Transform _boneLimb { get; }
+        Transform _boneUpper { get; set; }
+        Transform _boneMid { get; set; }
+        Transform _boneLimb { get; set; }
 
         //The IK parameters
         Transform _targetLimb { get; set; }

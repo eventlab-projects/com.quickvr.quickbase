@@ -89,11 +89,27 @@ namespace QuickVR
             }
         }
 
+        public HumanBodyBones _boneID
+        {
+            get
+            {
+                return HumanBodyBones.Hips;
+            }
+            set
+            {
+
+            }
+        }
+
         public Transform _boneUpper
         {
             get
             {
                 return _animator.GetBoneTransform(HumanBodyBones.Hips);
+            }
+            set
+            {
+
             }
         }
 
@@ -103,6 +119,10 @@ namespace QuickVR
             {
                 return _animator.GetBoneTransform(HumanBodyBones.Hips);
             }
+            set
+            {
+
+            }
         }
 
         public Transform _boneLimb
@@ -110,6 +130,10 @@ namespace QuickVR
             get
             {
                 return _animator.GetBoneTransform(HumanBodyBones.Hips);
+            }
+            set
+            {
+
             }
         }
 

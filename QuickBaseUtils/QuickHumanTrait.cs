@@ -176,6 +176,11 @@ public static class QuickHumanTrait
         return HumanTrait.GetParentBone(boneID);
     }
 
+    public static HumanBodyBones GetParentBone(HumanBodyBones boneID)
+    {
+        return (HumanBodyBones)GetParentBone((int)boneID);
+    }
+
     public static List<int> GetChildBones(int boneID)
     {
         CheckChildBones();

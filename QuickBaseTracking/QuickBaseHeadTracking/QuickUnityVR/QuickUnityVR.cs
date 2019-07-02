@@ -195,19 +195,20 @@ namespace QuickVR {
         {
             //_ikManager._ikMask = _trackedJoints;
             //Check if the IKHint targets are actually tracked. 
-            foreach (IKLimbBones boneLimbID in QuickIKManager.GetIKLimbBones())
+            foreach (IKLimbBones b in QuickIKManager.GetIKLimbBones())
             {
-                HumanBodyBones? boneMidID = QuickIKManager.GetIKTargetMidBoneID(boneLimbID);
+                HumanBodyBones boneLimbID = QuickIKManager.ToUnity(b);
+                HumanBodyBones boneMidID = QuickHumanTrait.GetParentBone(boneLimbID);
                 IQuickIKSolver ikSolver = _ikManager.GetIKSolver(boneLimbID);
-                if (boneMidID.HasValue && GetQuickVRNode(boneMidID.Value).IsTracked())
+                if (GetQuickVRNode(boneMidID).IsTracked())
                 {
                     _ikManager._ikHintMaskUpdate &= ~(1 << (int)boneLimbID);
                     //ikSolver.ResetIKChain();
 
                     //Compute the rotation of the Bone Upper
-                    HumanBodyBones? boneUpperID = QuickIKManager.GetIKTargetUpperBoneID(boneLimbID);
-                    Vector3 userBoneMidPos = GetQuickVRNode(boneMidID.Value).GetTrackedObject().transform.position;
-                    Vector3 userBoneUpperPos = GetQuickVRNode(boneUpperID.Value).GetTrackedObject().transform.position;
+                    HumanBodyBones boneUpperID = QuickHumanTrait.GetParentBone(boneMidID);
+                    Vector3 userBoneMidPos = GetQuickVRNode(boneMidID).GetTrackedObject().transform.position;
+                    Vector3 userBoneUpperPos = GetQuickVRNode(boneUpperID).GetTrackedObject().transform.position;
 
                     Vector3 currentBoneDir = ikSolver._boneMid.position - ikSolver._boneUpper.position;
                     Vector3 targetBoneDir = ToAvatarSpace(userBoneMidPos - userBoneUpperPos);
@@ -217,7 +218,7 @@ namespace QuickVR {
                     ikSolver._boneUpper.Rotate(rotAxis, rotAngle, Space.World);
 
                     //Compute the rotation of the Bone Mid
-                    Vector3 userBoneLimbPos = GetQuickVRNode(QuickIKManager.ToUnity(boneLimbID)).GetTrackedObject().transform.position;
+                    Vector3 userBoneLimbPos = GetQuickVRNode(boneLimbID).GetTrackedObject().transform.position;
 
                     currentBoneDir = ikSolver._boneLimb.position - ikSolver._boneMid.position;
                     targetBoneDir = ToAvatarSpace(userBoneLimbPos - userBoneMidPos);

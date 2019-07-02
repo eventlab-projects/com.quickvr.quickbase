@@ -29,6 +29,18 @@ namespace QuickVR
 
         public Vector3 _offsetTargetLimbPos = Vector3.zero;
 
+        public HumanBodyBones _boneID
+        {
+            get
+            {
+                return m_boneID;
+            }
+            set
+            {
+                m_boneID = value;
+            }
+        }
+
         public Transform _boneUpper
         {
             get
@@ -146,6 +158,8 @@ namespace QuickVR
         protected Quaternion _initialLocalRotationUpper = Quaternion.identity;
         protected Quaternion _initialLocalRotationMid = Quaternion.identity;
         protected Quaternion _initialLocalRotationLimb = Quaternion.identity;
+
+        protected HumanBodyBones m_boneID = HumanBodyBones.LastBone;
 
         #endregion
 

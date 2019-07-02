@@ -11,13 +11,6 @@ namespace QuickVR
         public Vector3 _targetLimbLocalPosition = Vector3.zero;
         public Quaternion _targetLimbLocalRotation = Quaternion.identity;
         public Vector3 _targetHintLocalPosition = Vector3.zero;
-
-        public QuickIKData(Vector3 limbLocalPos, Quaternion limbLocalRot, Vector3 hintLocalPos)
-        {
-            _targetLimbLocalPosition = limbLocalPos;
-            _targetLimbLocalRotation = limbLocalRot;
-            _targetHintLocalPosition = hintLocalPos;
-        }
     }
 
     public class QuickIKPose : ScriptableObject

@@ -1,7 +1,7 @@
 using UnityEngine;
 using QuickVR;
 
-public class QuickIKManagerAsset : ScriptableObject
+public class QuickIKManager_v1Asset : ScriptableObject
 {
  
     public System.Int32 _priority;

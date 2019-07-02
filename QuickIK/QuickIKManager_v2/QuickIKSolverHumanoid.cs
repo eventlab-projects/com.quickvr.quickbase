@@ -134,11 +134,17 @@ namespace QuickVR
     public class QuickIKSolverHumanoid : RigConstraint<QuickIKSolverHumanoidJob, QuickIKSolverHumanoidJobData, QuickIKSolverHumanoidBinder>, IQuickIKSolver
     {
 
-        protected Animator _animator
+        #region PUBLIC ATTRIBUTES
+
+        public HumanBodyBones _boneID
         {
             get
             {
-                return GetComponentInParent<Animator>();
+                return m_boneID;
+            }
+            set
+            {
+                m_boneID = value;
             }
         }
 
@@ -152,6 +158,10 @@ namespace QuickVR
                 if (ikGoal == AvatarIKGoal.LeftFoot) return _animator.GetBoneTransform(HumanBodyBones.LeftUpperLeg);
                 return _animator.GetBoneTransform(HumanBodyBones.RightUpperLeg);
             }
+            set
+            {
+
+            }
         }
 
         public Transform _boneMid
@@ -164,6 +174,10 @@ namespace QuickVR
                 if (ikGoal == AvatarIKGoal.LeftFoot) return _animator.GetBoneTransform(HumanBodyBones.LeftLowerLeg);
                 return _animator.GetBoneTransform(HumanBodyBones.RightLowerLeg);
             }
+            set
+            {
+
+            }
         }
 
         public Transform _boneLimb
@@ -175,6 +189,10 @@ namespace QuickVR
                 if (ikGoal == AvatarIKGoal.RightHand) return _animator.GetBoneTransform(HumanBodyBones.RightHand);
                 if (ikGoal == AvatarIKGoal.LeftFoot) return _animator.GetBoneTransform(HumanBodyBones.LeftFoot);
                 return _animator.GetBoneTransform(HumanBodyBones.RightFoot);
+            }
+            set
+            {
+
             }
         }
 
@@ -249,6 +267,22 @@ namespace QuickVR
                 data._posWeightHint = value;
             }
         }
+
+        #endregion
+
+        #region PROTECTED ATTRIBUTES
+
+        protected Animator _animator
+        {
+            get
+            {
+                return GetComponentInParent<Animator>();
+            }
+        }
+
+        protected HumanBodyBones m_boneID = HumanBodyBones.LastBone;
+
+        #endregion
 
     }
 
