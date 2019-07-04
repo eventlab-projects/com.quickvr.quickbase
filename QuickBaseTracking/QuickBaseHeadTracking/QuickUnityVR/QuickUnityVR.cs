@@ -39,7 +39,15 @@ namespace QuickVR {
             _unscaledHeadHeight = (_animator.GetBoneTransform(HumanBodyBones.Head).position.y - transform.position.y);
             
             //Create the IKManager
-            _ikManager = gameObject.GetOrCreateComponent<QuickIKManager>();
+            if (!gameObject.GetComponent<QuickIKManager>())
+            {
+#if UNITY_2019_1_OR_NEWER 
+                gameObject.AddComponent<QuickIKManager_v2>();
+#else
+                gameObject.AddComponent<QuickIKManager_v1>();
+#endif
+            }
+            _ikManager = gameObject.GetComponent<QuickIKManager>();
             _ikManager.enabled = false; //We control when to update the IK
         }
 
@@ -56,9 +64,9 @@ namespace QuickVR {
             base.CreateVRHands();
         }
 
-        #endregion
+#endregion
 
-        #region GET AND SET
+#region GET AND SET
 
         protected virtual float GetHeadHeight()
         {
@@ -130,9 +138,9 @@ namespace QuickVR {
             return GetAvatarHead().position;
         }
 
-        #endregion
+#endregion
 
-        #region UPDATE
+#region UPDATE
 
         protected override void UpdateTransformRoot()
         {
@@ -238,7 +246,7 @@ namespace QuickVR {
             _ikManager.UpdateTracking();
         }
 
-        #endregion
+#endregion
 
     }
 
