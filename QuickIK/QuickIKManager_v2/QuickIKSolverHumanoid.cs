@@ -19,7 +19,7 @@ namespace QuickVR
         public ReadOnlyTransformHandle _ikTargetHint;
         public FloatProperty _posWeightHint;
 
-        public IntProperty _avatarIKGoal;
+        public int _boneID;
 
         public FloatProperty jobWeight { get; set; }
 
@@ -38,13 +38,13 @@ namespace QuickVR
                 return;
             }
 
-            SetGoal(stream, (AvatarIKGoal)_avatarIKGoal.value.GetInt(stream));
+            SetGoal(stream, QuickIKSolverHumanoid.GetAvatarIKGoal((HumanBodyBones)_boneID));
         }
 
         private void SetGoal(AnimationStream stream, AvatarIKGoal ikGoal)
         {
             AnimationHumanStream hStream = stream.AsHuman();
-            AvatarIKHint ikHint = GetIKHint(ikGoal);
+            AvatarIKHint ikHint = QuickIKSolverHumanoid.GetAvatarIKHint(ikGoal);
 
             float jWeight = jobWeight.Get(stream);
 
@@ -72,14 +72,6 @@ namespace QuickVR
             
         }
 
-        private AvatarIKHint GetIKHint(AvatarIKGoal ikGoal)
-        {
-            if (ikGoal == AvatarIKGoal.LeftHand) return AvatarIKHint.LeftElbow;
-            if (ikGoal == AvatarIKGoal.RightHand) return AvatarIKHint.RightElbow;
-            if (ikGoal == AvatarIKGoal.LeftFoot) return AvatarIKHint.LeftKnee;
-            return AvatarIKHint.RightKnee;
-        }
-
     }
 
     [System.Serializable]
@@ -90,7 +82,7 @@ namespace QuickVR
         [SyncSceneToStream, Range(0.0f, 1.0f)] public float _rotWeight;
         [SyncSceneToStream] public Transform _ikTargetHint;
         [SyncSceneToStream, Range(0.0f, 1.0f)] public float _posWeightHint;
-        [SyncSceneToStream, ReadOnly] public int _avatarIKGoal;
+        [SyncSceneToStream, ReadOnly] public int _boneID;
 
         public bool IsValid()
         {
@@ -114,13 +106,14 @@ namespace QuickVR
         public override QuickIKSolverHumanoidJob Create(Animator animator, ref QuickIKSolverHumanoidJobData data, Component component)
         {
             QuickIKSolverHumanoidJob job = new QuickIKSolverHumanoidJob();
+            QuickIKSolverHumanoid ikSolver = (QuickIKSolverHumanoid)component;
             
             job._ikTarget = ReadOnlyTransformHandle.Bind(animator, data._ikTarget);
             job._posWeight = FloatProperty.Bind(animator, component, PropertyUtils.ConstructConstraintDataPropertyName(nameof(data._posWeight)));
             job._rotWeight = FloatProperty.Bind(animator, component, PropertyUtils.ConstructConstraintDataPropertyName(nameof(data._rotWeight)));
             job._ikTargetHint = ReadOnlyTransformHandle.Bind(animator, data._ikTargetHint);
             job._posWeightHint = FloatProperty.Bind(animator, component, PropertyUtils.ConstructConstraintDataPropertyName(nameof(data._posWeightHint)));
-            job._avatarIKGoal = IntProperty.Bind(animator, component, PropertyUtils.ConstructConstraintDataPropertyName(nameof(data._avatarIKGoal)));
+            job._boneID = (int)ikSolver._boneID; 
 
             return job;
         }
@@ -135,6 +128,11 @@ namespace QuickVR
     {
 
         #region PUBLIC ATTRIBUTES
+
+        //The bone chain hierarchy
+        public Transform m_boneUpper = null;
+        public Transform m_boneMid = null;
+        public Transform m_boneLimb = null;
 
         public HumanBodyBones _boneID
         {
@@ -152,15 +150,11 @@ namespace QuickVR
         {
             get
             {
-                AvatarIKGoal ikGoal = (AvatarIKGoal)data._avatarIKGoal;
-                if (ikGoal == AvatarIKGoal.LeftHand) return _animator.GetBoneTransform(HumanBodyBones.LeftUpperArm);
-                if (ikGoal == AvatarIKGoal.RightHand) return _animator.GetBoneTransform(HumanBodyBones.RightUpperArm);
-                if (ikGoal == AvatarIKGoal.LeftFoot) return _animator.GetBoneTransform(HumanBodyBones.LeftUpperLeg);
-                return _animator.GetBoneTransform(HumanBodyBones.RightUpperLeg);
+                return m_boneUpper;
             }
             set
             {
-
+                m_boneUpper = value;
             }
         }
 
@@ -168,15 +162,11 @@ namespace QuickVR
         {
             get
             {
-                AvatarIKGoal ikGoal = (AvatarIKGoal)data._avatarIKGoal;
-                if (ikGoal == AvatarIKGoal.LeftHand) return _animator.GetBoneTransform(HumanBodyBones.LeftLowerArm);
-                if (ikGoal == AvatarIKGoal.RightHand) return _animator.GetBoneTransform(HumanBodyBones.RightLowerArm);
-                if (ikGoal == AvatarIKGoal.LeftFoot) return _animator.GetBoneTransform(HumanBodyBones.LeftLowerLeg);
-                return _animator.GetBoneTransform(HumanBodyBones.RightLowerLeg);
+                return m_boneMid;
             }
             set
             {
-
+                m_boneMid = value;
             }
         }
 
@@ -184,15 +174,11 @@ namespace QuickVR
         {
             get
             {
-                AvatarIKGoal ikGoal = (AvatarIKGoal)data._avatarIKGoal;
-                if (ikGoal == AvatarIKGoal.LeftHand) return _animator.GetBoneTransform(HumanBodyBones.LeftHand);
-                if (ikGoal == AvatarIKGoal.RightHand) return _animator.GetBoneTransform(HumanBodyBones.RightHand);
-                if (ikGoal == AvatarIKGoal.LeftFoot) return _animator.GetBoneTransform(HumanBodyBones.LeftFoot);
-                return _animator.GetBoneTransform(HumanBodyBones.RightFoot);
+                return m_boneLimb;
             }
             set
             {
-
+                m_boneLimb = value;
             }
         }
 
@@ -281,6 +267,28 @@ namespace QuickVR
         }
 
         protected HumanBodyBones m_boneID = HumanBodyBones.LastBone;
+
+        #endregion
+
+        #region GET AND SET
+
+        public static AvatarIKGoal GetAvatarIKGoal(HumanBodyBones boneID)
+        {
+            return QuickUtils.ParseEnum<AvatarIKGoal>(boneID.ToString());
+        }
+
+        public static AvatarIKHint GetAvatarIKHint(HumanBodyBones boneID)
+        {
+            return GetAvatarIKHint(GetAvatarIKGoal(boneID));
+        }
+
+        public static AvatarIKHint GetAvatarIKHint(AvatarIKGoal ikGoal)
+        {
+            if (ikGoal == AvatarIKGoal.LeftHand) return AvatarIKHint.LeftElbow;
+            if (ikGoal == AvatarIKGoal.RightHand) return AvatarIKHint.RightElbow;
+            if (ikGoal == AvatarIKGoal.LeftFoot) return AvatarIKHint.LeftKnee;
+            return AvatarIKHint.RightKnee;
+        }
 
         #endregion
 
