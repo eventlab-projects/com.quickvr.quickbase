@@ -147,7 +147,8 @@ namespace QuickVR
 
         protected virtual string GetFilePath()
         {
-            return Path.Combine(Application.dataPath, _fileName + ".xml");
+            //return Path.Combine(Application.dataPath, _fileName + ".xml");
+            return Path.Combine(QuickUtils.GetUserFolder(), _fileName + ".xml");
         }
 
         protected virtual void LoadAnimationFrames()

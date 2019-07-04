@@ -44,13 +44,67 @@ namespace QuickVR {
 
         #region PROTECTED PARAMETERS
 
-        [SerializeField, HideInInspector] protected Transform _ikTargetsRoot = null;
-        [SerializeField, HideInInspector] protected Transform _ikTargetsLeftHand = null;
-        [SerializeField, HideInInspector] protected Transform _ikTargetsRightHand = null;
+        protected Transform _ikTargetsRoot
+        {
+            get
+            {
+                if (!m_ikTargetsRoot) m_ikTargetsRoot = transform.CreateChild("__IKTargets__");
+                return m_ikTargetsRoot;
+            }
+        }
 
-        [SerializeField, HideInInspector] protected Transform _ikSolversBody = null;
-        [SerializeField, HideInInspector] protected Transform _ikSolversLeftHand = null;
-        [SerializeField, HideInInspector] protected Transform _ikSolversRightHand = null;
+        protected Transform _ikTargetsLeftHand
+        {
+            get
+            {
+                if (!m_ikTargetsLeftHand) m_ikTargetsLeftHand = transform.CreateChild("__IKTargetsLeftHand__");
+                return m_ikTargetsLeftHand;
+            }
+        }
+
+        protected Transform _ikTargetsRightHand
+        {
+            get
+            {
+                if (!m_ikTargetsRightHand) m_ikTargetsRightHand = transform.CreateChild("__IKTargetsRightHand__");
+                return m_ikTargetsRightHand;
+            }
+        }
+
+        protected Transform _ikSolversBody
+        {
+            get
+            {
+                if (!m_ikSolversBody) m_ikSolversBody = transform.CreateChild("__IKSolversBody__");
+                return m_ikSolversBody;
+            }
+        }
+
+        protected Transform _ikSolversLeftHand
+        {
+            get
+            {
+                if (!m_ikSolversLeftHand) m_ikSolversLeftHand = transform.CreateChild("__IKSolversLeftHand__");
+                return m_ikSolversLeftHand;
+            }
+        }
+
+        protected Transform _ikSolversRightHand
+        {
+            get
+            {
+                if (!m_ikSolversRightHand) m_ikSolversRightHand = transform.CreateChild("__IKSolversRightHand__");
+                return m_ikSolversRightHand;
+            }
+        }
+
+        protected Transform m_ikTargetsRoot = null;
+        protected Transform m_ikTargetsLeftHand = null;
+        protected Transform m_ikTargetsRightHand = null;
+
+        protected Transform m_ikSolversBody = null;
+        protected Transform m_ikSolversLeftHand = null;
+        protected Transform m_ikSolversRightHand = null;
 
         protected static List<IKLimbBones> _ikLimbBones = null;
         protected static List<IKLimbBonesHand> _ikLimbBonesHand = null;
@@ -70,14 +124,6 @@ namespace QuickVR {
         protected override void Reset()
         {
             base.Reset();
-
-            _ikTargetsRoot = transform.CreateChild("__IKTargets__");
-            _ikTargetsLeftHand = transform.CreateChild("__IKTargetsLeftHand__");
-            _ikTargetsRightHand = transform.CreateChild("__IKTargetsRightHand__");
-
-            _ikSolversBody = transform.CreateChild("__IKSolversBody__");
-            _ikSolversLeftHand = transform.CreateChild("__IKSolversLeftHand__");
-            _ikSolversRightHand = transform.CreateChild("__IKSolversRightHand__");
 
             CreateIKSolversBody();
             CreateIKSolversHand(HumanBodyBones.LeftHand);
@@ -176,6 +222,16 @@ namespace QuickVR {
         #endregion
 
         #region GET AND SET
+
+        public virtual QuickIKData GetInitialIKData(HumanBodyBones boneID)
+        {
+            return _initialIKPose[boneID];
+        }
+
+        public virtual QuickIKData GetInitialIKData(IKLimbBones boneID)
+        {
+            return GetInitialIKData(ToUnity(boneID));
+        }
 
         protected virtual Transform GetBoneUpper(HumanBodyBones boneLimbID)
         {
