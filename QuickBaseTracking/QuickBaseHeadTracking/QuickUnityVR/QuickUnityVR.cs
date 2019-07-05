@@ -14,6 +14,8 @@ namespace QuickVR {
         public bool _displaceWithCamera = false;
         public bool _rotateWithCamera = false;
 
+        public bool _isStanding = true;
+
         #endregion
 
         #region PROTECTED PARAMETERS
@@ -150,11 +152,14 @@ namespace QuickVR {
             float h = t.position.y - _vrNodesOrigin.position.y;
             _vrNodesOrigin.position = new Vector3(_vrNodesOrigin.position.x, t.position.y - Mathf.Min(h, GetHeadHeight()), _vrNodesOrigin.position.z);
 
-            float hipsOffsetY = Mathf.Min(0, _verticalReference.transform.position.y - _initialVerticalReferencePosY);
-            Transform tHips = _animator.GetBoneTransform(HumanBodyBones.Hips);
-            tHips.localPosition = _initialHipsLocalPosition;
-            tHips.Translate(Vector3.up * hipsOffsetY, Space.World);
-
+            if (_isStanding)
+            {
+                float hipsOffsetY = Mathf.Min(0, _verticalReference.transform.position.y - _initialVerticalReferencePosY);
+                Transform tHips = _animator.GetBoneTransform(HumanBodyBones.Hips);
+                tHips.localPosition = _initialHipsLocalPosition;
+                tHips.Translate(Vector3.up * hipsOffsetY, Space.World);
+            }
+            
             if (_rotateWithCamera) CalibrateCameraForward();
         }
 
@@ -208,7 +213,8 @@ namespace QuickVR {
                 HumanBodyBones boneLimbID = QuickIKManager.ToUnity(b);
                 HumanBodyBones boneMidID = QuickHumanTrait.GetParentBone(boneLimbID);
                 IQuickIKSolver ikSolver = _ikManager.GetIKSolver(boneLimbID);
-                if (GetQuickVRNode(boneMidID).IsTracked())
+                QuickVRNode nodeMid = GetQuickVRNode(boneMidID);
+                if (nodeMid && nodeMid.IsTracked())
                 {
                     _ikManager._ikHintMaskUpdate &= ~(1 << (int)boneLimbID);
                     //ikSolver.ResetIKChain();
