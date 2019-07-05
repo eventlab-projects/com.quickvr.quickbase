@@ -60,7 +60,10 @@ namespace QuickVR {
             if (IsBoneLimb(boneID.Value))
             {
                 //Create a child that will contain the real rotation of the bone
-                ikTarget.CreateChild("__BoneRotation__").rotation = _animator.GetBoneTransform(boneID.Value).rotation;
+                if (!ikTarget.Find("__BoneRotation__"))
+                {
+                    ikTarget.CreateChild("__BoneRotation__").rotation = _animator.GetBoneTransform(boneID.Value).rotation;
+                }
             }
             
             return ikTarget;

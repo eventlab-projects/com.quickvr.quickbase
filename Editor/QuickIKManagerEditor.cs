@@ -17,7 +17,7 @@ namespace QuickVR
         #region PROTECTED ATTRIBUTES
 
         protected QuickIKManager _ikManager = null;
-
+        
         [SerializeField] protected bool _showCfgBody = false;
         [SerializeField] protected bool _showCfgLeftHand = false;
         [SerializeField] protected bool _showCfgRightHand = false;
@@ -38,6 +38,11 @@ namespace QuickVR
             _ikManager = (QuickIKManager)target;
 
             SceneView.duringSceneGui += UpdateDebug;
+        }
+
+        protected virtual void OnDisable()
+        {
+            SceneView.duringSceneGui -= UpdateDebug;
         }
 
         #endregion
@@ -96,12 +101,13 @@ namespace QuickVR
             ikSolver._weightIKRot = EditorGUILayout.Slider(" IK Rot Weight", ikSolver._weightIKRot, 0.0f, 1.0f);
             if (ikSolver._targetHint)
             {
-                ikSolver._weightIKHint = EditorGUILayout.Slider(" IK Rot Weight", ikSolver._weightIKHint, 0.0f, 1.0f);
+                ikSolver._weightIKHint = EditorGUILayout.Slider(" IK Hint Weight", ikSolver._weightIKHint, 0.0f, 1.0f);
             }
         }
 
         protected virtual void UpdateDebug(SceneView sceneView)
         {
+            if (!_ikManager.gameObject.activeInHierarchy) return;
             //DrawIKTargets(GetIKTargetsLimb(), Handles.CubeHandleCap);
             //DrawIKTargets(GetIKTargetsMid(), Handles.SphereHandleCap);
 

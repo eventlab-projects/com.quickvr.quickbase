@@ -21,12 +21,6 @@ namespace QuickVR
         public Transform m_targetLimb = null;
         public Transform m_targetHint = null;
 
-        [Range(0.0f, 1.0f)]
-        public float m_weightIKPos = 1.0f;
-
-        [Range(0.0f, 1.0f)]
-        public float m_weightIKRot = 1.0f;
-
         public Vector3 _offsetTargetLimbPos = Vector3.zero;
 
         public HumanBodyBones _boneID
@@ -160,6 +154,12 @@ namespace QuickVR
         protected Quaternion _initialLocalRotationLimb = Quaternion.identity;
 
         protected HumanBodyBones m_boneID = HumanBodyBones.LastBone;
+
+        [SerializeField, Range(0.0f, 1.0f)]
+        protected float m_weightIKPos = 1.0f;
+
+        [SerializeField, Range(0.0f, 1.0f)]
+        protected float m_weightIKRot = 1.0f;
 
         #endregion
 
