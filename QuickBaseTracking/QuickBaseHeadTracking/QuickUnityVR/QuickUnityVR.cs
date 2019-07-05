@@ -105,28 +105,36 @@ namespace QuickVR {
 
         public override Vector3 GetDisplacement()
         {
-            QuickVRNode HipsNode = GetQuickVRNode(QuickVRNode.Type.Hips);
-            if (HipsNode.IsTracked()) return HipsNode.GetTrackedObject().GetDisplacement();
-            else if (_displaceWithCamera) return GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject().GetDisplacement();
-
+            if (_isStanding)
+            {
+                QuickVRNode HipsNode = GetQuickVRNode(QuickVRNode.Type.Hips);
+                if (HipsNode.IsTracked()) return HipsNode.GetTrackedObject().GetDisplacement();
+                else if (_displaceWithCamera) return GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject().GetDisplacement();
+            }
+            
             return Vector3.zero;
         }
 
         protected override float GetRotationOffset()
         {
-            QuickVRNode HipsNode = GetQuickVRNode(QuickVRNode.Type.Hips);
-            QuickVRNode hmdNode = GetQuickVRNode(QuickVRNode.Type.Head);
-            QuickVRNode node = null;
+            if (_isStanding)
+            {
+                QuickVRNode HipsNode = GetQuickVRNode(QuickVRNode.Type.Hips);
+                QuickVRNode hmdNode = GetQuickVRNode(QuickVRNode.Type.Head);
+                QuickVRNode node = null;
 
-            if (HipsNode.IsTracked()) node = HipsNode;
-            else if (_rotateWithCamera) node = hmdNode;
+                if (HipsNode.IsTracked()) node = HipsNode;
+                else if (_rotateWithCamera) node = hmdNode;
 
-            if (!node) return 0.0f;
+                if (!node) return 0.0f;
 
-            Vector3 currentForward = Vector3.ProjectOnPlane(_vrNodesOrigin.forward, _vrNodesOrigin.up);
-            Vector3 targetForward = Vector3.ProjectOnPlane(node.transform.forward, _vrNodesOrigin.up);
+                Vector3 currentForward = Vector3.ProjectOnPlane(_vrNodesOrigin.forward, _vrNodesOrigin.up);
+                Vector3 targetForward = Vector3.ProjectOnPlane(node.transform.forward, _vrNodesOrigin.up);
 
-            return Vector3.SignedAngle(currentForward, targetForward, _vrNodesOrigin.up);
+                return Vector3.SignedAngle(currentForward, targetForward, _vrNodesOrigin.up);
+            }
+
+            return 0.0f;
         }
 
         public override Vector3 GetEyeCenterPosition()
@@ -182,7 +190,6 @@ namespace QuickVR {
             QuickVRNode node = GetQuickVRNode(nType);
             HumanBodyBones boneID = QuickUtils.ParseEnum<HumanBodyBones>(nType.ToString());
             QuickTrackedObject tObject = node.GetTrackedObject();
-            Vector3 posOffset = tObject.transform.position - _vrNodesOrigin.position;
 
             IQuickIKSolver ikSolver = _ikManager.GetIKSolver(boneID);
             if (ikSolver == null) return;
@@ -195,14 +202,42 @@ namespace QuickVR {
             else if (QuickIKManager.IsBoneMid(boneID))
             {
                 t = ikSolver._targetHint;
-                posOffset += node.transform.forward * 0.25f;
             }
 
             if (!t) return;
 
-            t.position = transform.position + ToAvatarSpace(posOffset);
-            t.rotation = ToAvatarSpace(tObject.transform.rotation);
+            t.position += tObject.GetDisplacement();
+            //t.rotation = ToAvatarSpace(tObject.transform.rotation);
         }
+
+        //protected virtual void UpdateTransformNode(QuickVRNode.Type nType)
+        //{
+        //    if (!IsNodeTracked(nType)) return;
+
+        //    QuickVRNode node = GetQuickVRNode(nType);
+        //    HumanBodyBones boneID = QuickUtils.ParseEnum<HumanBodyBones>(nType.ToString());
+        //    QuickTrackedObject tObject = node.GetTrackedObject();
+        //    Vector3 posOffset = tObject.transform.position - _vrNodesOrigin.position;
+
+        //    IQuickIKSolver ikSolver = _ikManager.GetIKSolver(boneID);
+        //    if (ikSolver == null) return;
+
+        //    Transform t = null;
+        //    if (QuickIKManager.IsBoneLimb(boneID))
+        //    {
+        //        t = ikSolver._targetLimb;
+        //    }
+        //    else if (QuickIKManager.IsBoneMid(boneID))
+        //    {
+        //        t = ikSolver._targetHint;
+        //        posOffset += node.transform.forward * 0.25f;
+        //    }
+
+        //    if (!t) return;
+
+        //    t.position = transform.position + ToAvatarSpace(posOffset);
+        //    t.rotation = ToAvatarSpace(tObject.transform.rotation);
+        //}
 
         protected virtual void UpdateTrackingIK()
         {
