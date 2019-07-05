@@ -66,9 +66,21 @@ namespace QuickVR {
             base.CreateVRHands();
         }
 
-#endregion
+        protected override QuickVRNode CreateVRNode(QuickVRNode.Type n)
+        {
+            _vrNodesOrigin.CreateChild("_CalibrationPose_" + n.ToString());
 
-#region GET AND SET
+            return base.CreateVRNode(n);
+        }
+
+        #endregion
+
+        #region GET AND SET
+
+        protected Transform GetCalibrationPose(QuickVRNode.Type tNode)
+        {
+            return _vrNodesOrigin.Find("_CalibrationPose_" + tNode.ToString());
+        }
 
         protected virtual float GetHeadHeight()
         {
@@ -86,6 +98,17 @@ namespace QuickVR {
             QuickVRNode nodeHips = GetQuickVRNode(QuickVRNode.Type.Hips);
             _verticalReference = nodeHips.IsTracked() ? nodeHips.GetTrackedObject() : GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject();
             _initialVerticalReferencePosY = _verticalReference.transform.position.y;
+        }
+
+        protected override void CalibrateVRNode(QuickVRNode.Type nodeType)
+        {
+            base.CalibrateVRNode(nodeType);
+
+            QuickTrackedObject tObject = GetQuickVRNode(nodeType).GetTrackedObject();
+            Transform cPose = GetCalibrationPose(nodeType);
+            cPose.position = tObject.transform.position;
+            cPose.rotation = tObject.transform.rotation;
+            tObject.Reset();
         }
 
         protected override void CalibrateVRNodeHead(QuickVRNode node)
@@ -148,9 +171,9 @@ namespace QuickVR {
             return GetAvatarHead().position;
         }
 
-#endregion
+        #endregion
 
-#region UPDATE
+        #region UPDATE
 
         protected override void UpdateTransformRoot()
         {
@@ -194,20 +217,39 @@ namespace QuickVR {
             IQuickIKSolver ikSolver = _ikManager.GetIKSolver(boneID);
             if (ikSolver == null) return;
 
+            QuickIKData initialIKData = _ikManager.GetInitialIKData(boneID);
             Transform t = null;
+            Vector3 initialLocalPos = Vector3.zero;
+            Quaternion initialLocalRot = Quaternion.identity;
             if (QuickIKManager.IsBoneLimb(boneID))
             {
                 t = ikSolver._targetLimb;
+                initialLocalPos = initialIKData._targetLimbLocalPosition;
+                initialLocalRot = initialIKData._targetLimbLocalRotation;
             }
             else if (QuickIKManager.IsBoneMid(boneID))
             {
                 t = ikSolver._targetHint;
+                initialLocalPos = initialIKData._targetHintLocalPosition;
             }
 
             if (!t) return;
 
-            t.position += tObject.GetDisplacement();
-            //t.rotation = ToAvatarSpace(tObject.transform.rotation);
+            Transform calibrationPose = GetCalibrationPose(nType);
+            if (!calibrationPose) return;
+
+            Quaternion tmp = transform.rotation;
+            transform.rotation = _vrNodesOrigin.rotation;
+
+            t.localPosition = initialLocalPos;
+            t.localRotation = initialLocalRot;
+
+            Vector3 offset = tObject.transform.position - calibrationPose.position;
+            t.position += offset;
+
+            Quaternion rotOffset = tObject.transform.rotation * Quaternion.Inverse(calibrationPose.rotation);
+            t.rotation = rotOffset * t.rotation;
+            transform.rotation = tmp;
         }
 
         //protected virtual void UpdateTransformNode(QuickVRNode.Type nType)
@@ -287,7 +329,35 @@ namespace QuickVR {
             _ikManager.UpdateTracking();
         }
 
-#endregion
+        #endregion
+
+        #region DEBUG
+
+        protected override void OnDrawGizmos()
+        {
+            base.OnDrawGizmos();
+
+            if (Application.isPlaying)
+            {
+                DebugVRNodeCalibrationPose(QuickVRNode.Type.Head, Color.grey);
+                DebugVRNodeCalibrationPose(QuickVRNode.Type.LeftHand, Color.blue);
+                DebugVRNodeCalibrationPose(QuickVRNode.Type.LeftFoot, Color.cyan);
+                DebugVRNodeCalibrationPose(QuickVRNode.Type.RightHand, Color.red);
+                DebugVRNodeCalibrationPose(QuickVRNode.Type.RightFoot, Color.magenta);
+                DebugVRNodeCalibrationPose(QuickVRNode.Type.Hips, Color.black);
+            }
+        }
+
+        protected virtual void DebugVRNodeCalibrationPose(QuickVRNode.Type nType, Color color, float scale = 0.05f)
+        {
+            Transform t = GetCalibrationPose(nType);
+            QuickVRNode qNode = GetQuickVRNode(nType);
+
+            Gizmos.color = color;
+            Gizmos.DrawWireSphere(t.position, scale * 0.5f);
+        }
+
+        #endregion
 
     }
 
