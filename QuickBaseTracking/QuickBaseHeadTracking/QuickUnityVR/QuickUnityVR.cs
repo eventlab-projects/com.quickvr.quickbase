@@ -215,7 +215,7 @@ namespace QuickVR {
                 IQuickIKSolver ikSolver = _ikManager.GetIKSolver(boneID);
                 if (ikSolver == null) continue;
 
-                if (_updateMode == UpdateMode.FromUser) UpdateTransformNodeFromUser(node, ikSolver, boneID);
+                if (_updateMode == UpdateMode.FromUser || t == QuickVRNode.Type.Head) UpdateTransformNodeFromUser(node, ikSolver, boneID);
                 else UpdateTransformNodeFromCalibrationPose(node, ikSolver, boneID);
             }
 
