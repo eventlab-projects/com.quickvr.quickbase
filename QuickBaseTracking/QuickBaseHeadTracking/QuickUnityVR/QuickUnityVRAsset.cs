@@ -19,5 +19,6 @@ public class QuickUnityVRAsset : ScriptableObject
     public System.Boolean _displaceWithCamera;
     public System.Boolean _rotateWithCamera;
     public System.Boolean _isStanding;
+    public QuickVR.QuickUnityVR.UpdateMode _updateMode;
  
 }

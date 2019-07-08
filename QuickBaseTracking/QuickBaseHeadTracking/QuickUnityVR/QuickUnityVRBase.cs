@@ -404,7 +404,7 @@ namespace QuickVR
         //    QuickVRNode nodeHead = GetQuickVRNode(QuickVRNode.Type.Head);
         //    Vector3 n = Vector3.ProjectOnPlane(nodeHead.transform.forward, transform.up);
         //    Vector3 p = nodeHead.transform.position;
-            
+
         //    int HipsIndex = 0;
         //    float dMin = Mathf.Infinity;
         //    for (int i = 0; i < extraTrackers.Count; i++)
@@ -421,18 +421,43 @@ namespace QuickVR
         //    return HipsIndex;
         //}
 
+        //protected int GetHipsIndex(List<QuickExtraTracker> extraTrackers)
+        //{
+        //    QuickVRNode nodeHead = GetQuickVRNode(QuickVRNode.Type.Head);
+        //    Vector3 n = Vector3.ProjectOnPlane(nodeHead.transform.forward, Vector3.up).normalized;
+        //    Vector3 p = nodeHead.transform.position;
+
+        //    int HipsIndex = 0;
+        //    float aMin = Mathf.Infinity;
+        //    Debug.Log("==============================================");
+        //    for (int i = 0; i < extraTrackers.Count; i++)
+        //    {
+        //        Vector3 v = Vector3.ProjectOnPlane((extraTrackers[i].Value - p).normalized, Vector3.up);
+        //        float a = Vector3.Angle(n, v);
+        //        Debug.Log("i = " + i);
+        //        Debug.Log("a = " + a.ToString("f3"));
+        //        Debug.Log("pos = " + extraTrackers[i].Value.ToString("f3"));
+        //        if (a < aMin)
+        //        {
+        //            aMin = a;
+        //            HipsIndex = i;
+        //        }
+        //    }
+
+        //    return HipsIndex;
+        //}
+
         protected int GetHipsIndex(List<QuickExtraTracker> extraTrackers)
         {
             QuickVRNode nodeHead = GetQuickVRNode(QuickVRNode.Type.Head);
-            Vector3 n = Vector3.ProjectOnPlane(nodeHead.transform.forward, Vector3.up);
             Vector3 p = nodeHead.transform.position;
 
             int HipsIndex = 0;
             float aMin = Mathf.Infinity;
             for (int i = 0; i < extraTrackers.Count; i++)
             {
-                Vector3 v = extraTrackers[i].Value - p;
-                float a = Vector3.Angle(n, v);
+                Vector3 v = p - extraTrackers[i].Value;
+                float a = Vector3.Angle(Vector3.up, v);
                 if (a < aMin)
                 {
                     aMin = a;
