@@ -16,6 +16,13 @@ namespace QuickVR {
 
         public bool _isStanding = true;
 
+        public enum UpdateMode
+        {
+            FromUser,
+            FromCalibrationPose,
+        }
+        public UpdateMode _updateMode = UpdateMode.FromUser;
+
         #endregion
 
         #region PROTECTED PARAMETERS
@@ -200,23 +207,43 @@ namespace QuickVR {
 
             foreach (QuickVRNode.Type t in QuickVRNode.GetTypeList())
             {
-                UpdateTransformNode(t);
+                if (!IsNodeTracked(t)) continue;
+                QuickVRNode node = GetQuickVRNode(t);
+                HumanBodyBones boneID = QuickUtils.ParseEnum<HumanBodyBones>(t.ToString());
+                QuickTrackedObject tObject = node.GetTrackedObject();
+
+                IQuickIKSolver ikSolver = _ikManager.GetIKSolver(boneID);
+                if (ikSolver == null) continue;
+
+                if (_updateMode == UpdateMode.FromUser) UpdateTransformNodeFromUser(node, ikSolver, boneID);
+                else UpdateTransformNodeFromCalibrationPose(node, ikSolver, boneID);
             }
 
             UpdateTrackingIK();
         }
 
-        protected virtual void UpdateTransformNode(QuickVRNode.Type nType)
+        protected virtual void UpdateTransformNodeFromUser(QuickVRNode node, IQuickIKSolver ikSolver, HumanBodyBones boneID)
         {
-            if (!IsNodeTracked(nType)) return;
+            Transform t = null;
+            Vector3 posOffset = node.GetTrackedObject().transform.position - _vrNodesOrigin.position;
+            if (QuickIKManager.IsBoneLimb(boneID))
+            {
+                t = ikSolver._targetLimb;
+            }
+            else if (QuickIKManager.IsBoneMid(boneID))
+            {
+                t = ikSolver._targetHint;
+                posOffset += node.transform.forward * 0.25f;
+            }
 
-            QuickVRNode node = GetQuickVRNode(nType);
-            HumanBodyBones boneID = QuickUtils.ParseEnum<HumanBodyBones>(nType.ToString());
-            QuickTrackedObject tObject = node.GetTrackedObject();
+            if (!t) return;
 
-            IQuickIKSolver ikSolver = _ikManager.GetIKSolver(boneID);
-            if (ikSolver == null) return;
+            t.position = transform.position + ToAvatarSpace(posOffset);
+            t.rotation = ToAvatarSpace(node.GetTrackedObject().transform.rotation);
+        }
 
+        protected virtual void UpdateTransformNodeFromCalibrationPose(QuickVRNode node, IQuickIKSolver ikSolver, HumanBodyBones boneID)
+        {
             QuickIKData initialIKData = _ikManager.GetInitialIKData(boneID);
             Transform t = null;
             Vector3 initialLocalPos = Vector3.zero;
@@ -235,7 +262,7 @@ namespace QuickVR {
 
             if (!t) return;
 
-            Transform calibrationPose = GetCalibrationPose(nType);
+            Transform calibrationPose = GetCalibrationPose(node.GetNodeType());
             if (!calibrationPose) return;
 
             Quaternion tmp = transform.rotation;
@@ -244,42 +271,13 @@ namespace QuickVR {
             t.localPosition = initialLocalPos;
             t.localRotation = initialLocalRot;
 
-            Vector3 offset = tObject.transform.position - calibrationPose.position;
+            Vector3 offset = node.GetTrackedObject().transform.position - calibrationPose.position;
             t.position += offset;
 
-            Quaternion rotOffset = tObject.transform.rotation * Quaternion.Inverse(calibrationPose.rotation);
+            Quaternion rotOffset = node.GetTrackedObject().transform.rotation * Quaternion.Inverse(calibrationPose.rotation);
             t.rotation = rotOffset * t.rotation;
             transform.rotation = tmp;
         }
-
-        //protected virtual void UpdateTransformNode(QuickVRNode.Type nType)
-        //{
-        //    if (!IsNodeTracked(nType)) return;
-
-        //    QuickVRNode node = GetQuickVRNode(nType);
-        //    HumanBodyBones boneID = QuickUtils.ParseEnum<HumanBodyBones>(nType.ToString());
-        //    QuickTrackedObject tObject = node.GetTrackedObject();
-        //    Vector3 posOffset = tObject.transform.position - _vrNodesOrigin.position;
-
-        //    IQuickIKSolver ikSolver = _ikManager.GetIKSolver(boneID);
-        //    if (ikSolver == null) return;
-
-        //    Transform t = null;
-        //    if (QuickIKManager.IsBoneLimb(boneID))
-        //    {
-        //        t = ikSolver._targetLimb;
-        //    }
-        //    else if (QuickIKManager.IsBoneMid(boneID))
-        //    {
-        //        t = ikSolver._targetHint;
-        //        posOffset += node.transform.forward * 0.25f;
-        //    }
-
-        //    if (!t) return;
-
-        //    t.position = transform.position + ToAvatarSpace(posOffset);
-        //    t.rotation = ToAvatarSpace(tObject.transform.rotation);
-        //}
 
         protected virtual void UpdateTrackingIK()
         {
