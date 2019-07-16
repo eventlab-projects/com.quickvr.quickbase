@@ -11,6 +11,7 @@ namespace QuickVR {
     
     public enum IKLimbBones
     {
+        Hips,
         Head,
         LeftHand,
         RightHand,
@@ -268,7 +269,7 @@ namespace QuickVR {
             base.Calibrate();
         }
 
-        protected virtual void ResetIKSolver(HumanBodyBones boneID)
+        public virtual void ResetIKSolver(HumanBodyBones boneID)
         {
             IQuickIKSolver ikSolver = GetIKSolver(boneID);
             QuickIKData initialIKData = _initialIKPose[ikSolver._boneID];

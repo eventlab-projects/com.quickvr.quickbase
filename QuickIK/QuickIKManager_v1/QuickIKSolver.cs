@@ -23,7 +23,7 @@ namespace QuickVR
 
         public Vector3 _offsetTargetLimbPos = Vector3.zero;
 
-        public HumanBodyBones _boneID
+        public virtual HumanBodyBones _boneID
         {
             get
             {
@@ -35,7 +35,7 @@ namespace QuickVR
             }
         }
 
-        public Transform _boneUpper
+        public virtual Transform _boneUpper
         {
             get
             {
@@ -47,7 +47,7 @@ namespace QuickVR
             }
         }
 
-        public Transform _boneMid
+        public virtual Transform _boneMid
         {
             get
             {
@@ -59,7 +59,7 @@ namespace QuickVR
             }
         }
 
-        public Transform _boneLimb
+        public virtual Transform _boneLimb
         {
             get
             {
@@ -71,7 +71,7 @@ namespace QuickVR
             }
         }
 
-        public Transform _targetLimb
+        public virtual Transform _targetLimb
         {
             get
             {
@@ -83,7 +83,7 @@ namespace QuickVR
             }
         }
 
-        public Transform _targetHint
+        public virtual Transform _targetHint
         {
             get
             {
@@ -95,7 +95,7 @@ namespace QuickVR
             }
         }
 
-        public float _weight
+        public virtual float _weight
         {
             get
             {
@@ -107,7 +107,7 @@ namespace QuickVR
             }
         }
 
-        public float _weightIKPos
+        public virtual float _weightIKPos
         {
             get
             {
@@ -119,7 +119,7 @@ namespace QuickVR
             }
         }
 
-        public float _weightIKRot
+        public virtual float _weightIKRot
         {
             get
             {
@@ -131,7 +131,7 @@ namespace QuickVR
             }
         }
 
-        public float _weightIKHint
+        public virtual float _weightIKHint
         {
             get
             {

@@ -12,7 +12,7 @@ public class QuickUnityVRAsset : ScriptableObject
     public UnityEngine.Camera _pfCamera;
     public System.Single _cameraNearPlane;
     public System.Single _cameraFarPlane;
-    [BitMask(typeof(QuickVR.IKLimbBones), 0, 4)]
+    [BitMask(typeof(QuickVR.IKLimbBones), 0, 5)]
     public System.Int32 _trackedJoints;
     public System.Boolean _useFootprints;
     public UnityEngine.Transform _footprints;

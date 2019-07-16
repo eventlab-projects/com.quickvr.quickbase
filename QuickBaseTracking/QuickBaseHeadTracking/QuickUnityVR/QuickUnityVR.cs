@@ -30,7 +30,6 @@ namespace QuickVR {
         [SerializeField, HideInInspector]
         protected QuickIKManager _ikManager = null;
 
-        protected Vector3 _initialHipsLocalPosition = Vector3.zero;
         protected QuickTrackedObject _verticalReference = null;
         protected float _initialVerticalReferencePosY = 0.0f;
 
@@ -44,7 +43,6 @@ namespace QuickVR {
         {
             base.Awake();
 
-            _initialHipsLocalPosition = _animator.GetBoneTransform(HumanBodyBones.Hips).localPosition;
             _unscaledHeadHeight = (_animator.GetBoneTransform(HumanBodyBones.Head).position.y - transform.position.y);
             
             //Create the IKManager
@@ -96,8 +94,6 @@ namespace QuickVR {
 
         public override void Calibrate()
         {
-            _animator.GetBoneTransform(HumanBodyBones.Hips).localPosition = _initialHipsLocalPosition;
-
             _ikManager.Calibrate();
 
             base.Calibrate();
@@ -193,9 +189,9 @@ namespace QuickVR {
             if (_isStanding)
             {
                 float hipsOffsetY = Mathf.Min(0, _verticalReference.transform.position.y - _initialVerticalReferencePosY);
-                Transform tHips = _animator.GetBoneTransform(HumanBodyBones.Hips);
-                tHips.localPosition = _initialHipsLocalPosition;
-                tHips.Translate(Vector3.up * hipsOffsetY, Space.World);
+                _ikManager.ResetIKSolver(HumanBodyBones.Hips);
+                IQuickIKSolver ikSolver = _ikManager.GetIKSolver(HumanBodyBones.Hips); 
+                ikSolver._targetLimb.Translate(Vector3.up * hipsOffsetY, Space.World);
             }
             
             if (_rotateWithCamera) CalibrateCameraForward();

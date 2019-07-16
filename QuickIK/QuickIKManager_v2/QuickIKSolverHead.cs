@@ -145,7 +145,7 @@ namespace QuickVR
         {
             get
             {
-                return _animator.GetBoneTransform(HumanBodyBones.Hips);
+                return _animator.GetBoneTransform(HumanBodyBones.Head);
             }
             set
             {

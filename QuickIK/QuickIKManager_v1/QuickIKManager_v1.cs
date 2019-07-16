@@ -28,6 +28,7 @@ namespace QuickVR {
 
         protected override void CreateIKSolversBody()
         {
+            CreateIKSolver<QuickIKSolverHips_v1>(HumanBodyBones.Hips);
             foreach (IKLimbBones boneID in GetIKLimbBones())
             {
                 HumanBodyBones uBone = ToUnity(boneID);
@@ -78,7 +79,7 @@ namespace QuickVR {
             return ((_ikMaskBody & (1 << (int)boneID)) != 0);
         }
 
-        protected override void ResetIKSolver(HumanBodyBones boneID)
+        public override void ResetIKSolver(HumanBodyBones boneID)
         {
             QuickIKSolver ikSolver = (QuickIKSolver)GetIKSolver(boneID);
             if ((_ikMaskBody & (1 << (int)boneID)) != 0)
