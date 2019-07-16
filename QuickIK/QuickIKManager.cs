@@ -38,6 +38,12 @@ namespace QuickVR {
         [BitMask(typeof(IKLimbBones))]
         public int _ikMaskBody = -1;
 
+        [BitMask(typeof(IKLimbBonesHand))]
+        public int _ikMaskLeftHand = -1;
+
+        [BitMask(typeof(IKLimbBonesHand))]
+        public int _ikMaskRightHand = -1;
+
         [BitMask(typeof(IKLimbBones))]
         public int _ikHintMaskUpdate = -1;
 
@@ -328,6 +334,11 @@ namespace QuickVR {
             return QuickUtils.ParseEnum<HumanBodyBones>(boneID.ToString());
         }
 
+        public static HumanBodyBones ToUnity(IKLimbBonesHand boneID, bool isLeft)
+        {
+            return QuickUtils.ParseEnum<HumanBodyBones>((isLeft ? "Left" : "Right") + boneID.ToString() + "Distal");
+        }
+
         //public virtual void ResetIKChains()
         //{
         //    QuickIKSolver ikSolver = null;
@@ -451,6 +462,11 @@ namespace QuickVR {
         #endregion
 
 		#region UPDATE
+
+        public virtual void Update()
+        {
+
+        }
 
         public override void UpdateTracking() {
             

@@ -107,9 +107,12 @@ namespace QuickVR {
 
 		#region UPDATE
 
-        protected virtual void Update()
+        public override void Update()
         {
-            
+            foreach (QuickIKSolver ikSolver in GetIKSolvers())
+            {
+                ikSolver.ResetIKChain();
+            }
         }
 
         public override void UpdateTracking() {
@@ -154,14 +157,16 @@ namespace QuickVR {
             _ikTargetsRightHand.position = rightHand.position;
             _ikTargetsRightHand.rotation = rightHand.rotation;
 
-            foreach (IQuickIKSolver ikSolver in GetIKSolversLeftHand())
+            foreach (IKLimbBonesHand boneID in GetIKLimbBonesHand())
             {
-                ((QuickIKSolver)ikSolver).UpdateIK();
+                QuickIKSolver ikSolver = (QuickIKSolver)GetIKSolver(ToUnity(boneID, true));
+                if ((_ikMaskLeftHand & (1 << (int)boneID)) != 0) ikSolver.UpdateIK();
             }
 
-            foreach (IQuickIKSolver ikSolver in GetIKSolversRightHand())
+            foreach (IKLimbBonesHand boneID in GetIKLimbBonesHand())
             {
-                ((QuickIKSolver)ikSolver).UpdateIK();
+                QuickIKSolver ikSolver = (QuickIKSolver)GetIKSolver(ToUnity(boneID, false));
+                if ((_ikMaskRightHand & (1 << (int)boneID)) != 0) ikSolver.UpdateIK();
             }
 
             base.UpdateTracking();

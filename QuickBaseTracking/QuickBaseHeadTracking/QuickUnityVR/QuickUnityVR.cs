@@ -178,6 +178,11 @@ namespace QuickVR {
 
         #region UPDATE
 
+        public virtual void Update()
+        {
+            _ikManager.Update();
+        }
+
         protected override void UpdateTransformRoot()
         {
             base.UpdateTransformRoot();

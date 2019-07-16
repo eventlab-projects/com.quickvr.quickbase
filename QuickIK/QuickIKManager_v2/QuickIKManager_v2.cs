@@ -15,16 +15,6 @@ namespace QuickVR {
     public class QuickIKManager_v2 : QuickIKManager 
     {
 
-        #region PUBLIC PARAMETERS
-
-        [BitMask(typeof(IKLimbBonesHand))]
-        public int _ikMaskLeftHand = -1;
-
-        [BitMask(typeof(IKLimbBonesHand))]
-        public int _ikMaskRightHand = -1;
-
-        #endregion
-
         #region PROTECTED PARAMETERS
 
         protected PlayableGraph? _initialPoseGraph = null;
