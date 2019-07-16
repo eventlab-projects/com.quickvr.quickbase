@@ -493,14 +493,8 @@ namespace QuickVR {
         protected virtual void UpdateHintTargetKnee(HumanBodyBones boneLimbID)
         {
             IQuickIKSolver ikSolver = GetIKSolver(boneLimbID);
-            Vector3 u = (ikSolver._boneMid.position - ikSolver._boneUpper.position).normalized;
-            Vector3 v = (ikSolver._boneMid.position - ikSolver._boneLimb.position).normalized;
-            if (Vector3.Angle(u, v) < 170.0f)
-            {
-                Vector3 n = ((u + v) * 0.5f).normalized;
-                ikSolver._targetHint.position = ikSolver._boneMid.position + n * DEFAULT_TARGET_HINT_DISTANCE;
-                //ikSolver._targetHint.position = ikSolver._boneMid.position + ikSolver._targetLimb.forward * DEFAULT_TARGET_HINT_DISTANCE;
-            }
+            Vector3 n = Vector3.ProjectOnPlane(ikSolver._targetLimb.forward, transform.up).normalized;
+            ikSolver._targetHint.position = ikSolver._boneMid.position + n * DEFAULT_TARGET_HINT_DISTANCE;
         }
 
         #endregion
