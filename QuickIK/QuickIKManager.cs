@@ -387,6 +387,11 @@ namespace QuickVR {
             return new List<IQuickIKSolver>(_ikSolversBody.GetComponentsInChildren<IQuickIKSolver>());
         }
 
+        public virtual List<IQuickIKSolver> GetIKSolversHand(HumanBodyBones handBoneID)
+        {
+            return handBoneID == HumanBodyBones.LeftHand ? GetIKSolversLeftHand() : GetIKSolversRightHand();
+        }
+
         public virtual List<IQuickIKSolver> GetIKSolversLeftHand()
         {
             return new List<IQuickIKSolver>(_ikSolversLeftHand.GetComponentsInChildren<IQuickIKSolver>());
@@ -425,7 +430,7 @@ namespace QuickVR {
             return false;
         }
 
-        [ButtonMethod]
+        //[ButtonMethod]
         public virtual void ResetIKTargets()
         {
             foreach (IKLimbBones boneID in GetIKLimbBones())
@@ -459,9 +464,47 @@ namespace QuickVR {
             }
         }
 
+        [ButtonMethod]
+        public virtual void CopyLeftHandPoseToRightHand()
+        {
+            CopyHandPose(HumanBodyBones.LeftHand, HumanBodyBones.RightHand);
+        }
+
+        [ButtonMethod]
+        public virtual void CopyRightHandPoseToLeftHand()
+        {
+            CopyHandPose(HumanBodyBones.RightHand, HumanBodyBones.LeftHand);
+        }
+
+        protected virtual void CopyHandPose(HumanBodyBones srcHandBoneID, HumanBodyBones dstHandBoneID)
+        {
+            //Copy the hand pose
+            MirrorPose(GetIKSolver(srcHandBoneID), GetIKSolver(dstHandBoneID));
+            
+            //Copy the fingers pose
+            List<IQuickIKSolver> srcHandIKSolvers = GetIKSolversHand(srcHandBoneID);
+            List<IQuickIKSolver> dstHandIKSolvers = GetIKSolversHand(dstHandBoneID);
+            for (int i = 0; i < srcHandIKSolvers.Count; i++)
+            {
+                MirrorPose(srcHandIKSolvers[i], dstHandIKSolvers[i]);
+            }
+        }
+
+        protected virtual void MirrorPose(IQuickIKSolver srcIKSolver, IQuickIKSolver dstIKSolver)
+        {
+            Vector3 srcPos = srcIKSolver._targetLimb.localPosition;
+            Quaternion srcRot = srcIKSolver._targetLimb.localRotation;
+            dstIKSolver._targetLimb.localPosition = Vector3.Scale(new Vector3(-1, 1, 1), srcPos);
+            dstIKSolver._targetLimb.localRotation = new Quaternion(srcRot.x, -srcRot.y, -srcRot.z, srcRot.w);
+            if (dstIKSolver._targetHint && srcIKSolver._targetHint)
+            {
+                dstIKSolver._targetHint.localPosition = Vector3.Scale(new Vector3(-1, 1, 1), srcIKSolver._targetHint.localPosition);
+            }
+        }
+
         #endregion
 
-		#region UPDATE
+        #region UPDATE
 
         public virtual void Update()
         {

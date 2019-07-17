@@ -6,7 +6,6 @@ using System;
 
 namespace QuickVR {
 
-    [Configurable("QuickHeadTracking")]
 	public abstract class QuickHeadTracking : QuickBaseTrackingManager {
 
 		#region PUBLIC PARAMETERS

@@ -11,7 +11,7 @@ namespace QuickVR
 
     [CustomEditor(typeof(QuickIKManager), true)]
     [InitializeOnLoad]
-    public class QuickIKManagerEditor : Editor
+    public class QuickIKManagerEditor : QuickBaseEditor
     {
 
         #region PROTECTED ATTRIBUTES
@@ -49,9 +49,9 @@ namespace QuickVR
 
         #region UPDATE
 
-        public override void OnInspectorGUI()
+        protected override void DrawGUI()
         {
-            DrawDefaultInspector();
+            base.DrawGUI();
 
             EditorGUILayout.Space();
             _showCfgBody = EditorGUILayout.Foldout(_showCfgBody, "Body IK Solvers");
