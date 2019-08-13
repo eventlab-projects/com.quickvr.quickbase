@@ -118,8 +118,8 @@ namespace QuickVR {
             {
                 HumanBodyBones boneLimb = QuickUtils.ParseEnum<HumanBodyBones>(prefix + b.ToString() + "Distal");
                 QuickIKSolverTwoBone ikSolver = CreateIKSolver<QuickIKSolverTwoBone>(boneLimb);
-                ikSolver.data.maintainTargetPositionOffset = true;
-                ikSolver.data.maintainTargetRotationOffset = true;
+                ikSolver.data.maintainTargetPositionOffset = false;
+                ikSolver.data.maintainTargetRotationOffset = false;
             }
         }
 

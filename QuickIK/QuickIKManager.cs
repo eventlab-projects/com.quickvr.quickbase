@@ -205,14 +205,21 @@ namespace QuickVR {
                 }
 
                 //Set the rotation of the IKTarget
-                ikTarget.rotation = transform.rotation;
-                if (boneID.Value == HumanBodyBones.LeftHand)
+                if (boneName.Contains("Distal"))
                 {
-                    ikTarget.LookAt(bone.position - transform.right, transform.up);
+                    ikTarget.rotation = bone.rotation;
                 }
-                else if (boneID.Value == HumanBodyBones.RightHand)
+                else
                 {
-                    ikTarget.LookAt(bone.position + transform.right, transform.up);
+                    ikTarget.rotation = transform.rotation;
+                    if (boneID.Value == HumanBodyBones.LeftHand)
+                    {
+                        ikTarget.LookAt(bone.position - transform.right, transform.up);
+                    }
+                    else if (boneID.Value == HumanBodyBones.RightHand)
+                    {
+                        ikTarget.LookAt(bone.position + transform.right, transform.up);
+                    }
                 }
             }
 
