@@ -138,7 +138,24 @@ namespace QuickVR {
         }
 
         protected abstract void CreateIKSolversBody();
-        protected virtual void CreateIKSolversHand(HumanBodyBones boneHandID) { }
+
+        protected virtual void CreateIKSolversHand(HumanBodyBones boneHandID)
+        {
+            Transform ikSolversRoot = boneHandID == HumanBodyBones.LeftHand ? _ikSolversLeftHand : _ikSolversRightHand;
+            Transform tBone = _animator.GetBoneTransform(boneHandID);
+
+            Transform ikTargetsRoot = boneHandID == HumanBodyBones.LeftHand ? _ikTargetsLeftHand : _ikTargetsRightHand;
+            ikTargetsRoot.position = tBone.position;
+            ikTargetsRoot.rotation = tBone.rotation;
+
+            string prefix = boneHandID.ToString().Contains("Left") ? "Left" : "Right";
+            foreach (IKLimbBonesHand b in GetIKLimbBonesHand())
+            {
+                HumanBodyBones boneLimb = QuickUtils.ParseEnum<HumanBodyBones>(prefix + b.ToString() + "Distal");
+                IQuickIKSolver ikSolver = CreateIKSolver<QuickIKSolver>(boneLimb);
+                ikSolver._targetHint = CreateIKTarget(QuickHumanTrait.GetParentBone(boneLimb));
+            }
+        }
 
         protected virtual T CreateIKSolver<T>(HumanBodyBones boneLimb) where T : MonoBehaviour, IQuickIKSolver
         {
@@ -531,8 +548,30 @@ namespace QuickVR {
 
         }
 
-        public override void UpdateTracking() {
-            
+        public override void UpdateTracking()
+        {
+
+            //Update the IK for the fingers
+            Transform leftHand = _animator.GetBoneTransform(HumanBodyBones.LeftHand);
+            _ikTargetsLeftHand.position = leftHand.position;
+            _ikTargetsLeftHand.rotation = leftHand.rotation;
+
+            Transform rightHand = _animator.GetBoneTransform(HumanBodyBones.RightHand);
+            _ikTargetsRightHand.position = rightHand.position;
+            _ikTargetsRightHand.rotation = rightHand.rotation;
+
+            foreach (IKLimbBonesHand boneID in GetIKLimbBonesHand())
+            {
+                QuickIKSolver ikSolver = GetIKSolver<QuickIKSolver>(ToUnity(boneID, true));
+                if ((_ikMaskLeftHand & (1 << (int)boneID)) != 0) ikSolver.UpdateIK();
+            }
+
+            foreach (IKLimbBonesHand boneID in GetIKLimbBonesHand())
+            {
+                QuickIKSolver ikSolver = GetIKSolver<QuickIKSolver>(ToUnity(boneID, false));
+                if ((_ikMaskRightHand & (1 << (int)boneID)) != 0) ikSolver.UpdateIK();
+            }
+
             //Update the position of the hint targets
             if ((_ikHintMaskUpdate & (1 << (int)IKLimbBones.LeftHand)) > 0)
             {
