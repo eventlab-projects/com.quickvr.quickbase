@@ -1,0 +1,114 @@
+{
+    "thumbnail" : "touch_controller_thumbnail.png",
+    "components": {
+        "trigger": {
+            "filename": "oculus_cv1_controller_right_trigger.obj",
+            "motion":{
+                "type":"rotate",
+                "controller_axis":1,
+                "controller_axis_component":0,
+		"trigger_path" : "/input/trigger",
+                "value_mapping": [0.0,-17.0],
+                "pivot": [0.0000, -0.02622, 0.03769],
+                "axis": [1.0, 0.0, 0.0]
+            },
+            "component_local" : {
+                "origin": [-0.00391,-0.04554,0.05172],
+                "rotate_xyz" : [-39.4,0.0,0.0]
+            }
+        },
+        "thumbstick": {
+            "filename": "oculus_cv1_controller_right_thumbstick.obj",
+            "motion":{
+                "type":"joystick",
+                "controller_axis": 0,
+                "component_path" : "/input/joystick",
+                "center": [0.00149, -0.01393, 0.05283],
+                "rotate_xyz": [0.0,0.0,0.0],
+                "joystick_rotation_x": [18,-18],
+                "joystick_rotation_y": [18,-18],
+                "press_translate": [0.0, -0.000317, 0.000386]
+            },
+            "component_local" : {
+                "origin": [0.00149, -0.0012, 0.042],
+                "rotate_xyz" : [50.6,0,0]
+            }
+        },
+        "grip": {
+            "filename": "oculus_cv1_controller_right_grip.obj",
+            "motion":{
+                "type":"rotate",
+                "controller_axis":2,
+                "controller_axis_component":0,
+		"trigger_path" : "/input/grip",
+                "value_mapping": [0.0,10.0],
+                "pivot": [-0.01, 0.008, 0.075],
+                "axis": [0.0, 1.0, 0.0]
+            },
+            "component_local" : {
+                "origin": [-0.012, -0.00938, 0.09077],
+                "rotate_xyz" : [0.0,94.0,0.0]
+            }
+        },
+        "a_button": {
+            "filename": "oculus_cv1_controller_right_button_a.obj",
+            "motion":{
+                "type":"translate",
+                "controller_button": 7,
+		"pressed_path" : "/input/a/click",
+                "value_mapping": [0.0, 0.00085],
+                "axis": [0.0, -0.635, 0.773]
+            },
+            "component_local" : {
+                "origin": [-0.01107, 0.0001, 0.05813],
+                "rotate_xyz" : [50.6,0.0,0.0]
+            }
+        },
+        "b_button": {
+            "filename": "oculus_cv1_controller_right_button_b.obj",
+            "motion":{
+                "type":"translate",
+                "controller_button": 1,
+		"pressed_path" : "/input/b/click",
+                "value_mapping": [0.0, 0.00085],
+                "axis": [0.0, -0.635, 0.773]
+            },
+            "component_local" : {
+                "origin": [-0.01732, -0.00897, 0.04806],
+                "rotate_xyz" : [50.6,0.0,0.0]
+            }
+        },
+        "home_button": {
+            "filename": "oculus_cv1_controller_right_button_home.obj",
+            "component_local" : {
+                "origin": [0.00371, 0.00408, 0.06298],
+                "rotate_xyz" : [50.6,0.0,0.0]
+            }
+        },
+        "body": {
+            "filename": "oculus_cv1_controller_right_body.obj",
+            "component_local" : {
+                "origin": [0.0, 0.003, 0.097],
+                "rotate_xyz" : [5.037,0.0,0.0]
+            }
+        },
+        "base": {
+            "component_local" : {
+                "origin": [0.00554, -0.00735, 0.139],
+                "rotate_xyz" : [-0.4,-180.0,0.0]
+            }
+        },
+        "tip": {
+            "component_local" : {
+                "origin": [-0.00629,-0.02522,0.03469],
+                "rotate_xyz" : [-39.4,0.0,0.0]
+            }
+        },
+        "handgrip": {
+            "component_local" : {
+                "origin": [0.0, 0.003, 0.097],
+                "rotate_xyz" : [5.037,0.0,0.0]
+             }
+        }
+    }
+}

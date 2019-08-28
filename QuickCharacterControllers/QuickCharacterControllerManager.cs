@@ -80,6 +80,8 @@ namespace QuickVR
             //_rigidBody.maxAngularVelocity = _maxAngularSpeed * Mathf.Deg2Rad;
             _rigidBody.useGravity = true;
             _rigidBody.drag = 0.0f;
+
+            _rigidBody.isKinematic = true;
         }
 
         #endregion
