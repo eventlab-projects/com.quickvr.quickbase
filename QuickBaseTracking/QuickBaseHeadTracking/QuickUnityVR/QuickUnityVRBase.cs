@@ -32,6 +32,8 @@ namespace QuickVR
 
         public static bool _handsSwaped = false;
 
+        public Space _debugMode = Space.Self;
+
         #endregion
 
         #region PROTECTED ATTRIBUTES
@@ -114,6 +116,7 @@ namespace QuickVR
             base.OnEnable();
 
             InputTracking.trackingAcquired += OnXRNodeTracked;
+            QuickVRManager.OnPostUpdateTracking += UpdateDebugObjects;
         }
 
         protected override void OnDisable()
@@ -121,6 +124,7 @@ namespace QuickVR
             base.OnDisable();
 
             InputTracking.trackingAcquired -= OnXRNodeTracked;
+            QuickVRManager.OnPostUpdateTracking -= UpdateDebugObjects;
         }
 
         protected virtual void OnXRNodeTracked(XRNodeState state)
@@ -151,6 +155,35 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
+
+        protected virtual void GetQuickVRNodePosition(QuickVRNode.Type nodeType, out Vector3 nodePos, out Vector3 trackedObjectPos, Space space)
+        {
+            QuickVRNode node = GetQuickVRNode(nodeType);
+
+            if (space == Space.Self)
+            {
+                nodePos = transform.position + ToAvatarSpace(node.transform.position - _vrNodesOrigin.position);
+                trackedObjectPos = transform.position + ToAvatarSpace(node.GetTrackedObject().transform.position - _vrNodesOrigin.position);
+            }
+            else
+            {
+                nodePos = node.transform.position;
+                trackedObjectPos = node.GetTrackedObject().transform.position;
+            }
+        }
+
+        protected virtual Quaternion GetQuickVRNodeRotation(QuickVRNode.Type nodeType, Space space)
+        {
+            QuickVRNode node = GetQuickVRNode(nodeType);
+            if (space == Space.Self)
+            {
+                return ToAvatarSpace(node.GetTrackedObject().transform.rotation);
+            }
+            else
+            {
+                return node.transform.rotation;
+            }
+        }
 
         protected virtual bool IsNodeTracked(QuickVRNode.Type nodeType)
         {
@@ -450,13 +483,14 @@ namespace QuickVR
         protected int GetHipsIndex(List<QuickExtraTracker> extraTrackers)
         {
             QuickVRNode nodeHead = GetQuickVRNode(QuickVRNode.Type.Head);
+            Vector3 fwd = Vector3.ProjectOnPlane(nodeHead.transform.forward, transform.up);
             Vector3 p = nodeHead.transform.position;
-
+            
             int HipsIndex = 0;
             float aMin = Mathf.Infinity;
             for (int i = 0; i < extraTrackers.Count; i++)
             {
-                Vector3 v = p - extraTrackers[i].Value;
+                Vector3 v = Vector3.ProjectOnPlane(p - extraTrackers[i].Value, fwd);
                 float a = Vector3.Angle(Vector3.up, v);
                 if (a < aMin)
                 {
@@ -720,6 +754,21 @@ namespace QuickVR
             CalibrateVRNode(_handsSwaped? QuickVRNode.Type.LeftHand : QuickVRNode.Type.RightHand);
         }
 
+        protected virtual void UpdateDebugObjects()
+        {
+            foreach (QuickVRNode.Type t in QuickVRNode.GetTypeList())
+            {
+                Vector3 nPos, tPos;
+                Quaternion nRot;
+                GetQuickVRNodePosition(t, out nPos, out tPos, _debugMode);
+                nRot = GetQuickVRNodeRotation(t, _debugMode);
+
+                Transform tModel = GetQuickVRNode(t).GetModel();
+                tModel.position = nPos;
+                tModel.rotation = nRot;
+            }
+        }
+
         #endregion
 
         #region DEBUG
@@ -803,15 +852,18 @@ namespace QuickVR
             QuickVRNode qNode = GetQuickVRNode(nType);
             if (IsNodeTracked(nType) || forceDraw)
             {
-                Transform tNode = qNode.transform;
-                Transform tTracked = qNode.GetTrackedObject().transform;
+                Vector3 nodePos, tObjectPos;
+                GetQuickVRNodePosition(nType, out nodePos, out tObjectPos, _debugMode);
 
                 Gizmos.color = color;
-                Gizmos.DrawCube(tNode.position, new Vector3(scale, scale, scale));
-                Gizmos.DrawSphere(tTracked.position, scale * 0.5f);
+                Gizmos.DrawCube(nodePos, new Vector3(scale, scale, scale));
+                Gizmos.DrawSphere(tObjectPos, scale * 0.5f);
 
                 Gizmos.color = Color.white;
-                Gizmos.DrawLine(tNode.position, tTracked.position);
+                Gizmos.DrawLine(nodePos, tObjectPos);
+
+                qNode.GetModel().position = nodePos;
+                qNode.GetModel().rotation = GetQuickVRNodeRotation(nType, _debugMode);
             }
         }
 
@@ -821,8 +873,14 @@ namespace QuickVR
             QuickVRNode n2 = GetQuickVRNode(n2Type);
             if ((IsNodeTracked(n1Type) && IsNodeTracked(n2Type)) || forceDraw)
             {
+                Vector3 n1Pos, t1Pos;
+                GetQuickVRNodePosition(n1Type, out n1Pos, out t1Pos, _debugMode);
+
+                Vector3 n2Pos, t2Pos;
+                GetQuickVRNodePosition(n1Type, out n2Pos, out t2Pos, _debugMode);
+
                 Gizmos.color = Color.white;
-                Gizmos.DrawLine(n1.GetTrackedObject().transform.position, n2.GetTrackedObject().transform.position);
+                Gizmos.DrawLine(t1Pos, t2Pos);
             }
         }
 

@@ -93,7 +93,6 @@ namespace QuickVR
 
             if (pfName.Length != 0)
             {
-                Debug.Log("pfName = " + pfName);
                 _model = Instantiate<Transform>(Resources.Load<Transform>("Prefabs/" + pfName));
                 _model.parent = transform;
                 _model.ResetTransformation();
@@ -118,6 +117,11 @@ namespace QuickVR
             _trackedObject.Reset();
 
             Update();
+        }
+
+        public virtual Transform GetModel()
+        {
+            return _model;
         }
 
         protected virtual void SetModelVisible(bool v)
