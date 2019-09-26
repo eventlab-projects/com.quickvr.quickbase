@@ -57,10 +57,6 @@ namespace QuickVR {
 		protected MeshFilter _mFilter;
         protected Renderer _renderer;
 
-        protected static Queue<QuickMirrorReflectionBase> _mirrorQueue = new Queue<QuickMirrorReflectionBase>();
-
-        protected bool _interleavedRendering = false;
-
         #endregion
 		
 		#region CREATION AND DESTRUCTION
@@ -195,11 +191,6 @@ namespace QuickVR {
             return (Vector3.Distance(_currentCamera.transform.position, transform.position) < _reflectionDistance);
         }
 
-        protected virtual void AddToMirrorQueue()
-        {
-            _mirrorQueue.Enqueue(this);
-        }
-
         public virtual void BeginCameraRendering(Camera cam)
         {
             _currentCamera = cam;
@@ -208,10 +199,8 @@ namespace QuickVR {
 
             if (AllowRender())
             {
-                if (!_insideRendering && (_mirrorQueue.Count == 0 || _mirrorQueue.Peek() == this))
+                if (!_insideRendering)
                 {
-                    if (_mirrorQueue.Count > 0) _mirrorQueue.Dequeue();
-
                     _insideRendering = true;
                     //StartCoroutine(CoUpdateInsideRendering());
                     
@@ -230,10 +219,6 @@ namespace QuickVR {
                     // Restore the quality settings
                     QualitySettings.pixelLightCount = oldPixelLightCount;
                     QualitySettings.shadows = oldShadowQuality;
-                }
-                else if (!_mirrorQueue.Contains(this))
-                {
-                    //AddToMirrorQueue();
                 }
             }
             else
