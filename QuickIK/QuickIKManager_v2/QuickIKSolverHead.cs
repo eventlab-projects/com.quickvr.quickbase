@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 using UnityEngine.Animations.Rigging;
-using UnityEngine.Experimental.Animations;
+
 
 using System;
 
@@ -25,12 +25,12 @@ namespace QuickVR
 
         #endregion
 
-        public void ProcessRootMotion(AnimationStream stream)
+        public void ProcessRootMotion(UnityEngine.Animations.AnimationStream stream)
         {
             
         }
 
-        public void ProcessAnimation(AnimationStream stream)
+        public void ProcessAnimation(UnityEngine.Animations.AnimationStream stream)
         {
             if (!stream.isHumanStream)
             {
@@ -38,7 +38,7 @@ namespace QuickVR
                 return;
             }
 
-            AnimationHumanStream hStream = stream.AsHuman();
+            UnityEngine.Animations.AnimationHumanStream hStream = stream.AsHuman();
 
             //Update the bodyPosition to match the hipsTarget
             Vector3 u = _head.GetPosition(stream) - _hips.GetPosition(stream);

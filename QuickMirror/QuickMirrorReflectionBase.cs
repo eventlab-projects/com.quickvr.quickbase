@@ -50,6 +50,7 @@ namespace QuickVR {
 
         protected ReflectionQuality _oldReflectionQuality = ReflectionQuality.HIGH;
 
+        protected Camera _currentCamera = null;
         protected Camera _reflectionCamera = null;
 		protected static bool _insideRendering = false;
 
@@ -81,12 +82,16 @@ namespace QuickVR {
             {
                 _renderer.sharedMaterial = new Material(Shader.Find(shaderName));
             }
+
+            QuickMirrorReflectionManager.AddMirror(this);
         }
 
         protected virtual void OnDisable()
         {
             DestroyImmediate(_reflectionTextureLeft);
             DestroyImmediate(_reflectionTextureRight);
+
+            QuickMirrorReflectionManager.RemoveMirror(this);
         }
 		
 		protected virtual void CreateReflectionTexture() {
@@ -187,7 +192,7 @@ namespace QuickVR {
         #region MIRROR RENDER
 
         protected virtual bool AllowRender() {
-            return (Vector3.Distance(Camera.current.transform.position, transform.position) < _reflectionDistance);
+            return (Vector3.Distance(_currentCamera.transform.position, transform.position) < _reflectionDistance);
         }
 
         protected virtual void AddToMirrorQueue()
@@ -195,11 +200,9 @@ namespace QuickVR {
             _mirrorQueue.Enqueue(this);
         }
 
-        // This is called when it's known that the object will be rendered by some
-		// camera. We render reflections and do other updates here.
-		// Because the script executes in edit mode, reflections for the scene view
-		// camera will just work!
-		protected virtual void OnWillRenderObject() {
+        public virtual void BeginCameraRendering(Camera cam)
+        {
+            _currentCamera = cam;
             //Force the mirror to be in the Water layer, so it will avoid to be rendered by the reflection cameras
 			gameObject.layer = LayerMask.NameToLayer("Water");
 
@@ -262,7 +265,7 @@ namespace QuickVR {
 		
 		protected virtual void RenderVirtualImageStereo(RenderTexture rtLeft, RenderTexture rtRight, bool mirrorStereo = true)
         {
-            if (Camera.current.stereoEnabled)
+            if (_currentCamera.stereoEnabled)
             {
                 float stereoSign = mirrorStereo ? -1.0f : 1.0f;
                 float stereoSeparation = 0.0f;
@@ -277,12 +280,12 @@ namespace QuickVR {
                     stereoSeparation = Vector3.Distance(posEyeLeft, posEyeRight);
                 }
 
-                if (Camera.current.stereoTargetEye == StereoTargetEyeMask.Both || Camera.current.stereoTargetEye == StereoTargetEyeMask.Left)
+                if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Both || _currentCamera.stereoTargetEye == StereoTargetEyeMask.Left)
                 {
                     RenderVirtualImage(rtLeft, Camera.StereoscopicEye.Left, stereoSign * stereoSeparation * 0.5f);
                 }
 
-                if (Camera.current.stereoTargetEye == StereoTargetEyeMask.Both || Camera.current.stereoTargetEye == StereoTargetEyeMask.Right)
+                if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Both || _currentCamera.stereoTargetEye == StereoTargetEyeMask.Right)
                 {
                     RenderVirtualImage(rtRight, Camera.StereoscopicEye.Right, -stereoSign * stereoSeparation * 0.5f);
                 }
@@ -297,11 +300,11 @@ namespace QuickVR {
         {
             // set camera to clear the same way as current camera
             _reflectionCamera.cullingMask = ~(1 << LayerMask.NameToLayer("Water")) & ~(1 << LayerMask.NameToLayer("UI")) & _reflectLayers.value; // never render water layer
-            _reflectionCamera.clearFlags = Camera.current.clearFlags;
-            _reflectionCamera.backgroundColor = Camera.current.backgroundColor;
-            if (Camera.current.clearFlags == CameraClearFlags.Skybox)
+            _reflectionCamera.clearFlags = _currentCamera.clearFlags;
+            _reflectionCamera.backgroundColor = _currentCamera.backgroundColor;
+            if (_currentCamera.clearFlags == CameraClearFlags.Skybox)
             {
-                Skybox sky = Camera.current.GetComponent<Skybox>();
+                Skybox sky = _currentCamera.GetComponent<Skybox>();
                 Skybox mysky = _reflectionCamera.GetComponent<Skybox>();
                 if (!sky || !sky.material)
                 {
@@ -317,12 +320,12 @@ namespace QuickVR {
             // update other values to match current camera.
             // even if we are supplying custom camera&projection matrices,
             // some of values are used elsewhere (e.g. skybox uses far plane)
-            _reflectionCamera.nearClipPlane = Mathf.Max(Camera.current.nearClipPlane, 0.1f);
-            _reflectionCamera.farClipPlane = Mathf.Min(Camera.current.farClipPlane, 1000.0f);
-            _reflectionCamera.orthographic = Camera.current.orthographic;
-            //_reflectionCamera.fieldOfView = Camera.current.fieldOfView;
-            _reflectionCamera.aspect = Camera.current.aspect;
-            _reflectionCamera.orthographicSize = Camera.current.orthographicSize;
+            _reflectionCamera.nearClipPlane = Mathf.Max(_currentCamera.nearClipPlane, 0.1f);
+            _reflectionCamera.farClipPlane = Mathf.Min(_currentCamera.farClipPlane, 1000.0f);
+            _reflectionCamera.orthographic = _currentCamera.orthographic;
+            //_reflectionCamera.fieldOfView = _currentCamera.fieldOfView;
+            _reflectionCamera.aspect = _currentCamera.aspect;
+            _reflectionCamera.orthographicSize = _currentCamera.orthographicSize;
         }
 
         protected abstract void RenderVirtualImage(RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0.0f);

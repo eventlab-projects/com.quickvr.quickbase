@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 using UnityEngine.Animations.Rigging;
-using UnityEngine.Experimental.Animations;
+
 
 using System;
 
@@ -25,12 +25,12 @@ namespace QuickVR
 
         #endregion
 
-        public void ProcessRootMotion(AnimationStream stream)
+        public void ProcessRootMotion(UnityEngine.Animations.AnimationStream stream)
         {
 
         }
 
-        public void ProcessAnimation(AnimationStream stream)
+        public void ProcessAnimation(UnityEngine.Animations.AnimationStream stream)
         {
             if (!stream.isHumanStream)
             {
@@ -41,9 +41,9 @@ namespace QuickVR
             SetGoal(stream, QuickIKSolverHumanoid.GetAvatarIKGoal((HumanBodyBones)_boneID));
         }
 
-        private void SetGoal(AnimationStream stream, AvatarIKGoal ikGoal)
+        private void SetGoal(UnityEngine.Animations.AnimationStream stream, AvatarIKGoal ikGoal)
         {
-            AnimationHumanStream hStream = stream.AsHuman();
+            UnityEngine.Animations.AnimationHumanStream hStream = stream.AsHuman();
             AvatarIKHint ikHint = QuickIKSolverHumanoid.GetAvatarIKHint(ikGoal);
 
             float jWeight = jobWeight.Get(stream);
