@@ -764,8 +764,11 @@ namespace QuickVR
                 nRot = GetQuickVRNodeRotation(t, _debugMode);
 
                 Transform tModel = GetQuickVRNode(t).GetModel();
-                tModel.position = nPos;
-                tModel.rotation = nRot;
+                if (tModel)
+                {
+                    tModel.position = nPos;
+                    tModel.rotation = nRot;
+                }
             }
         }
 
