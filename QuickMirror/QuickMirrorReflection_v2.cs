@@ -80,13 +80,13 @@ namespace QuickVR
             float d = -Vector3.Dot(normal, pos);
             Vector4 reflectionPlane = new Vector4(normal.x, normal.y, normal.z, d);
             Matrix4x4 reflection = CalculateReflectionMatrix(reflectionPlane);
-            _reflectionCamera.worldToCameraMatrix = (_currentCamera.stereoEnabled)? _currentCamera.GetStereoViewMatrix(eye) : _currentCamera.worldToCameraMatrix;
+            _reflectionCamera.worldToCameraMatrix = (_currentCamera.stereoEnabled) ? _currentCamera.GetStereoViewMatrix(eye) : _currentCamera.worldToCameraMatrix;
             _reflectionCamera.worldToCameraMatrix *= reflection;
 
             //2) Compute ProjectionMatrix
             // Setup oblique projection matrix so that near plane is our reflection
             // plane. This way we clip everything below/above it for free.
-            _reflectionCamera.projectionMatrix = (_currentCamera.stereoEnabled)? _currentCamera.GetStereoProjectionMatrix(eye) : _currentCamera.projectionMatrix;
+            _reflectionCamera.projectionMatrix = (_currentCamera.stereoEnabled) ? _currentCamera.GetStereoProjectionMatrix(eye) : _currentCamera.projectionMatrix;
             _reflectionCamera.targetTexture = targetTexture;
             GL.invertCulling = true;
 
@@ -102,9 +102,28 @@ namespace QuickVR
                 _reflectionCamera.projectionMatrix = MakeProjectionMatrixOblique(_reflectionCamera.projectionMatrix, clipPlane);
                 _reflectionCamera.Render();
             }
-            
+
             GL.invertCulling = false;
         }
+
+        //protected override void RenderVirtualImage(RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0)
+        //{
+        //    Vector3 p = _currentCamera.transform.position;
+        //    Vector3 v = p - transform.position;
+        //    Vector3 normal = GetNormal();
+        //    Quaternion q = new Quaternion(normal.x, normal.y, normal.z, 0);
+
+        //    _reflectionCamera.transform.position = p - 2.0f * normal * Vector3.Dot(v, normal); //Vector3.Reflect(_currentCamera.transform.position, GetNormal());
+        //    _reflectionCamera.transform.rotation = _currentCamera.transform.rotation;
+        //    _reflectionCamera.transform.Rotate(transform.up, 180.0f, Space.World);
+        //    //_reflectionCamera.projectionMatrix = (_currentCamera.stereoEnabled) ? _currentCamera.GetStereoProjectionMatrix(eye) : _currentCamera.projectionMatrix;
+        //    Vector4 clipPlane = CameraSpacePlane(_reflectionCamera.worldToCameraMatrix, transform.position, normal, -1.0f);
+        //    _reflectionCamera.projectionMatrix = _reflectionCamera.CalculateObliqueMatrix(clipPlane); //MakeProjectionMatrixOblique(_reflectionCamera.projectionMatrix, clipPlane);
+        //    //_reflectionCamera.transform.rotation *= Quaternion.FromToRotation(_reflectionCamera.transform.forward, GetNormal());
+        //    //_reflectionCamera.transform.rotation = Quaternion.LookRotation(_reflectionCamera.transform.forward, _currentCamera.transform.up);
+        //    _reflectionCamera.targetTexture = targetTexture;
+        //    _reflectionCamera.Render();
+        //}
 
         // Given position/normal of the plane, calculates plane in camera space.
         private Vector4 CameraSpacePlane(Matrix4x4 worldToCameraMatrix, Vector3 pos, Vector3 normal, float sideSign)

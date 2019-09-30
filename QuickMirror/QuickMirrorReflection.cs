@@ -65,13 +65,13 @@ namespace QuickVR {
             //Setup the projection and worldView matrices as explained in:
             //http://csc.lsu.edu/~kooima/pdfs/gen-perspective.pdf 
 
-            _reflectionCamera.transform.position = GetReflectedPosition(Camera.current.transform.position);
+            _reflectionCamera.transform.position = GetReflectedPosition(_currentCamera.transform.position);
 
             Vector3 pa = GetCornerPosition(Corner.BOTTOM_LEFT);
 			Vector3 pb = GetCornerPosition(Corner.BOTTOM_RIGHT);
 			Vector3 pc = GetCornerPosition(Corner.TOP_LEFT);
 			
-			Vector3 pe = _reflectionCamera.transform.position + Camera.current.transform.right * stereoSeparation; // eye position
+			Vector3 pe = _reflectionCamera.transform.position + _currentCamera.transform.right * stereoSeparation; // eye position
 
 			Vector3 va = pa - pe;
 			Vector3 vb = pb - pe;
@@ -83,8 +83,8 @@ namespace QuickVR {
             //Adjust the near and far clipping planes of the reflection camera. 
             Vector3 v = pe - transform.position;
             Vector3 projectedPoint = pe - Vector3.Project(v, vn);
-            float n = Mathf.Max(Camera.current.nearClipPlane, Vector3.Distance(pe, projectedPoint));
-            float f = Mathf.Max(n, Camera.current.farClipPlane);
+            float n = Mathf.Max(_currentCamera.nearClipPlane, Vector3.Distance(pe, projectedPoint));
+            float f = Mathf.Max(n, _currentCamera.farClipPlane);
 
             float d = -Vector3.Dot(va, vn);			// distance from eye to screen 
             float l = Vector3.Dot(vr, va) * n / d;	// distance to left screen edge

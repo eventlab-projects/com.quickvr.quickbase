@@ -48,10 +48,10 @@ namespace QuickVR
 #if UNITY_EDITOR
         static void UpdateMirrorsSceneView(UnityEditor.SceneView sView)
         {
-            foreach (QuickMirrorReflectionBase mirror in _mirrors)
-            {
-                mirror.BeginCameraRendering(sView.camera);
-            }
+            //foreach (QuickMirrorReflectionBase mirror in _mirrors)
+            //{
+            //    mirror.BeginCameraRendering(sView.camera);
+            //}
         }
 #endif
 

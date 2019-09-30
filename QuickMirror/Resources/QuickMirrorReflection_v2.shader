@@ -45,7 +45,7 @@ Shader "QuickVR/MirrorReflection_v2"
 					//return ComputeFinalColor(GetProjUV(i.screenPos), i.uv);
 
 					float2 projUV = GetProjUV(i.screenPos);
-					return ComputeFinalColor(float2(projUV.x, 1.0 - projUV.y), i.uv);
+					return ComputeFinalColor(float2(1.0 - projUV.x, 1.0 - projUV.y), i.uv);
 				}
 			ENDCG
 		}
