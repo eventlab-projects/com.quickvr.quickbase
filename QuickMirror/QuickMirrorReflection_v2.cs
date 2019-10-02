@@ -1,8 +1,9 @@
 ﻿
 using UnityEngine;
+using UnityEngine.Rendering;
+
 using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.XR;
 
 using QuickVR;
 using System;
@@ -34,6 +35,15 @@ namespace QuickVR
             _replacementShader = Shader.Find(GetShaderReplacementName());
         }
 
+        protected virtual CommandBuffer CreateInvertCullingCommandBuffer(bool invertCulling)
+        {
+            CommandBuffer cBuffer = new CommandBuffer();
+            cBuffer.SetInvertCulling(invertCulling);
+            cBuffer.name = "Invert Culling = " + invertCulling.ToString();
+
+            return cBuffer;
+        }
+
         #endregion
 
         #region GET AND SET
@@ -51,6 +61,17 @@ namespace QuickVR
         #endregion
 
         #region UPDATE
+
+        protected override void UpdateCameraModes()
+        {
+            base.UpdateCameraModes();
+
+            _reflectionCamera.RemoveAllCommandBuffers();
+            CommandBuffer invertCullingON = CreateInvertCullingCommandBuffer(true);
+            _reflectionCamera.AddCommandBuffer(CameraEvent.BeforeGBuffer, invertCullingON);
+            _reflectionCamera.AddCommandBuffer(CameraEvent.BeforeDepthTexture, invertCullingON);
+            _reflectionCamera.AddCommandBuffer(CameraEvent.AfterEverything, CreateInvertCullingCommandBuffer(false));
+        }
 
         protected override void RenderReflection()
         {
@@ -88,7 +109,6 @@ namespace QuickVR
             // plane. This way we clip everything below/above it for free.
             _reflectionCamera.projectionMatrix = (_currentCamera.stereoEnabled) ? _currentCamera.GetStereoProjectionMatrix(eye) : _currentCamera.projectionMatrix;
             _reflectionCamera.targetTexture = targetTexture;
-            GL.invertCulling = true;
 
             if (_useRenderWithShader)
             {
@@ -102,8 +122,6 @@ namespace QuickVR
                 _reflectionCamera.projectionMatrix = MakeProjectionMatrixOblique(_reflectionCamera.projectionMatrix, clipPlane);
                 _reflectionCamera.Render();
             }
-
-            GL.invertCulling = false;
         }
 
         //protected override void RenderVirtualImage(RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0)
@@ -113,14 +131,16 @@ namespace QuickVR
         //    Vector3 normal = GetNormal();
         //    Quaternion q = new Quaternion(normal.x, normal.y, normal.z, 0);
 
-        //    _reflectionCamera.transform.position = p - 2.0f * normal * Vector3.Dot(v, normal); //Vector3.Reflect(_currentCamera.transform.position, GetNormal());
+        //    //_reflectionCamera.transform.position = _currentCamera.transform.position;
+        //    //_reflectionCamera.transform.rotation = _currentCamera.transform.rotation;
+
+        //    _reflectionCamera.transform.position = p - 2.0f * normal * Vector3.Dot(v, normal); 
         //    _reflectionCamera.transform.rotation = _currentCamera.transform.rotation;
         //    _reflectionCamera.transform.Rotate(transform.up, 180.0f, Space.World);
-        //    //_reflectionCamera.projectionMatrix = (_currentCamera.stereoEnabled) ? _currentCamera.GetStereoProjectionMatrix(eye) : _currentCamera.projectionMatrix;
-        //    Vector4 clipPlane = CameraSpacePlane(_reflectionCamera.worldToCameraMatrix, transform.position, normal, -1.0f);
-        //    _reflectionCamera.projectionMatrix = _reflectionCamera.CalculateObliqueMatrix(clipPlane); //MakeProjectionMatrixOblique(_reflectionCamera.projectionMatrix, clipPlane);
-        //    //_reflectionCamera.transform.rotation *= Quaternion.FromToRotation(_reflectionCamera.transform.forward, GetNormal());
-        //    //_reflectionCamera.transform.rotation = Quaternion.LookRotation(_reflectionCamera.transform.forward, _currentCamera.transform.up);
+        //    _reflectionCamera.projectionMatrix = (_currentCamera.stereoEnabled) ? _currentCamera.GetStereoProjectionMatrix(eye) : _currentCamera.projectionMatrix;
+        //    Vector4 clipPlane = CameraSpacePlane(_reflectionCamera.worldToCameraMatrix, transform.position, normal, 1.0f);
+        //    _reflectionCamera.projectionMatrix = MakeProjectionMatrixOblique(_reflectionCamera.projectionMatrix, clipPlane);
+
         //    _reflectionCamera.targetTexture = targetTexture;
         //    _reflectionCamera.Render();
         //}
