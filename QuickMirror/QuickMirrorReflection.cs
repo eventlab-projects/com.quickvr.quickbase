@@ -62,10 +62,21 @@ namespace QuickVR {
 
         protected override void RenderVirtualImage(RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0.0f)
         {
+            //Debug.Log("MATRICES");
+            //Debug.Log(_currentCamera.transform.worldToLocalMatrix.ToString("f3"));
+            //Debug.Log(_currentCamera.worldToCameraMatrix.ToString("f3"));
+            //Debug.Log(_currentCamera.GetStereoViewMatrix(Camera.StereoscopicEye.Left).ToString("f3"));
+            //Debug.Log(_currentCamera.GetStereoViewMatrix(Camera.StereoscopicEye.Right).ToString("f3"));
+
+            Matrix4x4 mat = _currentCamera.transform.worldToLocalMatrix;
+            Vector3 pos = new Vector3(mat.m03, -mat.m13, mat.m23);
+            //Debug.Log("pos = " + pos.ToString("f3"));
+
             //Setup the projection and worldView matrices as explained in:
             //http://csc.lsu.edu/~kooima/pdfs/gen-perspective.pdf 
 
-            _reflectionCamera.transform.position = GetReflectedPosition(_currentCamera.transform.position);
+            //_reflectionCamera.transform.position = GetReflectedPosition(_currentCamera.transform.position);
+            _reflectionCamera.transform.position = GetReflectedPosition(pos);
 
             Vector3 pa = GetCornerPosition(Corner.BOTTOM_LEFT);
 			Vector3 pb = GetCornerPosition(Corner.BOTTOM_RIGHT);

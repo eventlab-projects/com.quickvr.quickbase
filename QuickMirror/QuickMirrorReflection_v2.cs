@@ -95,7 +95,7 @@ namespace QuickVR
             //Reflect camera around reflection plane
             Vector3 normal = GetNormal();
             //Vector3 camToPlane = (_currentCamera.transform.position + _currentCamera.transform.right * stereoSeparation) - transform.position;
-            Vector3 camToPlane = _currentCamera.transform.position + _currentCamera.transform.right - transform.position;
+            Vector3 camToPlane = _currentCamera.transform.position - transform.position;
             Vector3 reflectionCamToPlane = Vector3.Reflect(camToPlane, normal);
             Vector3 camPosRS = transform.position + reflectionCamToPlane;
             _reflectionCamera.transform.position = camPosRS;
