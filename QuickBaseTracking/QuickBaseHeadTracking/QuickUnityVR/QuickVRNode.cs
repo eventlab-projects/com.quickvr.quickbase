@@ -36,6 +36,8 @@ namespace QuickVR
             //TrackingReference,  //Represents a stationary physical device that can be used as a point of reference in the tracked area.
         };
 
+        public bool _showModel = false;
+
         #endregion
 
         #region PROTECTED PARAMETERS
@@ -190,7 +192,7 @@ namespace QuickVR
 
         protected virtual void Update()
         {
-            SetModelVisible(IsTracked());
+            SetModelVisible(IsTracked() && Application.isEditor && _showModel);
 
             InputTracking.GetNodeStates(_vrNodesStates);
 
