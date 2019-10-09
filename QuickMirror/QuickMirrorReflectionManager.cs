@@ -21,7 +21,6 @@ namespace QuickVR
 
         static QuickMirrorReflectionManager()
         {
-            QuickSingletonManager.GetInstance<QuickVRManager>();
 #if UNITY_EDITOR
             UnityEditor.SceneView.beforeSceneGui += UpdateMirrorsSceneView;
 #endif
