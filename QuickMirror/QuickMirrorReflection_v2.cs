@@ -79,6 +79,7 @@ namespace QuickVR
 
             Material mat = GetMaterial();
             Camera cam = _currentCamera;
+            Matrix4x4 refl = CalculateReflectionMatrix();
             if (cam.stereoEnabled)
             {
                 mat.SetMatrix("_mvpEyeLeft", cam.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left) * cam.GetStereoViewMatrix(Camera.StereoscopicEye.Left) * transform.localToWorldMatrix);
@@ -151,11 +152,8 @@ namespace QuickVR
         protected override void RenderVirtualImage(RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0)
         {
             //1) Compute worldToCamera Matrix
-            Vector3 normal = GetNormal();
-            float d = -Vector3.Dot(normal, transform.position);
-            Vector4 reflectionPlane = new Vector4(normal.x, normal.y, normal.z, d);
             _reflectionCamera.worldToCameraMatrix = _currentCamera.stereoEnabled ? _currentCamera.GetStereoViewMatrix(eye) : _currentCamera.worldToCameraMatrix;
-            _reflectionCamera.worldToCameraMatrix *= CalculateReflectionMatrix(reflectionPlane);
+            _reflectionCamera.worldToCameraMatrix *= CalculateReflectionMatrix();
 
             //2) Compute the projection matrix
             _reflectionCamera.projectionMatrix = (_currentCamera.stereoEnabled) ? _currentCamera.GetStereoProjectionMatrix(eye) : _currentCamera.projectionMatrix;
@@ -185,8 +183,12 @@ namespace QuickVR
         }
 
         // Calculates reflection matrix around the given plane
-        private static Matrix4x4 CalculateReflectionMatrix(Vector4 plane)
+        protected virtual Matrix4x4 CalculateReflectionMatrix()
         {
+            Vector3 normal = GetNormal();
+            float d = -Vector3.Dot(normal, transform.position);
+            Vector4 plane = new Vector4(normal.x, normal.y, normal.z, d);
+
             Matrix4x4 reflectionMat = Matrix4x4.zero;
 
             reflectionMat.m00 = (1F - 2F * plane[0] * plane[0]);
