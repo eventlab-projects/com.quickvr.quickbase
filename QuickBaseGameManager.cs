@@ -298,7 +298,6 @@ namespace QuickVR {
 		}
 
 		protected virtual IEnumerator CoUpdateStateCalibrating() {
-            Debug.Log("PREPARING FOR CALIBRATION");
             if (OnCalibrating != null) OnCalibrating();
 
             QuickUnityVRBase hTracking = _player? _player.GetComponent<QuickUnityVRBase>() : null;

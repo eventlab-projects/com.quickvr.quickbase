@@ -395,6 +395,23 @@ namespace QuickVR
 
         #region EXTENSION METHODS
 
+        public static int GetNumSiblings(this Component c)
+        {
+            return c.transform.parent ? c.transform.parent.childCount : c.gameObject.scene.rootCount;
+        }
+
+        public static T GetNextSibling<T>(this T t) where T : Component
+        {
+            int sIndex = t.transform.GetSiblingIndex() + 1;
+            if (sIndex < GetNumSiblings(t))
+            {
+                Transform tChild = t.transform.parent ? t.transform.parent.GetChild(sIndex) : t.gameObject.scene.GetRootGameObjects()[sIndex].transform;
+                return tChild.GetComponent<T>();
+            }
+
+            return null;
+        } 
+
         public static T GetOrCreateComponent<T>(this Component c) where T : Component
         {
             return c.gameObject.GetOrCreateComponent<T>();

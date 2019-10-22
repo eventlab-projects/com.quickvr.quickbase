@@ -11,15 +11,8 @@ namespace QuickVR {
 		public float _maxTimeOut = 0.0f;
 		public bool _pressKeyToFinish = false;		//The test is finished if RETURN is pressed
 		public bool _avoidable = true;				//We can force this test to finish by pressing BACKSPACE
-		public bool _finishGameWhenOver = false;	//When this stage is over, it actually will finish the game
 
-		public bool _sendOnInitEvent = true;
-		public bool _sendOnFinishedEvent = true;
-
-		public List<QuickStageBase> _nextStages = new List<QuickStageBase>();	//The tests to execute once this test finishes its execution
-		public List<QuickStageBase> _killStages = new List<QuickStageBase>();	//The tests to kill once this test finishes its execution
-
-        public string _debugMessage = "";
+		public string _debugMessage = "";
 		public Color _debugMessageColor = Color.white;
 
         [Space()]
@@ -31,6 +24,14 @@ namespace QuickVR {
         public float _instructionsVolume = 1.0f;
         public float _instructionsTimePause = 0.5f;
 
+        public enum FinishPolicy
+        {
+            Nothing,
+            ExecuteNext,
+            GameOver,
+        }
+        public FinishPolicy _finishPolicy = FinishPolicy.ExecuteNext;
+
         #endregion
 
         #region PROTECTED PARAMETERS
@@ -40,7 +41,7 @@ namespace QuickVR {
         protected QuickBaseGameManager _gameManager = null;
 		protected DebugManager _debugManager = null;
 
-		protected bool _finished = true;
+		protected bool _finished = false;
 
 		protected float _timeStart = 0.0f;	//Indicates when the test started (since the start of the game)
 
@@ -54,12 +55,11 @@ namespace QuickVR {
 
         #region EVENTS
 
-        public delegate void OnInitAction(QuickStageBase stageManager);
-        public static event OnInitAction OnInit;
-
-        public delegate void OnFinishedAction(QuickStageBase stageManager);
-        public static event OnFinishedAction OnFinished;
-
+        public delegate void OnStageAction(QuickStageBase stageManager);
+        public static event OnStageAction OnBeforeInstructions;
+        public static event OnStageAction OnAfterInstructions;
+        public static event OnStageAction OnFinished;
+        
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -82,15 +82,25 @@ namespace QuickVR {
             enabled = true;
 
             _timeStart = Time.time;
+            Debug.Log("===============================");
+            _debugManager.Log("RUNNING STAGE: " + GetName());
+            if (_debugMessage.Length != 0)
+            {
+                _debugManager.Log(_debugMessage, _debugMessageColor);
+            }
 
-            if (_debugMessage.Length == 0) _debugMessage = "RUNNING STAGE: " + GetName();
-            _debugManager.Log(_debugMessage, _debugMessageColor);
-
-            StartCoroutine(CoInit());
+            StartCoroutine(CoUpdate());
 		}
 
-        protected virtual IEnumerator CoInit()
+        private IEnumerator CoUpdateBase()
         {
+            yield return StartCoroutine(CoUpdate());
+        }
+
+        protected virtual IEnumerator CoUpdate()
+        {
+            if (OnBeforeInstructions != null) OnBeforeInstructions(this);
+
             _instructionsManager.SetAudioSource(_instructionsAudioSource);
             _instructionsManager._timePauseBetweenInstructions = _instructionsTimePause;
             _instructionsManager._volume = _instructionsVolume;
@@ -100,18 +110,10 @@ namespace QuickVR {
 
             while (_instructionsManager.IsPlaying()) yield return null;
 
-            if (_sendOnInitEvent && (OnInit != null)) OnInit(this);
+            if (OnAfterInstructions != null) OnAfterInstructions(this);
 
             if (_maxTimeOut > 0) StartCoroutine("CoTimeOut");
         }
-
-		protected virtual T CreateStageManager<T>(string stageName) where T : QuickStageBase {
-			GameObject go = new GameObject(stageName);
-			go.transform.parent = transform;
-			go.transform.localPosition = Vector3.zero;
-			go.transform.localRotation = Quaternion.identity;
-			return go.AddComponent<T>();
-		}
 
 		#endregion
 
@@ -132,34 +134,34 @@ namespace QuickVR {
 		}
 
 		public virtual void Finish() {
-            FinishSilently();
-
-			if (_finishGameWhenOver) _gameManager.Finish();
-			else {
-				//Kill and start the indicated tests
-				foreach (QuickStageBase bManager in _killStages) bManager.Finish();
-				foreach (QuickStageBase bManager in _nextStages) bManager.Init();
-			}
-			enabled = false;
-            
-            if (_sendOnFinishedEvent && (OnFinished != null)) OnFinished(this);
-		}
-
-		/// <summary>
-		/// The test is finished silently, i.e., nor the child tests are forced to start nor the kill tests are forced to finish. 
-		/// </summary>
-		public virtual void FinishSilently() {
             _instructionsManager.Stop();
             _debugManager.Clear();
-			float totalTime = Time.time - _timeStart;
-			Debug.Log("===============================");
-			Debug.Log("STAGE FINISHED: " + GetName());
-			Debug.Log("Total Time = " + totalTime);
-			Debug.Log("===============================");
+            float totalTime = Time.time - _timeStart;
+            Debug.Log("STAGE FINISHED: " + GetName());
+            Debug.Log("Total Time = " + totalTime);
+            Debug.Log("===============================");
 
-			StopAllCoroutines();
-			_finished = true;
-			//gameObject.SetActive(false);
+            StopAllCoroutines();
+            _finished = true;
+
+            if (_finishPolicy == FinishPolicy.ExecuteNext)
+            {
+                QuickStageBase nextStage = QuickUtils.GetNextSibling<QuickStageBase>(this);
+                if (nextStage)
+                {
+                    //Debug.Log("currentStage = " + name);
+                    //Debug.Log("nextStage = " + nextStage.name);
+                    nextStage.Init();
+                }
+            }
+            else if (_finishPolicy == FinishPolicy.GameOver)
+            {
+                _gameManager.Finish();
+            }
+
+			enabled = false;
+            
+            if (OnFinished != null) OnFinished(this);
 		}
 
 		#endregion
