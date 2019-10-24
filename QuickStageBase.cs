@@ -45,19 +45,15 @@ namespace QuickVR {
 
 		protected float _timeStart = 0.0f;	//Indicates when the test started (since the start of the game)
 
+        protected QuickCoroutineManager _coManager = null;
+        protected int _coSet = -1;
+
 		#endregion
 
-		#region PRIVATE PARAMETERS
-
-		private bool _readyToFinish = false;
-
-        #endregion
-
-        #region EVENTS
+		#region EVENTS
 
         public delegate void OnStageAction(QuickStageBase stageManager);
-        public static event OnStageAction OnBeforeInstructions;
-        public static event OnStageAction OnAfterInstructions;
+        public static event OnStageAction OnInit;
         public static event OnStageAction OnFinished;
         
         #endregion
@@ -68,6 +64,7 @@ namespace QuickVR {
             _instructionsManager = QuickSingletonManager.GetInstance<QuickInstructionsManager>();
             _gameManager = QuickSingletonManager.GetInstance<QuickBaseGameManager>();
             _debugManager = QuickSingletonManager.GetInstance<DebugManager>();
+            _coManager = QuickSingletonManager.GetInstance<QuickCoroutineManager>();
         }
 
 		protected virtual void Start()
@@ -75,10 +72,9 @@ namespace QuickVR {
             enabled = false;
 		}
 
-		public virtual void Init() {
+		public virtual void Init()
+        {
             _finished = false;
-            _readyToFinish = false;
-            gameObject.SetActive(true);
             enabled = true;
 
             _timeStart = Time.time;
@@ -89,18 +85,13 @@ namespace QuickVR {
                 _debugManager.Log(_debugMessage, _debugMessageColor);
             }
 
-            StartCoroutine(CoUpdate());
+            if (OnInit != null) OnInit(this);
+
+            StartCoroutine(CoUpdateBase());
 		}
 
         private IEnumerator CoUpdateBase()
         {
-            yield return StartCoroutine(CoUpdate());
-        }
-
-        protected virtual IEnumerator CoUpdate()
-        {
-            if (OnBeforeInstructions != null) OnBeforeInstructions(this);
-
             _instructionsManager.SetAudioSource(_instructionsAudioSource);
             _instructionsManager._timePauseBetweenInstructions = _instructionsTimePause;
             _instructionsManager._volume = _instructionsVolume;
@@ -110,9 +101,40 @@ namespace QuickVR {
 
             while (_instructionsManager.IsPlaying()) yield return null;
 
-            if (OnAfterInstructions != null) OnAfterInstructions(this);
+            _coSet = _coManager.BeginCoroutineSet();
+            _coManager.StartCoroutine(CoUpdate(), _coSet);
+            _coManager.StartCoroutine(CoWaitForUserInput(), _coSet);
+            _coManager.StartCoroutine(CoTimeOut(), _coSet);
 
-            if (_maxTimeOut > 0) StartCoroutine("CoTimeOut");
+            yield return _coManager.WaitForCoroutineSet(_coSet);
+
+            Finish();
+        }
+
+        protected virtual IEnumerator CoWaitForUserInput()
+        {
+            if (_pressKeyToFinish)
+            {
+                while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE))
+                {
+                    yield return null;
+                }
+                Finish();
+            }
+        }
+
+        protected virtual IEnumerator CoTimeOut()
+        {
+            if (_maxTimeOut > 0)
+            {
+                yield return new WaitForSeconds(_maxTimeOut);
+                Finish();
+            }
+        }
+
+        protected virtual IEnumerator CoUpdate()
+        {
+            yield break; 
         }
 
 		#endregion
@@ -124,16 +146,12 @@ namespace QuickVR {
             return GetType().Name + " (" + name + ")";
         }
 
-		protected virtual void SetReadyToFinish(bool isReadyToFinish) {
-			_readyToFinish = isReadyToFinish;
-			//if (_readyToFinish) _debugManager.Log("Click to continue. ");
-		}
-
 		public virtual bool IsFinished() {
 			return _finished;
 		}
 
 		public virtual void Finish() {
+            _finished = true;
             _instructionsManager.Stop();
             _debugManager.Clear();
             float totalTime = Time.time - _timeStart;
@@ -141,8 +159,8 @@ namespace QuickVR {
             Debug.Log("Total Time = " + totalTime);
             Debug.Log("===============================");
 
+            _coManager.StopCoroutineSet(_coSet);
             StopAllCoroutines();
-            _finished = true;
 
             if (_finishPolicy == FinishPolicy.ExecuteNext)
             {
@@ -168,16 +186,9 @@ namespace QuickVR {
 
 		#region UPDATE
 
-		protected virtual IEnumerator CoTimeOut() {
-			yield return new WaitForSeconds(_maxTimeOut);
-			SetReadyToFinish(true);
-		}
-
-		protected virtual void Update() {
-			if (
-				(_avoidable && InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CANCEL)) ||
-				(_readyToFinish && (!_pressKeyToFinish || InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)))
-				) 
+		protected virtual void Update()
+        {
+			if (_avoidable && InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CANCEL)) 
 			{
 				Finish();
 			}

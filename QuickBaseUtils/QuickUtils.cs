@@ -403,12 +403,13 @@ namespace QuickVR
         public static T GetNextSibling<T>(this T t) where T : Component
         {
             int sIndex = t.transform.GetSiblingIndex() + 1;
-            if (sIndex < GetNumSiblings(t))
+            while (sIndex < GetNumSiblings(t))
             {
                 Transform tChild = t.transform.parent ? t.transform.parent.GetChild(sIndex) : t.gameObject.scene.GetRootGameObjects()[sIndex].transform;
-                return tChild.GetComponent<T>();
+                if (tChild.gameObject.activeInHierarchy) return tChild.GetComponent<T>();
+                sIndex++;
             }
-
+            
             return null;
         } 
 
