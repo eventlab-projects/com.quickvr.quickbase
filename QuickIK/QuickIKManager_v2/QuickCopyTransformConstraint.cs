@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 using UnityEngine.Animations.Rigging;
-using UnityEngine.Experimental.Animations;
+
 
 using System;
 
@@ -20,12 +20,12 @@ namespace QuickVR
 
         #endregion
 
-        public void ProcessRootMotion(AnimationStream stream)
+        public void ProcessRootMotion(UnityEngine.Animations.AnimationStream stream)
         {
 
         }
 
-        public void ProcessAnimation(AnimationStream stream)
+        public void ProcessAnimation(UnityEngine.Animations.AnimationStream stream)
         {
             _dstTransform.SetPosition(stream, _srcTransform.GetPosition(stream));
             _dstTransform.SetRotation(stream, _srcTransform.GetRotation(stream));

@@ -13,13 +13,4 @@ namespace QuickVR
         public Vector3 _targetHintLocalPosition = Vector3.zero;
     }
 
-    public class QuickIKPose : ScriptableObject
-    {
-        public QuickIKData _ikDataHead = null;
-        public QuickIKData _ikDataLeftHand = null;
-        public QuickIKData _ikDataRightHand = null;
-        public QuickIKData _ikDataLeftFoot = null;
-        public QuickIKData _ikDataRightFoot = null;
-    }
-
 }

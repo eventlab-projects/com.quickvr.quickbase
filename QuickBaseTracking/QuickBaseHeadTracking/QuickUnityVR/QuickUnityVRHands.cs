@@ -86,18 +86,17 @@ namespace QuickVR {
 
             QuickTrackedObject tObject = node.GetTrackedObject();
 
-            SettingsBase.HeightMode hMode = SettingsBase.GetHeightMode();
             float yOffset = 0.0f;
-            if (hMode == SettingsBase.HeightMode.FromTrackingSystem)
-            {
-                yOffset = _camera.transform.localPosition.y;
-            }
-            else if (hMode == SettingsBase.HeightMode.FromSubject)
+            if (SettingsBase.GetHeightMode() == SettingsBase.HeightMode.FromSubject)
             {
                 float sf = HUMAN_HEADS_TALL_EYES / HUMAN_HEADS_TALL;
                 yOffset = SettingsBase.GetSubjectHeight() * sf;
             }
-
+            else
+            {
+                yOffset = _camera.transform.localPosition.y;
+            }
+            
             _vrNodesOrigin.position = tObject.transform.position - transform.up * yOffset;
         }
 

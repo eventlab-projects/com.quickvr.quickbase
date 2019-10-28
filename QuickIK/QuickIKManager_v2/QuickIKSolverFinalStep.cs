@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 
 using UnityEngine.Animations.Rigging;
-using UnityEngine.Experimental.Animations;
+
 
 using System;
 
@@ -13,19 +13,19 @@ namespace QuickVR
 
         #region PUBLIC ATTRIBUTES
 
-        public MuscleHandle _jawMuscle;
+        public UnityEngine.Animations.MuscleHandle _jawMuscle;
         public float _jawMuscleValue;
 
         public FloatProperty jobWeight { get; set; }
 
         #endregion
 
-        public void ProcessRootMotion(AnimationStream stream)
+        public void ProcessRootMotion(UnityEngine.Animations.AnimationStream stream)
         {
 
         }
 
-        public void ProcessAnimation(AnimationStream stream)
+        public void ProcessAnimation(UnityEngine.Animations.AnimationStream stream)
         {
             if (!stream.isHumanStream)
             {
@@ -33,7 +33,7 @@ namespace QuickVR
                 return;
             }
 
-            AnimationHumanStream hStream = stream.AsHuman();
+            UnityEngine.Animations.AnimationHumanStream hStream = stream.AsHuman();
             hStream.SetMuscle(_jawMuscle, jobWeight.Get(stream) * _jawMuscleValue);
 
             hStream.SolveIK();
@@ -63,7 +63,7 @@ namespace QuickVR
         public override QuickIKSolverFinalStepJob Create(Animator animator, ref QuickIKSolverFinalStepJobData data, Component component)
         {
             QuickIKSolverFinalStepJob job = new QuickIKSolverFinalStepJob();
-            job._jawMuscle = new MuscleHandle(HeadDof.JawDownUp);
+            job._jawMuscle = new UnityEngine.Animations.MuscleHandle(HeadDof.JawDownUp);
 
             HumanPoseHandler poseHandler = new HumanPoseHandler(animator.avatar, animator.transform);
             HumanPose pose = new HumanPose();

@@ -36,6 +36,8 @@ namespace QuickVR
             //TrackingReference,  //Represents a stationary physical device that can be used as a point of reference in the tracked area.
         };
 
+        public bool _showModel = false;
+
         #endregion
 
         #region PROTECTED PARAMETERS
@@ -48,6 +50,18 @@ namespace QuickVR
 
         protected static List<XRNodeState> _vrNodesStates = new List<XRNodeState>();
 
+        protected Transform _model = null;
+
+        #endregion
+
+        #region CONSTANTS
+
+        protected static string PF_GENERIC_HMD = "pf_Generic_HMD";
+        protected static string PF_VIVE_CONTROLLER = "pf_VIVE_Controller";
+        protected static string PF_OCULUS_CV1_CONTROLLER_LEFT = "pf_OculusCV1_Controller_Left";
+        protected static string PF_OCULUS_CV1_CONTROLLER_RIGHT = "pf_OculusCV1_Controller_Right";
+        protected static string PF_VIVE_TRACKER = "pf_VIVE_Tracker";
+
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -55,6 +69,37 @@ namespace QuickVR
         protected virtual void Awake()
         {
             _trackedObject = transform.CreateChild("__TrackedObject__").gameObject.GetOrCreateComponent<QuickTrackedObject>();
+            LoadVRModel();
+        }
+
+        protected virtual void LoadVRModel()
+        {
+            Type nodeType = GetNodeType();
+            string modelName = XRDevice.model.ToLower();
+            string pfName = "";
+            if (nodeType == QuickVRNode.Type.Head) pfName = PF_GENERIC_HMD;
+            else if (nodeType == QuickVRNode.Type.LeftHand)
+            {
+                if (modelName.Contains("vive")) pfName = PF_VIVE_CONTROLLER;
+                else if (modelName.Contains("oculus")) pfName = PF_OCULUS_CV1_CONTROLLER_LEFT;
+            }
+            else if (nodeType == QuickVRNode.Type.RightHand)
+            {
+                if (modelName.Contains("vive")) pfName = PF_VIVE_CONTROLLER;
+                else if (modelName.Contains("oculus")) pfName = PF_OCULUS_CV1_CONTROLLER_RIGHT;
+            }
+            else
+            {
+                pfName = PF_VIVE_TRACKER;
+            }
+
+            if (pfName.Length != 0)
+            {
+                _model = Instantiate<Transform>(Resources.Load<Transform>("Prefabs/" + pfName));
+                _model.parent = transform;
+                _model.ResetTransformation();
+                _model.name = "Model";
+            }
         }
 
         #endregion
@@ -74,6 +119,18 @@ namespace QuickVR
             _trackedObject.Reset();
 
             Update();
+        }
+
+        public virtual Transform GetModel()
+        {
+            return _model;
+        }
+
+        protected virtual void SetModelVisible(bool v)
+        {
+            if (!_model) return;
+
+            _model.gameObject.SetActive(v);
         }
 
         public static XRNodeState? GetUnityVRNodeState(XRNode nodeType)
@@ -135,6 +192,8 @@ namespace QuickVR
 
         protected virtual void Update()
         {
+            SetModelVisible(IsTracked() && Application.isEditor && _showModel);
+
             InputTracking.GetNodeStates(_vrNodesStates);
 
             if (IsTracked())

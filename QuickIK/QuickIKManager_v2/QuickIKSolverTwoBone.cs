@@ -139,6 +139,7 @@ namespace QuickVR
         protected HumanBodyBones m_boneID = HumanBodyBones.LastBone;
 
         #endregion
+
     }
 
 }

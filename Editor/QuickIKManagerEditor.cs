@@ -11,7 +11,7 @@ namespace QuickVR
 
     [CustomEditor(typeof(QuickIKManager), true)]
     [InitializeOnLoad]
-    public class QuickIKManagerEditor : Editor
+    public class QuickIKManagerEditor : QuickBaseEditor
     {
 
         #region PROTECTED ATTRIBUTES
@@ -49,9 +49,9 @@ namespace QuickVR
 
         #region UPDATE
 
-        public override void OnInspectorGUI()
+        protected override void DrawGUI()
         {
-            DrawDefaultInspector();
+            base.DrawGUI();
 
             EditorGUILayout.Space();
             _showCfgBody = EditorGUILayout.Foldout(_showCfgBody, "Body IK Solvers");
@@ -111,9 +111,9 @@ namespace QuickVR
             //DrawIKTargets(GetIKTargetsLimb(), Handles.CubeHandleCap);
             //DrawIKTargets(GetIKTargetsMid(), Handles.SphereHandleCap);
 
-            foreach (IQuickIKSolver s in _ikManager.GetIKSolversBody()) DrawIKSolver(s, false);
-            foreach (IQuickIKSolver s in _ikManager.GetIKSolversLeftHand()) DrawIKSolver(s, true);
-            foreach (IQuickIKSolver s in _ikManager.GetIKSolversRightHand()) DrawIKSolver(s, true);
+            foreach (IQuickIKSolver s in _ikManager.GetIKSolversBody<IQuickIKSolver>()) DrawIKSolver(s, false);
+            foreach (IQuickIKSolver s in _ikManager.GetIKSolversLeftHand<IQuickIKSolver>()) DrawIKSolver(s, true);
+            foreach (IQuickIKSolver s in _ikManager.GetIKSolversRightHand<IQuickIKSolver>()) DrawIKSolver(s, true);
         }
 
         protected virtual void DrawIKTarget(Transform t, Handles.CapFunction function, bool isSolverFinger)

@@ -15,16 +15,6 @@ namespace QuickVR {
     public class QuickIKManager_v2 : QuickIKManager 
     {
 
-        #region PUBLIC PARAMETERS
-
-        [BitMask(typeof(IKLimbBonesHand))]
-        public int _ikMaskLeftHand = -1;
-
-        [BitMask(typeof(IKLimbBonesHand))]
-        public int _ikMaskRightHand = -1;
-
-        #endregion
-
         #region PROTECTED PARAMETERS
 
         protected PlayableGraph? _initialPoseGraph = null;
@@ -108,30 +98,31 @@ namespace QuickVR {
             return ikSolver;
         }
 
-        protected override void CreateIKSolversHand(HumanBodyBones boneHandID)
-        {
-            Transform ikSolversRoot = boneHandID == HumanBodyBones.LeftHand ? _ikSolversLeftHand : _ikSolversRightHand;
-            Transform tBone = _animator.GetBoneTransform(boneHandID);
+        //protected override void CreateIKSolversHand(HumanBodyBones boneHandID)
+        //{
+        //    Transform ikSolversRoot = boneHandID == HumanBodyBones.LeftHand ? _ikSolversLeftHand : _ikSolversRightHand;
+        //    Transform tBone = _animator.GetBoneTransform(boneHandID);
             
-            Transform ikTargetsRoot = boneHandID == HumanBodyBones.LeftHand ? _ikTargetsLeftHand : _ikTargetsRightHand;
-            ikTargetsRoot.position = tBone.position;
-            ikTargetsRoot.rotation = tBone.rotation;
+        //    Transform ikTargetsRoot = boneHandID == HumanBodyBones.LeftHand ? _ikTargetsLeftHand : _ikTargetsRightHand;
+        //    ikTargetsRoot.position = tBone.position;
+        //    ikTargetsRoot.rotation = tBone.rotation;
             
-            MultiParentConstraint constraint = ikTargetsRoot.GetOrCreateComponent<MultiParentConstraint>();
-            constraint.data.constrainedObject = ikTargetsRoot;
-            WeightedTransformArray sourceObjects = new WeightedTransformArray();
-            sourceObjects.Add(new WeightedTransform(_animator.GetBoneTransform(boneHandID), 1.0f));
-            constraint.data.sourceObjects = sourceObjects;
+        //    MultiParentConstraint constraint = ikTargetsRoot.GetOrCreateComponent<MultiParentConstraint>();
+        //    constraint.data.constrainedObject = ikTargetsRoot;
+        //    WeightedTransformArray sourceObjects = new WeightedTransformArray();
+        //    sourceObjects.Add(new WeightedTransform(_animator.GetBoneTransform(boneHandID), 1.0f));
+        //    constraint.data.sourceObjects = sourceObjects;
 
-            string prefix = boneHandID.ToString().Contains("Left") ? "Left" : "Right";
-            foreach (IKLimbBonesHand b in GetIKLimbBonesHand())
-            {
-                HumanBodyBones boneLimb = QuickUtils.ParseEnum<HumanBodyBones>(prefix + b.ToString() + "Distal");
-                QuickIKSolverTwoBone ikSolver = CreateIKSolver<QuickIKSolverTwoBone>(boneLimb);
-                ikSolver.data.maintainTargetPositionOffset = true;
-                ikSolver.data.maintainTargetRotationOffset = true;
-            }
-        }
+        //    string prefix = boneHandID.ToString().Contains("Left") ? "Left" : "Right";
+        //    foreach (IKLimbBonesHand b in GetIKLimbBonesHand())
+        //    {
+        //        HumanBodyBones boneLimb = QuickUtils.ParseEnum<HumanBodyBones>(prefix + b.ToString() + "Distal");
+        //        QuickIKSolverTwoBone ikSolver = CreateIKSolver<QuickIKSolverTwoBone>(boneLimb);
+        //        //ikSolver.data.maintainTargetPositionOffset = false;
+        //        //ikSolver.data.maintainTargetRotationOffset = false;
+        //        ikSolver.data.hint = CreateIKTarget(QuickHumanTrait.GetParentBone(boneLimb));
+        //    }
+        //}
 
         #endregion
 
