@@ -261,12 +261,40 @@ namespace QuickVR {
 
         public virtual QuickIKData GetInitialIKData(HumanBodyBones boneID)
         {
-            return _initialIKPose[boneID];
+            return _initialIKPose.ContainsKey(boneID)? _initialIKPose[boneID] : null;
         }
 
         public virtual QuickIKData GetInitialIKData(IKLimbBones boneID)
         {
             return GetInitialIKData(ToUnity(boneID));
+        }
+
+        public virtual Vector3 GetInitialIKDataLocalPos(HumanBodyBones boneID)
+        {
+            QuickIKData ikData = GetInitialIKData(boneID);
+            if (ikData == null) return Vector3.zero;
+
+            if (IsBoneLimb(boneID))
+            {
+                return ikData._targetLimbLocalPosition;
+            }
+            if (IsBoneMid(boneID))
+            {
+                return ikData._targetHintLocalPosition;
+            }
+
+            return Vector3.zero;
+        }
+
+        public virtual Vector3 GetInitialIKdata(IKLimbBones boneID)
+        {
+            return GetInitialIKDataLocalPos(ToUnity(boneID));
+        }
+
+        public virtual Quaternion GetInitialIKDataLocalRot(HumanBodyBones boneID)
+        {
+            QuickIKData ikData = GetInitialIKData(boneID);
+            return ((ikData != null) && (IsBoneLimb(boneID))) ? ikData._targetLimbLocalRotation : Quaternion.identity;
         }
 
         protected virtual Transform GetBoneUpper(HumanBodyBones boneLimbID)
