@@ -76,7 +76,7 @@ namespace AltProg.CleanEmptyDir
 
             try
             {
-                var json = JSON.Parse(fullContents);
+                var json = SimpleJSON.JSON.Parse(fullContents);
 
                 if ( (string)json ["last_ver"] != VERSION)
                     return ToMessage(json ["last_ver_msg"].AsArray);
@@ -99,7 +99,7 @@ namespace AltProg.CleanEmptyDir
             return null;
         }
 
-        static Message ToMessage( JSONArray  msg )
+        static Message ToMessage( SimpleJSON.JSONArray  msg )
         {
             var msgObj = new Message();
             msgObj.Msg = msg[0];

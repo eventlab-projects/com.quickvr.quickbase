@@ -103,7 +103,7 @@ public class ErcBodyTracking : QuickBodyTracking<ErcBodyJoints> {
 
     protected virtual void CreateIKManager()
     {
-        _ikManager = gameObject.GetOrCreateComponent<QuickIKManager>();
+        _ikManager = gameObject.GetOrCreateComponent<QuickIKManager_v1>();
     }
 
     protected virtual Transform CreateFootBase(HumanBodyBones footBone)

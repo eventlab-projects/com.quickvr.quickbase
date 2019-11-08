@@ -47,8 +47,8 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
  
-namespace AltProg.CleanEmptyDir
-//namespace SimpleJSON
+//namespace AltProg.CleanEmptyDir
+namespace SimpleJSON
 {
     public enum JSONBinaryTag
     {
