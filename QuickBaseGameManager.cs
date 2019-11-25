@@ -23,6 +23,7 @@ namespace QuickVR {
         public float _minDistToFootPrints = 0.5f;        
 
         public AudioClip _headTrackingCalibrationInstructions = null;
+        public bool _calibrationAssisted = true;
 		
 		public float _timeOut = -1;	//Number of seconds to wait until automatic finishing the game
 		public QuickStageBase _initialStage = null;
@@ -32,6 +33,12 @@ namespace QuickVR {
         #endregion
 
         #region PROTECTED PARAMETERS
+
+        protected enum CalibrationStep
+        {
+            HMDAdjustment,
+            ForwardDirection,
+        }
 
         protected Transform _player = null;
 
@@ -92,8 +99,9 @@ namespace QuickVR {
 			_debugManager = QuickSingletonManager.GetInstance<DebugManager>();
             _sceneManager = QuickSingletonManager.GetInstance<QuickSceneManager>();
             _fps = QuickSingletonManager.GetInstance<PerformanceFPS>();
+            _cameraFade = QuickSingletonManager.GetInstance<CameraFade>();
 
-			if (!_headTrackingCalibrationInstructions) {
+            if (!_headTrackingCalibrationInstructions) {
 				_headTrackingCalibrationInstructions = Resources.Load<AudioClip>(GetDefaultHMDCalibrationInstructions());
 			}
 
@@ -110,11 +118,7 @@ namespace QuickVR {
         protected virtual void Start()
         {
             StartPlayer();
-
-            _cameraFade = QuickSingletonManager.GetInstance<CameraFade>();
-            _cameraFade.SetColor(Color.white);
-            _cameraFade.SetTexture(_player.GetComponent<QuickHeadTracking>()._calibrationTexture);
-
+            
             StartCoroutine(CoUpdate());
         }
 
@@ -147,6 +151,16 @@ namespace QuickVR {
 			else path += "es/";
 			return path + "instructions";
 		}
+
+        protected virtual Texture2D GetHMDCalibrationScreen(CalibrationStep step)
+        {
+            string path = "HMDCalibrationScreens/";
+            path += SettingsBase.GetLanguage() == SettingsBase.Languages.ENGLISH ? "en/" : "es/";
+            path += "CalibrationScreen_v2";
+            path += step == CalibrationStep.HMDAdjustment ? "_00" : "_01";
+
+            return Resources.Load<Texture2D>(path);
+        }
 
 		protected virtual void InitGameConfiguration() {
 
@@ -304,22 +318,49 @@ namespace QuickVR {
 			if (hTracking)
             {
                 yield return StartCoroutine(CoShowLogos());
-#if !UNITY_ANDROID
+
+                _cameraFade.SetColor(Color.white);
+                _cameraFade.SetTexture(_player.GetComponent<QuickHeadTracking>()._calibrationTexture);
+
                 //hTracking.ShowCalibrationScreen(true);
 
-				//HMD Adjustment
-				_debugManager.Log("Adjusting HMD. Press CONTINUE when ready.");
-				while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
+                //HMD Adjustment
+                _debugManager.Log("Adjusting HMD. Press CONTINUE when ready.");
+                //while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
+                if (_calibrationAssisted)
+                {
+                    while (!Input.GetKeyDown(KeyCode.Return)) yield return null;
+                }
+                else
+                {
+                    while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
+                }
                 _cameraFade.SetColor(Color.black);
                 _cameraFade.SetTexture(null);
                 yield return null;
 
                 //HMD Forward Direction calibration
-                yield return StartCoroutine(CoPlayInstructions(_headTrackingCalibrationInstructions, "[WAIT] Playing HMD calibration instructions", Color.red));
+                _instructionsManager.Play(_headTrackingCalibrationInstructions);
 
-				_debugManager.Log("Wait for the user to look forward. Press CONTINUE when ready.");
-				while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
-#endif
+				if (_calibrationAssisted)
+                {
+                    _debugManager.Log("[WAIT] Playing calibration instructions.", Color.red);
+                    while (_instructionsManager.IsPlaying() && !Input.GetKeyDown(KeyCode.Return)) yield return null;
+
+                    _debugManager.Log("Wait for the user to look forward. Press RETURN when ready.");
+                    while (!Input.GetKeyDown(KeyCode.Return)) yield return null;
+                }
+                else
+                {
+                    _cameraFade.SetColor(Color.white);
+                    _cameraFade.SetTexture(GetHMDCalibrationScreen(CalibrationStep.ForwardDirection));
+                    while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
+                }
+
+                _instructionsManager.Stop();
+                _cameraFade.SetColor(Color.black);
+                _cameraFade.SetTexture(null);
+                yield return null;
 
                 QuickSingletonManager.GetInstance<QuickVRManager>().Calibrate(true);
                 hTracking.InitVRNodeFootPrints();

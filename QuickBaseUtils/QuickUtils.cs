@@ -393,7 +393,16 @@ namespace QuickVR
             }
         }
 
-        #region EXTENSION METHODS
+        public static bool IsMobileTarget()
+        {
+#if UNITY_ANDROID
+            return true;
+#else
+            return false;
+#endif
+        }
+
+#region EXTENSION METHODS
 
         public static int GetNumSiblings(this Component c)
         {
@@ -579,7 +588,7 @@ namespace QuickVR
             return watch.ElapsedMilliseconds / 1000.0f;
         }
 
-        #endregion
+#endregion
 
     }
 }

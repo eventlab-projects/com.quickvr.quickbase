@@ -482,20 +482,34 @@ namespace QuickVR
 
         protected int GetHipsIndex(List<QuickExtraTracker> extraTrackers)
         {
+            //QuickVRNode nodeHead = GetQuickVRNode(QuickVRNode.Type.Head);
+            //Vector3 p = nodeHead.transform.position;
+
+            //int HipsIndex = 0;
+            //float aMin = Mathf.Infinity;
+            //for (int i = 0; i < extraTrackers.Count; i++)
+            //{
+            //    Vector3 v = p - extraTrackers[i].Value;
+            //    float a = Vector3.Angle(Vector3.up, v);
+            //    if (a < aMin)
+            //    {
+            //        aMin = a;
+            //        HipsIndex = i;
+            //    }
+            //}
+
             QuickVRNode nodeHead = GetQuickVRNode(QuickVRNode.Type.Head);
-            Vector3 fwd = Vector3.ProjectOnPlane(nodeHead.transform.forward, transform.up);
             Vector3 p = nodeHead.transform.position;
-            
+
             int HipsIndex = 0;
-            float aMin = Mathf.Infinity;
+            float dMin = Mathf.Infinity;
             for (int i = 0; i < extraTrackers.Count; i++)
             {
-                Vector3 v = Vector3.ProjectOnPlane(p - extraTrackers[i].Value, fwd);
-                float a = Vector3.Angle(Vector3.up, v);
-                if (a < aMin)
+                float d = Vector3.Distance(extraTrackers[i].Value, p);
+                if (d < dMin)
                 {
-                    aMin = a;
                     HipsIndex = i;
+                    dMin = d;
                 }
             }
 

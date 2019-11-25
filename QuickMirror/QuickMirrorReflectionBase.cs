@@ -116,7 +116,7 @@ namespace QuickVR {
             rTex.name = name;
             rTex.isPowerOfTwo = true;
             rTex.hideFlags = HideFlags.DontSave;
-            rTex.antiAliasing = 1;
+            rTex.antiAliasing = 2;
 
             return rTex;
         }
@@ -140,7 +140,7 @@ namespace QuickVR {
             _reflectionCamera.gameObject.GetOrCreateComponent<Skybox>();
 
             _reflectionCamera.enabled = false;
-            _reflectionCamera.allowMSAA = false;
+            _reflectionCamera.allowMSAA = true;
 
             _reflectionCamera.renderingPath = _reflectedRenderingPath;
         }
@@ -190,6 +190,11 @@ namespace QuickVR {
         protected virtual bool AllowRender() {
             return (Vector3.Distance(_currentCamera.transform.position, transform.position) < _reflectionDistance);
         }
+
+        //protected virtual void OnWillRenderObject()
+        //{
+        //    BeginCameraRendering(Camera.current);
+        //}
 
         public virtual void BeginCameraRendering(Camera cam)
         {

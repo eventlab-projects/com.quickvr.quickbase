@@ -159,21 +159,25 @@ namespace QuickVR {
 
         protected virtual T CreateIKSolver<T>(HumanBodyBones boneLimb) where T : MonoBehaviour, IQuickIKSolver
         {
-            T ikSolver = CreateIKSolverTransform(GetIKSolversRoot(boneLimb), boneLimb.ToString()).GetOrCreateComponent<T>();
-
-            //And configure it according to the bone
-            ikSolver._boneUpper = GetBoneUpper(boneLimb);
-            ikSolver._boneMid = GetBoneMid(boneLimb);
-            ikSolver._boneLimb = _animator.GetBoneTransform(boneLimb);
-
-            ikSolver._targetLimb = CreateIKTarget(boneLimb);
-
-            HumanBodyBones? midBoneID = GetIKTargetMidBoneID(boneLimb);
-            if (midBoneID.HasValue)
+            T ikSolver = GetIKSolver<T>(boneLimb);
+            if (!ikSolver)
             {
-                ikSolver._targetHint = CreateIKTarget(midBoneID.Value);
+                ikSolver = CreateIKSolverTransform(GetIKSolversRoot(boneLimb), boneLimb.ToString()).GetOrCreateComponent<T>();
+
+                //And configure it according to the bone
+                ikSolver._boneUpper = GetBoneUpper(boneLimb);
+                ikSolver._boneMid = GetBoneMid(boneLimb);
+                ikSolver._boneLimb = _animator.GetBoneTransform(boneLimb);
+
+                ikSolver._targetLimb = CreateIKTarget(boneLimb);
+
+                HumanBodyBones? midBoneID = GetIKTargetMidBoneID(boneLimb);
+                if (midBoneID.HasValue)
+                {
+                    ikSolver._targetHint = CreateIKTarget(midBoneID.Value);
+                }
+                //ikSolver._boneID = boneLimb;
             }
-            //ikSolver._boneID = boneLimb;
 
             foreach (IQuickIKSolver s in ikSolver.GetComponents<IQuickIKSolver>())
             {
@@ -284,11 +288,6 @@ namespace QuickVR {
             }
 
             return Vector3.zero;
-        }
-
-        public virtual Vector3 GetInitialIKdata(IKLimbBones boneID)
-        {
-            return GetInitialIKDataLocalPos(ToUnity(boneID));
         }
 
         public virtual Quaternion GetInitialIKDataLocalRot(HumanBodyBones boneID)

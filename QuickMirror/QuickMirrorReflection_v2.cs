@@ -66,11 +66,11 @@ namespace QuickVR
         {
             base.UpdateCameraModes();
 
-            _reflectionCamera.RemoveAllCommandBuffers();
-            CommandBuffer invertCullingON = CreateInvertCullingCommandBuffer(true);
-            _reflectionCamera.AddCommandBuffer(CameraEvent.BeforeGBuffer, invertCullingON);
-            _reflectionCamera.AddCommandBuffer(CameraEvent.BeforeDepthTexture, invertCullingON);
-            _reflectionCamera.AddCommandBuffer(CameraEvent.AfterEverything, CreateInvertCullingCommandBuffer(false));
+            //_reflectionCamera.RemoveAllCommandBuffers();
+            //CommandBuffer invertCullingON = CreateInvertCullingCommandBuffer(true);
+            //_reflectionCamera.AddCommandBuffer(CameraEvent.BeforeGBuffer, invertCullingON);
+            //_reflectionCamera.AddCommandBuffer(CameraEvent.BeforeDepthTexture, invertCullingON);
+            //_reflectionCamera.AddCommandBuffer(CameraEvent.AfterEverything, CreateInvertCullingCommandBuffer(false));
         }
 
         protected override void RenderReflection()
@@ -151,6 +151,8 @@ namespace QuickVR
 
         protected override void RenderVirtualImage(RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0)
         {
+            GL.invertCulling = true;
+
             //1) Compute worldToCamera Matrix
             _reflectionCamera.worldToCameraMatrix = _currentCamera.stereoEnabled ? _currentCamera.GetStereoViewMatrix(eye) : _currentCamera.worldToCameraMatrix;
             _reflectionCamera.worldToCameraMatrix *= CalculateReflectionMatrix();
@@ -172,6 +174,8 @@ namespace QuickVR
                 _reflectionCamera.projectionMatrix = _reflectionCamera.CalculateObliqueMatrix(clipPlane);
                 _reflectionCamera.Render();
             }
+
+            GL.invertCulling = false;
         }
 
         // Given position/normal of the plane, calculates plane in camera space.
