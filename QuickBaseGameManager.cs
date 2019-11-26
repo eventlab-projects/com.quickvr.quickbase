@@ -118,8 +118,17 @@ namespace QuickVR {
         protected virtual void Start()
         {
             StartPlayer();
-            
-            StartCoroutine(CoUpdate());
+
+            QuickUnityVRBase hTracking = _player ? _player.GetComponent<QuickUnityVRBase>() : null;
+            if (hTracking)
+            {
+                StartCoroutine(CoUpdate());
+            }
+            else
+            {
+                Debug.LogError("NO HEAD TRACKING FOUND!!! APPLICATION IS CLOSED");
+                QuickUtils.CloseApplication();
+            }
         }
 
         protected virtual void AwakePlayer()
@@ -283,7 +292,20 @@ namespace QuickVR {
             //Start loading the next scene
             if (_nextSceneName != "") _sceneManager.LoadSceneAsync(_nextSceneName);
 
-			yield return StartCoroutine(CoUpdateStateCalibrating());	//Wait for the VR Devices Calibration
+            //Adjust the HMD
+            yield return StartCoroutine(CoUpdateHMDAdjustment());
+
+            //Show the logos if any
+            yield return StartCoroutine(CoShowLogos());
+
+            //Start the calibration process
+            if (OnCalibrating != null) OnCalibrating();
+            yield return StartCoroutine(CoUpdateStateCalibrating());	//Wait for the VR Devices Calibration
+            QuickSingletonManager.GetInstance<QuickVRManager>().Calibrate(true);
+            _player.GetComponent<QuickUnityVRBase>().InitVRNodeFootPrints();
+            _debugManager.Clear();
+
+            //Start the application
             _cameraFade.FadeIn(5.0f);
             while (_cameraFade.IsFading()) yield return null;
 			
@@ -311,62 +333,50 @@ namespace QuickVR {
             }
 		}
 
-		protected virtual IEnumerator CoUpdateStateCalibrating() {
-            if (OnCalibrating != null) OnCalibrating();
+        protected virtual IEnumerator CoUpdateHMDAdjustment()
+        {
+            _cameraFade.SetColor(Color.white);
+            _cameraFade.SetTexture(_player.GetComponent<QuickHeadTracking>()._calibrationTexture);
 
-            QuickUnityVRBase hTracking = _player? _player.GetComponent<QuickUnityVRBase>() : null;
-			if (hTracking)
+            //HMD Adjustment
+            _debugManager.Log("Adjusting HMD. Press CONTINUE when ready.");
+            //while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
+            if (_calibrationAssisted)
             {
-                yield return StartCoroutine(CoShowLogos());
+                while (!Input.GetKeyDown(KeyCode.Return)) yield return null;
+            }
+            else
+            {
+                while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
+            }
+            _cameraFade.SetColor(Color.black);
+            _cameraFade.SetTexture(null);
+            yield return null;
+        }
 
+		protected virtual IEnumerator CoUpdateStateCalibrating() {
+            //HMD Forward Direction calibration
+            _instructionsManager.Play(_headTrackingCalibrationInstructions);
+
+			if (_calibrationAssisted)
+            {
+                _debugManager.Log("[WAIT] Playing calibration instructions.", Color.red);
+                while (_instructionsManager.IsPlaying() && !Input.GetKeyDown(KeyCode.Return)) yield return null;
+
+                _debugManager.Log("Wait for the user to look forward. Press RETURN when ready.");
+                while (!Input.GetKeyDown(KeyCode.Return)) yield return null;
+            }
+            else
+            {
                 _cameraFade.SetColor(Color.white);
-                _cameraFade.SetTexture(_player.GetComponent<QuickHeadTracking>()._calibrationTexture);
+                _cameraFade.SetTexture(GetHMDCalibrationScreen(CalibrationStep.ForwardDirection));
+                while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
+            }
 
-                //hTracking.ShowCalibrationScreen(true);
-
-                //HMD Adjustment
-                _debugManager.Log("Adjusting HMD. Press CONTINUE when ready.");
-                //while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
-                if (_calibrationAssisted)
-                {
-                    while (!Input.GetKeyDown(KeyCode.Return)) yield return null;
-                }
-                else
-                {
-                    while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
-                }
-                _cameraFade.SetColor(Color.black);
-                _cameraFade.SetTexture(null);
-                yield return null;
-
-                //HMD Forward Direction calibration
-                _instructionsManager.Play(_headTrackingCalibrationInstructions);
-
-				if (_calibrationAssisted)
-                {
-                    _debugManager.Log("[WAIT] Playing calibration instructions.", Color.red);
-                    while (_instructionsManager.IsPlaying() && !Input.GetKeyDown(KeyCode.Return)) yield return null;
-
-                    _debugManager.Log("Wait for the user to look forward. Press RETURN when ready.");
-                    while (!Input.GetKeyDown(KeyCode.Return)) yield return null;
-                }
-                else
-                {
-                    _cameraFade.SetColor(Color.white);
-                    _cameraFade.SetTexture(GetHMDCalibrationScreen(CalibrationStep.ForwardDirection));
-                    while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
-                }
-
-                _instructionsManager.Stop();
-                _cameraFade.SetColor(Color.black);
-                _cameraFade.SetTexture(null);
-                yield return null;
-
-                QuickSingletonManager.GetInstance<QuickVRManager>().Calibrate(true);
-                hTracking.InitVRNodeFootPrints();
-				_debugManager.Clear();
-			}
-			else _debugManager.Log("NO HEAD TRACKING FOUND!!!");
+            _instructionsManager.Stop();
+            _cameraFade.SetColor(Color.black);
+            _cameraFade.SetTexture(null);
+            yield return null;
 		}
 
         protected virtual IEnumerator CoPlayInstructions(AudioClip clip, string message = "", Color color = new Color())
