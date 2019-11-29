@@ -13,6 +13,8 @@ namespace QuickVR
 
         public enum Type
         {
+            Undefined = -1,
+
             Head, 
 
             LeftUpperArm, 
@@ -33,7 +35,7 @@ namespace QuickVR
             RightLowerLeg,
             RightFoot,
 
-            //TrackingReference,  //Represents a stationary physical device that can be used as a point of reference in the tracked area.
+            TrackingReference,  //Represents a stationary physical device that can be used as a point of reference in the tracked area.
         };
 
         public bool _showModel = false;
@@ -51,6 +53,8 @@ namespace QuickVR
         protected static List<XRNodeState> _vrNodesStates = new List<XRNodeState>();
 
         protected Transform _model = null;
+
+        protected Type _role = Type.Undefined;
 
         #endregion
 
@@ -174,6 +178,26 @@ namespace QuickVR
             return QuickUtils.ParseEnum<Type>(name);
         }
 
+        public virtual Type GetRole()
+        {
+            return _role;
+        }
+
+        public virtual void SetRole(Type role)
+        {
+            _role = role;
+            name = role.ToString();
+        }
+
+        public virtual void SetRole(XRNode role)
+        {
+            if (role == XRNode.Head) SetRole(Type.Head);
+            else if (role == XRNode.LeftHand) SetRole(Type.LeftHand);
+            else if (role == XRNode.RightHand) SetRole(Type.RightHand);
+            else if (role == XRNode.TrackingReference) SetRole(Type.TrackingReference);
+            else SetRole(Type.Undefined);
+        }
+
         public virtual QuickTrackedObject GetTrackedObject()
         {
             return _trackedObject;
@@ -182,7 +206,6 @@ namespace QuickVR
         public static List<Type> GetTypeList()
         {
             if (_typeList.Count == 0) _typeList = QuickUtils.GetEnumValues<Type>();
-
             return _typeList;
         }
 
@@ -193,26 +216,6 @@ namespace QuickVR
         protected virtual void Update()
         {
             SetModelVisible(IsTracked() && Application.isEditor && _showModel);
-
-            InputTracking.GetNodeStates(_vrNodesStates);
-
-            if (IsTracked())
-            {
-                XRNodeState? uState = GetUnityVRNodeState();
-                if (uState.HasValue)
-                {
-                    Vector3 pos;
-                    Quaternion rot;
-                    if (uState.Value.TryGetPosition(out pos))
-                    {
-                        transform.localPosition = pos;
-                    }
-                    if (uState.Value.TryGetRotation(out rot))
-                    {
-                        transform.localRotation = rot;
-                    }
-                }
-            }
         }
 
         #endregion
