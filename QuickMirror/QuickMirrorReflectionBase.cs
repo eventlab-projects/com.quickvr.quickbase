@@ -258,17 +258,7 @@ namespace QuickVR {
             if (_currentCamera.stereoEnabled)
             {
                 float stereoSign = mirrorStereo ? -1.0f : 1.0f;
-                float stereoSeparation = 0.0f;
-
-                XRNodeState? eyeLeftState = QuickVRNode.GetUnityVRNodeState(XRNode.LeftEye);
-                XRNodeState? eyeRightState = QuickVRNode.GetUnityVRNodeState(XRNode.RightEye);
-                if (eyeLeftState.HasValue && eyeRightState.HasValue)
-                {
-                    Vector3 posEyeLeft, posEyeRight;
-                    eyeLeftState.Value.TryGetPosition(out posEyeLeft);
-                    eyeRightState.Value.TryGetPosition(out posEyeRight);
-                    stereoSeparation = Vector3.Distance(posEyeLeft, posEyeRight);
-                }
+                float stereoSeparation = QuickSingletonManager.GetInstance<QuickVRPlayArea>().GetEyeStereoSeparation();
 
                 if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Both || _currentCamera.stereoTargetEye == StereoTargetEyeMask.Left)
                 {

@@ -46,9 +46,18 @@ namespace QuickVR
 
         protected Coroutine _coUpdateTrackedNode = null;
 
+        protected QuickVRPlayArea _vrPlayArea = null;
+
         #endregion
 
         #region CREATION AND DESTRUCTION
+
+        protected override void Awake()
+        {
+            _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
+
+            base.Awake();
+        }
 
         protected override void Start()
         {
@@ -99,7 +108,7 @@ namespace QuickVR
         
         protected virtual IEnumerator CoUpdate()
         {
-            _trackedObject = GetComponent<QuickUnityVRBase>().GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject();
+            _trackedObject = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject();
 
             while (true)
             {
@@ -115,10 +124,10 @@ namespace QuickVR
         protected virtual void CoUpdateTrackedNode()
         {
             QuickUnityVRBase hTracking = GetComponent<QuickUnityVRBase>();
-            QuickVRNode hipsNode = hTracking.GetQuickVRNode(QuickVRNode.Type.Hips);
+            QuickVRNode hipsNode = _vrPlayArea.GetVRNode(QuickVRNode.Type.Hips);
             if (hipsNode)
             {
-                QuickTrackedObject tObject = hipsNode.IsTracked() ? hipsNode.GetTrackedObject() : hTracking.GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject();
+                QuickTrackedObject tObject = _vrPlayArea.IsTrackedNode(hipsNode)? hipsNode.GetTrackedObject() : _vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject();
                 if (tObject != _trackedObject)
                 {
                     _trackedObject = tObject;

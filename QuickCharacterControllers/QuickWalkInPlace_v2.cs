@@ -38,6 +38,7 @@ namespace QuickVR
         protected QuickTrackedObject _trackedObject = null;
 
         protected QuickUnityVRBase _headTracking = null;
+        protected QuickVRPlayArea _vrPlayArea = null;
 
         #endregion
 
@@ -108,7 +109,7 @@ namespace QuickVR
             QuickVRNode nodeHead = null;
             while (nodeHead == null)
             {
-                nodeHead = hTracking.GetQuickVRNode(QuickVRNode.Type.Head);
+                nodeHead = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head);
                 yield return null;
             }
             _trackedObject = nodeHead.GetTrackedObject();
@@ -138,10 +139,10 @@ namespace QuickVR
 
         protected virtual void CoUpdateTrackedNode()
         {
-            QuickVRNode hipsNode = _headTracking.GetQuickVRNode(QuickVRNode.Type.Hips);
+            QuickVRNode hipsNode = _vrPlayArea.GetVRNode(QuickVRNode.Type.Hips);
             if (hipsNode)
             {
-                QuickTrackedObject tObject = hipsNode.IsTracked() ? hipsNode.GetTrackedObject() : _headTracking.GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject();
+                QuickTrackedObject tObject = _vrPlayArea.IsTrackedNode(hipsNode)? hipsNode.GetTrackedObject() : _vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject();
                 if (tObject != _trackedObject)
                 {
                     _trackedObject = tObject;
