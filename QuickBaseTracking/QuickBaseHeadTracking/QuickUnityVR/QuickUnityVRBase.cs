@@ -59,6 +59,7 @@ namespace QuickVR
         protected override void Awake()
         {
             _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
+            _vrPlayArea.transform.parent = transform;
 
             base.Awake();
 
@@ -447,23 +448,22 @@ namespace QuickVR
 
             foreach (QuickVRNode.Type t in QuickVRNode.GetTypeList())
             {
-                CalibrateVRNode(t);
+                QuickVRNode node = _vrPlayArea.GetVRNode(t);
+                if (node) CalibrateVRNode(node);
             }
         }
 
-        protected virtual void CalibrateVRNode(QuickVRNode.Type nodeType)
+        protected virtual void CalibrateVRNode(QuickVRNode node)
         {
-            QuickVRNode node = _vrPlayArea.GetVRNode(nodeType);
-            if (!node) return;
-
             QuickTrackedObject tObject = node.GetTrackedObject();
             tObject.transform.ResetTransformation();
-            
-            if (nodeType == QuickVRNode.Type.Head)
+
+            QuickVRNode.Type role = node.GetRole();
+            if (role == QuickVRNode.Type.Head)
             {
                 CalibrateVRNodeHead(node);
             }
-            else if (nodeType == QuickVRNode.Type.Hips)
+            else if (role == QuickVRNode.Type.Hips)
             {
                 QuickTrackedObject tObjectHead = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject();
                 if (_vrPlayArea.IsTrackedNode(node))
@@ -475,7 +475,7 @@ namespace QuickVR
                     node.transform.position = new Vector3(tObjectHead.transform.position.x, tObjectHead.transform.position.y - 0.8f, tObjectHead.transform.position.z);
                 }
             }
-            else if (nodeType == QuickVRNode.Type.LeftHand || nodeType == QuickVRNode.Type.RightHand)
+            else if (role == QuickVRNode.Type.LeftHand || role == QuickVRNode.Type.RightHand)
             {
                 //if (IsExtraTracker(node.GetID()))
                 //{
@@ -491,17 +491,17 @@ namespace QuickVR
                 //else
                 {
                     //This is a controller
-                    float sign = nodeType == QuickVRNode.Type.LeftHand ? 1.0f : -1.0f;
+                    float sign = role == QuickVRNode.Type.LeftHand ? 1.0f : -1.0f;
                     tObject.transform.Rotate(tObject.transform.forward, sign * 90.0f, Space.World);
                     tObject.transform.localPosition = HAND_CONTROLLER_POSITION_OFFSET;
                 }
             }
-            else if (nodeType == QuickVRNode.Type.LeftFoot || nodeType == QuickVRNode.Type.RightFoot)
+            else if (role == QuickVRNode.Type.LeftFoot || role == QuickVRNode.Type.RightFoot)
             {
                 //tObject.transform.rotation = _vrNodesOrigin.rotation;
                 //tObject.transform.position += -_vrNodesOrigin.forward * 0.075f;
             }
-            else if (nodeType == QuickVRNode.Type.LeftLowerArm || nodeType == QuickVRNode.Type.RightLowerArm)
+            else if (role == QuickVRNode.Type.LeftLowerArm || role == QuickVRNode.Type.RightLowerArm)
             {
                 tObject.transform.position += (-node.transform.forward * 0.1f);// + (-_vrNodesOrigin.up * 0.1f);
             }
@@ -582,6 +582,8 @@ namespace QuickVR
         {
             //Apply the correct rotation to the cameracontrollerroot:
             QuickVRNode nodeHead = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head);
+            if (!nodeHead) return;
+
             Vector3 fwdCam = Vector3.ProjectOnPlane(_camera.transform.forward, transform.up).normalized;
             Vector3 fwdHead = Vector3.ProjectOnPlane(nodeHead.GetTrackedObject().transform.forward, transform.up).normalized;
             float rotOffset = Vector3.SignedAngle(fwdCam, fwdHead, transform.up);

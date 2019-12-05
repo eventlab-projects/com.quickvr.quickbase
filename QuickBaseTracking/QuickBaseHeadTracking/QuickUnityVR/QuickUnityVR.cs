@@ -77,11 +77,6 @@ namespace QuickVR {
 
         #region GET AND SET
 
-        protected Transform GetCalibrationPose(QuickVRNode.Type tNode)
-        {
-            return _vrPlayArea.transform.Find("_CalibrationPose_" + tNode.ToString());
-        }
-
         protected virtual float GetHeadHeight()
         {
             return _unscaledHeadHeight * (1.0f / transform.lossyScale.y);
@@ -101,15 +96,15 @@ namespace QuickVR {
             //_initialVerticalReferencePosY = _verticalReference.transform.position.y;
         }
 
-        protected override void CalibrateVRNode(QuickVRNode.Type nodeType)
+        protected override void CalibrateVRNode(QuickVRNode node)
         {
-            base.CalibrateVRNode(nodeType);
+            base.CalibrateVRNode(node);
 
-            //QuickTrackedObject tObject = _vrPlayArea.GetVRNode(nodeType).GetTrackedObject();
-            //Transform cPose = GetCalibrationPose(nodeType);
-            //cPose.position = tObject.transform.position;
-            //cPose.rotation = tObject.transform.rotation;
-            //tObject.Reset();
+            QuickTrackedObject tObject = node.GetTrackedObject();
+            Transform cPose = _vrPlayArea.GetCalibrationPose(node.GetRole());
+            cPose.position = tObject.transform.position;
+            cPose.rotation = tObject.transform.rotation;
+            tObject.Reset();
         }
 
         protected override void CalibrateVRNodeHead(QuickVRNode node)
@@ -217,7 +212,6 @@ namespace QuickVR {
 
             foreach (QuickVRNode.Type t in QuickVRNode.GetTypeList())
             {
-                if (!_vrPlayArea.IsTrackedNode(t)) continue;
                 QuickVRNode node = _vrPlayArea.GetVRNode(t);
                 if (!node) continue;
 
@@ -266,34 +260,29 @@ namespace QuickVR {
 
         protected virtual void UpdateTransformNodeFromCalibrationPose(QuickVRNode node, IQuickIKSolver ikSolver, HumanBodyBones boneID, bool updatePos, bool updateRot)
         {
-            //QuickIKData initialIKData = _ikManager.GetInitialIKData(boneID);
-            //Transform t = _ikManager.GetIKTarget(boneID);
-            //if (!t) return;
+            QuickIKData initialIKData = _ikManager.GetInitialIKData(boneID);
+            Transform t = _ikManager.GetIKTarget(boneID);
+            if (!t) return;
 
-            //Vector3 initialLocalPos = _ikManager.GetInitialIKDataLocalPos(boneID);
-            //Quaternion initialLocalRot = _ikManager.GetInitialIKDataLocalRot(boneID);
-            
-            //Transform calibrationPose = GetCalibrationPose(node.GetNodeType());
-            //if (!calibrationPose) return;
+            Vector3 initialLocalPos = _ikManager.GetInitialIKDataLocalPos(boneID);
+            Quaternion initialLocalRot = _ikManager.GetInitialIKDataLocalRot(boneID);
 
-            //Quaternion tmp = transform.rotation;
-            //transform.rotation = _vrNodesOrigin.rotation;
-            
-            //if (updatePos)
-            //{
-            //    t.localPosition = initialLocalPos;
-            //    Vector3 offset = node.GetTrackedObject().transform.position - calibrationPose.position;
-            //    t.position += offset;
-            //}
-            
-            //if (updateRot)
-            //{
-            //    t.localRotation = initialLocalRot;
-            //    Quaternion rotOffset = node.GetTrackedObject().transform.rotation * Quaternion.Inverse(calibrationPose.rotation);
-            //    t.rotation = rotOffset * t.rotation;
-            //}
+            Transform calibrationPose = _vrPlayArea.GetCalibrationPose(node.GetRole());
+            if (!calibrationPose) return;
 
-            //transform.rotation = tmp;
+            if (updatePos)
+            {
+                t.localPosition = initialLocalPos;
+                Vector3 offset = node.GetTrackedObject().transform.position - calibrationPose.position;
+                t.position += offset;
+            }
+
+            if (updateRot)
+            {
+                t.localRotation = initialLocalRot;
+                Quaternion rotOffset = node.GetTrackedObject().transform.rotation * Quaternion.Inverse(calibrationPose.rotation);
+                t.rotation = rotOffset * t.rotation;
+            }
         }
 
         protected virtual void UpdateTrackingIK()
