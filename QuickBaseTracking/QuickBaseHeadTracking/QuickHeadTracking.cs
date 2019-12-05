@@ -6,7 +6,6 @@ using System;
 
 namespace QuickVR {
 
-    [Configurable("QuickHeadTracking")]
 	public abstract class QuickHeadTracking : QuickBaseTrackingManager {
 
 		#region PUBLIC PARAMETERS
@@ -45,7 +44,7 @@ namespace QuickVR {
         #region CONSTANTS
 
         protected const int DEFAULT_PRIORITY_TRACKING_HEAD = 2000;
-		protected const float DEFAULT_NEAR_CLIP_PLANE = 0.035f;
+		protected const float DEFAULT_NEAR_CLIP_PLANE = 0.05f;
 		protected const float DEFAULT_FAR_CLIP_PLANE = 500.0f;
 
         protected const string CAMERA_CONTROLLER_ROOT_NAME = "__CameraControllerRoot__";
@@ -77,7 +76,6 @@ namespace QuickVR {
             _camera.tag = "MainCamera";
             _camera.gameObject.GetOrCreateComponent<AudioListener>();
             _camera.gameObject.GetOrCreateComponent<FlareLayer>();
-            _camera.gameObject.GetOrCreateComponent<GUILayer>();
             _camera.transform.rotation = transform.rotation;
         }
 

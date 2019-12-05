@@ -103,7 +103,7 @@ public class ErcBodyTracking : QuickBodyTracking<ErcBodyJoints> {
 
     protected virtual void CreateIKManager()
     {
-        _ikManager = gameObject.GetOrCreateComponent<QuickIKManager>();
+        _ikManager = gameObject.GetOrCreateComponent<QuickIKManager_v1>();
     }
 
     protected virtual Transform CreateFootBase(HumanBodyBones footBone)
@@ -247,11 +247,6 @@ public class ErcBodyTracking : QuickBodyTracking<ErcBodyJoints> {
     protected override Quaternion GetTrackingJointRotation(ErcBodyJoints jointID)
     {
         return Quaternion.identity;
-    }
-
-    protected override QuickJoint.State GetTrackingJointState(ErcBodyJoints jointID)
-    {
-        return QuickJoint.State.TRACKED;
     }
 
     protected virtual float GetScaleFactor()

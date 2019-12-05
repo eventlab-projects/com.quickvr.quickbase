@@ -70,7 +70,7 @@ public class DebugManager : MonoBehaviour
     protected virtual void OnGUI()
     {
         GUI.color = _textColor;
-        GUI.Label(new Rect(0, Screen.height - 25, 500, 25), _message);
+        GUI.Label(new Rect(0, Screen.height - 25, 1024, 25), _message);
     }
 
     #endregion

@@ -6,21 +6,6 @@ using System.Collections.Generic;
 namespace QuickVR
 {
 
-    #region CONFIGURABLE ATTRIBUTE
-
-    [AttributeUsage(AttributeTargets.Class)]
-    public class ConfigurableAttribute : Attribute
-    {
-        public string _configurationFolder = "";
-
-        public ConfigurableAttribute(string configurationFolder = "")
-        {
-            _configurationFolder = configurationFolder;
-        }
-    }
-
-    #endregion 
-
     #region BUTTON METHOD ATTRIBUTE
 
     [AttributeUsage(AttributeTargets.Method)]

@@ -1,5 +1,4 @@
 using UnityEngine;
-using UnityEngine.Rendering;
 using UnityEngine.XR;
 
 using System.Collections;
@@ -58,10 +57,6 @@ namespace QuickVR {
 		protected MeshFilter _mFilter;
         protected Renderer _renderer;
 
-        protected static Queue<QuickMirrorReflectionBase> _mirrorQueue = new Queue<QuickMirrorReflectionBase>();
-
-        protected bool _interleavedRendering = false;
-
         #endregion
 		
 		#region CREATION AND DESTRUCTION
@@ -84,8 +79,7 @@ namespace QuickVR {
                 _renderer.sharedMaterial = new Material(Shader.Find(shaderName));
             }
 
-            QuickVRManager.OnPostUpdateTracking += OnRenderMirror;
-            RenderPipelineManager.beginCameraRendering += OnBeginCameraRenderingTest;
+            QuickMirrorReflectionManager.AddMirror(this);
         }
 
         protected virtual void OnDisable()
@@ -93,8 +87,7 @@ namespace QuickVR {
             DestroyImmediate(_reflectionTextureLeft);
             DestroyImmediate(_reflectionTextureRight);
 
-            QuickVRManager.OnPostUpdateTracking -= OnRenderMirror;
-            RenderPipelineManager.beginCameraRendering -= OnBeginCameraRenderingTest;
+            QuickMirrorReflectionManager.RemoveMirror(this);
         }
 		
 		protected virtual void CreateReflectionTexture() {
@@ -123,7 +116,7 @@ namespace QuickVR {
             rTex.name = name;
             rTex.isPowerOfTwo = true;
             rTex.hideFlags = HideFlags.DontSave;
-            rTex.antiAliasing = 1;
+            rTex.antiAliasing = 2;
 
             return rTex;
         }
@@ -147,7 +140,7 @@ namespace QuickVR {
             _reflectionCamera.gameObject.GetOrCreateComponent<Skybox>();
 
             _reflectionCamera.enabled = false;
-            _reflectionCamera.allowMSAA = false;
+            _reflectionCamera.allowMSAA = true;
 
             _reflectionCamera.renderingPath = _reflectedRenderingPath;
         }
@@ -198,43 +191,21 @@ namespace QuickVR {
             return (Vector3.Distance(_currentCamera.transform.position, transform.position) < _reflectionDistance);
         }
 
-        protected virtual void AddToMirrorQueue()
-        {
-            _mirrorQueue.Enqueue(this);
-        }
+        //protected virtual void OnWillRenderObject()
+        //{
+        //    BeginCameraRendering(Camera.current);
+        //}
 
-        // This is called when it's known that the object will be rendered by some
-		// camera. We render reflections and do other updates here.
-		// Because the script executes in edit mode, reflections for the scene view
-		// camera will just work!
-		//protected virtual void OnWillRenderObject() {
-        protected virtual void OnBeginCameraRenderingTest(ScriptableRenderContext context, Camera cam)
+        public virtual void BeginCameraRendering(Camera cam)
         {
-            //Debug.Log("_camera = " + cam.name);
-            Debug.Log(cam.targetTexture);
-        }
-
-        protected virtual void OnRenderMirror()
-        {
-            foreach (Camera cam in Camera.allCameras)
-            {
-                _currentCamera = cam;
-                OnBeginCameraRendering();
-                Debug.Log("RENDER MIRROR");
-            }
-        }
-
-        protected virtual void OnBeginCameraRendering()
-        {
+            _currentCamera = cam;
             //Force the mirror to be in the Water layer, so it will avoid to be rendered by the reflection cameras
 			gameObject.layer = LayerMask.NameToLayer("Water");
 
             if (AllowRender())
             {
-                if (!_insideRendering && (_mirrorQueue.Count == 0 || _mirrorQueue.Peek() == this))
+                if (!_insideRendering)
                 {
-                    if (_mirrorQueue.Count > 0) _mirrorQueue.Dequeue();
-
                     _insideRendering = true;
                     //StartCoroutine(CoUpdateInsideRendering());
                     
@@ -253,10 +224,6 @@ namespace QuickVR {
                     // Restore the quality settings
                     QualitySettings.pixelLightCount = oldPixelLightCount;
                     QualitySettings.shadows = oldShadowQuality;
-                }
-                else if (!_mirrorQueue.Contains(this))
-                {
-                    //AddToMirrorQueue();
                 }
             }
             else
@@ -291,17 +258,7 @@ namespace QuickVR {
             if (_currentCamera.stereoEnabled)
             {
                 float stereoSign = mirrorStereo ? -1.0f : 1.0f;
-                float stereoSeparation = 0.0f;
-
-                XRNodeState? eyeLeftState = QuickVRNode.GetUnityVRNodeState(XRNode.LeftEye);
-                XRNodeState? eyeRightState = QuickVRNode.GetUnityVRNodeState(XRNode.RightEye);
-                if (eyeLeftState.HasValue && eyeRightState.HasValue)
-                {
-                    Vector3 posEyeLeft, posEyeRight;
-                    eyeLeftState.Value.TryGetPosition(out posEyeLeft);
-                    eyeRightState.Value.TryGetPosition(out posEyeRight);
-                    stereoSeparation = Vector3.Distance(posEyeLeft, posEyeRight);
-                }
+                float stereoSeparation = QuickSingletonManager.GetInstance<QuickVRPlayArea>().GetEyeStereoSeparation();
 
                 if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Both || _currentCamera.stereoTargetEye == StereoTargetEyeMask.Left)
                 {
@@ -352,6 +309,21 @@ namespace QuickVR {
         }
 
         protected abstract void RenderVirtualImage(RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0.0f);
+
+        protected virtual void OnDrawGizmos()
+        {
+            if (_currentCamera && _reflectionCamera)
+            {
+                Gizmos.color = Color.red;
+                Gizmos.matrix = Matrix4x4.TRS(_currentCamera.transform.position, _currentCamera.transform.rotation, Vector3.one); 
+                Gizmos.DrawFrustum(Vector3.zero, _currentCamera.fieldOfView, _currentCamera.farClipPlane, _currentCamera.nearClipPlane, _currentCamera.aspect);
+
+                Gizmos.color = Color.blue;
+                Gizmos.matrix = Matrix4x4.TRS(_reflectionCamera.transform.position, _reflectionCamera.transform.rotation, Vector3.one);
+                Gizmos.DrawFrustum(Vector3.zero, _reflectionCamera.fieldOfView, _reflectionCamera.farClipPlane, _reflectionCamera.nearClipPlane, _reflectionCamera.aspect);
+            } 
+            
+        }
 
         #endregion
 

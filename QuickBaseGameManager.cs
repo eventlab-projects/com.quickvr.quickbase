@@ -23,6 +23,7 @@ namespace QuickVR {
         public float _minDistToFootPrints = 0.5f;        
 
         public AudioClip _headTrackingCalibrationInstructions = null;
+        public bool _calibrationAssisted = true;
 		
 		public float _timeOut = -1;	//Number of seconds to wait until automatic finishing the game
 		public QuickStageBase _initialStage = null;
@@ -32,6 +33,12 @@ namespace QuickVR {
         #endregion
 
         #region PROTECTED PARAMETERS
+
+        protected enum CalibrationStep
+        {
+            HMDAdjustment,
+            ForwardDirection,
+        }
 
         protected Transform _player = null;
 
@@ -44,9 +51,9 @@ namespace QuickVR {
 
 		protected PerformanceFPS _fps = null;
 		
-		protected float _timeRunning = 0.0f;	//The time elapsed since the application entered in Running state. 
+		protected float _timeRunning = 0.0f;    //The time elapsed since the application entered in Running state. 
 
-		protected AudioSource _audioSource = null;
+        protected QuickInstructionsManager _instructionsManager = null;
 
         protected QuickUnityVRBase _hTracking;
 
@@ -88,16 +95,16 @@ namespace QuickVR {
         }
 
         protected virtual void Awake() {
+            _instructionsManager = QuickSingletonManager.GetInstance<QuickInstructionsManager>();
 			_debugManager = QuickSingletonManager.GetInstance<DebugManager>();
             _sceneManager = QuickSingletonManager.GetInstance<QuickSceneManager>();
             _fps = QuickSingletonManager.GetInstance<PerformanceFPS>();
+            _cameraFade = QuickSingletonManager.GetInstance<CameraFade>();
 
-			if (!_headTrackingCalibrationInstructions) {
+            if (!_headTrackingCalibrationInstructions) {
 				_headTrackingCalibrationInstructions = Resources.Load<AudioClip>(GetDefaultHMDCalibrationInstructions());
 			}
 
-            _audioSource = gameObject.GetOrCreateComponent<AudioSource>();
-            
             float tOut = SettingsBase.GetTimeOutMinutes();
             if (tOut >= 0) _timeOut = tOut * 60.0f;
 
@@ -112,11 +119,16 @@ namespace QuickVR {
         {
             StartPlayer();
 
-            _cameraFade = QuickSingletonManager.GetInstance<CameraFade>();
-            _cameraFade.SetColor(Color.white);
-            _cameraFade.SetTexture(_player.GetComponent<QuickHeadTracking>()._calibrationTexture);
-
-            StartCoroutine(CoUpdate());
+            QuickUnityVRBase hTracking = _player ? _player.GetComponent<QuickUnityVRBase>() : null;
+            if (hTracking)
+            {
+                StartCoroutine(CoUpdate());
+            }
+            else
+            {
+                Debug.LogError("NO HEAD TRACKING FOUND!!! APPLICATION IS CLOSED");
+                QuickUtils.CloseApplication();
+            }
         }
 
         protected virtual void AwakePlayer()
@@ -148,6 +160,16 @@ namespace QuickVR {
 			else path += "es/";
 			return path + "instructions";
 		}
+
+        protected virtual Texture2D GetHMDCalibrationScreen(CalibrationStep step)
+        {
+            string path = "HMDCalibrationScreens/";
+            path += SettingsBase.GetLanguage() == SettingsBase.Languages.ENGLISH ? "en/" : "es/";
+            path += "CalibrationScreen_v2";
+            path += step == CalibrationStep.HMDAdjustment ? "_00" : "_01";
+
+            return Resources.Load<Texture2D>(path);
+        }
 
 		protected virtual void InitGameConfiguration() {
 
@@ -270,7 +292,20 @@ namespace QuickVR {
             //Start loading the next scene
             if (_nextSceneName != "") _sceneManager.LoadSceneAsync(_nextSceneName);
 
-			yield return StartCoroutine(CoUpdateStateCalibrating());	//Wait for the VR Devices Calibration
+            //Adjust the HMD
+            yield return StartCoroutine(CoUpdateHMDAdjustment());
+
+            //Show the logos if any
+            yield return StartCoroutine(CoShowLogos());
+
+            //Start the calibration process
+            if (OnCalibrating != null) OnCalibrating();
+            yield return StartCoroutine(CoUpdateStateCalibrating());	//Wait for the VR Devices Calibration
+            QuickSingletonManager.GetInstance<QuickVRManager>().Calibrate(true);
+            _player.GetComponent<QuickUnityVRBase>().InitVRNodeFootPrints();
+            _debugManager.Clear();
+
+            //Start the application
             _cameraFade.FadeIn(5.0f);
             while (_cameraFade.IsFading()) yield return null;
 			
@@ -298,39 +333,62 @@ namespace QuickVR {
             }
 		}
 
-		protected virtual IEnumerator CoUpdateStateCalibrating() {
-            Debug.Log("PREPARING FOR CALIBRATION");
-            if (OnCalibrating != null) OnCalibrating();
+        protected virtual IEnumerator CoUpdateHMDAdjustment()
+        {
+            _cameraFade.SetColor(Color.white);
+            _cameraFade.SetTexture(_player.GetComponent<QuickHeadTracking>()._calibrationTexture);
 
-            QuickUnityVRBase hTracking = _player? _player.GetComponent<QuickUnityVRBase>() : null;
-			if (hTracking)
+            //HMD Adjustment
+            _debugManager.Log("Adjusting HMD. Press CONTINUE when ready.");
+            //while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
+            if (_calibrationAssisted)
             {
-                yield return StartCoroutine(CoShowLogos());
-#if !UNITY_ANDROID
-                //hTracking.ShowCalibrationScreen(true);
+                while (!Input.GetKeyDown(KeyCode.Return)) yield return null;
+            }
+            else
+            {
+                while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
+            }
+            _cameraFade.SetColor(Color.black);
+            _cameraFade.SetTexture(null);
+            yield return null;
+        }
 
-				//HMD Adjustment
-				_debugManager.Log("Adjusting HMD. Click to continue.");
-				while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
-                _cameraFade.SetColor(Color.black);
-                _cameraFade.SetTexture(null);
-                yield return null;
+		protected virtual IEnumerator CoUpdateStateCalibrating() {
+            //HMD Forward Direction calibration
+            _instructionsManager.Play(_headTrackingCalibrationInstructions);
 
-				//HMD Forward Direction calibration
-				if (_headTrackingCalibrationInstructions) {
-					yield return StartCoroutine(CoPlayInstructions(_headTrackingCalibrationInstructions, "[WAIT] Playing HMD calibration instructions", Color.red));
-				}
+			if (_calibrationAssisted)
+            {
+                _debugManager.Log("[WAIT] Playing calibration instructions.", Color.red);
+                while (_instructionsManager.IsPlaying() && !Input.GetKeyDown(KeyCode.Return)) yield return null;
 
-				_debugManager.Log("Wait for the user to look forward. Click to continue.");
-				while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
-#endif
+                _debugManager.Log("Wait for the user to look forward. Press RETURN when ready.");
+                while (!Input.GetKeyDown(KeyCode.Return)) yield return null;
+            }
+            else
+            {
+                _cameraFade.SetColor(Color.white);
+                _cameraFade.SetTexture(GetHMDCalibrationScreen(CalibrationStep.ForwardDirection));
+                while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
+            }
 
-                QuickSingletonManager.GetInstance<QuickVRManager>().Calibrate(true);
-                hTracking.InitVRNodeFootPrints();
-				_debugManager.Clear();
-			}
-			else _debugManager.Log("NO HEAD TRACKING FOUND!!!");
+            _instructionsManager.Stop();
+            _cameraFade.SetColor(Color.black);
+            _cameraFade.SetTexture(null);
+            yield return null;
 		}
+
+        protected virtual IEnumerator CoPlayInstructions(AudioClip clip, string message = "", Color color = new Color())
+        {
+            _debugManager.Log(message, color);
+            _instructionsManager.Play(clip);
+            while (_instructionsManager.IsPlaying() && !InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE))
+            {
+                yield return null;
+            }
+            _instructionsManager.Stop();
+        }
 
         protected virtual IEnumerator CoShowLogos()
         {
@@ -353,17 +411,7 @@ namespace QuickVR {
             _cameraFade.SetTexture(calibrationTexture);
         }
 
-		protected virtual IEnumerator CoPlayInstructions(AudioClip clip, string message = "", Color color = new Color()) {
-			_debugManager.Log(message, color);
-			_audioSource.clip = clip;
-			_audioSource.Play();
-			while (_audioSource.isPlaying && (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE))) {
-				yield return null;
-			}
-			_audioSource.Stop();
-		}
-
-        protected virtual IEnumerator CoUpdateTeleport()
+		protected virtual IEnumerator CoUpdateTeleport()
         {
             _teleport = GetPlayer().GetComponentInChildren<QuickTeleport>(true);
             if (_teleport != null)

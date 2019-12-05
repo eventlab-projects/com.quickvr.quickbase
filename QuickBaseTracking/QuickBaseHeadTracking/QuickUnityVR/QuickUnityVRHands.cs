@@ -61,90 +61,85 @@ namespace QuickVR {
 
         public override Vector3 GetEyeCenterPosition()
         {
-            float yOffset = GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject().transform.position.y - _vrNodesOrigin.position.y;
-            return transform.position + transform.up * yOffset;
+            return _vrPlayArea.GetVRNode(QuickVRNode.Type.Head).transform.position;
         }
 
-        protected override Vector3 GetDisplacement()
+        public override Vector3 GetDisplacement()
         {
-            return GetQuickVRNode(QuickVRNode.Type.Head).GetTrackedObject().GetDisplacement();
+            return _vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject().GetDisplacement();
         }
 
         protected override float GetRotationOffset()
         {
-            QuickVRNode hmdNode = GetQuickVRNode(QuickVRNode.Type.Head);
+            //QuickVRNode hmdNode = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head);
 
-            Vector3 currentForward = Vector3.ProjectOnPlane(_vrNodesOrigin.forward, _vrNodesOrigin.up);
-            Vector3 targetForward = Vector3.ProjectOnPlane(hmdNode.transform.forward, _vrNodesOrigin.up);
+            //Vector3 currentForward = Vector3.ProjectOnPlane(_vrNodesOrigin.forward, _vrNodesOrigin.up);
+            //Vector3 targetForward = Vector3.ProjectOnPlane(hmdNode.transform.forward, _vrNodesOrigin.up);
 
-            return Vector3.SignedAngle(currentForward, targetForward, _vrNodesOrigin.up);
+            //return Vector3.SignedAngle(currentForward, targetForward, _vrNodesOrigin.up);
+
+            return 0.0f;
         }
 
-        protected override void CalibrateVRNodeHead(QuickVRNode node)
-        {
-            base.CalibrateVRNodeHead(node);
+        //protected override void CalibrateVRNodeHead(QuickVRNode node)
+        //{
+        //    base.CalibrateVRNodeHead(node);
 
-            QuickTrackedObject tObject = node.GetTrackedObject();
+        //    QuickTrackedObject tObject = node.GetTrackedObject();
 
-            SettingsBase.HeightMode hMode = SettingsBase.GetHeightMode();
-            float yOffset = 0.0f;
-            if (hMode == SettingsBase.HeightMode.FromTrackingSystem)
-            {
-                yOffset = _camera.transform.localPosition.y;
-            }
-            else if (hMode == SettingsBase.HeightMode.FromSubject)
-            {
-                float sf = HUMAN_HEADS_TALL_EYES / HUMAN_HEADS_TALL;
-                yOffset = SettingsBase.GetSubjectHeight() * sf;
-            }
-
-            _vrNodesOrigin.position = tObject.transform.position - transform.up * yOffset;
-        }
+        //    float yOffset = 0.0f;
+        //    if (SettingsBase.GetHeightMode() == SettingsBase.HeightMode.FromSubject)
+        //    {
+        //        float sf = HUMAN_HEADS_TALL_EYES / HUMAN_HEADS_TALL;
+        //        yOffset = SettingsBase.GetSubjectHeight() * sf;
+        //    }
+        //    else
+        //    {
+        //        yOffset = _camera.transform.localPosition.y;
+        //    }
+            
+        //    _vrNodesOrigin.position = tObject.transform.position - transform.up * yOffset;
+        //}
 
         #endregion
 
         #region UPDATE
 
-        protected override void UpdateTransformRoot()
-        {
-            base.UpdateTransformRoot();
-
-            CalibrateCameraForward();
-        }
-
         protected override void UpdateTransformNodes()
         {
+            base.UpdateTransformNodes();
+
             UpdateVRHand(QuickVRNode.Type.LeftHand);
             UpdateVRHand(QuickVRNode.Type.RightHand);
         }
 
         protected virtual void UpdateVRHand(QuickVRNode.Type nType)
         {
-            QuickVRNode node = GetQuickVRNode(nType);
-            if (node.IsTracked())
-            {
-                Transform vrHandRoot = GetVRHand(nType).transform.parent;
+            //QuickVRNode node = _vrPlayArea.GetVRNode(nType);
+            //if (node.IsTracked())
+            //{
+            //    Transform vrHandRoot = GetVRHand(nType).transform.parent;
 
-                QuickTrackedObject tObject = node.GetTrackedObject();
-                Vector3 posOffset = tObject.transform.position - _vrNodesOrigin.position;
-                vrHandRoot.position = transform.position + ToAvatarSpace(posOffset);
-                vrHandRoot.rotation = ToAvatarSpace(tObject.transform.rotation);
-            }
+            //    QuickTrackedObject tObject = node.GetTrackedObject();
+            //    Vector3 posOffset = tObject.transform.position - _vrNodesOrigin.position;
+            //    vrHandRoot.position = transform.position + ToAvatarSpace(posOffset);
+            //    vrHandRoot.rotation = ToAvatarSpace(tObject.transform.rotation);
+            //}
         }
 
-        protected override void OnLeftHandConnected(XRNodeState state)
-        {
-            _vrHandLeft.gameObject.SetActive(true);
+        //protected override void OnLeftHandConnected(XRNodeState state)
+        //{
+        //    _vrHandLeft.gameObject.SetActive(true);
 
-            base.OnLeftHandConnected(state);
-        }
+        //    base.OnLeftHandConnected(state);
+        //}
 
-        protected override void OnRightHandConnected(XRNodeState state)
-        {
-            _vrHandRight.gameObject.SetActive(true);
+        //protected override void OnRightHandConnected(XRNodeState state)
+        //{
+        //    _vrHandRight.gameObject.SetActive(true);
 
-            base.OnRightHandConnected(state);
-        }
+        //    base.OnRightHandConnected(state);
+        //}
 
         #endregion
 

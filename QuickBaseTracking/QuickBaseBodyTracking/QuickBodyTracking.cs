@@ -5,7 +5,6 @@ using System;
 
 namespace QuickVR {
 
-    [Configurable("QuickBodyTracking")]
 	public abstract class QuickBodyTracking : QuickBaseTrackingManager {
 
 		#region PUBLIC PARAMETERS
@@ -65,7 +64,8 @@ namespace QuickVR {
 		protected QuickUnityDictionary<QuickJointType, DoubleExponentialFilterVector3> _filters = new QuickUnityDictionary<QuickJointType, DoubleExponentialFilterVector3>();
 
 		protected Dictionary<QuickJointType, V> _toTracking = new Dictionary<QuickJointType, V>();
-		protected Dictionary<QuickJointType, HumanBodyBones> _toUnity = new Dictionary<QuickJointType, HumanBodyBones>();
+        protected Dictionary<V, QuickJointType> _toQuickJoint = new Dictionary<V, QuickJointType>();
+        protected Dictionary<QuickJointType, HumanBodyBones> _toUnity = new Dictionary<QuickJointType, HumanBodyBones>();
 
 		protected Vector3 _initialForward = Vector3.forward;
 		protected Quaternion _calibrationRotation = Quaternion.identity;
@@ -175,6 +175,7 @@ namespace QuickVR {
 
 		protected virtual void CreateJointMapQuickVR(QuickJointType intermediateJoint, V trackingJoint) {
 			_toTracking[intermediateJoint] = trackingJoint;
+            _toQuickJoint[trackingJoint] = intermediateJoint;
 		}
 
 		protected virtual void CreateJointMapUnity(QuickJointType intermediateJoint, HumanBodyBones unityBoneID) {
@@ -262,7 +263,7 @@ namespace QuickVR {
 		protected abstract Quaternion GetTrackingJointRotation(V tJointID);
 
 		protected virtual QuickJoint.State GetTrackingJointState(V tJointID) {
-			return QuickJoint.State.TRACKED;
+            return _toQuickJoint.ContainsKey(tJointID) ? QuickJoint.State.TRACKED : QuickJoint.State.UNTRACKED;
 		}
 
 		protected abstract bool IsTrackingConnected();
@@ -293,15 +294,15 @@ namespace QuickVR {
 		public override void UpdateTracking() {
 			if (!IsTrackingConnected()) return;
 
-            Vector3 fwd = ComputeTorsoForward();
-            if (fwd != Vector3.zero) transform.forward = fwd;
+            //Vector3 fwd = ComputeTorsoForward();
+            //if (fwd != Vector3.zero) transform.forward = fwd;
             
 			UpdateIntermediateSkeleton();
 			UpdateUnitySkeleton();
 
 			UpdateRootPosition();
 
-            transform.rotation *= _initialRootRotation;
+            //transform.rotation *= _initialRootRotation;
 		}
 
 		protected virtual void UpdateIntermediateSkeleton() {
@@ -329,11 +330,8 @@ namespace QuickVR {
             Transform uBone = _animator.GetBoneTransform(_toUnity[qJointID]);
             Transform uBoneParent = _animator.GetBoneTransform(_toUnity[qJointParentID]);
 
-            if ((t != tParent) && (t.localPosition != Vector3.zero))
-            {
-                float s = Vector3.Distance(uBone.position, uBoneParent.position) / Vector3.Distance(t.position, tParent.position);
-                t.position = tParent.position + (t.position - tParent.position) * s;
-            }
+            float avatarBoneLength = Vector3.Distance(uBone.position, uBoneParent.position);
+            t.position = tParent.position + (uBone.position - uBoneParent.position).normalized * avatarBoneLength;
 
             List<QuickJointType> childs = _skeleton.GetChilds(qJointID);
             foreach (QuickJointType c in childs)
@@ -357,9 +355,7 @@ namespace QuickVR {
 
 			Vector3 rawPos = GetTrackingJointPosition(tJoint);
 			Quaternion rawRot = GetTrackingJointRotation(tJoint);
-			QuickJoint.State rawState = GetTrackingJointState(tJoint);
-
-            _skeleton.GetJoint(qJointID).Update(rawPos, rawRot, rawState, IsTrackingDataWorldSpace());
+            _skeleton.GetJoint(qJointID)._state = GetTrackingJointState(tJoint);
 
             Transform t = _skeleton.GetJoint(qJointID).GetTransform();
             if (IsTrackingDataWorldSpace())
@@ -404,12 +400,12 @@ namespace QuickVR {
 
             tBase.Rotate(transform.up, Vector3.SignedAngle(ComputeTorsoForward(), transform.forward, transform.up), Space.World);
             tBase.position = _animator.GetBoneTransform(HumanBodyBones.Hips).position;
-                
-			_skeleton.UpdateDebug();
+
+            _skeleton.UpdateDebug();
 
             tBase.rotation = tmpRot;
             tBase.position = tmpPos;
-		}
+        }
 
         #endregion
 

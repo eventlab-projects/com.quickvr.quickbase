@@ -5,7 +5,6 @@ using System.Collections.Generic;
 namespace QuickVR {
 
 	[System.Serializable]
-    [Configurable]
     public abstract class QuickBaseTrackingManager : MonoBehaviour {
 
 		#region PUBLIC PARAMETERS

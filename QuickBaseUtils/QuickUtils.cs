@@ -120,6 +120,11 @@ namespace QuickVR
             return names;
         }
 
+        public static List<int> GetEnumValuesToInt<T>() where T : IConvertible
+        {
+            return new List<int>((IEnumerable<int>)(Enum.GetValues(typeof(T))));
+        }
+
         public static int ParseInt(string value)
         {
             int result;
@@ -354,7 +359,73 @@ namespace QuickVR
             return Derived.IsSubclassOf(Base) || Derived == Base;
         }
 
+        public static Mesh GetUnityPrimitiveMesh(PrimitiveType primitiveType)
+        {
+            Debug.Log("Getting Unity Primitive Mesh: " + primitiveType);
+            Mesh primMesh = Resources.GetBuiltinResource<Mesh>(GetPrimitiveMeshPath(primitiveType));
+
+            if (primMesh == null)
+            {
+                Debug.LogError("Couldn't load Unity Primitive Mesh: " + primitiveType);
+            }
+
+            return primMesh;
+        }
+
+        private static string GetPrimitiveMeshPath(PrimitiveType primitiveType)
+        {
+            switch (primitiveType)
+            {
+                case PrimitiveType.Sphere:
+                    return "New-Sphere.fbx";
+                case PrimitiveType.Capsule:
+                    return "New-Capsule.fbx";
+                case PrimitiveType.Cylinder:
+                    return "New-Cylinder.fbx";
+                case PrimitiveType.Cube:
+                    return "Cube.fbx";
+                case PrimitiveType.Plane:
+                    return "New-Plane.fbx";
+                case PrimitiveType.Quad:
+                    return "Quad.fbx";
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(primitiveType), primitiveType, null);
+            }
+        }
+
+        public static bool IsMobileTarget()
+        {
+#if UNITY_ANDROID
+            return true;
+#else
+            return false;
+#endif
+        }
+
 #region EXTENSION METHODS
+
+        public static int GetNumSiblings(this Component c)
+        {
+            return c.transform.parent ? c.transform.parent.childCount : c.gameObject.scene.rootCount;
+        }
+
+        public static T GetNextSibling<T>(this T t) where T : Component
+        {
+            int sIndex = t.transform.GetSiblingIndex() + 1;
+            while (sIndex < GetNumSiblings(t))
+            {
+                Transform tChild = t.transform.parent ? t.transform.parent.GetChild(sIndex) : t.gameObject.scene.GetRootGameObjects()[sIndex].transform;
+                if (tChild.gameObject.activeInHierarchy) return tChild.GetComponent<T>();
+                sIndex++;
+            }
+            
+            return null;
+        } 
+
+        public static T GetOrCreateComponent<T>(this Component c) where T : Component
+        {
+            return c.gameObject.GetOrCreateComponent<T>();
+        }
 
         public static T GetOrCreateComponent<T>(this GameObject go) where T : Component
         {
@@ -419,10 +490,10 @@ namespace QuickVR
             transform.localScale = Vector3.one;
         }
 
-        public static Transform CreateChild(this Transform transform, string name)
+        public static Transform CreateChild(this Transform transform, string name, bool checkName = true)
         {
             Transform t = transform.Find(name);
-            if (!t)
+            if (!t || !checkName)
             {
                 t = new GameObject(name).transform;
                 t.parent = transform;
@@ -430,6 +501,21 @@ namespace QuickVR
             }
 
             return t;
+        }
+
+        public static Transform Find(this Transform transform, string name, bool recursive = false)
+        {
+            if (!recursive) return transform.Find(name);
+
+            Queue<Transform> queue = new Queue<Transform>();
+            queue.Enqueue(transform);
+            while (queue.Count > 0)
+            {
+                Transform c = queue.Dequeue();
+                if (c.name.CompareTo(name) == 0) return c;
+                foreach (Transform t in c) queue.Enqueue(t);
+            }
+            return null;
         }
 
         public static void DestroyChild(this Transform transform, int childID)
@@ -460,6 +546,46 @@ namespace QuickVR
             {
                 UnityEngine.Object.DestroyImmediate(transform.GetChild(i).gameObject);
             }
+        }
+
+        public static Vector3 GetEyeCenterPosition(this Animator animator)
+        {
+            Transform lEye = animator.GetBoneTransform(HumanBodyBones.LeftEye);
+            Transform rEye = animator.GetBoneTransform(HumanBodyBones.RightEye);
+            if (lEye && rEye) return Vector3.Lerp(lEye.position, rEye.position, 0.5f);
+            if (lEye) return lEye.position;
+            if (rEye) return rEye.position;
+
+            return animator.GetBoneTransform(HumanBodyBones.Head).position;
+        }
+
+        public static Transform GetLookAtBone(this Animator animator, HumanBodyBones boneID)
+        {
+            HumanBodyBones? lookAtBone = QuickHumanTrait.GetLookAtBone(boneID);
+            if (!lookAtBone.HasValue) return null;
+
+            Transform tLookAt = animator.GetBoneTransform(lookAtBone.Value);
+            if (tLookAt) return tLookAt;
+
+            return animator.GetLookAtBone(lookAtBone.Value);
+        }
+
+        public static void Shuffle<T>(this IList<T> ts)
+        {
+            var count = ts.Count;
+            var last = count - 1;
+            for (var i = 0; i < last; ++i)
+            {
+                var r = UnityEngine.Random.Range(i, count);
+                var tmp = ts[i];
+                ts[i] = ts[r];
+                ts[r] = tmp;
+            }
+        }
+
+        public static float GetElapsedSeconds(this System.Diagnostics.Stopwatch watch)
+        {
+            return watch.ElapsedMilliseconds / 1000.0f;
         }
 
 #endregion

@@ -11,8 +11,6 @@ namespace QuickVR
         #region PROTECTED PARAMETERS
 
         protected Dictionary<int, List<Coroutine>> _coroutineSets = new Dictionary<int, List<Coroutine>>();
-        protected int _currentCoroutineSetID = -1;
-        protected List<int> _coroutineSetHistory = new List<int>();
         protected int _newCoroutineSetID = 0;
 
         #endregion
@@ -21,30 +19,16 @@ namespace QuickVR
 
         public virtual int BeginCoroutineSet()
         {
-            _currentCoroutineSetID = _newCoroutineSetID++;
-            _coroutineSetHistory.Add(_currentCoroutineSetID);
-            return _currentCoroutineSetID;
+            return _newCoroutineSetID++;
         }
 
-        public virtual void EndCoroutineSet()
-        {
-            if (_coroutineSetHistory.Count == 0) {
-                _currentCoroutineSetID = -1;
-                return;
-            }
-            
-            int last = _coroutineSetHistory.Count - 1;
-            _currentCoroutineSetID = _coroutineSetHistory[last];
-            _coroutineSetHistory.RemoveAt(last);
-        }
-
-        public new Coroutine StartCoroutine(IEnumerator coroutine)
+        public Coroutine StartCoroutine(IEnumerator coroutine, int coSet = -1)
         {
             Coroutine c = base.StartCoroutine(coroutine);
-            if (_currentCoroutineSetID != -1)
+            if (coSet != -1)
             {
-                if (!_coroutineSets.ContainsKey(_currentCoroutineSetID)) _coroutineSets[_currentCoroutineSetID] = new List<Coroutine>();
-                _coroutineSets[_currentCoroutineSetID].Add(c);
+                if (!_coroutineSets.ContainsKey(coSet)) _coroutineSets[coSet] = new List<Coroutine>();
+                _coroutineSets[coSet].Add(c);
             }
             
             return c;
@@ -57,6 +41,17 @@ namespace QuickVR
             List<Coroutine> coroutines = _coroutineSets[setID];
             foreach (Coroutine c in coroutines) yield return c;
             _coroutineSets.Remove(setID);
+        }
+
+        public virtual void StopCoroutineSet(int setID)
+        {
+            if (!_coroutineSets.ContainsKey(setID)) return;
+
+            List<Coroutine> coroutines = _coroutineSets[setID];
+            foreach (Coroutine c in coroutines)
+            {
+                if (c != null) StopCoroutine(c);
+            }
         }
 
         #endregion

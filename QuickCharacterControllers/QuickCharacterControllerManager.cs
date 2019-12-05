@@ -36,8 +36,6 @@ namespace QuickVR
         protected CapsuleCollider _collider = null;
         protected static PhysicMaterial _physicMaterial = null;
 
-        protected HashSet<QuickCharacterControllerBase> _characterControllers = new HashSet<QuickCharacterControllerBase>();
-
         protected bool _stepping = false;
         protected Vector3 _stepVelocity = Vector3.zero;
 
@@ -82,20 +80,17 @@ namespace QuickVR
             //_rigidBody.maxAngularVelocity = _maxAngularSpeed * Mathf.Deg2Rad;
             _rigidBody.useGravity = true;
             _rigidBody.drag = 0.0f;
+
+            _rigidBody.isKinematic = true;
         }
 
         #endregion
 
         #region GET AND SET
 
-        public virtual void AddCharacterController(QuickCharacterControllerBase characterController)
+        public virtual bool IsStepping()
         {
-            _characterControllers.Add(characterController);
-        }
-
-        public virtual void RemoveCharacterController(QuickCharacterControllerBase characterController)
-        {
-            _characterControllers.Remove(characterController);
+            return _stepping;
         }
 
         public static int GetLayerPlayer()
@@ -116,23 +111,6 @@ namespace QuickVR
         protected virtual Vector3 GetTotalLinearVelocity()
         {
             return _stepVelocity + _rigidBody.velocity;
-        }
-
-        #endregion
-
-        #region UPDATE
-
-        protected virtual void FixedUpdate()
-        {
-            Vector3 linearVelocity = Vector3.zero;
-
-            foreach (QuickCharacterControllerBase characterController in _characterControllers)
-            {
-                characterController.UpdateMovement();
-                linearVelocity += characterController.GetCurrentLinearVelocity();
-            }
-
-            _rigidBody.velocity = Vector3.Scale(_rigidBody.velocity, Vector3.up) + linearVelocity;
         }
 
         #endregion

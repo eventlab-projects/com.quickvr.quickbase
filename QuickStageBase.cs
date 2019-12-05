@@ -11,139 +11,184 @@ namespace QuickVR {
 		public float _maxTimeOut = 0.0f;
 		public bool _pressKeyToFinish = false;		//The test is finished if RETURN is pressed
 		public bool _avoidable = true;				//We can force this test to finish by pressing BACKSPACE
-		public bool _finishGameWhenOver = false;	//When this stage is over, it actually will finish the game
 
-		public bool _sendOnInitEvent = true;
-		public bool _sendOnFinishedEvent = true;
-
-		public List<QuickStageBase> _nextStages = new List<QuickStageBase>();	//The tests to execute once this test finishes its execution
-		public List<QuickStageBase> _killStages = new List<QuickStageBase>();	//The tests to kill once this test finishes its execution
-
-        public string _debugMessage = "";
+		public string _debugMessage = "";
 		public Color _debugMessageColor = Color.white;
 
-		public delegate void OnInitAction(QuickStageBase stageManager);
-		public static event OnInitAction OnInit;
+        [Space()]
+        [Header("Stage Instructions")]
+        public List<AudioClip> _instructionsSpanish = new List<AudioClip>();
+        public List<AudioClip> _instructionsEnglish = new List<AudioClip>();
+        public AudioSource _instructionsAudioSource = null;
+        [Range(0.0f, 1.0f)]
+        public float _instructionsVolume = 1.0f;
+        public float _instructionsTimePause = 0.5f;
 
-		public delegate void OnFinishedAction(QuickStageBase stageManager);
-		public static event OnFinishedAction OnFinished;
+        public enum FinishPolicy
+        {
+            Nothing,
+            ExecuteNext,
+            GameOver,
+        }
+        public FinishPolicy _finishPolicy = FinishPolicy.ExecuteNext;
 
-		#endregion
+        #endregion
 
-		#region PROTECTED PARAMETERS
+        #region PROTECTED PARAMETERS
 
-		protected QuickBaseGameManager _gameManager = null;
+        protected QuickInstructionsManager _instructionsManager = null;
+
+        protected QuickBaseGameManager _gameManager = null;
 		protected DebugManager _debugManager = null;
 
-		protected string _testName = "";
-
-		protected bool _finished = true;
+		protected bool _finished = false;
 
 		protected float _timeStart = 0.0f;	//Indicates when the test started (since the start of the game)
 
-		#endregion
-
-		#region PRIVATE PARAMETERS
-
-		private bool _readyToFinish = false;
+        protected QuickCoroutineManager _coManager = null;
+        protected int _coSet = -1;
 
 		#endregion
 
-		#region CREATION AND DESTRUCTION
+		#region EVENTS
 
-		protected virtual void Awake() {
-			_testName = gameObject.name;
+        public delegate void OnStageAction(QuickStageBase stageManager);
+        public static event OnStageAction OnInit;
+        public static event OnStageAction OnFinished;
+        
+        #endregion
+
+        #region CREATION AND DESTRUCTION
+
+        protected virtual void Awake() {
+            _instructionsManager = QuickSingletonManager.GetInstance<QuickInstructionsManager>();
             _gameManager = QuickSingletonManager.GetInstance<QuickBaseGameManager>();
             _debugManager = QuickSingletonManager.GetInstance<DebugManager>();
+            _coManager = QuickSingletonManager.GetInstance<QuickCoroutineManager>();
         }
 
-		protected virtual void Start() {
-
+		protected virtual void Start()
+        {
             enabled = false;
 		}
 
-		public virtual void Init() {
-			if (_sendOnInitEvent && (OnInit != null)) OnInit(this);
-
+		public virtual void Init()
+        {
             _finished = false;
-			_readyToFinish = false;
-			gameObject.SetActive(true);
-			enabled = true;
+            enabled = true;
 
-			if (_maxTimeOut > 0) StartCoroutine("CoTimeOut");
+            _timeStart = Time.time;
+            Debug.Log("===============================");
+            _debugManager.Log("RUNNING STAGE: " + GetName());
+            if (_debugMessage.Length != 0)
+            {
+                _debugManager.Log(_debugMessage, _debugMessageColor);
+            }
 
-			_timeStart = Time.time;
+            if (OnInit != null) OnInit(this);
 
-            if (_debugMessage.Length == 0) _debugMessage = name;
-			_debugManager.Log(_debugMessage, _debugMessageColor);
-
-			Debug.Log("RUNNING STAGE: " + _testName);
+            StartCoroutine(CoUpdateBase());
 		}
 
-		protected virtual T CreateStageManager<T>(string stageName) where T : QuickStageBase {
-			GameObject go = new GameObject(stageName);
-			go.transform.parent = transform;
-			go.transform.localPosition = Vector3.zero;
-			go.transform.localRotation = Quaternion.identity;
-			return go.AddComponent<T>();
-		}
+        private IEnumerator CoUpdateBase()
+        {
+            _instructionsManager.SetAudioSource(_instructionsAudioSource);
+            _instructionsManager._timePauseBetweenInstructions = _instructionsTimePause;
+            _instructionsManager._volume = _instructionsVolume;
+            SettingsBase.Languages lang = SettingsBase.GetLanguage();
+            if (lang == SettingsBase.Languages.SPANISH) _instructionsManager.Play(_instructionsSpanish);
+            else if (lang == SettingsBase.Languages.ENGLISH) _instructionsManager.Play(_instructionsEnglish);
+
+            while (_instructionsManager.IsPlaying()) yield return null;
+
+            _coSet = _coManager.BeginCoroutineSet();
+            _coManager.StartCoroutine(CoUpdate(), _coSet);
+            _coManager.StartCoroutine(CoWaitForUserInput(), _coSet);
+            _coManager.StartCoroutine(CoTimeOut(), _coSet);
+
+            yield return _coManager.WaitForCoroutineSet(_coSet);
+
+            Finish();
+        }
+
+        protected virtual IEnumerator CoWaitForUserInput()
+        {
+            if (_pressKeyToFinish)
+            {
+                while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE))
+                {
+                    yield return null;
+                }
+                Finish();
+            }
+        }
+
+        protected virtual IEnumerator CoTimeOut()
+        {
+            if (_maxTimeOut > 0)
+            {
+                yield return new WaitForSeconds(_maxTimeOut);
+                Finish();
+            }
+        }
+
+        protected virtual IEnumerator CoUpdate()
+        {
+            yield break; 
+        }
 
 		#endregion
 
 		#region GET AND SET
 
-		protected virtual void SetReadyToFinish(bool isReadyToFinish) {
-			_readyToFinish = isReadyToFinish;
-			//if (_readyToFinish) _debugManager.Log("Click to continue. ");
-		}
+        protected virtual string GetName()
+        {
+            return GetType().Name + " (" + name + ")";
+        }
 
 		public virtual bool IsFinished() {
 			return _finished;
 		}
 
 		public virtual void Finish() {
-			FinishSilently();
+            _finished = true;
+            _instructionsManager.Stop();
+            _debugManager.Clear();
+            float totalTime = Time.time - _timeStart;
+            Debug.Log("STAGE FINISHED: " + GetName());
+            Debug.Log("Total Time = " + totalTime);
+            Debug.Log("===============================");
 
-			if (_finishGameWhenOver) _gameManager.Finish();
-			else {
-				//Kill and start the indicated tests
-				foreach (QuickStageBase bManager in _killStages) bManager.Finish();
-				foreach (QuickStageBase bManager in _nextStages) bManager.Init();
-			}
+            _coManager.StopCoroutineSet(_coSet);
+            StopAllCoroutines();
+
+            if (_finishPolicy == FinishPolicy.ExecuteNext)
+            {
+                QuickStageBase nextStage = QuickUtils.GetNextSibling<QuickStageBase>(this);
+                if (nextStage)
+                {
+                    //Debug.Log("currentStage = " + name);
+                    //Debug.Log("nextStage = " + nextStage.name);
+                    nextStage.Init();
+                }
+            }
+            else if (_finishPolicy == FinishPolicy.GameOver)
+            {
+                _gameManager.Finish();
+            }
+
 			enabled = false;
-			if (_sendOnFinishedEvent && (OnFinished != null)) OnFinished(this);
-		}
-
-		/// <summary>
-		/// The test is finished silently, i.e., nor the child tests are forced to start nor the kill tests are forced to finish. 
-		/// </summary>
-		public virtual void FinishSilently() {
-			_debugManager.Clear();
-			float totalTime = Time.time - _timeStart;
-			Debug.Log("===============================");
-			Debug.Log("TEST FINISHED: " + _testName);
-			Debug.Log("Total Time = " + totalTime);
-			Debug.Log("===============================");
-
-			StopAllCoroutines();
-			_finished = true;
-			//gameObject.SetActive(false);
+            
+            if (OnFinished != null) OnFinished(this);
 		}
 
 		#endregion
 
 		#region UPDATE
 
-		protected virtual IEnumerator CoTimeOut() {
-			yield return new WaitForSeconds(_maxTimeOut);
-			SetReadyToFinish(true);
-		}
-
-		protected virtual void Update() {
-			if (
-				(_avoidable && InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CANCEL)) ||
-				(_readyToFinish && (!_pressKeyToFinish || InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)))
-				) 
+		protected virtual void Update()
+        {
+			if (_avoidable && InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CANCEL)) 
 			{
 				Finish();
 			}
