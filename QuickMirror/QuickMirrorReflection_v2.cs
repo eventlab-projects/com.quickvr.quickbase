@@ -52,6 +52,23 @@ namespace QuickVR
 
         #region UPDATE
 
+        protected override void RenderReflection()
+        {
+            base.RenderReflection();
+
+            Material mat = GetMaterial();
+            Camera cam = _currentCamera;
+            if (cam.stereoEnabled)
+            {
+                mat.SetMatrix("_mvpEyeLeft", cam.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left) * cam.GetStereoViewMatrix(Camera.StereoscopicEye.Left) * transform.localToWorldMatrix);
+            }
+            else
+            {
+                mat.SetMatrix("_mvpEyeLeft", cam.projectionMatrix * cam.worldToCameraMatrix * transform.localToWorldMatrix);
+            }
+            mat.SetMatrix("_mvpEyeRight", cam.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right) * cam.GetStereoViewMatrix(Camera.StereoscopicEye.Right) * transform.localToWorldMatrix);
+        }
+
         protected override void RenderVirtualImage(RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0)
         {
             //1) Compute ModelViewMatrix
@@ -63,13 +80,13 @@ namespace QuickVR
             float d = -Vector3.Dot(normal, pos);
             Vector4 reflectionPlane = new Vector4(normal.x, normal.y, normal.z, d);
             Matrix4x4 reflection = CalculateReflectionMatrix(reflectionPlane);
-            _reflectionCamera.worldToCameraMatrix = (Camera.current.stereoEnabled)? Camera.current.GetStereoViewMatrix(eye) : Camera.current.worldToCameraMatrix;
+            _reflectionCamera.worldToCameraMatrix = (_currentCamera.stereoEnabled)? _currentCamera.GetStereoViewMatrix(eye) : _currentCamera.worldToCameraMatrix;
             _reflectionCamera.worldToCameraMatrix *= reflection;
 
             //2) Compute ProjectionMatrix
             // Setup oblique projection matrix so that near plane is our reflection
             // plane. This way we clip everything below/above it for free.
-            _reflectionCamera.projectionMatrix = (Camera.current.stereoEnabled)? Camera.current.GetStereoProjectionMatrix(eye) : Camera.current.projectionMatrix;
+            _reflectionCamera.projectionMatrix = (_currentCamera.stereoEnabled)? _currentCamera.GetStereoProjectionMatrix(eye) : _currentCamera.projectionMatrix;
             _reflectionCamera.targetTexture = targetTexture;
             GL.invertCulling = true;
 
