@@ -134,9 +134,8 @@ namespace QuickVR
 
         public virtual bool IsVRNodesSwaped(QuickVRNode nodeLeft, QuickVRNode nodeRight, bool doSwaping = true)
         {
-            if (!nodeLeft || !nodeRight) return false;
-
             QuickVRNode hmdNode = GetVRNode(QuickVRNode.Type.Head);
+            if (!hmdNode || !nodeLeft || !nodeRight) return false;
 
             float dLeft = IsTrackedNode(nodeLeft) ? Vector3.Dot(nodeLeft.transform.position - hmdNode.transform.position, hmdNode.transform.right) : 0.0f;
             float dRight = IsTrackedNode(nodeRight) ? Vector3.Dot(nodeRight.transform.position - hmdNode.transform.position, hmdNode.transform.right) : 0.0f;
@@ -171,7 +170,7 @@ namespace QuickVR
             InputTracking.GetNodeStates(_vrNodeStates);
             foreach (XRNodeState s in _vrNodeStates)
             {
-                if (!IsValidNode(s.nodeType) || !s.tracked) continue;
+                if (!IsValidNode(s.nodeType)) continue;
 
                 QuickVRNode n = GetVRNode(s.uniqueID);
                 if (!n)
