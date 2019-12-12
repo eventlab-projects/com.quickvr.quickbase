@@ -45,6 +45,9 @@ namespace QuickVR
 
         protected QuickCharacterControllerManager _characterControllerManager = null;
 
+        protected bool _autoUserForward = true; //If true, the forward of the user (the real person) is retrieved from the tracking data at every frame. Otherwise, the user forward is manually provided. 
+        protected Vector3 _userForward = Vector3.zero;  //The provided user forward when _autoUserForward is set to false. 
+
         #endregion
 
         #region EVENTS
@@ -100,6 +103,23 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
+
+        public virtual Vector3 GetUserForward()
+        {
+            return _userForward;
+        }
+
+        public virtual void SetUserForward(Vector3 fwd)
+        {
+            _autoUserForward = false;
+            _userForward = fwd;
+        }
+
+        public virtual void ResetUserForward()
+        {
+            _autoUserForward = false;
+            UpdateUserForward();
+        }
 
         protected virtual bool IsHMDPresent()
         {
@@ -516,16 +536,8 @@ namespace QuickVR
         {
             _vrPlayArea.Calibrate();
 
-            QuickVRNode node = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head);
-            if (!node) return;
-
-            Vector3 headFwd = Vector3.ProjectOnPlane(node.transform.forward, transform.up);
-            float rotAngle = Vector3.SignedAngle(headFwd, transform.forward, transform.up);
-
+            float rotAngle = Vector3.SignedAngle(_userForward, transform.forward, transform.up);
             _vrPlayArea.transform.Rotate(transform.up, rotAngle, Space.World);
-
-            //_vrPlayArea.transform.forward = Vector3.ProjectOnPlane(node.transform.forward, transform.up);
-            //_footprints.rotation = ToAvatarSpace(_vrNodesOrigin.rotation);
         }
 
         public virtual QuickVRHand GetVRHand(QuickVRNode.Type nType)
@@ -552,6 +564,8 @@ namespace QuickVR
             UpdateFootPrints();
 
             UpdateVRCursors();
+
+            UpdateUserForward();
         }
 
         protected virtual void UpdateFootPrints()
@@ -608,6 +622,15 @@ namespace QuickVR
         {
             GetVRCursor(VRCursorType.LEFT).transform.position = _vrHandLeft._handBoneIndexDistal.position;
             GetVRCursor(VRCursorType.RIGHT).transform.position = _vrHandRight._handBoneIndexDistal.position;
+        }
+
+        protected virtual void UpdateUserForward()
+        {
+            QuickVRNode node = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head);
+            if (_autoUserForward && node)
+            {
+                _userForward = Vector3.ProjectOnPlane(node.transform.forward, transform.up);
+            }
         }
 
         //protected virtual void OnHMDConnected(XRNodeState state)
