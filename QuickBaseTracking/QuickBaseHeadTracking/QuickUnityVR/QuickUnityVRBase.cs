@@ -420,8 +420,8 @@ namespace QuickVR
             transform.position = _initialPosition;
             transform.rotation = _initialRotation;
 
-            _vrPlayArea.Calibrate();
             CalibrateVRNodes();
+            CalibrateVRPlayArea();
 
             base.Calibrate();
 
@@ -509,6 +509,16 @@ namespace QuickVR
 
         protected virtual void CalibrateVRNodeHead(QuickVRNode node)
         {
+
+        }
+
+        protected virtual void CalibrateVRPlayArea()
+        {
+            _vrPlayArea.Calibrate();
+
+            QuickVRNode node = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head);
+            if (!node) return;
+
             Vector3 headFwd = Vector3.ProjectOnPlane(node.transform.forward, transform.up);
             float rotAngle = Vector3.SignedAngle(headFwd, transform.forward, transform.up);
 

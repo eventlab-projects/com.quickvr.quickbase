@@ -123,14 +123,19 @@ namespace QuickVR {
             //}
             
             //Set the offset of the TrackedObject of the head
-            QuickTrackedObject tObject = node.GetTrackedObject();
-            tObject.transform.localPosition = _headOffset * transform.lossyScale.x;
+            node.GetTrackedObject().transform.localPosition = _headOffset * transform.lossyScale.x;
+        }
 
-            Vector3 offset = _animator.GetBoneTransform(HumanBodyBones.Head).position - tObject.transform.position;
+        protected override void CalibrateVRPlayArea()
+        {
+            base.CalibrateVRPlayArea();
+
+            //Set the offset of the TrackedObject of the head
+            QuickVRNode node = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head);
+            if (!node) return;
+
+            Vector3 offset = _animator.GetBoneTransform(HumanBodyBones.Head).position - node.GetTrackedObject().transform.position;
             _vrPlayArea.transform.position += offset;
-
-            //Set the position of the vrNodesOrigin
-            //_vrNodesOrigin.position = tObject.transform.position - transform.up * GetHeadHeight() * transform.lossyScale.y;
         }
 
         public override Vector3 GetDisplacement()
