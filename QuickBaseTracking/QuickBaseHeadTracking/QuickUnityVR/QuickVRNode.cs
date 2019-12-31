@@ -40,7 +40,7 @@ namespace QuickVR
             TrackingReference,  //Represents a stationary physical device that can be used as a point of reference in the tracked area.
         };
 
-        public bool _showModel = true;
+        public bool _showModel = false;
 
         #endregion
 

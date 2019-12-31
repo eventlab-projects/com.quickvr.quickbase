@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEditor;
 using UnityEditor.SceneManagement;
 
-using UnityEngine.Animations.Rigging;
+//using UnityEngine.Animations.Rigging;
 
 namespace QuickVR
 {

@@ -50,11 +50,12 @@ namespace QuickVR {
             //Create the IKManager
             if (!gameObject.GetComponent<QuickIKManager>())
             {
-#if UNITY_2019_1_OR_NEWER 
-                gameObject.AddComponent<QuickIKManager_v2>();
-#else
+                //#if UNITY_2019_1_OR_NEWER 
+                //                gameObject.AddComponent<QuickIKManager_v2>();
+                //#else
+                //                gameObject.AddComponent<QuickIKManager_v1>();
+                //#endif
                 gameObject.AddComponent<QuickIKManager_v1>();
-#endif
             }
             _ikManager = gameObject.GetComponent<QuickIKManager>();
             _ikManager.enabled = false; //We control when to update the IK
