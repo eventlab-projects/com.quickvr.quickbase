@@ -13,7 +13,11 @@ namespace QuickVR
 
         public enum Type
         {
+            Undefined = -1,
+
             Head, 
+            LeftEye,
+            RightEye,
 
             LeftUpperArm, 
             LeftLowerArm, 
@@ -33,16 +37,17 @@ namespace QuickVR
             RightLowerLeg,
             RightFoot,
 
-            //TrackingReference,  //Represents a stationary physical device that can be used as a point of reference in the tracked area.
+            TrackingReference,  //Represents a stationary physical device that can be used as a point of reference in the tracked area.
         };
 
-        public bool _showModel = false;
+        public bool _showModel = true;
 
         #endregion
 
         #region PROTECTED PARAMETERS
 
-        [SerializeField, ReadOnly] protected ulong _id = 0;
+        [SerializeField, ReadOnly]
+        protected ulong _id = 0;
 
         protected QuickTrackedObject _trackedObject = null;
 
@@ -51,6 +56,8 @@ namespace QuickVR
         protected static List<XRNodeState> _vrNodesStates = new List<XRNodeState>();
 
         protected Transform _model = null;
+
+        protected Type _role = Type.Undefined;
 
         #endregion
 
@@ -69,21 +76,21 @@ namespace QuickVR
         protected virtual void Awake()
         {
             _trackedObject = transform.CreateChild("__TrackedObject__").gameObject.GetOrCreateComponent<QuickTrackedObject>();
-            LoadVRModel();
         }
 
         protected virtual void LoadVRModel()
         {
-            Type nodeType = GetNodeType();
+            if (_model) DestroyImmediate(_model.gameObject);
+
             string modelName = XRDevice.model.ToLower();
             string pfName = "";
-            if (nodeType == QuickVRNode.Type.Head) pfName = PF_GENERIC_HMD;
-            else if (nodeType == QuickVRNode.Type.LeftHand)
+            if (_role == QuickVRNode.Type.Head) pfName = PF_GENERIC_HMD;
+            else if (_role == QuickVRNode.Type.LeftHand)
             {
                 if (modelName.Contains("vive")) pfName = PF_VIVE_CONTROLLER;
                 else if (modelName.Contains("oculus")) pfName = PF_OCULUS_CV1_CONTROLLER_LEFT;
             }
-            else if (nodeType == QuickVRNode.Type.RightHand)
+            else if (_role == QuickVRNode.Type.RightHand)
             {
                 if (modelName.Contains("vive")) pfName = PF_VIVE_CONTROLLER;
                 else if (modelName.Contains("oculus")) pfName = PF_OCULUS_CV1_CONTROLLER_RIGHT;
@@ -106,19 +113,14 @@ namespace QuickVR
 
         #region GET AND SET
 
+        public virtual void SetID(ulong id)
+        {
+            _id = id;
+        }
+
         public virtual ulong GetID()
         {
             return _id;
-        }
-
-        public virtual void SetID(ulong id)
-        {
-            if (id == _id) return;
-
-            _id = id;
-            _trackedObject.Reset();
-
-            Update();
         }
 
         public virtual Transform GetModel()
@@ -133,45 +135,28 @@ namespace QuickVR
             _model.gameObject.SetActive(v);
         }
 
-        public static XRNodeState? GetUnityVRNodeState(XRNode nodeType)
+        public virtual Type GetRole()
         {
-            InputTracking.GetNodeStates(_vrNodesStates);
-            XRNodeState? result = null;
-
-            for (int i = 0; i < _vrNodesStates.Count && !result.HasValue; i++)
-            {
-                if (_vrNodesStates[i].nodeType == nodeType) result = _vrNodesStates[i];
-            }
-            
-            return result;
+            return _role;
         }
 
-        public static XRNodeState? GetUnityVRNodeState(ulong id)
+        public virtual void SetRole(Type role)
         {
-            InputTracking.GetNodeStates(_vrNodesStates);
-            XRNodeState? result = null;
+            _role = role;
+            name = role.ToString();
 
-            for (int i = 0; i < _vrNodesStates.Count && !result.HasValue; i++)
-            {
-                if (_vrNodesStates[i].uniqueID == id) result = _vrNodesStates[i];
-            }
+            LoadVRModel();
 
-            return result;
+            _trackedObject.Reset();
+
+            Update();
         }
 
-        protected virtual XRNodeState? GetUnityVRNodeState()
+        public virtual void SetRole(XRNode role)
         {
-            return GetUnityVRNodeState(_id);
-        }
-
-        public virtual bool IsTracked()
-        {
-            return _id != 0;
-        }
-
-        public Type GetNodeType()
-        {
-            return QuickUtils.ParseEnum<Type>(name);
+            string s = role.ToString();
+            if (QuickUtils.IsEnumValue<Type>(s)) SetRole(QuickUtils.ParseEnum<Type>(s));
+            else SetRole(Type.Undefined);
         }
 
         public virtual QuickTrackedObject GetTrackedObject()
@@ -181,8 +166,12 @@ namespace QuickVR
 
         public static List<Type> GetTypeList()
         {
-            if (_typeList.Count == 0) _typeList = QuickUtils.GetEnumValues<Type>();
-
+            if (_typeList.Count == 0)
+            {
+                _typeList = QuickUtils.GetEnumValues<Type>();
+                _typeList.Remove(Type.Undefined);
+                _typeList.Remove(Type.TrackingReference);
+            }
             return _typeList;
         }
 
@@ -192,27 +181,9 @@ namespace QuickVR
 
         protected virtual void Update()
         {
-            SetModelVisible(IsTracked() && Application.isEditor && _showModel);
+            //SetModelVisible(IsTracked() && Application.isEditor && _showModel);
 
-            InputTracking.GetNodeStates(_vrNodesStates);
-
-            if (IsTracked())
-            {
-                XRNodeState? uState = GetUnityVRNodeState();
-                if (uState.HasValue)
-                {
-                    Vector3 pos;
-                    Quaternion rot;
-                    if (uState.Value.TryGetPosition(out pos))
-                    {
-                        transform.localPosition = pos;
-                    }
-                    if (uState.Value.TryGetRotation(out rot))
-                    {
-                        transform.localRotation = rot;
-                    }
-                }
-            }
+            SetModelVisible(Application.isEditor && _showModel);
         }
 
         #endregion

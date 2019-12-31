@@ -490,10 +490,10 @@ namespace QuickVR
             transform.localScale = Vector3.one;
         }
 
-        public static Transform CreateChild(this Transform transform, string name)
+        public static Transform CreateChild(this Transform transform, string name, bool checkName = true)
         {
             Transform t = transform.Find(name);
-            if (!t)
+            if (!t || !checkName)
             {
                 t = new GameObject(name).transform;
                 t.parent = transform;
