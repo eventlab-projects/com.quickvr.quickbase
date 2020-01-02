@@ -40,16 +40,7 @@ namespace QuickVR
             TrackingReference,  //Represents a stationary physical device that can be used as a point of reference in the tracked area.
         };
 
-        public enum UpdateMode
-        {
-            FromUser,
-            FromCalibrationPose,
-        }
-        
-        public bool _showModel = true;
-
-        public UpdateMode _updateModePosition = UpdateMode.FromCalibrationPose;
-        public UpdateMode _updateModeRotation = UpdateMode.FromCalibrationPose;
+        public bool _showModel = false;
 
         #endregion
 
@@ -149,7 +140,7 @@ namespace QuickVR
             return _role;
         }
 
-        public virtual void SetRole(Type role, bool resetUpdateMode = true)
+        public virtual void SetRole(Type role)
         {
             _role = role;
             name = role.ToString();
@@ -157,30 +148,6 @@ namespace QuickVR
             LoadVRModel();
 
             _trackedObject.Reset();
-
-            if (resetUpdateMode)
-            {
-                if (_role == Type.Head)
-                {
-                    _updateModePosition = UpdateMode.FromCalibrationPose;
-                    _updateModeRotation = UpdateMode.FromUser;
-                }
-                else if (_role == Type.Hips)
-                {
-                    _updateModePosition = UpdateMode.FromCalibrationPose;
-                    _updateModeRotation = UpdateMode.FromCalibrationPose;
-                }
-                else if (_role == Type.LeftFoot || _role == Type.RightFoot)
-                {
-                    _updateModePosition = UpdateMode.FromCalibrationPose;
-                    _updateModeRotation = UpdateMode.FromUser;
-                }
-                else if (_role == Type.LeftHand || _role == Type.RightHand)
-                {
-                    _updateModePosition = UpdateMode.FromUser;
-                    _updateModeRotation = UpdateMode.FromUser;
-                }
-            }
 
             Update();
         }
