@@ -42,6 +42,15 @@ namespace QuickVR
 
         public bool _showModel = false;
 
+        public enum UpdateMode
+        {
+            FromUser,
+            FromCalibrationPose,
+        }
+
+        public UpdateMode _updateModePos = UpdateMode.FromUser;
+        public UpdateMode _updateModeRot = UpdateMode.FromUser;
+
         #endregion
 
         #region PROTECTED PARAMETERS
@@ -140,12 +149,14 @@ namespace QuickVR
             return _role;
         }
 
-        public virtual void SetRole(Type role)
+        public virtual void SetRole(Type role, bool resetUpdateMode = true)
         {
             _role = role;
             name = role.ToString();
 
             LoadVRModel();
+
+            if (resetUpdateMode) ResetUpdateMode();
 
             _trackedObject.Reset();
 
@@ -157,6 +168,25 @@ namespace QuickVR
             string s = role.ToString();
             if (QuickUtils.IsEnumValue<Type>(s)) SetRole(QuickUtils.ParseEnum<Type>(s));
             else SetRole(Type.Undefined);
+        }
+
+        protected virtual void ResetUpdateMode()
+        {
+            if (_role == Type.Head)
+            {
+                _updateModePos = UpdateMode.FromCalibrationPose;
+                _updateModeRot = UpdateMode.FromUser;
+            }
+            else if (_role == Type.LeftHand || _role == Type.RightHand)
+            {
+                _updateModePos = UpdateMode.FromUser;
+                _updateModeRot = UpdateMode.FromUser;
+            }
+            else if (_role == Type.LeftFoot || _role == Type.RightFoot)
+            {
+                _updateModePos = UpdateMode.FromCalibrationPose;
+                _updateModeRot = UpdateMode.FromUser;
+            }
         }
 
         public virtual QuickTrackedObject GetTrackedObject()
