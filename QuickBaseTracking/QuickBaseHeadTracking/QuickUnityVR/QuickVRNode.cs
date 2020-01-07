@@ -177,6 +177,11 @@ namespace QuickVR
                 _updateModePos = UpdateMode.FromCalibrationPose;
                 _updateModeRot = UpdateMode.FromUser;
             }
+            else if (_role == Type.Hips)
+            {
+                _updateModePos = UpdateMode.FromCalibrationPose;
+                _updateModeRot = UpdateMode.FromCalibrationPose;
+            }
             else if (_role == Type.LeftHand || _role == Type.RightHand)
             {
                 _updateModePos = UpdateMode.FromUser;
