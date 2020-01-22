@@ -166,7 +166,8 @@ namespace QuickVR {
         {
             string path = "HMDCalibrationScreens/";
             path += SettingsBase.GetLanguage() == SettingsBase.Languages.ENGLISH ? "en/" : "es/";
-            path += "CalibrationScreen_v2";
+            path += "CalibrationScreen_";
+            path += "v2";
             path += step == CalibrationStep.HMDAdjustment ? "_00" : "_01";
 
             return Resources.Load<Texture2D>(path);
