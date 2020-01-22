@@ -176,7 +176,12 @@ public abstract class BaseInputManager : MonoBehaviour {
             tmp.Add(names[i]);
         }
 
-        //Fore the option "None" to be the first one. 
+        return GetCodes(tmp);
+    }
+
+    protected virtual string[] GetCodes(List<string> tmp)
+    {
+        //Force the option "None" to be the first one. 
         tmp.Remove(BaseInputManager.NULL_MAPPING);
         List<string> codes = new List<string>();
         codes.Add(BaseInputManager.NULL_MAPPING);

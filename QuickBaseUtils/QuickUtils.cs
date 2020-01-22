@@ -402,7 +402,17 @@ namespace QuickVR
 #endif
         }
 
-#region EXTENSION METHODS
+        public static bool IsOculusQuest()
+        {
+            return UnityEngine.XR.XRDevice.model.ToLower().Contains("quest");
+        }
+
+        public static bool IsHandTrackingSupported()
+        {
+            return IsOculusQuest();
+        }
+
+        #region EXTENSION METHODS
 
         public static int GetNumSiblings(this Component c)
         {
