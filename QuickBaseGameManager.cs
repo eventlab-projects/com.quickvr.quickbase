@@ -112,16 +112,14 @@ namespace QuickVR {
 			InitGameConfiguration();
 			
             AwakePlayer();
-
-            _hTracking = GetPlayer().GetComponentInChildren<QuickUnityVRBase>(true);
         }
 
         protected virtual void Start()
         {
             StartPlayer();
 
-            QuickUnityVRBase hTracking = _player ? _player.GetComponent<QuickUnityVRBase>() : null;
-            if (hTracking)
+            _hTracking = _player ? _player.GetComponent<QuickUnityVRBase>() : null;
+            if (_hTracking)
             {
                 StartCoroutine(CoUpdate());
             }
@@ -167,7 +165,16 @@ namespace QuickVR {
             string path = "HMDCalibrationScreens/";
             path += SettingsBase.GetLanguage() == SettingsBase.Languages.ENGLISH ? "en/" : "es/";
             path += "CalibrationScreen_";
-            path += "v2";
+            if (_calibrationAssisted)
+            {
+                path += "v1";
+            }
+            else
+            {
+                if (_hTracking._handTrackingMode == QuickUnityVRBase.HandTrackingMode.Controllers) path += "v2";
+                else path += "v3";
+            }
+            
             path += step == CalibrationStep.HMDAdjustment ? "_00" : "_01";
 
             return Resources.Load<Texture2D>(path);
@@ -286,6 +293,12 @@ namespace QuickVR {
             }
         }
 
+        protected virtual bool IsContinueTriggered()
+        {
+            if (_calibrationAssisted) return Input.GetKeyDown(KeyCode.Return);
+            return InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE);
+        }
+
         #endregion
 
         #region UPDATE
@@ -338,19 +351,12 @@ namespace QuickVR {
         protected virtual IEnumerator CoUpdateHMDAdjustment()
         {
             _cameraFade.SetColor(Color.white);
-            _cameraFade.SetTexture(_player.GetComponent<QuickHeadTracking>()._calibrationTexture);
+            _cameraFade.SetTexture(GetHMDCalibrationScreen(CalibrationStep.HMDAdjustment));
 
             //HMD Adjustment
             _debugManager.Log("Adjusting HMD. Press CONTINUE when ready.");
-            //while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
-            if (_calibrationAssisted)
-            {
-                while (!Input.GetKeyDown(KeyCode.Return)) yield return null;
-            }
-            else
-            {
-                while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
-            }
+            while (!IsContinueTriggered()) yield return null;
+            
             _cameraFade.SetColor(Color.black);
             _cameraFade.SetTexture(null);
             yield return null;
@@ -359,21 +365,14 @@ namespace QuickVR {
 		protected virtual IEnumerator CoUpdateStateCalibrating() {
             //HMD Forward Direction calibration
             _instructionsManager.Play(_headTrackingCalibrationInstructions);
+            _cameraFade.SetColor(Color.white);
+            _cameraFade.SetTexture(GetHMDCalibrationScreen(CalibrationStep.ForwardDirection));
 
-			if (_calibrationAssisted)
-            {
-                _debugManager.Log("[WAIT] Playing calibration instructions.", Color.red);
-                while (_instructionsManager.IsPlaying() && !Input.GetKeyDown(KeyCode.Return)) yield return null;
+            _debugManager.Log("[WAIT] Playing calibration instructions.", Color.red);
+            while (_instructionsManager.IsPlaying() && !IsContinueTriggered()) yield return null;
 
-                _debugManager.Log("Wait for the user to look forward. Press RETURN when ready.");
-                while (!Input.GetKeyDown(KeyCode.Return)) yield return null;
-            }
-            else
-            {
-                _cameraFade.SetColor(Color.white);
-                _cameraFade.SetTexture(GetHMDCalibrationScreen(CalibrationStep.ForwardDirection));
-                while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
-            }
+            _debugManager.Log("Wait for the user to look forward. Press RETURN when ready.");
+            while (!IsContinueTriggered()) yield return null;
 
             _instructionsManager.Stop();
             _cameraFade.SetColor(Color.black);
