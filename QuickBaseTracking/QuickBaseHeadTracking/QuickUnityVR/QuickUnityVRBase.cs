@@ -32,6 +32,13 @@ namespace QuickVR
 
         public static bool _handsSwaped = false;
 
+        public enum HandTrackingMode
+        {
+            Controllers,
+            Hands,
+        }
+        public HandTrackingMode _handTrackingMode = HandTrackingMode.Controllers;
+
         #endregion
 
         #region PROTECTED ATTRIBUTES
@@ -72,6 +79,16 @@ namespace QuickVR
             
             _initialPosition = transform.position;
             _initialRotation = transform.rotation;
+        }
+
+        protected override void Start()
+        {
+            base.Start();
+
+            if (!QuickUtils.IsHandTrackingSupported())
+            {
+                _handTrackingMode = HandTrackingMode.Controllers;
+            }
         }
 
         protected override void CreateVRCursors()
@@ -495,7 +512,7 @@ namespace QuickVR
                     node.transform.position = new Vector3(tObjectHead.transform.position.x, tObjectHead.transform.position.y - 0.8f, tObjectHead.transform.position.z);
                 }
             }
-            else if (role == QuickVRNode.Type.LeftHand || role == QuickVRNode.Type.RightHand)
+            else if (role == QuickVRNode.Type.LeftHand)
             {
                 //if (IsExtraTracker(node.GetID()))
                 //{
@@ -511,9 +528,33 @@ namespace QuickVR
                 //else
                 {
                     //This is a controller
-                    float sign = role == QuickVRNode.Type.LeftHand ? 1.0f : -1.0f;
-                    tObject.transform.Rotate(tObject.transform.forward, sign * 90.0f, Space.World);
+                    //float sign = role == QuickVRNode.Type.LeftHand ? 1.0f : -1.0f;
+                    //tObject.transform.Rotate(tObject.transform.forward, sign * 90.0f, Space.World);
+                    //tObject.transform.localPosition = HAND_CONTROLLER_POSITION_OFFSET;
+
+                    //tObject.transform.LookAt(tObject.transform.position + node.transform.right, -node.transform.up);
+                }
+
+                if (_handTrackingMode == HandTrackingMode.Controllers)
+                {
+                    tObject.transform.Rotate(tObject.transform.forward, 90.0f, Space.World);
                     tObject.transform.localPosition = HAND_CONTROLLER_POSITION_OFFSET;
+                }
+                else
+                {
+                    tObject.transform.LookAt(tObject.transform.position + node.transform.right, -node.transform.up);
+                }
+            }
+            else if (role == QuickVRNode.Type.RightHand)
+            {
+                if (_handTrackingMode == HandTrackingMode.Controllers)
+                {
+                    tObject.transform.Rotate(tObject.transform.forward, -90.0f, Space.World);
+                    tObject.transform.localPosition = HAND_CONTROLLER_POSITION_OFFSET;
+                }
+                else
+                {
+                    tObject.transform.LookAt(tObject.transform.position - node.transform.right, node.transform.up);
                 }
             }
             else if (role == QuickVRNode.Type.LeftFoot || role == QuickVRNode.Type.RightFoot)

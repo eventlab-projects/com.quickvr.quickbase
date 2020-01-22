@@ -218,7 +218,8 @@ namespace QuickVR
         {
             //SetModelVisible(IsTracked() && Application.isEditor && _showModel);
 
-            SetModelVisible(Application.isEditor && _showModel);
+            //SetModelVisible(Application.isEditor && _showModel);
+            SetModelVisible(_showModel);
         }
 
         #endregion
