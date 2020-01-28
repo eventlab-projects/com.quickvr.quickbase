@@ -33,20 +33,16 @@ namespace QuickVR {
 
 		#endregion
 
-		#region CONSTANTS
+		#region CREATION AND DESTRUCTION
 
-		public static int DEFAULT_PRIORITY_TRACKING_BODY = 1000;
+        protected override void Start()
+        {
+            base.Start();
+
+            QuickSingletonManager.GetInstance<QuickVRManager>().AddBodyTrackingSystem(this);
+        }
 
         #endregion
-
-        #region GET AND SET
-
-        protected override int GetDefaultPriority()
-        {
-            return DEFAULT_PRIORITY_TRACKING_BODY;
-        }
-        
-		#endregion
 
 	}
 

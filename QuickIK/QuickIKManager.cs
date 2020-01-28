@@ -128,6 +128,13 @@ namespace QuickVR {
 
         #region CREATION AND DESTRUCTION
 
+        protected override void Start()
+        {
+            base.Start();
+
+            QuickSingletonManager.GetInstance<QuickVRManager>().AddIKManagerSystem(this);
+        }
+
         protected override void Reset()
         {
             base.Reset();
@@ -378,11 +385,6 @@ namespace QuickVR {
             if (_ikLimbBonesHand == null) _ikLimbBonesHand = QuickUtils.GetEnumValues<IKLimbBonesHand>();
 
             return _ikLimbBonesHand;
-        }
-
-        protected override int GetDefaultPriority()
-        {
-            return QuickBodyTracking.DEFAULT_PRIORITY_TRACKING_BODY - 1;
         }
 
         public static HumanBodyBones ToUnity(IKLimbBones boneID)

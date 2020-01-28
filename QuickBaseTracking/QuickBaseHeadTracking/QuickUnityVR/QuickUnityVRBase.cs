@@ -66,6 +66,16 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
+        protected virtual void OnEnable()
+        {
+            QuickVRManager.OnPostUpdateTracking += OnPostUpdateTracking;
+        }
+
+        protected virtual void OnDisable()
+        {
+            QuickVRManager.OnPostUpdateTracking -= OnPostUpdateTracking;
+        }
+
         protected override void Awake()
         {
             _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
@@ -600,13 +610,16 @@ namespace QuickVR
             UpdateTransformRoot();
             UpdateTransformNodes();
 
-            UpdateCameraPosition();
-
             UpdateFootPrints();
 
             UpdateVRCursors();
 
             UpdateUserForward();
+        }
+
+        protected virtual void OnPostUpdateTracking()
+        {
+            UpdateCameraPosition();
         }
 
         protected virtual void UpdateFootPrints()

@@ -10,8 +10,9 @@ namespace QuickVR
 
         #region PROTECTED PARAMETERS
 
-        //A list of the Tracking Systems present in the scene, sorted by priority. Lower number indicates higher priority
-        protected Dictionary<int, HashSet<QuickBaseTrackingManager>> _trackingManagers = new Dictionary<int, HashSet<QuickBaseTrackingManager>>();
+        protected List<QuickHeadTracking> _headTrackingSystems = new List<QuickHeadTracking>();
+        protected List<QuickBodyTracking> _bodyTrackingSystems = new List<QuickBodyTracking>();
+        protected List<QuickIKManager> _ikManagerSystems = new List<QuickIKManager>();
 
         protected PerformanceFPS _fpsCounter = null;
 
@@ -35,41 +36,42 @@ namespace QuickVR
             _fpsCounter._showFPS = false;
         }
 
-        protected virtual void OnDestroy()
-        {
-            _trackingManagers.Clear();
-        }
-
         #endregion
 
         #region GET AND SET
 
-        public virtual void AddTrackingManager(int priority, QuickBaseTrackingManager tManager)
+        public virtual void AddHeadTrackingSystem(QuickHeadTracking hTracking)
         {
-            if (!_trackingManagers.ContainsKey(priority)) _trackingManagers[priority] = new HashSet<QuickBaseTrackingManager>();
-            _trackingManagers[priority].Add(tManager);
+            _headTrackingSystems.Add(hTracking);
         }
 
-        protected virtual List<int> GetSortedKeys()
+        public virtual void AddBodyTrackingSystem(QuickBodyTracking bTracking)
         {
-            List<int> sortedKeys = new List<int>(_trackingManagers.Keys);
-            sortedKeys.Sort();
-            return sortedKeys;
+            _bodyTrackingSystems.Add(bTracking);
+        }
+
+        public virtual void AddIKManagerSystem(QuickIKManager ikManager)
+        {
+            _ikManagerSystems.Add(ikManager);
+        }
+
+        protected virtual List<QuickBaseTrackingManager> GetAllTrackingSystems()
+        {
+            List<QuickBaseTrackingManager> result = new List<QuickBaseTrackingManager>();
+            result.AddRange(_headTrackingSystems);
+            result.AddRange(_bodyTrackingSystems);
+            result.AddRange(_ikManagerSystems);
+
+            return result;
         }
 
         public virtual void Calibrate(bool forceCalibration = false)
         {
-            List<int> sortedKeys = GetSortedKeys();
-
-            foreach (int k in sortedKeys)
+            foreach (QuickBaseTrackingManager tm in GetAllTrackingSystems())
             {
-                HashSet<QuickBaseTrackingManager> tManagers = _trackingManagers[k];
-                foreach (QuickBaseTrackingManager tm in tManagers)
+                if (tm.gameObject.activeInHierarchy && (!tm.IsCalibrated() || forceCalibration))
                 {
-                    if (tm.gameObject.activeInHierarchy && (!tm.IsCalibrated() || forceCalibration))
-                    {
-                        tm.Calibrate();
-                    }
+                    tm.Calibrate();
                 }
             }
         }
@@ -80,30 +82,30 @@ namespace QuickVR
 
         protected virtual void LateUpdate()
         {
-            foreach (var pair in _trackingManagers)
+            //Calibrate the TrackingManagers that needs to be calibrated. 
+            if (InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CALIBRATE))
             {
-                HashSet<QuickBaseTrackingManager> tManagers = pair.Value;
-                tManagers.RemoveWhere(IsNull);
+                Calibrate(true);
             }
-
-            List<int> sortedKeys = GetSortedKeys();
-
+            
             if (OnPreUpdateTracking != null) OnPreUpdateTracking();
 
-            //Calibrate the TrackingManagers that needs to be calibrated. 
-            Calibrate();
-
-            //Update the TrackingManagers
-            foreach (int k in sortedKeys)
+            //1) Update the HeadTracking systems
+            foreach (QuickHeadTracking hTracking in _headTrackingSystems)
             {
-                HashSet<QuickBaseTrackingManager> tManagers = _trackingManagers[k];
-                foreach (QuickBaseTrackingManager tm in tManagers)
-                {
-                    if (tm.gameObject.activeInHierarchy && tm.enabled)
-                    {
-                        tm.UpdateTracking();
-                    }
-                }
+                hTracking.UpdateTracking();
+            }
+
+            //2) Update the BodyTracking systems
+            foreach (QuickBodyTracking bTracking in _bodyTrackingSystems)
+            {
+                bTracking.UpdateTracking();
+            }
+
+            //3) Update the IKManager systems
+            foreach (QuickIKManager ikManager in _ikManagerSystems)
+            {
+                ikManager.UpdateTracking();
             }
 
             if (OnPostUpdateTracking != null) OnPostUpdateTracking();

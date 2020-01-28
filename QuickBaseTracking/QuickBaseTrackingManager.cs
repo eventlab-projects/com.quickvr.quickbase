@@ -7,12 +7,6 @@ namespace QuickVR {
 	[System.Serializable]
     public abstract class QuickBaseTrackingManager : MonoBehaviour {
 
-		#region PUBLIC PARAMETERS
-
-		public int _priority = 0;
-
-		#endregion
-
 		#region PROTECTED PARAMETERS
 
 		[SerializeField, HideInInspector] 
@@ -26,7 +20,6 @@ namespace QuickVR {
 		#region ABSTRACT
 
 		public abstract void UpdateTracking();
-        protected abstract int GetDefaultPriority();
 
 		#endregion
 
@@ -34,7 +27,6 @@ namespace QuickVR {
 
         protected virtual void Reset()
         {
-            _priority = GetDefaultPriority();
             _animator = GetComponent<Animator>();
         }
 
@@ -49,18 +41,9 @@ namespace QuickVR {
             {
                 r.updateWhenOffscreen = true;
             }
-            QuickSingletonManager.GetInstance<QuickVRManager>().AddTrackingManager(_priority, this);
 		}
 
-        protected virtual void OnEnable() {
-			QuickVRManager.OnPreUpdateTracking += UpdateInput;
-		}
-
-		protected virtual void OnDisable() {
-			QuickVRManager.OnPreUpdateTracking -= UpdateInput;
-		}
-
-		#endregion
+        #endregion
 
 		#region GET AND SET
 
@@ -83,13 +66,6 @@ namespace QuickVR {
 
 		#endregion
 
-		#region UPDATE
-
-		protected virtual void UpdateInput() {
-			if (InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CALIBRATE)) _isCalibrated = false;
-		}
-
-		#endregion
 
 	}
 

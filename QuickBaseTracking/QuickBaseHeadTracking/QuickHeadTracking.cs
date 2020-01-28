@@ -43,7 +43,6 @@ namespace QuickVR {
 
         #region CONSTANTS
 
-        protected const int DEFAULT_PRIORITY_TRACKING_HEAD = 2000;
 		protected const float DEFAULT_NEAR_CLIP_PLANE = 0.05f;
 		protected const float DEFAULT_FAR_CLIP_PLANE = 500.0f;
 
@@ -65,6 +64,13 @@ namespace QuickVR {
             CreateVRCursors();
 
             if (!_calibrationTexture) _calibrationTexture = LoadDefaultCalibrationTexture();
+        }
+
+        protected override void Start()
+        {
+            base.Start();
+
+            QuickSingletonManager.GetInstance<QuickVRManager>().AddHeadTrackingSystem(this);
         }
 
         protected virtual void CreateCamera()
@@ -115,11 +121,6 @@ namespace QuickVR {
         #endregion
 
         #region GET AND SET
-
-        protected override int GetDefaultPriority()
-        {
-            return DEFAULT_PRIORITY_TRACKING_HEAD;
-        }
 
         public virtual QuickUICursor GetVRCursor(VRCursorType cType) {
 			if (!_vrCursors.ContainsKey(cType)) return null;

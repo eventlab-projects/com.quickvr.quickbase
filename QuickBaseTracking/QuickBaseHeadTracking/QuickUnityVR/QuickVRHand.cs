@@ -102,8 +102,8 @@ namespace QuickVR
         protected virtual void Update()
         {
             //Update the animator state
-            SetAnimatorParameter(_parameterState, (int)(_state));
-            SetAnimatorParameter(_parameterPressValue, GetAnimationTime());
+            //SetAnimatorParameter(_parameterState, (int)(_state));
+            //SetAnimatorParameter(_parameterPressValue, GetAnimationTime());
         }
 
         #endregion
