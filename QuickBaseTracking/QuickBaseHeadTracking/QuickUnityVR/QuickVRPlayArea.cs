@@ -12,18 +12,12 @@ namespace QuickVR
 
         protected Dictionary<ulong, QuickVRNode> _vrNodes = new Dictionary<ulong, QuickVRNode>();
         protected Dictionary<QuickVRNode.Type, QuickVRNode> _vrNodeRoles = new Dictionary<QuickVRNode.Type, QuickVRNode>();
+        protected HashSet<QuickVRNode> _vrHardwareTrackers = new HashSet<QuickVRNode>();
         protected List<XRNodeState> _vrNodeStates = new List<XRNodeState>();
 
         protected Transform _calibrationPoseRoot = null;
-        protected Dictionary<QuickVRNode.Type, Transform> _calibrationPose = new Dictionary<QuickVRNode.Type, Transform>();
-
+        
         protected bool _isHandsSwaped = false;
-
-        #endregion
-
-        #region CONSTANTS
-
-        protected const string CALIBRATION_POSE_PREFIX = "_CalibrationPose_";
 
         #endregion
 
@@ -31,7 +25,7 @@ namespace QuickVR
 
         protected virtual void Awake()
         {
-            _calibrationPoseRoot = transform.CreateChild(CALIBRATION_POSE_PREFIX + "Root_");
+            _calibrationPoseRoot = transform.CreateChild("__CalibrationPoseRoot__");
         }
 
         protected virtual QuickVRNode CreateVRNode(ulong id, XRNode nodeType)
@@ -40,13 +34,17 @@ namespace QuickVR
             _vrNodes[id].SetID(id);
 
             string s = nodeType.ToString();
-            if (QuickUtils.IsEnumValue<QuickVRNode.Type>(s))
-            {
-                QuickVRNode.Type role = QuickUtils.ParseEnum<QuickVRNode.Type>(s);
-                _vrNodes[id].SetRole(role);
-                _vrNodeRoles[role] = _vrNodes[id];
+            QuickVRNode.Type role = QuickUtils.IsEnumValue<QuickVRNode.Type>(s)? QuickUtils.ParseEnum<QuickVRNode.Type>(s) : QuickVRNode.Type.Undefined;
+            _vrNodes[id].SetCalibrationPose(_calibrationPoseRoot.CreateChild(QuickVRNode.CALIBRATION_POSE_PREFIX, false));
+            _vrNodes[id].SetRole(role);
 
-                _calibrationPose[role] = _calibrationPoseRoot.CreateChild(GetCalibrationPoseName(role));
+            if (nodeType == XRNode.HardwareTracker)
+            {
+                _vrHardwareTrackers.Add(_vrNodes[id]);
+            }
+            else
+            {
+                _vrNodeRoles[role] = _vrNodes[id];
             }
 
             return _vrNodes[id];
@@ -69,16 +67,6 @@ namespace QuickVR
         public virtual QuickVRNode GetVRNode(HumanBodyBones boneID)
         {
             return GetVRNode(QuickUtils.ParseEnum<QuickVRNode.Type>(boneID.ToString()));
-        }
-
-        protected virtual string GetCalibrationPoseName(QuickVRNode.Type role)
-        {
-            return CALIBRATION_POSE_PREFIX + role.ToString();
-        }
-
-        public virtual Transform GetCalibrationPose(QuickVRNode.Type role)
-        {
-            return _calibrationPose[role];
         }
 
         protected virtual bool IsValidNode(XRNode n)
@@ -123,8 +111,14 @@ namespace QuickVR
 
         public virtual void Calibrate()
         {
+            foreach (var pair in _vrNodes)
+            {
+                pair.Value.Calibrate();
+            }
             _isHandsSwaped = IsVRNodesSwaped(QuickVRNode.Type.LeftHand, QuickVRNode.Type.RightHand);
             Debug.Log("handsSwaped = " + _isHandsSwaped);
+
+            
         }
 
         public virtual bool IsVRNodesSwaped(QuickVRNode.Type typeNodeLeft, QuickVRNode.Type typeNodeRight, bool doSwaping = true)

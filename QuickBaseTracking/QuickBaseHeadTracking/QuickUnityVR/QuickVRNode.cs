@@ -68,6 +68,8 @@ namespace QuickVR
 
         protected Type _role = Type.Undefined;
 
+        protected Transform _calibrationPose = null;
+
         #endregion
 
         #region CONSTANTS
@@ -77,6 +79,8 @@ namespace QuickVR
         protected static string PF_OCULUS_CV1_CONTROLLER_LEFT = "pf_OculusCV1_Controller_Left";
         protected static string PF_OCULUS_CV1_CONTROLLER_RIGHT = "pf_OculusCV1_Controller_Right";
         protected static string PF_VIVE_TRACKER = "pf_VIVE_Tracker";
+
+        public static string CALIBRATION_POSE_PREFIX = "__CalibrationPose__";
 
         #endregion
 
@@ -132,6 +136,16 @@ namespace QuickVR
             return _id;
         }
 
+        public virtual Transform GetCalibrationPose()
+        {
+            return _calibrationPose;
+        }
+
+        public virtual void SetCalibrationPose(Transform calibrationPose)
+        {
+            _calibrationPose = calibrationPose;
+        }
+
         public virtual Transform GetModel()
         {
             return _model;
@@ -153,6 +167,7 @@ namespace QuickVR
         {
             _role = role;
             name = role.ToString();
+            _calibrationPose.name = CALIBRATION_POSE_PREFIX + name;
 
             LoadVRModel();
 
@@ -208,6 +223,13 @@ namespace QuickVR
                 _typeList.Remove(Type.TrackingReference);
             }
             return _typeList;
+        }
+
+        public virtual void Calibrate()
+        {
+            _calibrationPose.position = _trackedObject.transform.position;
+            _calibrationPose.rotation = _trackedObject.transform.rotation;
+            _trackedObject.Reset();
         }
 
         #endregion
