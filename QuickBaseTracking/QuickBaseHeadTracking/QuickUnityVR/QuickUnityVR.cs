@@ -153,7 +153,7 @@ namespace QuickVR {
             foreach (QuickVRNode.Type t in QuickVRNode.GetTypeList())
             {
                 QuickVRNode node = _vrPlayArea.GetVRNode(t);
-                if (t == QuickVRNode.Type.Hips || !node) continue;
+                if (!node) continue;
 
                 HumanBodyBones boneID = QuickUtils.ParseEnum<HumanBodyBones>(t.ToString());
                 QuickTrackedObject tObject = node.GetTrackedObject();
@@ -167,10 +167,10 @@ namespace QuickVR {
                 else UpdateTransformNodeRotFromCalibrationPose(node, boneID);
             }
 
-            //2) Update the hips target if necessary
-            if (_isStanding)
+            //2) Special case: The user is standing but there is no tracker on the hips. So the hips position is estimated by the movement of the head
+            if (_isStanding && !_vrPlayArea.IsTrackedNode(QuickVRNode.Type.Hips))
             {
-                QuickVRNode vrNode = _vrPlayArea.GetVRNode(_vrPlayArea.IsTrackedNode(QuickVRNode.Type.Hips) ? QuickVRNode.Type.Hips : QuickVRNode.Type.Head);
+                QuickVRNode vrNode = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head);
                 UpdateTransformNodePosFromCalibrationPose(vrNode, HumanBodyBones.Hips, Vector3.up);
                 float maxY = _ikManager.GetInitialIKDataLocalPos(HumanBodyBones.Hips).y;
                 Transform targetHips = _ikManager.GetIKTarget(HumanBodyBones.Hips);

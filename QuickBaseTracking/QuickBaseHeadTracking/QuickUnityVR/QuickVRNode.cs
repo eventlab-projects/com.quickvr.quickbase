@@ -227,6 +227,75 @@ namespace QuickVR
 
         public virtual void Calibrate()
         {
+            QuickUnityVRBase hTracking = QuickSingletonManager.GetInstance<QuickUnityVRBase>();
+            _trackedObject.transform.ResetTransformation();
+
+            if (_role == QuickVRNode.Type.Head)
+            {
+                _trackedObject.transform.localPosition = hTracking.GetHeadOffset();
+            }
+            else if (_role == QuickVRNode.Type.Hips)
+            {
+                QuickVRPlayArea vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
+                QuickTrackedObject tObjectHead = vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject();
+                _trackedObject.transform.position = new Vector3(tObjectHead.transform.position.x, _trackedObject.transform.position.y, tObjectHead.transform.position.z);
+            }
+            else if (_role == QuickVRNode.Type.LeftHand)
+            {
+                //if (IsExtraTracker(node.GetID()))
+                //{
+                //    //tObject.transform.Rotate(tObject.transform.right, 90.0f, Space.World);
+                //    //tObject.transform.rotation = _vrNodesOrigin.rotation;
+                //    //float d = Vector3.Dot(node.transform.forward, _vrNodesOrigin.up);
+                //    //if (d < 0.5f)
+                //    //{
+                //    //    tObject.transform.Rotate(_vrNodesOrigin.right, 90.0f, Space.World);
+                //    //    tObject.transform.Rotate(_vrNodesOrigin.up, nodeType == QuickVRNode.Type.LeftHand? -90.0f : 90.0f, Space.World);
+                //    //}
+                //}
+                //else
+                {
+                    //This is a controller
+                    //float sign = role == QuickVRNode.Type.LeftHand ? 1.0f : -1.0f;
+                    //tObject.transform.Rotate(tObject.transform.forward, sign * 90.0f, Space.World);
+                    //tObject.transform.localPosition = HAND_CONTROLLER_POSITION_OFFSET;
+
+                    //tObject.transform.LookAt(tObject.transform.position + node.transform.right, -node.transform.up);
+                }
+
+                if (hTracking._handTrackingMode == QuickUnityVRBase.HandTrackingMode.Controllers)
+                {
+                    _trackedObject.transform.Rotate(_trackedObject.transform.forward, 90.0f, Space.World);
+                    _trackedObject.transform.localPosition = QuickUnityVRBase.HAND_CONTROLLER_POSITION_OFFSET;
+                }
+                else
+                {
+                    _trackedObject.transform.LookAt(_trackedObject.transform.position + transform.right, -transform.up);
+                }
+            }
+            else if (_role == QuickVRNode.Type.RightHand)
+            {
+                if (hTracking._handTrackingMode == QuickUnityVRBase.HandTrackingMode.Controllers)
+                {
+                    _trackedObject.transform.Rotate(_trackedObject.transform.forward, -90.0f, Space.World);
+                    _trackedObject.transform.localPosition = QuickUnityVRBase.HAND_CONTROLLER_POSITION_OFFSET;
+                }
+                else
+                {
+                    _trackedObject.transform.LookAt(_trackedObject.transform.position - transform.right, transform.up);
+                }
+            }
+            else if (_role == QuickVRNode.Type.LeftFoot || _role == QuickVRNode.Type.RightFoot)
+            {
+                //tObject.transform.rotation = _vrNodesOrigin.rotation;
+                //tObject.transform.position += -_vrNodesOrigin.forward * 0.075f;
+            }
+            //else if (_role == QuickVRNode.Type.LeftLowerArm || _role == QuickVRNode.Type.RightLowerArm)
+            //{
+            //    tObject.transform.position += (-node.transform.forward * 0.1f);// + (-_vrNodesOrigin.up * 0.1f);
+            //}
+
+            //Save the calibration pose
             _calibrationPose.position = _trackedObject.transform.position;
             _calibrationPose.rotation = _trackedObject.transform.rotation;
             _trackedObject.Reset();

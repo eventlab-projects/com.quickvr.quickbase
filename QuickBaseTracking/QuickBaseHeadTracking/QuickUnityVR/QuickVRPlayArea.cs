@@ -12,7 +12,7 @@ namespace QuickVR
 
         protected Dictionary<ulong, QuickVRNode> _vrNodes = new Dictionary<ulong, QuickVRNode>();
         protected Dictionary<QuickVRNode.Type, QuickVRNode> _vrNodeRoles = new Dictionary<QuickVRNode.Type, QuickVRNode>();
-        protected HashSet<QuickVRNode> _vrHardwareTrackers = new HashSet<QuickVRNode>();
+        protected List<QuickVRNode> _vrHardwareTrackers = new List<QuickVRNode>();
         protected List<XRNodeState> _vrNodeStates = new List<XRNodeState>();
 
         protected Transform _calibrationPoseRoot = null;
@@ -111,14 +111,21 @@ namespace QuickVR
 
         public virtual void Calibrate()
         {
-            foreach (var pair in _vrNodes)
+            Debug.Log("NUM HARDWARE TRACKERS = " + _vrHardwareTrackers.Count);
+            if (_vrHardwareTrackers.Count == 1)
             {
-                pair.Value.Calibrate();
+                //This is the hipsTracker
+                _vrHardwareTrackers[0].SetRole(QuickVRNode.Type.Hips);
+                _vrNodeRoles[QuickVRNode.Type.Hips] = _vrHardwareTrackers[0];
+            }
+
+            foreach (QuickVRNode.Type t in QuickVRNode.GetTypeList())
+            {
+                QuickVRNode n = GetVRNode(t);
+                if (n) n.Calibrate(); 
             }
             _isHandsSwaped = IsVRNodesSwaped(QuickVRNode.Type.LeftHand, QuickVRNode.Type.RightHand);
             Debug.Log("handsSwaped = " + _isHandsSwaped);
-
-            
         }
 
         public virtual bool IsVRNodesSwaped(QuickVRNode.Type typeNodeLeft, QuickVRNode.Type typeNodeRight, bool doSwaping = true)
