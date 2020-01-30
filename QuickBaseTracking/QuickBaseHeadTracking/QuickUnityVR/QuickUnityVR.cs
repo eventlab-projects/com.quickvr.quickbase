@@ -17,13 +17,6 @@ namespace QuickVR {
         public bool _isStanding = true;
         public bool _applyUserScale = false;
 
-        public enum UpdateMode
-        {
-            FromUser,
-            FromCalibrationPose,
-        }
-        public UpdateMode _updateMode = UpdateMode.FromUser;
-
         #endregion
 
         #region PROTECTED PARAMETERS
