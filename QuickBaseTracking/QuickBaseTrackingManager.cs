@@ -12,9 +12,6 @@ namespace QuickVR {
 		[SerializeField, HideInInspector] 
         protected Animator _animator = null;	
 
-		[SerializeField, HideInInspector] 
-        protected bool _isCalibrated = false;
-
 		#endregion
 
 		#region ABSTRACT
@@ -51,21 +48,9 @@ namespace QuickVR {
 			return _animator && _animator.isHuman;
 		}
 
-		public virtual void Calibrate() {
-			_isCalibrated = true;
-		}
-
-		public virtual bool IsCalibrated() {
-			return _isCalibrated;
-		}
-
-        public virtual void SetCalibrated(bool isCalibrated)
-        {
-            _isCalibrated = isCalibrated;
-        }
+        public abstract void Calibrate();
 
 		#endregion
-
 
 	}
 

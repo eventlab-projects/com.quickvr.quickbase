@@ -65,11 +65,11 @@ namespace QuickVR
             return result;
         }
 
-        public virtual void Calibrate(bool forceCalibration = false)
+        public virtual void Calibrate()
         {
             foreach (QuickBaseTrackingManager tm in GetAllTrackingSystems())
             {
-                if (tm.gameObject.activeInHierarchy && (!tm.IsCalibrated() || forceCalibration))
+                if (tm.gameObject.activeInHierarchy)
                 {
                     tm.Calibrate();
                 }
@@ -85,7 +85,7 @@ namespace QuickVR
             //Calibrate the TrackingManagers that needs to be calibrated. 
             if (InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CALIBRATE))
             {
-                Calibrate(true);
+                Calibrate();
             }
             
             if (OnPreUpdateTracking != null) OnPreUpdateTracking();

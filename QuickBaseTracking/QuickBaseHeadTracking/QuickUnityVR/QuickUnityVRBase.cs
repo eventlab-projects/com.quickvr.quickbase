@@ -478,16 +478,6 @@ namespace QuickVR
             transform.position = _initialPosition;
             transform.rotation = _initialRotation;
 
-            CalibrateVRNodes();
-            CalibrateVRPlayArea();
-
-            base.Calibrate();
-
-            if (OnCalibrate != null) OnCalibrate();
-        }
-
-        protected virtual void CalibrateVRNodes()
-        {
             //Get all the tracked extratrackers and sort them by Y, from lowest to higher. 
             List<QuickExtraTracker> extraTrackers = GetExtraTrackers();
             extraTrackers = extraTrackers.OrderBy(o => o.Value.y).ToList();
@@ -509,6 +499,13 @@ namespace QuickVR
                 QuickVRNode node = _vrPlayArea.GetVRNode(t);
                 if (node) CalibrateVRNode(node);
             }
+
+            _vrPlayArea.Calibrate();
+
+            float rotAngle = Vector3.SignedAngle(_userForward, transform.forward, transform.up);
+            _vrPlayArea.transform.Rotate(transform.up, rotAngle, Space.World);
+
+            if (OnCalibrate != null) OnCalibrate();
         }
 
         protected virtual void CalibrateVRNode(QuickVRNode node)
@@ -599,14 +596,6 @@ namespace QuickVR
             {
                 tObject.transform.position += (-node.transform.forward * 0.1f);// + (-_vrNodesOrigin.up * 0.1f);
             }
-        }
-
-        protected virtual void CalibrateVRPlayArea()
-        {
-            _vrPlayArea.Calibrate();
-
-            float rotAngle = Vector3.SignedAngle(_userForward, transform.forward, transform.up);
-            _vrPlayArea.transform.Rotate(transform.up, rotAngle, Space.World);
         }
 
         public virtual QuickVRHand GetVRHand(QuickVRNode.Type nType)
@@ -704,27 +693,6 @@ namespace QuickVR
                 _userForward = Vector3.ProjectOnPlane(node.transform.forward, transform.up);
             }
         }
-
-        //protected virtual void OnHMDConnected(XRNodeState state)
-        //{
-        //    GetQuickVRNode(QuickVRNode.Type.Head).SetID(state.uniqueID);
-        //    Calibrate();
-        //    InitVRNodeFootPrints();
-        //}
-
-        //protected virtual void OnLeftHandConnected(XRNodeState state)
-        //{
-        //    GetQuickVRNode(QuickVRNode.Type.LeftHand).SetID(state.uniqueID);
-        //    _handsSwaped = IsVRNodesSwaped(QuickVRNode.Type.LeftHand, QuickVRNode.Type.RightHand);
-        //    CalibrateVRNode(_handsSwaped? QuickVRNode.Type.RightHand : QuickVRNode.Type.LeftHand);
-        //}
-
-        //protected virtual void OnRightHandConnected(XRNodeState state)
-        //{
-        //    GetQuickVRNode(QuickVRNode.Type.RightHand).SetID(state.uniqueID);
-        //    _handsSwaped = IsVRNodesSwaped(QuickVRNode.Type.LeftHand, QuickVRNode.Type.RightHand);
-        //    CalibrateVRNode(_handsSwaped? QuickVRNode.Type.LeftHand : QuickVRNode.Type.RightHand);
-        //}
 
         #endregion
 

@@ -316,7 +316,7 @@ namespace QuickVR {
             //Start the calibration process
             if (OnCalibrating != null) OnCalibrating();
             yield return StartCoroutine(CoUpdateStateCalibrating());	//Wait for the VR Devices Calibration
-            QuickSingletonManager.GetInstance<QuickVRManager>().Calibrate(true);
+            QuickSingletonManager.GetInstance<QuickVRManager>().Calibrate();
             _player.GetComponent<QuickUnityVRBase>().InitVRNodeFootPrints();
             _debugManager.Clear();
 

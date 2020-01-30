@@ -270,8 +270,6 @@ namespace QuickVR {
 			}
 
 			_calibrationRotation = Quaternion.Inverse(_initialRootRotation) * Quaternion.FromToRotation(ComputeTorsoForward(), _initialForward);
-
-			base.Calibrate();
 		}
 
         protected virtual Vector3 GetRootDisplacement()

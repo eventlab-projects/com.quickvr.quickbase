@@ -334,8 +334,6 @@ namespace QuickVR {
             //    ikSolver = GetIKSolver(IKLimbBones.RightHand);
             //    ikSolver._targetHint.position = ikSolver._boneMid.position - transform.forward * DEFAULT_TARGET_HINT_DISTANCE;
             //}
-
-            base.Calibrate();
         }
 
         public virtual void ResetIKSolver(HumanBodyBones boneID)

@@ -82,11 +82,6 @@ namespace QuickVR {
             _unscaledHeadHeight = _ikManager.GetIKSolver(HumanBodyBones.Head)._targetLimb.position.y - transform.position.y;
 
             base.Calibrate();
-        }
-
-        protected override void CalibrateVRPlayArea()
-        {
-            base.CalibrateVRPlayArea();
 
             //Set the offset of the TrackedObject of the head
             QuickVRNode node = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head);
@@ -148,13 +143,6 @@ namespace QuickVR {
         public virtual void Update()
         {
             _ikManager.Update();
-        }
-
-        protected override void UpdateTransformRoot()
-        {
-            base.UpdateTransformRoot();
-
-            //if (_rotateWithCamera) CalibrateCameraForward();
         }
 
         protected override void UpdateTransformNodes()
