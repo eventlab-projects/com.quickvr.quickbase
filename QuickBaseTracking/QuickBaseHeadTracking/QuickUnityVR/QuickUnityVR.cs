@@ -122,6 +122,9 @@ namespace QuickVR {
             //    return Vector3.SignedAngle(currentForward, targetForward, _vrNodesOrigin.up);
             //}
 
+            QuickVRNode n = _vrPlayArea.GetVRNode(_vrPlayArea.IsTrackedNode(QuickVRNode.Type.Hips) ? QuickVRNode.Type.Hips : QuickVRNode.Type.Head);
+
+
             return 0.0f;
         }
 
