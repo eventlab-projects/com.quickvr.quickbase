@@ -114,14 +114,64 @@ namespace QuickVR
             return (eLeft != null && eRight != null) ? Vector3.Distance(eLeft.transform.position, eRight.transform.position) : 0.0f;
         }
 
+        protected virtual QuickVRNode GetLowerTracker(List<QuickVRNode> nodeList)
+        {
+            QuickVRNode result = null;
+
+            if (nodeList.Count > 0)
+            {
+                result = nodeList[0];
+                for (int i = 1; i < nodeList.Count; i++)
+                {
+                    if (nodeList[i].transform.position.y < result.transform.position.y)
+                    {
+                        result = nodeList[i];
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        protected virtual bool IsNodeLeftSide(QuickVRNode vrNode)
+        {
+            QuickVRNode nodeHead = GetVRNode(QuickVRNode.Type.Head);
+            Vector3 fwd = Vector3.ProjectOnPlane(nodeHead.transform.forward, transform.up);
+            Vector3 v = Vector3.ProjectOnPlane(vrNode.transform.position - nodeHead.transform.position, transform.up);
+
+            return Vector3.SignedAngle(fwd, v, transform.up) < 0;
+        }
+
         public virtual void Calibrate()
         {
-            Debug.Log("NUM HARDWARE TRACKERS = " + _vrHardwareTrackers.Count);
-            if (_vrHardwareTrackers.Count == 1)
+            List<QuickVRNode> tmp = new List<QuickVRNode>(_vrHardwareTrackers);
+            int numTrackers = tmp.Count;
+            Debug.Log("NUM HARDWARE TRACKERS = " + numTrackers);
+
+            
+            if (numTrackers == 1)
             {
                 //This is the hipsTracker
-                _vrHardwareTrackers[0].SetRole(QuickVRNode.Type.Hips);
-                _vrNodeRoles[QuickVRNode.Type.Hips] = _vrHardwareTrackers[0];
+                tmp[0].SetRole(QuickVRNode.Type.Hips);
+                _vrNodeRoles[QuickVRNode.Type.Hips] = tmp[0];
+            }
+            else if (numTrackers == 3)
+            {
+                //Hips + feet
+                QuickVRNode foot = GetLowerTracker(tmp);
+                QuickVRNode.Type footRole = IsNodeLeftSide(foot) ? QuickVRNode.Type.LeftFoot : QuickVRNode.Type.RightFoot;
+                foot.SetRole(footRole);
+                _vrNodeRoles[footRole] = foot;
+                tmp.Remove(foot);
+
+                foot = GetLowerTracker(tmp);
+                footRole = IsNodeLeftSide(foot) ? QuickVRNode.Type.LeftFoot : QuickVRNode.Type.RightFoot;
+                foot.SetRole(footRole);
+                _vrNodeRoles[footRole] = foot;
+                tmp.Remove(foot);
+
+                tmp[0].SetRole(QuickVRNode.Type.Hips);
+                _vrNodeRoles[QuickVRNode.Type.Hips] = tmp[0];
             }
 
             foreach (QuickVRNode.Type t in QuickVRNode.GetTypeList())
