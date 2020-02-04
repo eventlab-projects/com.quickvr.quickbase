@@ -13,8 +13,6 @@ namespace QuickVR
 
         public enum Type
         {
-            Undefined = -1,
-
             Head, 
             LeftEye,
             RightEye,
@@ -36,8 +34,6 @@ namespace QuickVR
             RightUpperLeg,
             RightLowerLeg,
             RightFoot,
-
-            TrackingReference,  //Represents a stationary physical device that can be used as a point of reference in the tracked area.
         };
 
         public bool _showModel = false;
@@ -66,7 +62,7 @@ namespace QuickVR
 
         protected Transform _model = null;
 
-        protected Type _role = Type.Undefined;
+        protected Type _role = Type.Head;
 
         protected Transform _calibrationPose = null;
 
@@ -178,13 +174,6 @@ namespace QuickVR
             Update();
         }
 
-        public virtual void SetRole(XRNode role)
-        {
-            string s = role.ToString();
-            if (QuickUtils.IsEnumValue<Type>(s)) SetRole(QuickUtils.ParseEnum<Type>(s));
-            else SetRole(Type.Undefined);
-        }
-
         protected virtual void ResetUpdateMode()
         {
             if (_role == Type.Head)
@@ -219,8 +208,6 @@ namespace QuickVR
             if (_typeList.Count == 0)
             {
                 _typeList = QuickUtils.GetEnumValues<Type>();
-                _typeList.Remove(Type.Undefined);
-                _typeList.Remove(Type.TrackingReference);
             }
             return _typeList;
         }

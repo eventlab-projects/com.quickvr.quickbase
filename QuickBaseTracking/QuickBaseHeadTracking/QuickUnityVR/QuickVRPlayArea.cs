@@ -26,28 +26,19 @@ namespace QuickVR
         protected virtual void Awake()
         {
             _calibrationPoseRoot = transform.CreateChild("__CalibrationPoseRoot__");
+            foreach (QuickVRNode.Type role in QuickVRNode.GetTypeList())
+            {
+                CreateVRNode(role);
+            }
         }
 
-        protected virtual QuickVRNode CreateVRNode(ulong id, XRNode nodeType)
+        protected virtual QuickVRNode CreateVRNode(QuickVRNode.Type role)
         {
-            _vrNodes[id] = transform.CreateChild("VRNode").gameObject.GetOrCreateComponent<QuickVRNode>();
-            _vrNodes[id].SetID(id);
+            _vrNodeRoles[role] = transform.CreateChild("VRNode").gameObject.GetOrCreateComponent<QuickVRNode>();
+            _vrNodeRoles[role].SetCalibrationPose(_calibrationPoseRoot.CreateChild(QuickVRNode.CALIBRATION_POSE_PREFIX, false));
+            _vrNodeRoles[role].SetRole(role);
 
-            string s = nodeType.ToString();
-            QuickVRNode.Type role = QuickUtils.IsEnumValue<QuickVRNode.Type>(s)? QuickUtils.ParseEnum<QuickVRNode.Type>(s) : QuickVRNode.Type.Undefined;
-            _vrNodes[id].SetCalibrationPose(_calibrationPoseRoot.CreateChild(QuickVRNode.CALIBRATION_POSE_PREFIX, false));
-            _vrNodes[id].SetRole(role);
-
-            if (nodeType == XRNode.HardwareTracker)
-            {
-                _vrHardwareTrackers.Add(_vrNodes[id]);
-            }
-            else
-            {
-                _vrNodeRoles[role] = _vrNodes[id];
-            }
-
-            return _vrNodes[id];
+            return _vrNodeRoles[role];
         }
 
         #endregion
@@ -228,21 +219,23 @@ namespace QuickVR
             {
                 if (!IsValidNode(s.nodeType)) continue;
 
-                QuickVRNode n = GetVRNode(s.uniqueID);
-                if (!n)
+                QuickVRNode n = null;
+                if (s.nodeType == XRNode.Head)
                 {
-                    n = CreateVRNode(s.uniqueID, s.nodeType);
+                    n = GetVRNode(QuickVRNode.Type.Head);
                 }
-
-                Vector3 pos;
-                Quaternion rot;
-                if (s.TryGetPosition(out pos))
+                if (n)
                 {
-                    n.transform.localPosition = pos;
-                }
-                if (s.TryGetRotation(out rot))
-                {
-                    n.transform.localRotation = rot;
+                    Vector3 pos;
+                    Quaternion rot;
+                    if (s.TryGetPosition(out pos))
+                    {
+                        n.transform.localPosition = pos;
+                    }
+                    if (s.TryGetRotation(out rot))
+                    {
+                        n.transform.localRotation = rot;
+                    }
                 }
             }
             
@@ -258,7 +251,6 @@ namespace QuickVR
             {
                 QuickVRNode n = pair.Value;
                 QuickVRNode.Type role = n.GetRole();
-                if (n.GetRole() == QuickVRNode.Type.Undefined) continue;
 
                 DebugExtension.DrawCoordinatesSystem(n.transform.position, n.transform.right, n.transform.up, n.transform.forward, 0.1f);
 
@@ -267,7 +259,6 @@ namespace QuickVR
                 if (role == QuickVRNode.Type.Head) Gizmos.color = Color.grey;
                 else if (role == QuickVRNode.Type.LeftHand) Gizmos.color = Color.blue;
                 else if (role == QuickVRNode.Type.RightHand) Gizmos.color = Color.red;
-                else if (role == QuickVRNode.Type.TrackingReference) Gizmos.color = Color.magenta;
 
                 Gizmos.matrix = n.transform.localToWorldMatrix;
                 Gizmos.DrawCube(Vector3.zero, cSize);
