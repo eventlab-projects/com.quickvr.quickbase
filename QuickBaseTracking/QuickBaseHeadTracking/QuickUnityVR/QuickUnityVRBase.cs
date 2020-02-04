@@ -230,8 +230,18 @@ namespace QuickVR
             //    else if (_displaceWithCamera) return _vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject().GetDisplacement();
             //}
 
-            QuickVRNode n = _vrPlayArea.GetVRNode(_vrPlayArea.IsTrackedNode(QuickVRNode.Type.Hips) ? QuickVRNode.Type.Hips : QuickVRNode.Type.Head);
-            return Vector3.Scale(n.GetTrackedObject().GetDisplacement(), Vector3.right + Vector3.forward);
+            Vector3 offset = Vector3.zero;
+            if (_vrPlayArea.IsTrackedNode(QuickVRNode.Type.Hips))
+            {
+
+            }
+            else
+            {
+                QuickVRNode nodeHead = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head);
+                offset = nodeHead.transform.position - GetEyeCenterPosition();
+            }
+
+            return Vector3.Scale(offset, Vector3.right + Vector3.forward);
         }
 
         protected virtual float GetRotationOffset()
@@ -564,20 +574,24 @@ namespace QuickVR
         {
             if (!_isStanding) return;
 
+            _vrPlayArea.transform.parent = null;
+
             if (_updateRotation)
             {
                 //Update the rotation
                 float rotOffset = GetRotationOffset();
                 transform.Rotate(transform.up, rotOffset, Space.World);
-                _vrPlayArea.transform.Rotate(transform.up, -rotOffset, Space.World);
             }
 
             if (_updatePosition)
             {
                 //Update the position
-                Vector3 disp = Vector3.Scale(GetDisplacement(), Vector3.right + Vector3.forward);
+                Vector3 disp = GetDisplacement();
                 transform.Translate(disp, Space.World);
+                _vrPlayArea.GetCalibrationPoseRoot().Translate(disp, Space.World);
             }
+
+            _vrPlayArea.transform.parent = transform;
             
             //Vector3 userDisp = ToAvatarSpace(disp);
             //transform.Translate(userDisp, Space.World);

@@ -54,6 +54,11 @@ namespace QuickVR
 
         #region GET AND SET
 
+        public virtual Transform GetCalibrationPoseRoot()
+        {
+            return _calibrationPoseRoot;
+        }
+
         public virtual QuickVRNode GetVRNode(ulong id)
         {
             return _vrNodes.ContainsKey(id) ? _vrNodes[id] : null;

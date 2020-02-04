@@ -29,7 +29,7 @@ namespace QuickVR
 
         #endregion
 
-        #region GET AND SET
+        #region CREATION AND DESTRUCTION
 
         protected virtual void OnEnable()
         {
@@ -46,7 +46,7 @@ namespace QuickVR
         public virtual void Reset()
         {
             _lastPosition = transform.position;
-            
+
             _velocity = Vector3.zero;
             _lastVelocity = Vector3.zero;
 
@@ -56,15 +56,19 @@ namespace QuickVR
             _lastRotation = transform.rotation;
         }
 
+        #endregion
+
+        #region GET AND SET
+
         public Vector3 GetDisplacement()
         {
-            //return IsTracked() ? _displacement : Vector3.zero;
             return transform.position - _lastPosition;
+            //Vector3 wDisp = transform.position - _lastPosition;
+            //return QuickSingletonManager.GetInstance<QuickVRPlayArea>().transform.InverseTransformVector(wDisp);
         }
 
         public Quaternion GetRotationOffset()
         {
-            //return IsTracked() ? _rotationOffset : Quaternion.identity;
             return _rotationOffset;
         }
 
