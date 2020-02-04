@@ -39,6 +39,11 @@ namespace QuickVR
         }
         public HandTrackingMode _handTrackingMode = HandTrackingMode.Controllers;
 
+        public bool _updatePosition = false;
+        public bool _updateRotation = false;
+
+        public bool _isStanding = true;
+
         #endregion
 
         #region PROTECTED ATTRIBUTES
@@ -47,13 +52,12 @@ namespace QuickVR
 
         protected Vector3 _userDisplacement = Vector3.zero; //The accumulated real displacement of the user
 
-        protected Vector3 _initialPosition = Vector3.zero;
-        protected Quaternion _initialRotation = Quaternion.identity;
+        protected Transform _calibrationPose = null;
 
         protected QuickCharacterControllerManager _characterControllerManager = null;
 
         protected bool _autoUserForward = true; //If true, the forward of the user (the real person) is retrieved from the tracking data at every frame. Otherwise, the user forward is manually provided. 
-        protected Vector3 _userForward = Vector3.zero;  //The provided user forward when _autoUserForward is set to false. 
+        protected Vector3 _customUserForward = Vector3.zero;  //The provided user forward when _autoUserForward is set to false. 
 
         protected Vector3 _headOffset = Vector3.zero;
 
@@ -88,9 +92,10 @@ namespace QuickVR
             _characterControllerManager = gameObject.GetOrCreateComponent<QuickCharacterControllerManager>();
 
             _footprints = Instantiate<GameObject>(Resources.Load<GameObject>("Footprints/Footprints")).transform;
-            
-            _initialPosition = transform.position;
-            _initialRotation = transform.rotation;
+
+            _calibrationPose = new GameObject("__CalibrationPose__").transform;
+            _calibrationPose.position = transform.position;
+            _calibrationPose.rotation = transform.rotation;
         }
 
         protected override void Start()
@@ -140,19 +145,23 @@ namespace QuickVR
 
         public virtual Vector3 GetUserForward()
         {
-            return _userForward;
+            if (_autoUserForward)
+            {
+                QuickVRNode n = _vrPlayArea.GetVRNode(_vrPlayArea.IsTrackedNode(QuickVRNode.Type.Hips)? QuickVRNode.Type.Hips : QuickVRNode.Type.Head);
+                return Vector3.ProjectOnPlane(n.transform.forward, transform.up);
+            }
+            return _customUserForward;
         }
 
         public virtual void SetUserForward(Vector3 fwd)
         {
             _autoUserForward = false;
-            _userForward = fwd;
+            _customUserForward = fwd;
         }
 
         public virtual void ResetUserForward()
         {
             _autoUserForward = false;
-            UpdateUserForward();
         }
 
         protected virtual bool IsHMDPresent()
@@ -170,12 +179,12 @@ namespace QuickVR
 
         public virtual void SetInitialPosition(Vector3 initialPosition)
         {
-            _initialPosition = initialPosition;
+            _calibrationPose.position = initialPosition;
         }
 
         public virtual void SetInitialRotation(Quaternion initialRotation)
         {
-            _initialRotation = initialRotation;
+            _calibrationPose.rotation = initialRotation;
         }
 
         protected virtual bool IsExtraTracker(ulong id)
@@ -212,8 +221,24 @@ namespace QuickVR
             return GetExtraTrackers().Count;
         }
 
-        public abstract Vector3 GetDisplacement();
-        protected abstract float GetRotationOffset();
+        public virtual Vector3 GetDisplacement()
+        {
+            //if (_isStanding)
+            //{
+            //    QuickVRNode hipsNode = _vrPlayArea.GetVRNode(QuickVRNode.Type.Hips);
+            //    if (_vrPlayArea.IsTrackedNode(hipsNode)) return hipsNode.GetTrackedObject().GetDisplacement();
+            //    else if (_displaceWithCamera) return _vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject().GetDisplacement();
+            //}
+
+            QuickVRNode n = _vrPlayArea.GetVRNode(_vrPlayArea.IsTrackedNode(QuickVRNode.Type.Hips) ? QuickVRNode.Type.Hips : QuickVRNode.Type.Head);
+            return Vector3.Scale(n.GetTrackedObject().GetDisplacement(), Vector3.right + Vector3.forward);
+        }
+
+        protected virtual float GetRotationOffset()
+        {
+            Vector3 userForward = GetUserForward();
+            return Vector3.SignedAngle(transform.forward, userForward, transform.up);
+        }
 
         //protected bool IsVRNodesSwaped(QuickVRNode.Type typeNodeLeft, QuickVRNode.Type typeNodeRight, bool doSwaping = true)
         //{
@@ -475,8 +500,8 @@ namespace QuickVR
 
         public override void Calibrate()
         {
-            transform.position = _initialPosition;
-            transform.rotation = _initialRotation;
+            transform.position = _calibrationPose.position;
+            transform.rotation = _calibrationPose.rotation;
 
             ////Get all the tracked extratrackers and sort them by Y, from lowest to higher. 
             //List<QuickExtraTracker> extraTrackers = GetExtraTrackers();
@@ -494,7 +519,7 @@ namespace QuickVR
 
             _vrPlayArea.Calibrate();
 
-            float rotAngle = Vector3.SignedAngle(_userForward, transform.forward, transform.up);
+            float rotAngle = Vector3.SignedAngle(GetUserForward(), transform.forward, transform.up);
             _vrPlayArea.transform.Rotate(transform.up, rotAngle, Space.World);
 
             if (OnCalibrate != null) OnCalibrate();
@@ -522,8 +547,6 @@ namespace QuickVR
             UpdateFootPrints();
 
             UpdateVRCursors();
-
-            UpdateUserForward();
         }
 
         protected virtual void OnPostUpdateTracking()
@@ -539,15 +562,23 @@ namespace QuickVR
 
         protected virtual void UpdateTransformRoot()
         {
-            ////Update the rotation
-            //float rotOffset = GetRotationOffset();
-            //transform.Rotate(transform.up, rotOffset, Space.World);
-            //_vrNodesOrigin.Rotate(_vrNodesOrigin.up, rotOffset, Space.World);
+            if (!_isStanding) return;
 
-            ////Update the position
-            //Vector3 disp = Vector3.Scale(GetDisplacement(), Vector3.right + Vector3.forward);
-            //_vrNodesOrigin.Translate(_vrNodesOrigin.InverseTransformVector(disp), Space.Self);
+            if (_updateRotation)
+            {
+                //Update the rotation
+                float rotOffset = GetRotationOffset();
+                transform.Rotate(transform.up, rotOffset, Space.World);
+                _vrPlayArea.transform.Rotate(transform.up, -rotOffset, Space.World);
+            }
 
+            if (_updatePosition)
+            {
+                //Update the position
+                Vector3 disp = Vector3.Scale(GetDisplacement(), Vector3.right + Vector3.forward);
+                transform.Translate(disp, Space.World);
+            }
+            
             //Vector3 userDisp = ToAvatarSpace(disp);
             //transform.Translate(userDisp, Space.World);
             //_characterControllerManager.SetStepVelocity(userDisp / Time.deltaTime);
@@ -585,15 +616,6 @@ namespace QuickVR
         {
             GetVRCursor(VRCursorType.LEFT).transform.position = _vrHandLeft._handBoneIndexDistal.position;
             GetVRCursor(VRCursorType.RIGHT).transform.position = _vrHandRight._handBoneIndexDistal.position;
-        }
-
-        protected virtual void UpdateUserForward()
-        {
-            QuickVRNode node = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head);
-            if (_autoUserForward && node)
-            {
-                _userForward = Vector3.ProjectOnPlane(node.transform.forward, transform.up);
-            }
         }
 
         #endregion

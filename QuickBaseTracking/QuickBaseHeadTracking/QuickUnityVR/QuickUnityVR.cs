@@ -11,10 +11,6 @@ namespace QuickVR {
 
         #region PUBLIC ATTRIBUTES
 
-        public bool _displaceWithCamera = false;
-        public bool _rotateWithCamera = false;
-
-        public bool _isStanding = true;
         public bool _applyUserScale = false;
 
         #endregion
@@ -89,43 +85,6 @@ namespace QuickVR {
 
             Vector3 offset = _ikManager.GetIKTarget(HumanBodyBones.Head).position - node.GetTrackedObject().transform.position;
             _vrPlayArea.transform.position += offset;
-        }
-
-        public override Vector3 GetDisplacement()
-        {
-            if (_isStanding)
-            {
-                QuickVRNode hipsNode = _vrPlayArea.GetVRNode(QuickVRNode.Type.Hips);
-                if (_vrPlayArea.IsTrackedNode(hipsNode)) return hipsNode.GetTrackedObject().GetDisplacement();
-                else if (_displaceWithCamera) return _vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject().GetDisplacement();
-            }
-            
-            return Vector3.zero;
-        }
-
-        protected override float GetRotationOffset()
-        {
-            //if (_isStanding)
-            //{
-            //    QuickVRNode HipsNode = _vrPlayArea.GetVRNode(QuickVRNode.Type.Hips);
-            //    QuickVRNode hmdNode = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head);
-            //    QuickVRNode node = null;
-
-            //    if (HipsNode.IsTracked()) node = HipsNode;
-            //    else if (_rotateWithCamera) node = hmdNode;
-
-            //    if (!node) return 0.0f;
-
-            //    Vector3 currentForward = Vector3.ProjectOnPlane(_vrNodesOrigin.forward, _vrNodesOrigin.up);
-            //    Vector3 targetForward = Vector3.ProjectOnPlane(node.transform.forward, _vrNodesOrigin.up);
-
-            //    return Vector3.SignedAngle(currentForward, targetForward, _vrNodesOrigin.up);
-            //}
-
-            QuickVRNode n = _vrPlayArea.GetVRNode(_vrPlayArea.IsTrackedNode(QuickVRNode.Type.Hips) ? QuickVRNode.Type.Hips : QuickVRNode.Type.Head);
-
-
-            return 0.0f;
         }
 
         public override Vector3 GetEyeCenterPosition()
