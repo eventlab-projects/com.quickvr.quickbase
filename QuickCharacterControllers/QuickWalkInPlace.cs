@@ -127,7 +127,7 @@ namespace QuickVR
             QuickVRNode hipsNode = _vrPlayArea.GetVRNode(QuickVRNode.Type.Hips);
             if (hipsNode)
             {
-                QuickTrackedObject tObject = _vrPlayArea.IsTrackedNode(hipsNode)? hipsNode.GetTrackedObject() : _vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject();
+                QuickTrackedObject tObject = hipsNode.IsTracked()? hipsNode.GetTrackedObject() : _vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject();
                 if (tObject != _trackedObject)
                 {
                     _trackedObject = tObject;

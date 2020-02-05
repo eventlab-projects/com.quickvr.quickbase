@@ -12,7 +12,6 @@ namespace QuickVR
 
         protected Dictionary<ulong, QuickVRNode> _vrNodes = new Dictionary<ulong, QuickVRNode>();
         protected Dictionary<QuickVRNode.Type, QuickVRNode> _vrNodeRoles = new Dictionary<QuickVRNode.Type, QuickVRNode>();
-        protected List<QuickVRNode> _vrHardwareTrackers = new List<QuickVRNode>();
         protected List<XRNodeState> _vrNodeStates = new List<XRNodeState>();
 
         protected Transform _calibrationPoseRoot = null;
@@ -50,6 +49,14 @@ namespace QuickVR
             return _calibrationPoseRoot;
         }
 
+        public virtual QuickVRNode GetVRNodeMain()
+        {
+            QuickVRNode nodeHips = GetVRNode(QuickVRNode.Type.Hips);
+            QuickVRNode nodeHead = GetVRNode(QuickVRNode.Type.Head);
+
+            return nodeHips.IsTracked() ? nodeHips : nodeHead;
+        }
+
         public virtual QuickVRNode GetVRNode(ulong id)
         {
             return _vrNodes.ContainsKey(id) ? _vrNodes[id] : null;
@@ -79,25 +86,6 @@ namespace QuickVR
                 );
         }
 
-        public virtual bool IsTrackedNode(QuickVRNode.Type role)
-        {
-            QuickVRNode node = GetVRNode(role);
-            if (node)
-            {
-                foreach (XRNodeState s in _vrNodeStates)
-                {
-                    if (s.uniqueID == node.GetID()) return s.tracked;
-                }
-            }
-
-            return false;
-        }
-
-        public virtual bool IsTrackedNode(QuickVRNode vrNode)
-        {
-            return vrNode ? IsTrackedNode(vrNode.GetRole()) : false;
-        }
-
         public virtual float GetEyeStereoSeparation()
         {
             QuickVRNode eLeft = GetVRNode(QuickVRNode.Type.LeftEye);
@@ -105,19 +93,19 @@ namespace QuickVR
             return (eLeft != null && eRight != null) ? Vector3.Distance(eLeft.transform.position, eRight.transform.position) : 0.0f;
         }
 
-        protected virtual QuickVRNode GetLowerTracker(List<QuickVRNode> nodeList)
+        protected virtual XRNodeState GetLowerTracker(List<XRNodeState> nodeList)
         {
-            QuickVRNode result = null;
-
-            if (nodeList.Count > 0)
+            XRNodeState result = nodeList[0];
+            Vector3 minPos;
+            result.TryGetPosition(out minPos);
+            for (int i = 1; i < nodeList.Count; i++)
             {
-                result = nodeList[0];
-                for (int i = 1; i < nodeList.Count; i++)
+                Vector3 tmpPos;
+                nodeList[i].TryGetPosition(out tmpPos);
+                if (tmpPos.y < minPos.y)
                 {
-                    if (nodeList[i].transform.position.y < result.transform.position.y)
-                    {
-                        result = nodeList[i];
-                    }
+                    result = nodeList[i];
+                    minPos = tmpPos;
                 }
             }
 
@@ -135,35 +123,56 @@ namespace QuickVR
 
         public virtual void Calibrate()
         {
-            List<QuickVRNode> tmp = new List<QuickVRNode>(_vrHardwareTrackers);
-            int numTrackers = tmp.Count;
+            _vrNodes.Clear();
+            List<XRNodeState> hardwareTrackers = new List<XRNodeState>();
+            foreach (XRNodeState s in _vrNodeStates)
+            {
+                if (s.nodeType == XRNode.Head)
+                {
+                    _vrNodes[s.uniqueID] = GetVRNode(QuickVRNode.Type.Head);
+                }
+                else if (s.nodeType == XRNode.LeftHand)
+                {
+                    _vrNodes[s.uniqueID] = GetVRNode(QuickVRNode.Type.LeftHand);
+                }
+                else if (s.nodeType == XRNode.RightHand)
+                {
+                    _vrNodes[s.uniqueID] = GetVRNode(QuickVRNode.Type.RightHand);
+                }
+                else if (s.nodeType == XRNode.HardwareTracker)
+                {
+                    hardwareTrackers.Add(s);
+                }
+            }
+
+            int numTrackers = hardwareTrackers.Count;
             Debug.Log("NUM HARDWARE TRACKERS = " + numTrackers);
 
             
             if (numTrackers == 1)
             {
                 //This is the hipsTracker
-                tmp[0].SetRole(QuickVRNode.Type.Hips);
-                _vrNodeRoles[QuickVRNode.Type.Hips] = tmp[0];
+                XRNodeState hTracker = hardwareTrackers[0];
+                _vrNodes[hTracker.uniqueID] = GetVRNode(QuickVRNode.Type.Hips);
             }
-            else if (numTrackers == 3)
-            {
-                //Hips + feet
-                QuickVRNode foot = GetLowerTracker(tmp);
-                QuickVRNode.Type footRole = IsNodeLeftSide(foot) ? QuickVRNode.Type.LeftFoot : QuickVRNode.Type.RightFoot;
-                foot.SetRole(footRole);
-                _vrNodeRoles[footRole] = foot;
-                tmp.Remove(foot);
+            //else if (numTrackers == 3)
+            //{
+            //    //Hips + feet
+            //    XRNodeState footTracker = GetLowerTracker(hardwareTrackers);
+            //    QuickVRNode.Type footRole = IsNodeLeftSide(foot) ? QuickVRNode.Type.LeftFoot : QuickVRNode.Type.RightFoot;
+            //    foot.SetRole(footRole);
+            //    _vrNodeRoles[footRole] = foot;
+            //    tmp.Remove(foot);
 
-                foot = GetLowerTracker(tmp);
-                footRole = IsNodeLeftSide(foot) ? QuickVRNode.Type.LeftFoot : QuickVRNode.Type.RightFoot;
-                foot.SetRole(footRole);
-                _vrNodeRoles[footRole] = foot;
-                tmp.Remove(foot);
+            //    foot = GetLowerTracker(tmp);
+            //    footRole = IsNodeLeftSide(foot) ? QuickVRNode.Type.LeftFoot : QuickVRNode.Type.RightFoot;
+            //    foot.SetRole(footRole);
+            //    _vrNodeRoles[footRole] = foot;
+            //    tmp.Remove(foot);
 
-                tmp[0].SetRole(QuickVRNode.Type.Hips);
-                _vrNodeRoles[QuickVRNode.Type.Hips] = tmp[0];
-            }
+            //    tmp[0].SetRole(QuickVRNode.Type.Hips);
+            //    _vrNodeRoles[QuickVRNode.Type.Hips] = tmp[0];
+            //}
 
             foreach (QuickVRNode.Type t in QuickVRNode.GetTypeList())
             {
@@ -184,8 +193,8 @@ namespace QuickVR
             QuickVRNode hmdNode = GetVRNode(QuickVRNode.Type.Head);
             if (!hmdNode || !nodeLeft || !nodeRight) return false;
 
-            float dLeft = IsTrackedNode(nodeLeft) ? Vector3.Dot(nodeLeft.transform.position - hmdNode.transform.position, hmdNode.transform.right) : 0.0f;
-            float dRight = IsTrackedNode(nodeRight) ? Vector3.Dot(nodeRight.transform.position - hmdNode.transform.position, hmdNode.transform.right) : 0.0f;
+            float dLeft = nodeLeft.IsTracked() ? Vector3.Dot(nodeLeft.transform.position - hmdNode.transform.position, hmdNode.transform.right) : 0.0f;
+            float dRight = nodeRight.IsTracked() ? Vector3.Dot(nodeRight.transform.position - hmdNode.transform.position, hmdNode.transform.right) : 0.0f;
 
             bool swaped = dLeft > dRight;
             if (swaped && doSwaping)
@@ -219,11 +228,7 @@ namespace QuickVR
             {
                 if (!IsValidNode(s.nodeType)) continue;
 
-                QuickVRNode n = null;
-                if (s.nodeType == XRNode.Head)
-                {
-                    n = GetVRNode(QuickVRNode.Type.Head);
-                }
+                QuickVRNode n = GetVRNode(s.uniqueID);
                 if (n)
                 {
                     Vector3 pos;
@@ -236,6 +241,8 @@ namespace QuickVR
                     {
                         n.transform.localRotation = rot;
                     }
+
+                    n.SetTracked(s.tracked);
                 }
             }
             

@@ -147,8 +147,7 @@ namespace QuickVR
         {
             if (_autoUserForward)
             {
-                QuickVRNode n = _vrPlayArea.GetVRNode(_vrPlayArea.IsTrackedNode(QuickVRNode.Type.Hips)? QuickVRNode.Type.Hips : QuickVRNode.Type.Head);
-                return Vector3.ProjectOnPlane(n.transform.forward, transform.up);
+                return Vector3.ProjectOnPlane(_vrPlayArea.GetVRNodeMain().transform.forward, transform.up);
             }
             return _customUserForward;
         }
@@ -230,7 +229,7 @@ namespace QuickVR
             //    else if (_displaceWithCamera) return _vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject().GetDisplacement();
             //}
 
-            QuickVRNode n = _vrPlayArea.GetVRNode(_vrPlayArea.IsTrackedNode(QuickVRNode.Type.Hips) ? QuickVRNode.Type.Hips : QuickVRNode.Type.Head);
+            QuickVRNode n = _vrPlayArea.GetVRNodeMain();
             Vector3 offset = n.GetTrackedObject().transform.position - n.GetCalibrationPose().position;
 
             return Vector3.Scale(offset, Vector3.right + Vector3.forward);

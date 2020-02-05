@@ -115,8 +115,8 @@ namespace QuickVR {
             foreach (QuickVRNode.Type t in QuickVRNode.GetTypeList())
             {
                 QuickVRNode node = _vrPlayArea.GetVRNode(t);
-                if (!node) continue;
-
+                if (!node.IsTracked()) continue;
+                
                 HumanBodyBones boneID = QuickUtils.ParseEnum<HumanBodyBones>(t.ToString());
                 QuickTrackedObject tObject = node.GetTrackedObject();
 
@@ -130,7 +130,8 @@ namespace QuickVR {
             }
 
             //2) Special case: The user is standing but there is no tracker on the hips. So the hips position is estimated by the movement of the head
-            if (_isStanding && !_vrPlayArea.IsTrackedNode(QuickVRNode.Type.Hips))
+            QuickVRNode nodeHips = _vrPlayArea.GetVRNode(QuickVRNode.Type.Hips);
+            if (_isStanding && !nodeHips.IsTracked())
             {
                 QuickVRNode vrNode = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head);
                 UpdateTransformNodePosFromCalibrationPose(vrNode, HumanBodyBones.Hips, Vector3.up);

@@ -51,9 +51,6 @@ namespace QuickVR
 
         #region PROTECTED PARAMETERS
 
-        [SerializeField, ReadOnly]
-        protected ulong _id = 0;
-
         protected QuickTrackedObject _trackedObject = null;
 
         protected static List<Type> _typeList = new List<Type>();
@@ -65,6 +62,8 @@ namespace QuickVR
         protected Type _role = Type.Head;
 
         protected Transform _calibrationPose = null;
+
+        protected bool _isTracked = false;
 
         #endregion
 
@@ -122,14 +121,14 @@ namespace QuickVR
 
         #region GET AND SET
 
-        public virtual void SetID(ulong id)
+        public virtual bool IsTracked()
         {
-            _id = id;
+            return _isTracked;
         }
 
-        public virtual ulong GetID()
+        public virtual void SetTracked(bool isTracked)
         {
-            return _id;
+            _isTracked = isTracked;
         }
 
         public virtual Transform GetCalibrationPose()
