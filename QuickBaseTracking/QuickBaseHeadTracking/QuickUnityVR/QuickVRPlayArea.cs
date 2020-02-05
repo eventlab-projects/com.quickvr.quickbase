@@ -64,7 +64,7 @@ namespace QuickVR
 
         public virtual QuickVRNode GetVRNode(QuickVRNode.Type role)
         {
-            return _vrNodeRoles.ContainsKey(role)? _vrNodeRoles[role] : null;
+            return _vrNodeRoles[role];
         }
 
         public virtual QuickVRNode GetVRNode(HumanBodyBones boneID)
@@ -147,40 +147,40 @@ namespace QuickVR
 
             int numTrackers = hardwareTrackers.Count;
             Debug.Log("NUM HARDWARE TRACKERS = " + numTrackers);
-
             
             if (numTrackers == 1)
             {
                 //This is the hipsTracker
-                XRNodeState hTracker = hardwareTrackers[0];
-                _vrNodes[hTracker.uniqueID] = GetVRNode(QuickVRNode.Type.Hips);
+                _vrNodes[hardwareTrackers[0].uniqueID] = GetVRNode(QuickVRNode.Type.Hips);
             }
-            //else if (numTrackers == 3)
-            //{
-            //    //Hips + feet
-            //    XRNodeState footTracker = GetLowerTracker(hardwareTrackers);
-            //    QuickVRNode.Type footRole = IsNodeLeftSide(foot) ? QuickVRNode.Type.LeftFoot : QuickVRNode.Type.RightFoot;
-            //    foot.SetRole(footRole);
-            //    _vrNodeRoles[footRole] = foot;
-            //    tmp.Remove(foot);
+            else if (numTrackers == 3)
+            {
+                //Hips + feet
+                XRNodeState footTracker = GetLowerTracker(hardwareTrackers);
+                _vrNodes[footTracker.uniqueID] = GetVRNode(QuickVRNode.Type.LeftFoot);
+                hardwareTrackers.Remove(footTracker);
 
-            //    foot = GetLowerTracker(tmp);
-            //    footRole = IsNodeLeftSide(foot) ? QuickVRNode.Type.LeftFoot : QuickVRNode.Type.RightFoot;
-            //    foot.SetRole(footRole);
-            //    _vrNodeRoles[footRole] = foot;
-            //    tmp.Remove(foot);
+                footTracker = GetLowerTracker(hardwareTrackers);
+                _vrNodes[footTracker.uniqueID] = GetVRNode(QuickVRNode.Type.RightFoot);
+                hardwareTrackers.Remove(footTracker);
 
-            //    tmp[0].SetRole(QuickVRNode.Type.Hips);
-            //    _vrNodeRoles[QuickVRNode.Type.Hips] = tmp[0];
-            //}
+                _vrNodes[hardwareTrackers[0].uniqueID] = GetVRNode(QuickVRNode.Type.Hips);
+            }
+
+            Update();
+
+            IsVRNodesSwaped(QuickVRNode.Type.LeftFoot, QuickVRNode.Type.RightFoot);
+
+            _isHandsSwaped = IsVRNodesSwaped(QuickVRNode.Type.LeftHand, QuickVRNode.Type.RightHand);
+            Debug.Log("handsSwaped = " + _isHandsSwaped);
+
+            Update();
 
             foreach (QuickVRNode.Type t in QuickVRNode.GetTypeList())
             {
                 QuickVRNode n = GetVRNode(t);
-                if (n) n.Calibrate(); 
+                if (n) n.Calibrate();
             }
-            _isHandsSwaped = IsVRNodesSwaped(QuickVRNode.Type.LeftHand, QuickVRNode.Type.RightHand);
-            Debug.Log("handsSwaped = " + _isHandsSwaped);
         }
 
         public virtual bool IsVRNodesSwaped(QuickVRNode.Type typeNodeLeft, QuickVRNode.Type typeNodeRight, bool doSwaping = true)
@@ -191,8 +191,6 @@ namespace QuickVR
         public virtual bool IsVRNodesSwaped(QuickVRNode nodeLeft, QuickVRNode nodeRight, bool doSwaping = true)
         {
             QuickVRNode hmdNode = GetVRNode(QuickVRNode.Type.Head);
-            if (!hmdNode || !nodeLeft || !nodeRight) return false;
-
             float dLeft = nodeLeft.IsTracked() ? Vector3.Dot(nodeLeft.transform.position - hmdNode.transform.position, hmdNode.transform.right) : 0.0f;
             float dRight = nodeRight.IsTracked() ? Vector3.Dot(nodeRight.transform.position - hmdNode.transform.position, hmdNode.transform.right) : 0.0f;
 
@@ -212,9 +210,19 @@ namespace QuickVR
 
         protected virtual void SwapQuickVRNode(QuickVRNode vrNodeA, QuickVRNode vrNodeB)
         {
-            QuickVRNode.Type tmp = vrNodeA.GetRole();
-            vrNodeA.SetRole(vrNodeB.GetRole());
-            vrNodeB.SetRole(tmp);
+            ulong idNodeA = 0;
+            ulong idNodeB = 0;
+            foreach (var pair in _vrNodes)
+            {
+                if (pair.Value == vrNodeA) idNodeA = pair.Key;
+                else if (pair.Value == vrNodeB) idNodeB = pair.Key;
+            }
+
+            if (idNodeA != 0 && idNodeB != 0)
+            {
+                _vrNodes[idNodeA] = vrNodeB;
+                _vrNodes[idNodeB] = vrNodeA;
+            }
         }
 
         #endregion
