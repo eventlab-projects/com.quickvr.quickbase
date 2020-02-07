@@ -13,6 +13,8 @@ namespace QuickVR
 
         public enum Type
         {
+            Hips,
+
             Head, 
             LeftEye,
             RightEye,
@@ -24,8 +26,6 @@ namespace QuickVR
             RightUpperArm, 
             RightLowerArm,
             RightHand,
-
-            Hips,
 
             LeftUpperLeg,
             LeftLowerLeg,

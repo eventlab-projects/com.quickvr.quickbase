@@ -72,20 +72,6 @@ namespace QuickVR
             return GetVRNode(QuickUtils.ParseEnum<QuickVRNode.Type>(boneID.ToString()));
         }
 
-        protected virtual bool IsValidNode(XRNode n)
-        {
-            return 
-                (
-                n == XRNode.HardwareTracker || 
-                n == XRNode.Head || 
-                n == XRNode.LeftEye || 
-                n == XRNode.RightEye || 
-                n == XRNode.LeftHand || 
-                n == XRNode.RightHand //||
-                //n == XRNode.TrackingReference
-                );
-        }
-
         public virtual float GetEyeStereoSeparation()
         {
             QuickVRNode eLeft = GetVRNode(QuickVRNode.Type.LeftEye);
@@ -234,8 +220,6 @@ namespace QuickVR
             InputTracking.GetNodeStates(_vrNodeStates);
             foreach (XRNodeState s in _vrNodeStates)
             {
-                if (!IsValidNode(s.nodeType)) continue;
-
                 QuickVRNode n = GetVRNode(s.uniqueID);
                 if (n)
                 {
