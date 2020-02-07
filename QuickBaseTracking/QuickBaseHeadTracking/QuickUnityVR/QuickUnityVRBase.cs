@@ -78,6 +78,8 @@ namespace QuickVR
 
             QuickVRNode.OnCalibrateVRNodeHead += OnCalibrateVRNodeHead;
             QuickVRNode.OnCalibrateVRNodeHips += OnCalibrateVRNodeHips;
+            QuickVRNode.OnCalibrateVRNodeLeftHand += OnCalibrateVRNodeLeftHand;
+            QuickVRNode.OnCalibrateVRNodeRightHand += OnCalibrateVRNodeRightHand;
         }
 
         protected virtual void OnDisable()
@@ -85,7 +87,9 @@ namespace QuickVR
             QuickVRManager.OnPostUpdateTracking -= OnPostUpdateTracking;
 
             QuickVRNode.OnCalibrateVRNodeHead -= OnCalibrateVRNodeHead;
-            QuickVRNode.OnCalibrateVRNodeHips += OnCalibrateVRNodeHips;
+            QuickVRNode.OnCalibrateVRNodeHips -= OnCalibrateVRNodeHips;
+            QuickVRNode.OnCalibrateVRNodeLeftHand -= OnCalibrateVRNodeLeftHand;
+            QuickVRNode.OnCalibrateVRNodeRightHand -= OnCalibrateVRNodeRightHand;
         }
 
         protected override void Awake()
@@ -531,14 +535,48 @@ namespace QuickVR
 
         protected virtual void OnCalibrateVRNodeHead(QuickVRNode node)
         {
+            node.GetTrackedObject().transform.localPosition = _headOffset;
+
             float rotAngle = Vector3.SignedAngle(GetUserForward(), transform.forward, transform.up);
             _vrPlayArea.transform.Rotate(transform.up, rotAngle, Space.World);
         }
 
         protected virtual void OnCalibrateVRNodeHips(QuickVRNode node)
         {
+            QuickTrackedObject tObjectHead = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject();
+            QuickTrackedObject tObjectHips = node.GetTrackedObject();
+            tObjectHips.transform.position = new Vector3(tObjectHead.transform.position.x, tObjectHips.transform.position.y, tObjectHead.transform.position.z);
+
             float rotAngle = Vector3.SignedAngle(GetUserForward(), transform.forward, transform.up);
             _vrPlayArea.transform.Rotate(transform.up, rotAngle, Space.World);
+        }
+
+        protected virtual void OnCalibrateVRNodeLeftHand(QuickVRNode node)
+        {
+            QuickTrackedObject tObject = node.GetTrackedObject();
+            if (_handTrackingMode == HandTrackingMode.Controllers)
+            {
+                tObject.transform.Rotate(tObject.transform.forward, 90.0f, Space.World);
+                tObject.transform.localPosition = HAND_CONTROLLER_POSITION_OFFSET;
+            }
+            else
+            {
+                tObject.transform.LookAt(tObject.transform.position + transform.right, -transform.up);
+            }
+        }
+
+        protected virtual void OnCalibrateVRNodeRightHand(QuickVRNode node)
+        {
+            QuickTrackedObject tObject = node.GetTrackedObject();
+            if (_handTrackingMode == HandTrackingMode.Controllers)
+            {
+                tObject.transform.Rotate(tObject.transform.forward, -90.0f, Space.World);
+                tObject.transform.localPosition = HAND_CONTROLLER_POSITION_OFFSET;
+            }
+            else
+            {
+                tObject.transform.LookAt(tObject.transform.position - transform.right, transform.up);
+            }
         }
 
         public virtual QuickVRHand GetVRHand(QuickVRNode.Type nType)

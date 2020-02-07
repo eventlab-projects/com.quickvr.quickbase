@@ -230,20 +230,15 @@ namespace QuickVR
 
         public virtual void Calibrate()
         {
-            QuickUnityVRBase hTracking = QuickSingletonManager.GetInstance<QuickUnityVRBase>();
             _trackedObject.transform.ResetTransformation();
 
             if (_role == Type.Head)
             {
                 if (OnCalibrateVRNodeHead != null) OnCalibrateVRNodeHead(this);
-                _trackedObject.transform.localPosition = hTracking.GetHeadOffset();
             }
             else if (_role == Type.Hips)
             {
                 if (OnCalibrateVRNodeHips != null) OnCalibrateVRNodeHips(this);
-                QuickVRPlayArea vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
-                QuickTrackedObject tObjectHead = vrPlayArea.GetVRNode(Type.Head).GetTrackedObject();
-                _trackedObject.transform.position = new Vector3(tObjectHead.transform.position.x, _trackedObject.transform.position.y, tObjectHead.transform.position.z);
             }
             else if (_role == Type.LeftHand)
             {
@@ -268,29 +263,10 @@ namespace QuickVR
 
                     //tObject.transform.LookAt(tObject.transform.position + node.transform.right, -node.transform.up);
                 }
-
-                if (hTracking._handTrackingMode == QuickUnityVRBase.HandTrackingMode.Controllers)
-                {
-                    _trackedObject.transform.Rotate(_trackedObject.transform.forward, 90.0f, Space.World);
-                    _trackedObject.transform.localPosition = QuickUnityVRBase.HAND_CONTROLLER_POSITION_OFFSET;
-                }
-                else
-                {
-                    _trackedObject.transform.LookAt(_trackedObject.transform.position + transform.right, -transform.up);
-                }
             }
             else if (_role == Type.RightHand)
             {
                 if (OnCalibrateVRNodeRightHand != null) OnCalibrateVRNodeRightHand(this);
-                if (hTracking._handTrackingMode == QuickUnityVRBase.HandTrackingMode.Controllers)
-                {
-                    _trackedObject.transform.Rotate(_trackedObject.transform.forward, -90.0f, Space.World);
-                    _trackedObject.transform.localPosition = QuickUnityVRBase.HAND_CONTROLLER_POSITION_OFFSET;
-                }
-                else
-                {
-                    _trackedObject.transform.LookAt(_trackedObject.transform.position - transform.right, transform.up);
-                }
             }
             else if (_role == Type.LeftFoot)
             {
@@ -300,16 +276,7 @@ namespace QuickVR
             {
                 if (OnCalibrateVRNodeRightFoot != null) OnCalibrateVRNodeRightFoot(this);
             }
-            else if (_role == Type.LeftFoot || _role == Type.RightFoot)
-            {
-                //tObject.transform.rotation = _vrNodesOrigin.rotation;
-                //tObject.transform.position += -_vrNodesOrigin.forward * 0.075f;
-            }
-            //else if (_role == Type.LeftLowerArm || _role == Type.RightLowerArm)
-            //{
-            //    tObject.transform.position += (-node.transform.forward * 0.1f);// + (-_vrNodesOrigin.up * 0.1f);
-            //}
-
+            
             //Save the calibration pose
             _calibrationPose.position = _trackedObject.transform.position;
             _calibrationPose.rotation = _trackedObject.transform.rotation;
