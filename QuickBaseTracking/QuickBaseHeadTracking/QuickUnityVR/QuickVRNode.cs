@@ -143,11 +143,6 @@ namespace QuickVR
             return _isTracked;
         }
 
-        public virtual void SetTracked(bool isTracked)
-        {
-            _isTracked = isTracked;
-        }
-
         public virtual Transform GetCalibrationPose()
         {
             return _calibrationPose;
@@ -293,6 +288,22 @@ namespace QuickVR
 
             //SetModelVisible(Application.isEditor && _showModel);
             SetModelVisible(_showModel);
+        }
+
+        public virtual void Update(XRNodeState s)
+        {
+            Vector3 pos;
+            Quaternion rot;
+            if (s.TryGetPosition(out pos))
+            {
+                transform.localPosition = pos;
+            }
+            if (s.TryGetRotation(out rot))
+            {
+                transform.localRotation = rot;
+            }
+
+            _isTracked = s.tracked;
         }
 
         #endregion

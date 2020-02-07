@@ -223,18 +223,7 @@ namespace QuickVR
                 QuickVRNode n = GetVRNode(s.uniqueID);
                 if (n)
                 {
-                    Vector3 pos;
-                    Quaternion rot;
-                    if (s.TryGetPosition(out pos))
-                    {
-                        n.transform.localPosition = pos;
-                    }
-                    if (s.TryGetRotation(out rot))
-                    {
-                        n.transform.localRotation = rot;
-                    }
-
-                    n.SetTracked(s.tracked);
+                    n.Update(s);
                 }
             }
             
