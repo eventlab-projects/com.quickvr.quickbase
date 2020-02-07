@@ -75,11 +75,17 @@ namespace QuickVR
         protected virtual void OnEnable()
         {
             QuickVRManager.OnPostUpdateTracking += OnPostUpdateTracking;
+
+            QuickVRNode.OnCalibrateVRNodeHead += OnCalibrateVRNodeHead;
+            QuickVRNode.OnCalibrateVRNodeHips += OnCalibrateVRNodeHips;
         }
 
         protected virtual void OnDisable()
         {
             QuickVRManager.OnPostUpdateTracking -= OnPostUpdateTracking;
+
+            QuickVRNode.OnCalibrateVRNodeHead -= OnCalibrateVRNodeHead;
+            QuickVRNode.OnCalibrateVRNodeHips += OnCalibrateVRNodeHips;
         }
 
         protected override void Awake()
@@ -520,10 +526,19 @@ namespace QuickVR
 
             _vrPlayArea.Calibrate();
 
+            if (OnCalibrate != null) OnCalibrate();
+        }
+
+        protected virtual void OnCalibrateVRNodeHead(QuickVRNode node)
+        {
             float rotAngle = Vector3.SignedAngle(GetUserForward(), transform.forward, transform.up);
             _vrPlayArea.transform.Rotate(transform.up, rotAngle, Space.World);
+        }
 
-            if (OnCalibrate != null) OnCalibrate();
+        protected virtual void OnCalibrateVRNodeHips(QuickVRNode node)
+        {
+            float rotAngle = Vector3.SignedAngle(GetUserForward(), transform.forward, transform.up);
+            _vrPlayArea.transform.Rotate(transform.up, rotAngle, Space.World);
         }
 
         public virtual QuickVRHand GetVRHand(QuickVRNode.Type nType)

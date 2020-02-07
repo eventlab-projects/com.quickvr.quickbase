@@ -79,6 +79,18 @@ namespace QuickVR
 
         #endregion
 
+        #region EVENTS
+
+        public delegate void CalibrateVRNodeAction(QuickVRNode vrNode);
+        public static event CalibrateVRNodeAction OnCalibrateVRNodeHead;
+        public static event CalibrateVRNodeAction OnCalibrateVRNodeHips;
+        public static event CalibrateVRNodeAction OnCalibrateVRNodeLeftHand;
+        public static event CalibrateVRNodeAction OnCalibrateVRNodeRightHand;
+        public static event CalibrateVRNodeAction OnCalibrateVRNodeLeftFoot;
+        public static event CalibrateVRNodeAction OnCalibrateVRNodeRightFoot;
+
+        #endregion
+
         #region CREATION AND DESTRUCTION
 
         protected virtual void Awake()
@@ -92,13 +104,13 @@ namespace QuickVR
 
             string modelName = XRDevice.model.ToLower();
             string pfName = "";
-            if (_role == QuickVRNode.Type.Head) pfName = PF_GENERIC_HMD;
-            else if (_role == QuickVRNode.Type.LeftHand)
+            if (_role == Type.Head) pfName = PF_GENERIC_HMD;
+            else if (_role == Type.LeftHand)
             {
                 if (modelName.Contains("vive")) pfName = PF_VIVE_CONTROLLER;
                 else if (modelName.Contains("oculus")) pfName = PF_OCULUS_CV1_CONTROLLER_LEFT;
             }
-            else if (_role == QuickVRNode.Type.RightHand)
+            else if (_role == Type.RightHand)
             {
                 if (modelName.Contains("vive")) pfName = PF_VIVE_CONTROLLER;
                 else if (modelName.Contains("oculus")) pfName = PF_OCULUS_CV1_CONTROLLER_RIGHT;
@@ -120,6 +132,11 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
+
+        public static HumanBodyBones ToHumanBodyBone(Type role)
+        {
+            return QuickUtils.ParseEnum<HumanBodyBones>(role.ToString());
+        }
 
         public virtual bool IsTracked()
         {
@@ -216,18 +233,21 @@ namespace QuickVR
             QuickUnityVRBase hTracking = QuickSingletonManager.GetInstance<QuickUnityVRBase>();
             _trackedObject.transform.ResetTransformation();
 
-            if (_role == QuickVRNode.Type.Head)
+            if (_role == Type.Head)
             {
+                if (OnCalibrateVRNodeHead != null) OnCalibrateVRNodeHead(this);
                 _trackedObject.transform.localPosition = hTracking.GetHeadOffset();
             }
-            else if (_role == QuickVRNode.Type.Hips)
+            else if (_role == Type.Hips)
             {
+                if (OnCalibrateVRNodeHips != null) OnCalibrateVRNodeHips(this);
                 QuickVRPlayArea vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
-                QuickTrackedObject tObjectHead = vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject();
+                QuickTrackedObject tObjectHead = vrPlayArea.GetVRNode(Type.Head).GetTrackedObject();
                 _trackedObject.transform.position = new Vector3(tObjectHead.transform.position.x, _trackedObject.transform.position.y, tObjectHead.transform.position.z);
             }
-            else if (_role == QuickVRNode.Type.LeftHand)
+            else if (_role == Type.LeftHand)
             {
+                if (OnCalibrateVRNodeLeftHand != null) OnCalibrateVRNodeLeftHand(this);
                 //if (IsExtraTracker(node.GetID()))
                 //{
                 //    //tObject.transform.Rotate(tObject.transform.right, 90.0f, Space.World);
@@ -236,13 +256,13 @@ namespace QuickVR
                 //    //if (d < 0.5f)
                 //    //{
                 //    //    tObject.transform.Rotate(_vrNodesOrigin.right, 90.0f, Space.World);
-                //    //    tObject.transform.Rotate(_vrNodesOrigin.up, nodeType == QuickVRNode.Type.LeftHand? -90.0f : 90.0f, Space.World);
+                //    //    tObject.transform.Rotate(_vrNodesOrigin.up, nodeType == Type.LeftHand? -90.0f : 90.0f, Space.World);
                 //    //}
                 //}
                 //else
                 {
                     //This is a controller
-                    //float sign = role == QuickVRNode.Type.LeftHand ? 1.0f : -1.0f;
+                    //float sign = role == Type.LeftHand ? 1.0f : -1.0f;
                     //tObject.transform.Rotate(tObject.transform.forward, sign * 90.0f, Space.World);
                     //tObject.transform.localPosition = HAND_CONTROLLER_POSITION_OFFSET;
 
@@ -259,8 +279,9 @@ namespace QuickVR
                     _trackedObject.transform.LookAt(_trackedObject.transform.position + transform.right, -transform.up);
                 }
             }
-            else if (_role == QuickVRNode.Type.RightHand)
+            else if (_role == Type.RightHand)
             {
+                if (OnCalibrateVRNodeRightHand != null) OnCalibrateVRNodeRightHand(this);
                 if (hTracking._handTrackingMode == QuickUnityVRBase.HandTrackingMode.Controllers)
                 {
                     _trackedObject.transform.Rotate(_trackedObject.transform.forward, -90.0f, Space.World);
@@ -271,12 +292,20 @@ namespace QuickVR
                     _trackedObject.transform.LookAt(_trackedObject.transform.position - transform.right, transform.up);
                 }
             }
-            else if (_role == QuickVRNode.Type.LeftFoot || _role == QuickVRNode.Type.RightFoot)
+            else if (_role == Type.LeftFoot)
+            {
+                if (OnCalibrateVRNodeLeftFoot != null) OnCalibrateVRNodeLeftFoot(this);
+            }
+            else if (_role == Type.RightFoot)
+            {
+                if (OnCalibrateVRNodeRightFoot != null) OnCalibrateVRNodeRightFoot(this);
+            }
+            else if (_role == Type.LeftFoot || _role == Type.RightFoot)
             {
                 //tObject.transform.rotation = _vrNodesOrigin.rotation;
                 //tObject.transform.position += -_vrNodesOrigin.forward * 0.075f;
             }
-            //else if (_role == QuickVRNode.Type.LeftLowerArm || _role == QuickVRNode.Type.RightLowerArm)
+            //else if (_role == Type.LeftLowerArm || _role == Type.RightLowerArm)
             //{
             //    tObject.transform.position += (-node.transform.forward * 0.1f);// + (-_vrNodesOrigin.up * 0.1f);
             //}

@@ -23,10 +23,26 @@ namespace QuickVR {
         protected float _initialVerticalReferencePosY = 0.0f;
 
         protected float _unscaledHeadHeight = 0.0f;
-        
+
         #endregion
 
         #region CREATION AND DESTRUCTION
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+
+            QuickVRNode.OnCalibrateVRNodeLeftFoot += OnCalibrateVRNodeFoot;
+            QuickVRNode.OnCalibrateVRNodeRightFoot += OnCalibrateVRNodeFoot;
+        }
+
+        protected override void OnDisable()
+        {
+            base.OnDisable();
+
+            QuickVRNode.OnCalibrateVRNodeLeftFoot -= OnCalibrateVRNodeFoot;
+            QuickVRNode.OnCalibrateVRNodeRightFoot -= OnCalibrateVRNodeFoot;
+        }
 
         protected override void Awake()
         {
@@ -85,6 +101,14 @@ namespace QuickVR {
 
             Vector3 offset = _ikManager.GetIKTarget(HumanBodyBones.Head).position - node.GetTrackedObject().transform.position;
             _vrPlayArea.transform.position += offset;
+        }
+
+        protected virtual void OnCalibrateVRNodeFoot(QuickVRNode node)
+        {
+            HumanBodyBones boneID = QuickVRNode.ToHumanBodyBone(node.GetRole());
+            Transform ikTarget = _ikManager.GetIKTarget(boneID);
+            QuickTrackedObject tObject = node.GetTrackedObject();
+            tObject.transform.rotation = ikTarget.rotation;
         }
 
         public override Vector3 GetEyeCenterPosition()
