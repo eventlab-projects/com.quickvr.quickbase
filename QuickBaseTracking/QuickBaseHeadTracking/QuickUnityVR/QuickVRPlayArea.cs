@@ -57,7 +57,7 @@ namespace QuickVR
             return nodeHips.IsTracked() ? nodeHips : nodeHead;
         }
 
-        public virtual QuickVRNode GetVRNode(ulong id)
+        protected virtual QuickVRNode GetVRNode(ulong id)
         {
             return _vrNodes.ContainsKey(id) ? _vrNodes[id] : null;
         }
@@ -283,6 +283,11 @@ namespace QuickVR
             InputTracking.GetNodeStates(_vrNodeStates);
             foreach (XRNodeState s in _vrNodeStates)
             {
+                bool isEssentialNode = s.nodeType == XRNode.Head || s.nodeType == XRNode.LeftHand || s.nodeType == XRNode.RightHand;
+                if (isEssentialNode && !_vrNodes.ContainsKey(s.uniqueID))
+                {
+                    _vrNodes[s.uniqueID] = GetVRNode(QuickUtils.ParseEnum<QuickVRNode.Type>(s.nodeType.ToString()));
+                }
                 QuickVRNode n = GetVRNode(s.uniqueID);
                 if (n)
                 {
