@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
+using UnityEngine.Animations;
 
 using QuickExtraTracker = System.Collections.Generic.KeyValuePair<UnityEngine.XR.XRNodeState, UnityEngine.Vector3>;
 using System.Linq;
@@ -28,8 +29,7 @@ namespace QuickVR
         public int _trackedJoints = -1;
 
         public bool _useFootprints = true;
-        public Transform _footprints = null;
-
+        
         public static bool _handsSwaped = false;
 
         public enum HandTrackingMode
@@ -60,6 +60,8 @@ namespace QuickVR
         protected Vector3 _customUserForward = Vector3.zero;  //The provided user forward when _autoUserForward is set to false. 
 
         protected Vector3 _headOffset = Vector3.zero;
+
+        protected PositionConstraint _footprints = null;
 
         #endregion
 
@@ -99,9 +101,9 @@ namespace QuickVR
 
             base.Awake();
 
-            _characterControllerManager = gameObject.GetOrCreateComponent<QuickCharacterControllerManager>();
+            CreateFootPrints();
 
-            _footprints = Instantiate<GameObject>(Resources.Load<GameObject>("Footprints/Footprints")).transform;
+            _characterControllerManager = gameObject.GetOrCreateComponent<QuickCharacterControllerManager>();
 
             _calibrationPose = new GameObject("__CalibrationPose__").transform;
             _calibrationPose.position = transform.position;
@@ -116,6 +118,17 @@ namespace QuickVR
             {
                 _handTrackingMode = HandTrackingMode.Controllers;
             }
+        }
+
+        protected virtual void CreateFootPrints()
+        {
+            _footprints = Instantiate<GameObject>(Resources.Load<GameObject>("Footprints/Footprints")).GetOrCreateComponent<PositionConstraint>();
+            _footprints.transform.ResetTransformation();
+            ConstraintSource source = new ConstraintSource();
+            source.sourceTransform = transform;
+            source.weight = 1.0f;
+            _footprints.AddSource(source);
+            _footprints.constraintActive = true;
         }
 
         protected override void CreateVRCursors()
@@ -137,11 +150,6 @@ namespace QuickVR
             cursorOrigin.position = tProximal.position + cursorOrigin.forward * (l1 + l2 + (l2 - l1));
 
             CreateVRCursor(cType, cursorOrigin);
-        }
-
-        public virtual void InitVRNodeFootPrints()
-        {
-            _userDisplacement = Vector3.zero;
         }
 
         #endregion
@@ -203,6 +211,8 @@ namespace QuickVR
         {
             transform.position = _calibrationPose.position;
             transform.rotation = _calibrationPose.rotation;
+            _footprints.translationOffset = Vector3.zero;
+            _footprints.transform.rotation = transform.rotation;
 
             _vrPlayArea.Calibrate();
 
@@ -274,20 +284,12 @@ namespace QuickVR
             UpdateTransformRoot();
             UpdateTransformNodes();
 
-            UpdateFootPrints();
-
             UpdateVRCursors();
         }
 
         protected virtual void OnPostUpdateTracking()
         {
             UpdateCameraPosition();
-        }
-
-        protected virtual void UpdateFootPrints()
-        {
-            _footprints.position = transform.position - _userDisplacement;
-            _footprints.gameObject.SetActive(_useFootprints);
         }
 
         protected virtual void UpdateTransformRoot()
@@ -309,6 +311,8 @@ namespace QuickVR
                 Vector3 disp = GetDisplacement();
                 transform.Translate(disp, Space.World);
                 _vrPlayArea.GetCalibrationPoseRoot().Translate(disp, Space.World);
+
+                _footprints.translationOffset -= disp; 
             }
 
             _vrPlayArea.transform.parent = transform;

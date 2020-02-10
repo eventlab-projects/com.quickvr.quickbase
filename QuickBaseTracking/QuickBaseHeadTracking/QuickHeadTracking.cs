@@ -14,9 +14,6 @@ namespace QuickVR {
 
 		public LayerMask _visibleLayers = -1;	//The layers that will be rendered by the cameras of the head tracking system. 
 
-        public bool _applyHeadRotation = true;
-		public bool _applyHeadPosition = true;
-
         public Camera _pfCamera = null;
 		public float _cameraNearPlane = DEFAULT_NEAR_CLIP_PLANE;
 		public float _cameraFarPlane = DEFAULT_FAR_CLIP_PLANE;

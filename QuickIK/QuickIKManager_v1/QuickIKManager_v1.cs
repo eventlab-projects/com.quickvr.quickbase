@@ -107,20 +107,13 @@ namespace QuickVR {
 
 		#region UPDATE
 
-        public override void Update()
-        {
-            foreach (QuickIKSolver ikSolver in GetIKSolvers<QuickIKSolver>())
-            {
-                ikSolver.ResetIKChain();
-            }
-        }
-
         public override void UpdateTracking() {
             foreach (IKLimbBones boneID in GetIKLimbBones())
             {
                 QuickIKSolver ikSolver = GetIKSolver<QuickIKSolver>(ToUnity(boneID));
                 if (ikSolver && ((_ikMaskBody & (1 << (int)boneID)) != 0))
                 {
+                    ikSolver.ResetIKChain();
                     //Correct the rotations of the limb bones by accounting for human body constraints
                     if (boneID == IKLimbBones.LeftHand || boneID == IKLimbBones.RightHand)
                     {

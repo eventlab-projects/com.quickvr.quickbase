@@ -126,11 +126,6 @@ namespace QuickVR {
 
         #region UPDATE
 
-        public virtual void Update()
-        {
-            _ikManager.Update();
-        }
-
         protected override void UpdateTransformNodes()
         {
             base.UpdateTransformNodes();
@@ -251,9 +246,6 @@ namespace QuickVR {
             //    }
             //    else ikSolver._weightIKPos = 1.0f;
             //}
-
-            _ikManager.GetIKSolver(HumanBodyBones.Head)._weightIKPos = _applyHeadPosition ? 1.0f : 0.0f;
-            _ikManager.GetIKSolver(HumanBodyBones.Head)._weightIKRot = _applyHeadRotation ? 1.0f : 0.0f;
 
             _ikManager.UpdateTracking();
         }

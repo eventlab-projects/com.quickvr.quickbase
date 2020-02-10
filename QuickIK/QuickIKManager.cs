@@ -570,11 +570,6 @@ namespace QuickVR {
 
         #region UPDATE
 
-        public virtual void Update()
-        {
-
-        }
-
         public override void UpdateTracking()
         {
 
