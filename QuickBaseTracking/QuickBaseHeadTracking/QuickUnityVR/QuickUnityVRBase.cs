@@ -148,11 +148,6 @@ namespace QuickVR
 
         #region GET AND SET
 
-        public virtual Vector3 GetHeadOffset()
-        {
-            return _headOffset;
-        }
-
         public virtual Vector3 GetUserForward()
         {
             if (_autoUserForward)
@@ -173,19 +168,6 @@ namespace QuickVR
             _autoUserForward = false;
         }
 
-        protected virtual bool IsHMDPresent()
-        {
-            return (XRDevice.isPresent && !XRDevice.model.ToLower().StartsWith("null"));
-        }
-
-        protected virtual List<XRNodeState> GetXRNodeStates()
-        {
-            List<XRNodeState> xRNodeStates = new List<XRNodeState>();
-            InputTracking.GetNodeStates(xRNodeStates);
-
-            return xRNodeStates;
-        }
-
         public virtual void SetInitialPosition(Vector3 initialPosition)
         {
             _calibrationPose.position = initialPosition;
@@ -194,40 +176,6 @@ namespace QuickVR
         public virtual void SetInitialRotation(Quaternion initialRotation)
         {
             _calibrationPose.rotation = initialRotation;
-        }
-
-        protected virtual bool IsExtraTracker(ulong id)
-        {
-            foreach (XRNodeState s in GetXRNodeStates())
-            {
-                if (s.uniqueID == id)
-                {
-                    return s.nodeType == XRNode.HardwareTracker;
-                }
-            }
-
-            return false;
-        }
-
-        protected virtual List<QuickExtraTracker> GetExtraTrackers()
-        {
-            List<QuickExtraTracker> extraTrackers = new List<QuickExtraTracker>();
-            foreach (XRNodeState s in GetXRNodeStates())
-            {
-                if (s.tracked && s.nodeType == XRNode.HardwareTracker)
-                {
-                    Vector3 pos;
-                    s.TryGetPosition(out pos);
-                    extraTrackers.Add(new QuickExtraTracker(s, pos));
-                }
-            }
-
-            return extraTrackers;
-        }
-
-        public virtual int GetNumExtraTrackers()
-        {
-            return GetExtraTrackers().Count;
         }
 
         public virtual Vector3 GetDisplacement()
@@ -251,282 +199,10 @@ namespace QuickVR
             return Vector3.SignedAngle(transform.forward, userForward, transform.up);
         }
 
-        //protected bool IsVRNodesSwaped(QuickVRNode.Type typeNodeLeft, QuickVRNode.Type typeNodeRight, bool doSwaping = true)
-        //{
-        //    return IsVRNodesSwaped(GetQuickVRNode(typeNodeLeft), GetQuickVRNode(typeNodeRight), doSwaping);
-        //}
-
-        //protected bool IsVRNodesSwaped(QuickVRNode nodeLeft, QuickVRNode nodeRight, bool doSwaping = true)
-        //{
-        //    QuickVRNode hmdNode = GetQuickVRNode(QuickVRNode.Type.Head);
-
-        //    float dLeft = nodeLeft.IsTracked() ? Vector3.Dot(nodeLeft.transform.position - hmdNode.transform.position, hmdNode.transform.right) : 0.0f;
-        //    float dRight = nodeRight.IsTracked() ? Vector3.Dot(nodeRight.transform.position - hmdNode.transform.position, hmdNode.transform.right) : 0.0f;
-
-        //    bool swaped = dLeft > dRight;
-        //    if (swaped && doSwaping)
-        //    {
-        //        SwapQuickVRNode(nodeLeft, nodeRight);
-        //    }
-
-        //    return swaped;
-        //}
-
-        protected virtual void ConfigureVRExtraTrackersHMD(List<QuickExtraTracker> extraTrackers)
-        {
-            if (extraTrackers.Count() == 1)
-            {
-                //This is the HipsTracker
-            }
-            //XRNodeState sHead = new XRNodeState();
-            //XRNodeState sLeftHand = new XRNodeState();
-            //XRNodeState sRightHand = new XRNodeState();
-            //sHead.uniqueID = sLeftHand.uniqueID = sRightHand.uniqueID = 0;
-
-            //foreach (XRNodeState s in GetXRNodeStates())
-            //{
-            //    if (!s.tracked) continue;
-
-            //    if (s.nodeType == XRNode.Head) sHead = s;
-            //    else if (s.nodeType == XRNode.LeftHand) sLeftHand = s;
-            //    else if (s.nodeType == XRNode.RightHand) sRightHand = s;
-            //}
-
-            //if (sLeftHand.uniqueID != 0 && sRightHand.uniqueID != 0)
-            //{
-            //    GetQuickVRNode(QuickVRNode.Type.Head).SetID(sHead.uniqueID);
-            //    GetQuickVRNode(QuickVRNode.Type.LeftHand).SetID(sLeftHand.uniqueID);
-            //    GetQuickVRNode(QuickVRNode.Type.RightHand).SetID(sRightHand.uniqueID);
-
-            //    if (extraTrackers.Count() == 0) return;
-
-            //    //numTrackers == 1 => Hips
-            //    int hipsIndex = GetHipsIndex(extraTrackers);
-            //    GetQuickVRNode(QuickVRNode.Type.Hips).SetID(extraTrackers[hipsIndex].Key.uniqueID);
-            //    extraTrackers.RemoveAt(hipsIndex);
-            //    if (extraTrackers.Count() == 0) return;
-
-            //    //numTrackers == 2 => ... + LeftFoot
-            //    GetQuickVRNode(QuickVRNode.Type.LeftFoot).SetID(extraTrackers[0].Key.uniqueID);
-            //    extraTrackers.RemoveAt(0);
-            //    if (extraTrackers.Count() == 0) return;
-
-            //    //numTrackers == 3 => ... + RightFoot
-            //    GetQuickVRNode(QuickVRNode.Type.RightFoot).SetID(extraTrackers[0].Key.uniqueID);
-            //    extraTrackers.RemoveAt(0);
-            //    if (extraTrackers.Count() == 0) return;
-
-            //    //numTrackers == 4 => ... + LeftLowerArm
-            //    GetQuickVRNode(QuickVRNode.Type.LeftLowerArm).SetID(extraTrackers[0].Key.uniqueID);
-            //    extraTrackers.RemoveAt(0);
-            //    if (extraTrackers.Count() == 0) return;
-
-            //    //numTrackers == 5 => ... + RightLowerArm
-            //    GetQuickVRNode(QuickVRNode.Type.RightLowerArm).SetID(extraTrackers[0].Key.uniqueID);
-            //    extraTrackers.RemoveAt(0);
-            //    if (extraTrackers.Count() == 0) return;
-
-            //    //numTrackers == 6 => ... + LeftLowerLeg
-            //    GetQuickVRNode(QuickVRNode.Type.LeftLowerLeg).SetID(extraTrackers[0].Key.uniqueID);
-            //    SwapQuickVRNode(QuickVRNode.Type.LeftLowerArm, QuickVRNode.Type.LeftLowerLeg);
-            //    extraTrackers.RemoveAt(0);
-            //    if (extraTrackers.Count() == 0) return;
-
-            //    //numTrackers == 7 => ... + RightLowerLeg
-            //    GetQuickVRNode(QuickVRNode.Type.RightLowerLeg).SetID(extraTrackers[0].Key.uniqueID);
-            //    SwapQuickVRNode(QuickVRNode.Type.RightLowerArm, QuickVRNode.Type.RightLowerLeg);
-            //    extraTrackers.RemoveAt(0);
-            //    if (extraTrackers.Count() == 0) return;
-            //}
-            //else
-            //{
-            //    //Add the HMD Node to the end of the list and make the auto-assignation
-            //    //as in the case where NoHMD is detected.
-            //    Vector3 pos;
-            //    sHead.TryGetPosition(out pos);
-            //    extraTrackers.Add(new QuickExtraTracker(sHead, pos));
-
-            //    ConfigureVRExtraTrackersNoHMD(extraTrackers);
-            //}
-        }
-
-        //protected virtual void ConfigureVRExtraTrackersNoHMD(List<QuickExtraTracker> extraTrackers)
-        //{
-        //    if (extraTrackers.Count() == 0) return;
-
-        //    //numTrackers == 1 => Head
-        //    //The head is always considered to be the tracker on the top. 
-        //    GetQuickVRNode(QuickVRNode.Type.Head).SetID(extraTrackers[extraTrackers.Count() - 1].Key.uniqueID);
-        //    extraTrackers.RemoveAt(extraTrackers.Count() - 1);
-        //    if (extraTrackers.Count() == 0) return;
-
-        //    //numTrackers == 2 => ... + Hips
-        //    int HipsIndex = GetHipsIndex(extraTrackers);
-        //    GetQuickVRNode(QuickVRNode.Type.Hips).SetID(extraTrackers[HipsIndex].Key.uniqueID);
-        //    extraTrackers.RemoveAt(HipsIndex);
-        //    if (extraTrackers.Count() == 0) return;
-
-        //    //numTrackers == 3 => ... + LeftHand
-        //    GetQuickVRNode(QuickVRNode.Type.LeftHand).SetID(extraTrackers[0].Key.uniqueID);
-        //    extraTrackers.RemoveAt(0);
-        //    if (extraTrackers.Count() == 0) return;
-
-        //    //numTrackers == 4 => ... + RightHand
-        //    GetQuickVRNode(QuickVRNode.Type.RightHand).SetID(extraTrackers[0].Key.uniqueID);
-        //    extraTrackers.RemoveAt(0);
-        //    if (extraTrackers.Count() == 0) return;
-
-        //    //numTrackers == 5 => ... + LeftFoot
-        //    GetQuickVRNode(QuickVRNode.Type.LeftFoot).SetID(extraTrackers[0].Key.uniqueID);
-        //    SwapQuickVRNode(QuickVRNode.Type.LeftHand, QuickVRNode.Type.LeftFoot);
-        //    extraTrackers.RemoveAt(0);
-        //    if (extraTrackers.Count() == 0) return;
-
-        //    //numTrackers == 6 => ... + RightFoot
-        //    GetQuickVRNode(QuickVRNode.Type.RightFoot).SetID(extraTrackers[0].Key.uniqueID);
-        //    SwapQuickVRNode(QuickVRNode.Type.RightHand, QuickVRNode.Type.RightFoot);
-        //    extraTrackers.RemoveAt(0);
-        //    if (extraTrackers.Count() == 0) return;
-
-        //    //numTrackers == 7 => ... + LeftLowerArm
-        //    GetQuickVRNode(QuickVRNode.Type.LeftLowerArm).SetID(extraTrackers[0].Key.uniqueID);
-        //    extraTrackers.RemoveAt(0);
-        //    if (extraTrackers.Count() == 0) return;
-
-        //    //numTrackers == 8 => ... + RightLowerArm
-        //    GetQuickVRNode(QuickVRNode.Type.RightLowerArm).SetID(extraTrackers[0].Key.uniqueID);
-        //    extraTrackers.RemoveAt(0);
-        //    if (extraTrackers.Count() == 0) return;
-
-        //    //numTrackers == 9 => ... + LeftLowerLeg
-        //    GetQuickVRNode(QuickVRNode.Type.LeftLowerLeg).SetID(extraTrackers[0].Key.uniqueID);
-        //    SwapQuickVRNode(QuickVRNode.Type.LeftHand, QuickVRNode.Type.LeftLowerArm);
-        //    SwapQuickVRNode(QuickVRNode.Type.LeftLowerArm, QuickVRNode.Type.LeftLowerLeg);
-        //    extraTrackers.RemoveAt(0);
-        //    if (extraTrackers.Count() == 0) return;
-
-        //    //numTrackers == 10 => ... + RightLowerLeg
-        //    GetQuickVRNode(QuickVRNode.Type.RightLowerLeg).SetID(extraTrackers[0].Key.uniqueID);
-        //    SwapQuickVRNode(QuickVRNode.Type.RightHand, QuickVRNode.Type.RightLowerArm);
-        //    SwapQuickVRNode(QuickVRNode.Type.RightLowerArm, QuickVRNode.Type.RightLowerLeg);
-        //    extraTrackers.RemoveAt(0);
-        //    if (extraTrackers.Count() == 0) return;
-        //}
-
-        //protected int GetHipsIndex(List<QuickExtraTracker> extraTrackers)
-        //{
-        //    QuickVRNode nodeHead = GetQuickVRNode(QuickVRNode.Type.Head);
-        //    Vector3 n = Vector3.ProjectOnPlane(nodeHead.transform.forward, transform.up);
-        //    Vector3 p = nodeHead.transform.position;
-
-        //    int HipsIndex = 0;
-        //    float dMin = Mathf.Infinity;
-        //    for (int i = 0; i < extraTrackers.Count; i++)
-        //    {
-        //        Vector3 v = Math3d.ProjectPointOnPlane(Vector3.up, p, Math3d.ProjectPointOnPlane(n, p, extraTrackers[i].Value));
-        //        float d = Vector3.Distance(v, p);
-        //        if (d < dMin)
-        //        {
-        //            dMin = d;
-        //            HipsIndex = i;
-        //        }
-        //    }
-
-        //    return HipsIndex;
-        //}
-
-        //protected int GetHipsIndex(List<QuickExtraTracker> extraTrackers)
-        //{
-        //    QuickVRNode nodeHead = GetQuickVRNode(QuickVRNode.Type.Head);
-        //    Vector3 n = Vector3.ProjectOnPlane(nodeHead.transform.forward, Vector3.up).normalized;
-        //    Vector3 p = nodeHead.transform.position;
-
-        //    int HipsIndex = 0;
-        //    float aMin = Mathf.Infinity;
-        //    Debug.Log("==============================================");
-        //    for (int i = 0; i < extraTrackers.Count; i++)
-        //    {
-        //        Vector3 v = Vector3.ProjectOnPlane((extraTrackers[i].Value - p).normalized, Vector3.up);
-        //        float a = Vector3.Angle(n, v);
-        //        Debug.Log("i = " + i);
-        //        Debug.Log("a = " + a.ToString("f3"));
-        //        Debug.Log("pos = " + extraTrackers[i].Value.ToString("f3"));
-        //        if (a < aMin)
-        //        {
-        //            aMin = a;
-        //            HipsIndex = i;
-        //        }
-        //    }
-
-        //    return HipsIndex;
-        //}
-
-        //protected int GetHipsIndex(List<QuickExtraTracker> extraTrackers)
-        //{
-        //    //QuickVRNode nodeHead = GetQuickVRNode(QuickVRNode.Type.Head);
-        //    //Vector3 p = nodeHead.transform.position;
-
-        //    //int HipsIndex = 0;
-        //    //float aMin = Mathf.Infinity;
-        //    //for (int i = 0; i < extraTrackers.Count; i++)
-        //    //{
-        //    //    Vector3 v = p - extraTrackers[i].Value;
-        //    //    float a = Vector3.Angle(Vector3.up, v);
-        //    //    if (a < aMin)
-        //    //    {
-        //    //        aMin = a;
-        //    //        HipsIndex = i;
-        //    //    }
-        //    //}
-
-        //    QuickVRNode nodeHead = GetQuickVRNode(QuickVRNode.Type.Head);
-        //    Vector3 p = nodeHead.transform.position;
-
-        //    int HipsIndex = 0;
-        //    float dMin = Mathf.Infinity;
-        //    for (int i = 0; i < extraTrackers.Count; i++)
-        //    {
-        //        float d = Vector3.Distance(extraTrackers[i].Value, p);
-        //        if (d < dMin)
-        //        {
-        //            HipsIndex = i;
-        //            dMin = d;
-        //        }
-        //    }
-
-        //    return HipsIndex;
-        //}
-
-        //protected virtual void SwapQuickVRNode(QuickVRNode.Type typeA, QuickVRNode.Type typeB)
-        //{
-        //    SwapQuickVRNode(GetQuickVRNode(typeA), GetQuickVRNode(typeB));
-        //}
-
-        //protected virtual void SwapQuickVRNode(QuickVRNode vrNodeA, QuickVRNode vrNodeB)
-        //{
-        //    ulong tmp = vrNodeA.GetID();
-        //    vrNodeA.SetID(vrNodeB.GetID());
-        //    vrNodeB.SetID(tmp);
-        //}
-
         public override void Calibrate()
         {
             transform.position = _calibrationPose.position;
             transform.rotation = _calibrationPose.rotation;
-
-            ////Get all the tracked extratrackers and sort them by Y, from lowest to higher. 
-            //List<QuickExtraTracker> extraTrackers = GetExtraTrackers();
-            //extraTrackers = extraTrackers.OrderBy(o => o.Value.y).ToList();
-
-            //if (IsHMDPresent()) ConfigureVRExtraTrackersHMD(extraTrackers);
-            //else ConfigureVRExtraTrackersNoHMD(extraTrackers);
-
-            ////Check if left/right nodes are set in the correct side, and swap them if necessary. 
-            //_handsSwaped = IsVRNodesSwaped(QuickVRNode.Type.LeftHand, QuickVRNode.Type.RightHand);
-            //IsVRNodesSwaped(QuickVRNode.Type.LeftLowerArm, QuickVRNode.Type.RightLowerArm);
-
-            //IsVRNodesSwaped(QuickVRNode.Type.LeftFoot, QuickVRNode.Type.RightFoot);
-            //IsVRNodesSwaped(QuickVRNode.Type.LeftLowerLeg, QuickVRNode.Type.RightLowerLeg);
 
             _vrPlayArea.Calibrate();
 
@@ -636,11 +312,6 @@ namespace QuickVR
             }
 
             _vrPlayArea.transform.parent = transform;
-            
-            //Vector3 userDisp = ToAvatarSpace(disp);
-            //transform.Translate(userDisp, Space.World);
-            //_characterControllerManager.SetStepVelocity(userDisp / Time.deltaTime);
-            //_userDisplacement += userDisp;
         }
 
         protected virtual void UpdateTransformNodes()

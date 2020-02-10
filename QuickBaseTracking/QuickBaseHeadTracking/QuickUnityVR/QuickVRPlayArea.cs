@@ -164,8 +164,8 @@ namespace QuickVR
                 Update();
 
                 IsVRNodesSwaped(QuickVRNode.Type.LeftFoot, QuickVRNode.Type.RightFoot);
-
                 _isHandsSwaped = IsVRNodesSwaped(QuickVRNode.Type.LeftHand, QuickVRNode.Type.RightHand);
+
                 Debug.Log("handsSwaped = " + _isHandsSwaped);
 
                 Update();
