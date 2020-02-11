@@ -247,7 +247,7 @@ namespace QuickVR
             }
             else
             {
-                tObject.transform.LookAt(tObject.transform.position + transform.right, -transform.up);
+                tObject.transform.LookAt(tObject.transform.position + node.transform.right, -node.transform.up);
             }
         }
 
@@ -261,7 +261,7 @@ namespace QuickVR
             }
             else
             {
-                tObject.transform.LookAt(tObject.transform.position - transform.right, transform.up);
+                tObject.transform.LookAt(tObject.transform.position - node.transform.right, node.transform.up);
             }
         }
 
