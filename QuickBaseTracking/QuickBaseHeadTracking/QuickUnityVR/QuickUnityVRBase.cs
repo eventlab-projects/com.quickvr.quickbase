@@ -216,15 +216,15 @@ namespace QuickVR
 
             _vrPlayArea.Calibrate();
 
+            float rotAngle = Vector3.SignedAngle(GetUserForward(), transform.forward, transform.up);
+            _vrPlayArea.transform.Rotate(transform.up, rotAngle, Space.World);
+
             if (OnCalibrate != null) OnCalibrate();
         }
 
         protected virtual void OnCalibrateVRNodeHead(QuickVRNode node)
         {
             node.GetTrackedObject().transform.localPosition = _headOffset;
-
-            float rotAngle = Vector3.SignedAngle(GetUserForward(), transform.forward, transform.up);
-            _vrPlayArea.transform.Rotate(transform.up, rotAngle, Space.World);
         }
 
         protected virtual void OnCalibrateVRNodeHips(QuickVRNode node)
@@ -232,9 +232,6 @@ namespace QuickVR
             QuickTrackedObject tObjectHead = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject();
             QuickTrackedObject tObjectHips = node.GetTrackedObject();
             tObjectHips.transform.position = new Vector3(tObjectHead.transform.position.x, tObjectHips.transform.position.y, tObjectHead.transform.position.z);
-
-            float rotAngle = Vector3.SignedAngle(GetUserForward(), transform.forward, transform.up);
-            _vrPlayArea.transform.Rotate(transform.up, rotAngle, Space.World);
         }
 
         protected virtual void OnCalibrateVRNodeLeftHand(QuickVRNode node)
