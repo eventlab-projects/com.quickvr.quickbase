@@ -91,8 +91,6 @@ public class InputManager : MonoBehaviour
 
         CreateDefaultAxis(DEFAULT_AXIS_LEFT_TRIGGER);
         CreateDefaultAxis(DEFAULT_AXIS_RIGHT_TRIGGER);
-
-
     }
 
     protected virtual void CreateDefaultButtons()
