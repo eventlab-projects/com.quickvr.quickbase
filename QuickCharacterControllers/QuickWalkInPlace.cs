@@ -70,13 +70,13 @@ namespace QuickVR
 
         protected virtual void OnEnable()
         {
-            QuickUnityVRBase.OnCalibrate += Init;
+            QuickVRManager.OnPostCalibrate += Init;
             StartCoroutine(CoUpdate());
         }
 
         protected virtual void OnDisable()
         {
-            QuickUnityVRBase.OnCalibrate -= Init;
+            QuickVRManager.OnPostCalibrate -= Init;
         }
 
         protected virtual void Init()

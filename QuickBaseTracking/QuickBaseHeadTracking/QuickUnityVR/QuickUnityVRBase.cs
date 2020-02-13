@@ -65,13 +65,6 @@ namespace QuickVR
 
         #endregion
 
-        #region EVENTS
-
-        public delegate void CalibrateAction();
-        public static event CalibrateAction OnCalibrate;
-
-        #endregion
-
         #region CREATION AND DESTRUCTION
 
         protected virtual void OnEnable()
@@ -218,8 +211,6 @@ namespace QuickVR
 
             float rotAngle = Vector3.SignedAngle(GetUserForward(), transform.forward, transform.up);
             _vrPlayArea.transform.Rotate(transform.up, rotAngle, Space.World);
-
-            if (OnCalibrate != null) OnCalibrate();
         }
 
         protected virtual void OnCalibrateVRNodeHead(QuickVRNode node)

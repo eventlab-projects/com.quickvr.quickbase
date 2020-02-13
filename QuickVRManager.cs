@@ -20,11 +20,11 @@ namespace QuickVR
 
         #region EVENTS
 
-        public delegate void PreUpdateTrackingAction();
-        public static event PreUpdateTrackingAction OnPreUpdateTracking;
+        public delegate void QuickVRManagerAction();
 
-        public delegate void PostUpdateTrackingAction();
-        public static event PostUpdateTrackingAction OnPostUpdateTracking;
+        public static event QuickVRManagerAction OnPreUpdateTracking;
+        public static event QuickVRManagerAction OnPostUpdateTracking;
+        public static event QuickVRManagerAction OnPostCalibrate;
 
         #endregion
 
@@ -74,6 +74,8 @@ namespace QuickVR
                     tm.Calibrate();
                 }
             }
+
+            if (OnPostCalibrate != null) OnPostCalibrate();
         }
 
         #endregion
@@ -117,6 +119,7 @@ namespace QuickVR
         }
 
         #endregion
+
     }
 
 }

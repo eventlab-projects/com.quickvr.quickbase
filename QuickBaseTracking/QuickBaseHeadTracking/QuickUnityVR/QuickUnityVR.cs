@@ -97,8 +97,6 @@ namespace QuickVR {
 
             //Set the offset of the TrackedObject of the head
             QuickVRNode node = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head);
-            if (!node) return;
-
             Vector3 offset = _ikManager.GetIKTarget(HumanBodyBones.Head).position - node.GetTrackedObject().transform.position;
             _vrPlayArea.transform.position += offset;
         }
