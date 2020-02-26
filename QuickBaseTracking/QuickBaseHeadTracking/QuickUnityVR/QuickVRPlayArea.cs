@@ -284,7 +284,7 @@ namespace QuickVR
             foreach (XRNodeState s in _vrNodeStates)
             {
                 bool isEssentialNode = s.nodeType == XRNode.Head || s.nodeType == XRNode.LeftHand || s.nodeType == XRNode.RightHand;
-                if (isEssentialNode && !_vrNodes.ContainsKey(s.uniqueID))
+                if (isEssentialNode)
                 {
                     _vrNodes[s.uniqueID] = GetVRNode(QuickUtils.ParseEnum<QuickVRNode.Type>(s.nodeType.ToString()));
                 }
