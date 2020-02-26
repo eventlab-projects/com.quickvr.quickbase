@@ -273,6 +273,8 @@ namespace QuickVR
             UpdateTransformNodes();
 
             UpdateVRCursors();
+
+            _footprints.gameObject.SetActive(_useFootprints);
         }
 
         protected virtual void OnPostUpdateTracking()
