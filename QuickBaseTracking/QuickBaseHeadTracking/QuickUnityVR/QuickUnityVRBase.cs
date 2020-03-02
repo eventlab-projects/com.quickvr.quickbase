@@ -149,6 +149,11 @@ namespace QuickVR
 
         #region GET AND SET
 
+        public virtual int GetNumExtraTrackers()
+        {
+            return 0;
+        }
+
         public virtual Vector3 GetUserForward()
         {
             if (_autoUserForward)
