@@ -56,9 +56,6 @@ namespace QuickVR
 
         protected QuickCharacterControllerManager _characterControllerManager = null;
 
-        protected bool _autoUserForward = true; //If true, the forward of the user (the real person) is retrieved from the tracking data at every frame. Otherwise, the user forward is manually provided. 
-        protected Vector3 _customUserForward = Vector3.zero;  //The provided user forward when _autoUserForward is set to false. 
-
         protected Vector3 _headOffset = Vector3.zero;
 
         protected PositionConstraint _footprints = null;
@@ -154,26 +151,6 @@ namespace QuickVR
             return 0;
         }
 
-        public virtual Vector3 GetUserForward()
-        {
-            if (_autoUserForward)
-            {
-                return Vector3.ProjectOnPlane(_vrPlayArea.GetVRNodeMain().transform.forward, transform.up);
-            }
-            return _customUserForward;
-        }
-
-        public virtual void SetUserForward(Vector3 fwd)
-        {
-            _autoUserForward = false;
-            _customUserForward = fwd;
-        }
-
-        public virtual void ResetUserForward()
-        {
-            _autoUserForward = false;
-        }
-
         public virtual void SetInitialPosition(Vector3 initialPosition)
         {
             _calibrationPose.position = initialPosition;
@@ -201,7 +178,7 @@ namespace QuickVR
 
         protected virtual float GetRotationOffset()
         {
-            Vector3 userForward = GetUserForward();
+            Vector3 userForward = _vrPlayArea.GetUserForward();
             return Vector3.SignedAngle(transform.forward, userForward, transform.up);
         }
 
@@ -214,7 +191,7 @@ namespace QuickVR
 
             _vrPlayArea.Calibrate();
 
-            float rotAngle = Vector3.SignedAngle(GetUserForward(), transform.forward, transform.up);
+            float rotAngle = Vector3.SignedAngle(_vrPlayArea.GetUserForward(), transform.forward, transform.up);
             _vrPlayArea.transform.Rotate(transform.up, rotAngle, Space.World);
         }
 

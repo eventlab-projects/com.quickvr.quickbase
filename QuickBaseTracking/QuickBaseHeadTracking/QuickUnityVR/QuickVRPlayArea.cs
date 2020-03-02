@@ -18,6 +18,8 @@ namespace QuickVR
         
         protected bool _isHandsSwaped = false;
 
+        protected Vector3 _customUserForward = Vector3.zero;  //A custom user forward provided by the application. 
+
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -43,6 +45,25 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
+
+        public virtual Vector3 GetUserForward()
+        {
+            if (_customUserForward == Vector3.zero)
+            {
+                return Vector3.ProjectOnPlane(GetVRNodeMain().transform.forward, transform.up);
+            }
+            return _customUserForward;
+        }
+
+        public virtual void SetUserForward(Vector3 fwd)
+        {
+            _customUserForward = fwd;
+        }
+
+        public virtual void ResetUserForward()
+        {
+            _customUserForward = Vector3.zero;
+        }
 
         public virtual Transform GetCalibrationPoseRoot()
         {
