@@ -20,8 +20,6 @@ namespace QuickVR {
         [SerializeField, HideInInspector]
         protected QuickIKManager _ikManager = null;
 
-        protected float _initialVerticalReferencePosY = 0.0f;
-
         protected float _unscaledHeadHeight = 0.0f;
 
         #endregion
