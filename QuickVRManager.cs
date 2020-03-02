@@ -16,6 +16,8 @@ namespace QuickVR
 
         protected PerformanceFPS _fpsCounter = null;
 
+        protected QuickVRCameraController _cameraController = null;
+
         #endregion
 
         #region EVENTS
@@ -34,11 +36,17 @@ namespace QuickVR
         {
             _fpsCounter = QuickSingletonManager.GetInstance<PerformanceFPS>();
             _fpsCounter._showFPS = false;
+            _cameraController = QuickSingletonManager.GetInstance<QuickVRCameraController>();
         }
 
         #endregion
 
         #region GET AND SET
+
+        public virtual QuickVRCameraController GetCameraController()
+        {
+            return _cameraController;
+        }
 
         public virtual void AddHeadTrackingSystem(QuickHeadTracking hTracking)
         {
@@ -111,6 +119,9 @@ namespace QuickVR
             }
 
             if (OnPostUpdateTracking != null) OnPostUpdateTracking();
+
+            //4) Update the camera position
+            _cameraController.UpdateCameraPosition();
         }
 
         private static bool IsNull(QuickBaseTrackingManager tManager)

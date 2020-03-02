@@ -321,18 +321,18 @@ namespace QuickVR
 
         protected virtual void UpdateCameraPosition()
         {
-            //Apply the correct rotation to the cameracontrollerroot:
-            QuickVRNode nodeHead = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head);
-            if (!nodeHead) return;
+            ////Apply the correct rotation to the cameracontrollerroot:
+            //QuickVRNode nodeHead = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head);
+            //if (!nodeHead) return;
 
-            Vector3 fwdCam = Vector3.ProjectOnPlane(_camera.transform.forward, transform.up).normalized;
-            Vector3 fwdHead = Vector3.ProjectOnPlane(nodeHead.GetTrackedObject().transform.forward, transform.up).normalized;
-            float rotOffset = Vector3.SignedAngle(fwdCam, fwdHead, transform.up);
-            _cameraControllerRoot.Rotate(transform.up, rotOffset, Space.World);
+            //Vector3 fwdCam = Vector3.ProjectOnPlane(_camera.transform.forward, transform.up).normalized;
+            //Vector3 fwdHead = Vector3.ProjectOnPlane(nodeHead.GetTrackedObject().transform.forward, transform.up).normalized;
+            //float rotOffset = Vector3.SignedAngle(fwdCam, fwdHead, transform.up);
+            //_cameraControllerRoot.Rotate(transform.up, rotOffset, Space.World);
 
-            //This forces the camera to be in the Avatar's eye center. 
-            Vector3 offset = GetEyeCenterPosition() - _camera.transform.position;
-            _cameraControllerRoot.position += offset;
+            ////This forces the camera to be in the Avatar's eye center. 
+            //Vector3 offset = GetEyeCenterPosition() - _camera.transform.position;
+            //_cameraControllerRoot.position += offset;
         }
 
         protected virtual void UpdateVRCursors()

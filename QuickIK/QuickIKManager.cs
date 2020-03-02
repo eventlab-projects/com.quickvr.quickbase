@@ -132,7 +132,7 @@ namespace QuickVR {
         {
             base.Start();
 
-            QuickSingletonManager.GetInstance<QuickVRManager>().AddIKManagerSystem(this);
+            _vrManager.AddIKManagerSystem(this);
         }
 
         protected override void Reset()

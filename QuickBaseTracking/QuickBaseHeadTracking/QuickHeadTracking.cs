@@ -23,12 +23,6 @@ namespace QuickVR {
         #region PROTECTED PARAMETERS
 
         [SerializeField, HideInInspector]
-        protected Camera _camera = null;
-
-        [SerializeField, HideInInspector]
-        protected Transform _cameraControllerRoot = null;
-
-        [SerializeField, HideInInspector]
         protected bool _showCalibrationScreen = true;
 
 		protected Dictionary<VRCursorType, QuickUICursor> _vrCursors = new Dictionary<VRCursorType, QuickUICursor>();
@@ -43,7 +37,6 @@ namespace QuickVR {
 		protected const float DEFAULT_NEAR_CLIP_PLANE = 0.05f;
 		protected const float DEFAULT_FAR_CLIP_PLANE = 500.0f;
 
-        protected const string CAMERA_CONTROLLER_ROOT_NAME = "__CameraControllerRoot__";
 		protected const string CALIBRATION_SCREEN_NAME = "__CalibrationScreen__";
 
         #endregion
@@ -55,8 +48,7 @@ namespace QuickVR {
 
             if (_animator && !_animator.isHuman) Debug.LogWarning("Animator detected, but Character is not rigged as HUMANOID.");
 
-			CreateCameraControllerRoot();
-			CreateCamera();
+			InitCameraController();
             CreateVRHands();
             CreateVRCursors();
 
@@ -67,22 +59,10 @@ namespace QuickVR {
         {
             base.Start();
 
-            QuickSingletonManager.GetInstance<QuickVRManager>().AddHeadTrackingSystem(this);
+            _vrManager.AddHeadTrackingSystem(this);
         }
 
-        protected virtual void CreateCamera()
-        {
-            _camera = _pfCamera ? Instantiate<Camera>(_pfCamera) : new GameObject().GetOrCreateComponent<Camera>();
-            _camera.name = "__Camera__";
-            _camera.transform.parent = _cameraControllerRoot;
-            _camera.transform.ResetTransformation();
-            _camera.tag = "MainCamera";
-            _camera.gameObject.GetOrCreateComponent<AudioListener>();
-            _camera.gameObject.GetOrCreateComponent<FlareLayer>();
-            _camera.transform.rotation = transform.rotation;
-        }
-
-		protected virtual Texture2D LoadDefaultCalibrationTexture()
+        protected virtual Texture2D LoadDefaultCalibrationTexture()
         {
             string path = "HMDCalibrationScreens/";
             if (SettingsBase.GetLanguage() == SettingsBase.Languages.ENGLISH) path += "en/";
@@ -91,7 +71,7 @@ namespace QuickVR {
         }
 
 		protected virtual void CreateVRCursors() {
-			CreateVRCursor(VRCursorType.HEAD, _camera.transform);
+			CreateVRCursor(VRCursorType.HEAD, Camera.main.transform);
 		}
 
 		protected virtual void CreateVRCursor(VRCursorType cType, Transform cTransform) {
@@ -103,10 +83,10 @@ namespace QuickVR {
             SetVRCursorActive(cType, false);
         }
 
-		protected virtual void CreateCameraControllerRoot() {
-            //_cameraControllerRoot = new GameObject(CAMERA_CONTROLLER_ROOT_NAME).transform;
-
-            _cameraControllerRoot = transform.CreateChild(CAMERA_CONTROLLER_ROOT_NAME).transform;
+		protected virtual void InitCameraController() {
+            QuickVRCameraController cameraController = _vrManager.GetCameraController();
+            cameraController.CreateCamera(_pfCamera);
+            cameraController.SetAnimator(_animator);
         }
 
         protected virtual void CreateVRHands()
@@ -141,32 +121,20 @@ namespace QuickVR {
 			return IsHumanoid()? _animator.GetBoneTransform(HumanBodyBones.Head) : transform;
 		}
 
-		public virtual Camera GetCamera() {
-			return _camera;
-		}
-
-		public virtual Transform GetCameraControllerRoot() {
-			return _cameraControllerRoot;
-		}
-
-        public abstract Vector3 GetEyeCenterPosition();
+		public abstract Vector3 GetEyeCenterPosition();
         
         #endregion
 
         #region UPDATE
 
-        public override void UpdateTracking() {
-            UpdateCameraParameters(_camera);
-		}
-
-        protected virtual void UpdateCameraParameters(Camera cam)
+        public override void UpdateTracking()
         {
-            if (!cam) return;
+            Camera cam = _vrManager.GetCameraController().GetCamera();
 
             cam.nearClipPlane = _cameraNearPlane;
             cam.farClipPlane = _cameraFarPlane;
             cam.cullingMask = _visibleLayers.value;
-        }
+		}
 
 		#endregion
 

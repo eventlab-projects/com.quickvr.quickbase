@@ -12,6 +12,8 @@ namespace QuickVR {
 		[SerializeField, HideInInspector] 
         protected Animator _animator = null;	
 
+        protected QuickVRManager _vrManager = null;
+
 		#endregion
 
 		#region ABSTRACT
@@ -29,6 +31,7 @@ namespace QuickVR {
 
         protected virtual void Awake() {
             _animator = GetComponent<Animator>();
+            _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
             if (_animator) _animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
 		}
 

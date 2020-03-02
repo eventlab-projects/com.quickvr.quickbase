@@ -39,7 +39,7 @@ namespace QuickVR {
         {
             base.Start();
 
-            QuickSingletonManager.GetInstance<QuickVRManager>().AddBodyTrackingSystem(this);
+            _vrManager.AddBodyTrackingSystem(this);
         }
 
         #endregion
