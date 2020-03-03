@@ -13,6 +13,10 @@ public static class QuickHumanTrait
 
     private static Dictionary<HumanBodyBones, HumanBodyBones> _lookAtBone = null;
 
+    private static string[] _fingers = { "Thumb", "Index", "Middle", "Ring", "Little" };
+
+    private static List<string> _muscleNames = null;
+
     #endregion
 
     #region CREATION AND DESTRUCTION
@@ -136,9 +140,41 @@ public static class QuickHumanTrait
         return HumanTrait.MuscleCount;
     }
 
+    public static List<string> GetMuscleNames()
+    {
+        if (_muscleNames == null)
+        {
+            _muscleNames = new List<string>();
+
+            for (int muscleID = 0; muscleID < HumanTrait.MuscleCount; muscleID++)
+            {
+                string name = HumanTrait.MuscleName[muscleID];
+                for (int h = 0; h <= 1; h++)
+                {
+                    string hName = h == 0 ? "Left" : "Right";
+                    foreach (string f in _fingers)
+                    {
+                        for (int i = 1; i <= 3; i++)
+                        {
+                            if (name == hName + " " + f + " " + i.ToString() + " Stretched") name = hName + "Hand." + f + "." + i.ToString() + " Stretched";
+                        }
+                    }
+                    foreach (string f in _fingers)
+                    {
+                        if (name == hName + " " + f + " Spread") name = hName + "Hand." + f + ".Spread";
+                    }
+                }
+
+                _muscleNames.Add(name);
+            }
+        }
+
+        return _muscleNames;
+    }
+
     public static string GetMuscleName(int muscleID)
     {
-        return HumanTrait.MuscleName[muscleID];
+        return GetMuscleNames()[muscleID];
     }
 
     public static int GetRequiredBoneCount()
