@@ -131,17 +131,19 @@ namespace QuickVR {
 
         protected virtual void CreateReflectionCamera() {
             //Create the camera
-            if (_reflectionCamera) return;
+            if (!_reflectionCamera)
+            {
+                _reflectionCamera = transform.CreateChild(QuickMirrorReflectionManager.MIRROR_CAMERA_NAME).gameObject.GetOrCreateComponent<Camera>();
+                //_reflectionCamera = new GameObject("__MirrorReflectionCamera__").AddComponent<Camera>();
+                _reflectionCamera.gameObject.layer = LayerMask.NameToLayer("Water");
+                //_reflectionCamera.gameObject.hideFlags = HideFlags.HideAndDontSave;
+                _reflectionCamera.gameObject.GetOrCreateComponent<Skybox>();
 
-            _reflectionCamera = transform.CreateChild("__MirrorReflectionCamera__").gameObject.GetOrCreateComponent<Camera>();
-            //_reflectionCamera = new GameObject("__MirrorReflectionCamera__").AddComponent<Camera>();
-            _reflectionCamera.gameObject.layer = LayerMask.NameToLayer("Water");
-            //_reflectionCamera.gameObject.hideFlags = HideFlags.HideAndDontSave;
-            _reflectionCamera.gameObject.GetOrCreateComponent<Skybox>();
+                _reflectionCamera.allowMSAA = true;
+            }
 
+            _reflectionCamera.name = QuickMirrorReflectionManager.MIRROR_CAMERA_NAME;
             _reflectionCamera.enabled = false;
-            _reflectionCamera.allowMSAA = true;
-
             _reflectionCamera.renderingPath = _reflectedRenderingPath;
         }
 
@@ -198,6 +200,8 @@ namespace QuickVR {
 
         public virtual void BeginCameraRendering(Camera cam)
         {
+            if (cam == _reflectionCamera) return;
+
             _currentCamera = cam;
             //Force the mirror to be in the Water layer, so it will avoid to be rendered by the reflection cameras
 			gameObject.layer = LayerMask.NameToLayer("Water");

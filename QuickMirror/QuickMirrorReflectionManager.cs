@@ -11,6 +11,8 @@ namespace QuickVR
     public static class QuickMirrorReflectionManager
     {
 
+        public static string MIRROR_CAMERA_NAME = "__MirrorReflectionCamera__";
+
         #region PRIVATE ATTRIBUTES
 
         private static HashSet<QuickMirrorReflectionBase> _mirrors = new HashSet<QuickMirrorReflectionBase>();
@@ -24,7 +26,8 @@ namespace QuickVR
 #if UNITY_EDITOR
             UnityEditor.SceneView.beforeSceneGui += UpdateMirrorsSceneView;
 #endif
-            QuickVRManager.OnPostUpdateTracking += UpdateMirrors;
+            //QuickVRManager.OnPostUpdateTracking += UpdateMirrors;
+            Camera.onPreRender += UpdateMirrors;
         }
 
         #endregion
@@ -57,14 +60,13 @@ namespace QuickVR
         }
 #endif
 
-        static void UpdateMirrors()
+        static void UpdateMirrors(Camera cam)
         {
+            if (cam.name == MIRROR_CAMERA_NAME) return;
+
             foreach (QuickMirrorReflectionBase mirror in _mirrors)
             {
-                foreach (Camera cam in Camera.allCameras)
-                {
-                    mirror.BeginCameraRendering(cam);
-                }
+                mirror.BeginCameraRendering(cam);
             }
         }
 

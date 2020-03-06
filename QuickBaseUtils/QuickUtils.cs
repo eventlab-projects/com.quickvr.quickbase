@@ -501,6 +501,18 @@ namespace QuickVR
             transform.localScale = Vector3.one;
         }
 
+        public static void GetProperties(this Transform transform, out Vector3 pos, out Quaternion rot)
+        {
+            pos = transform.position;
+            rot = transform.rotation;
+        }
+
+        public static void SetProperties(this Transform transform, Vector3 pos, Quaternion rot)
+        {
+            transform.position = pos;
+            transform.rotation = rot;
+        }
+
         public static Transform CreateChild(this Transform transform, string name, bool checkName = true)
         {
             Transform t = transform.Find(name);

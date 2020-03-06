@@ -24,10 +24,15 @@ namespace QuickVR
 
         public delegate void QuickVRManagerAction();
 
-        public static event QuickVRManagerAction OnPreUpdateTracking;
-        public static event QuickVRManagerAction OnPostUpdateTracking;
+        public static event QuickVRManagerAction OnPreCalibrate;
         public static event QuickVRManagerAction OnPostCalibrate;
 
+        public static event QuickVRManagerAction OnPreUpdateTracking;
+        public static event QuickVRManagerAction OnPostUpdateTracking;
+
+        public static event QuickVRManagerAction OnPreCameraUpdate;
+        public static event QuickVRManagerAction OnPostCameraUpdate;
+        
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -82,8 +87,6 @@ namespace QuickVR
                     tm.Calibrate();
                 }
             }
-
-            if (OnPostCalibrate != null) OnPostCalibrate();
         }
 
         #endregion
@@ -95,11 +98,23 @@ namespace QuickVR
             //Calibrate the TrackingManagers that needs to be calibrated. 
             if (InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CALIBRATE))
             {
+                if (OnPreCalibrate != null) OnPreCalibrate();
                 Calibrate();
+                if (OnPostCalibrate != null) OnPostCalibrate();
             }
-            
-            if (OnPreUpdateTracking != null) OnPreUpdateTracking();
 
+            //Update the TrackingManagers
+            if (OnPreUpdateTracking != null) OnPreUpdateTracking();
+            UpdateTracking();
+            if (OnPostUpdateTracking != null) OnPostUpdateTracking();
+
+            //Update the Camera position
+
+            _cameraController.UpdateCameraPosition();
+        }
+
+        protected virtual void UpdateTracking()
+        {
             //1) Update the HeadTracking systems
             foreach (QuickHeadTracking hTracking in _headTrackingSystems)
             {
@@ -117,16 +132,6 @@ namespace QuickVR
             {
                 ikManager.UpdateTracking();
             }
-
-            if (OnPostUpdateTracking != null) OnPostUpdateTracking();
-
-            //4) Update the camera position
-            _cameraController.UpdateCameraPosition();
-        }
-
-        private static bool IsNull(QuickBaseTrackingManager tManager)
-        {
-            return tManager == null;
         }
 
         #endregion
