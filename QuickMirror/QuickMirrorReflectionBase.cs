@@ -58,10 +58,10 @@ namespace QuickVR {
         protected Renderer _renderer;
 
         #endregion
-		
-		#region CREATION AND DESTRUCTION
-        
-		protected virtual void OnEnable() {
+
+        #region CREATION AND DESTRUCTION
+
+        protected virtual void OnEnable() {
             //Create the mesh filter
 			_mFilter = gameObject.GetOrCreateComponent<MeshFilter>();
             if (!_mFilter.sharedMesh) _mFilter.sharedMesh = QuickUtils.CreateFullScreenQuad();

@@ -162,6 +162,7 @@ namespace QuickVR
             
             //3) Do the render
             _reflectionCamera.targetTexture = targetTexture;
+            Shader.SetGlobalInt(QuickMirrorReflectionManager.REFLECTION_INVERT_Y, Application.isMobilePlatform ? 0 : 1);
             if (_useRenderWithShader)
             {
                 Shader.SetGlobalVector("MIRROR_PLANE_POS", transform.position);

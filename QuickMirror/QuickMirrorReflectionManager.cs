@@ -11,7 +11,8 @@ namespace QuickVR
     public static class QuickMirrorReflectionManager
     {
 
-        public static string MIRROR_CAMERA_NAME = "__MirrorReflectionCamera__";
+        public const string MIRROR_CAMERA_NAME = "__MirrorReflectionCamera__";
+        public const string REFLECTION_INVERT_Y = "REFLECTION_INVERT_Y";
 
         #region PRIVATE ATTRIBUTES
 

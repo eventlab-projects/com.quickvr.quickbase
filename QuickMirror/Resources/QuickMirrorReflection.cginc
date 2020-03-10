@@ -11,6 +11,8 @@ uniform float _ReflectionPower;		//Indicates how much light is the reflection. I
 uniform float _NoisePower;			//Indicates how much powerful is the noise texture
 uniform float4 _NoiseColor;			//The color of the noise
 
+uniform int REFLECTION_INVERT_Y;
+
 struct v2f
 {
 	float2 uv : TEXCOORD0;
