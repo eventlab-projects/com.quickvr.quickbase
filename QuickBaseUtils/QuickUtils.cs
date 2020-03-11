@@ -404,8 +404,8 @@ namespace QuickVR
 
         public static bool IsOculusQuest()
         {
-            return UnityEngine.XR.InputDevices.GetDeviceAtXRNode(UnityEngine.XR.XRNode.Head).name.ToLower().Contains("quest");
-            //return UnityEngine.XR.XRDevice.model.ToLower().Contains("quest");
+            //return UnityEngine.XR.InputDevices.GetDeviceAtXRNode(UnityEngine.XR.XRNode.Head).name.ToLower().Contains("quest");
+            return UnityEngine.XR.XRDevice.model.ToLower().Contains("quest");
         }
 
         public static bool IsHandTrackingSupported()

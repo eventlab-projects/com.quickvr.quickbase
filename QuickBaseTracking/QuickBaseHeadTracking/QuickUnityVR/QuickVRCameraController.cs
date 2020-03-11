@@ -42,6 +42,11 @@ namespace QuickVR
             _animator = animator;
         }
 
+        public virtual Animator GetAnimator()
+        {
+            return _animator;
+        }
+
         #endregion
 
         #region UPDATE

@@ -34,6 +34,8 @@ namespace QuickVR {
 
         #region PROTECTED PARAMETERS
 
+        protected QuickVRManager _vrManager = null;
+
         protected enum CalibrationStep
         {
             HMDAdjustment,
@@ -95,6 +97,7 @@ namespace QuickVR {
         }
 
         protected virtual void Awake() {
+            _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
             _calibrationAssisted = !QuickUtils.IsMobileTarget();
             _instructionsManager = QuickSingletonManager.GetInstance<QuickInstructionsManager>();
 			_debugManager = QuickSingletonManager.GetInstance<DebugManager>();
@@ -316,7 +319,7 @@ namespace QuickVR {
             //Start the calibration process
             if (OnCalibrating != null) OnCalibrating();
             yield return StartCoroutine(CoUpdateStateCalibrating());	//Wait for the VR Devices Calibration
-            QuickSingletonManager.GetInstance<QuickVRManager>().Calibrate();
+            _vrManager.Calibrate();
             _debugManager.Clear();
 
             //Start the application

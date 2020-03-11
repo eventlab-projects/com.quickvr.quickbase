@@ -60,10 +60,16 @@ namespace QuickVR
 
             // Wrap the clip in a playable
             _clipPlayable = AnimationClipPlayable.Create(_playableGraph, clip);
+            _clipPlayable.SetDone(false);
             _clipPlayable.SetApplyFootIK(false);
 
             // Connect the Playable to an output
             _playableOutput.SetSourcePlayable(_clipPlayable);
+        }
+
+        public virtual bool IsPlaying()
+        {
+            return _clipPlayable.IsValid() && !_clipPlayable.IsDone();
         }
 
         #endregion
@@ -72,13 +78,23 @@ namespace QuickVR
 
         protected virtual void Update()
         {
-            if (_clipPlayable.IsValid() && _loop)
+            if (!_clipPlayable.IsValid()) return;
+
+            if (_loop)
             {
                 float currentTime = (float)_clipPlayable.GetTime();
                 float clipTime = _clipPlayable.GetAnimationClip().length;
                 if (currentTime > clipTime)
                 {
-                    _clipPlayable.SetTime(Mathf.Repeat(currentTime, clipTime));
+                    if (_loop)
+                    {
+                        _clipPlayable.SetTime(Mathf.Repeat(currentTime, clipTime));
+                        _clipPlayable.SetDone(false);
+                    }
+                    else
+                    {
+                        _clipPlayable.SetDone(true);
+                    }
                 }
             }
         }

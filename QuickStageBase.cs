@@ -90,54 +90,7 @@ namespace QuickVR {
             StartCoroutine(CoUpdateBase());
 		}
 
-        private IEnumerator CoUpdateBase()
-        {
-            _instructionsManager.SetAudioSource(_instructionsAudioSource);
-            _instructionsManager._timePauseBetweenInstructions = _instructionsTimePause;
-            _instructionsManager._volume = _instructionsVolume;
-            SettingsBase.Languages lang = SettingsBase.GetLanguage();
-            if (lang == SettingsBase.Languages.SPANISH) _instructionsManager.Play(_instructionsSpanish);
-            else if (lang == SettingsBase.Languages.ENGLISH) _instructionsManager.Play(_instructionsEnglish);
-
-            while (_instructionsManager.IsPlaying()) yield return null;
-
-            _coSet = _coManager.BeginCoroutineSet();
-            _coManager.StartCoroutine(CoUpdate(), _coSet);
-            _coManager.StartCoroutine(CoWaitForUserInput(), _coSet);
-            _coManager.StartCoroutine(CoTimeOut(), _coSet);
-
-            yield return _coManager.WaitForCoroutineSet(_coSet);
-
-            Finish();
-        }
-
-        protected virtual IEnumerator CoWaitForUserInput()
-        {
-            if (_pressKeyToFinish)
-            {
-                while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE))
-                {
-                    yield return null;
-                }
-                Finish();
-            }
-        }
-
-        protected virtual IEnumerator CoTimeOut()
-        {
-            if (_maxTimeOut > 0)
-            {
-                yield return new WaitForSeconds(_maxTimeOut);
-                Finish();
-            }
-        }
-
-        protected virtual IEnumerator CoUpdate()
-        {
-            yield break; 
-        }
-
-		#endregion
+        #endregion
 
 		#region GET AND SET
 
@@ -194,7 +147,54 @@ namespace QuickVR {
 			}
 		}
 
-		#endregion
-	}
+        private IEnumerator CoUpdateBase()
+        {
+            _instructionsManager.SetAudioSource(_instructionsAudioSource);
+            _instructionsManager._timePauseBetweenInstructions = _instructionsTimePause;
+            _instructionsManager._volume = _instructionsVolume;
+            SettingsBase.Languages lang = SettingsBase.GetLanguage();
+            if (lang == SettingsBase.Languages.SPANISH) _instructionsManager.Play(_instructionsSpanish);
+            else if (lang == SettingsBase.Languages.ENGLISH) _instructionsManager.Play(_instructionsEnglish);
+
+            while (_instructionsManager.IsPlaying()) yield return null;
+
+            _coSet = _coManager.BeginCoroutineSet();
+            _coManager.StartCoroutine(CoUpdate(), _coSet);
+            _coManager.StartCoroutine(CoWaitForUserInput(), _coSet);
+            _coManager.StartCoroutine(CoTimeOut(), _coSet);
+
+            yield return _coManager.WaitForCoroutineSet(_coSet);
+
+            Finish();
+        }
+
+        protected virtual IEnumerator CoWaitForUserInput()
+        {
+            if (_pressKeyToFinish)
+            {
+                while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE))
+                {
+                    yield return null;
+                }
+                Finish();
+            }
+        }
+
+        protected virtual IEnumerator CoTimeOut()
+        {
+            if (_maxTimeOut > 0)
+            {
+                yield return new WaitForSeconds(_maxTimeOut);
+                Finish();
+            }
+        }
+
+        protected virtual IEnumerator CoUpdate()
+        {
+            yield break;
+        }
+
+        #endregion
+    }
 
 }
