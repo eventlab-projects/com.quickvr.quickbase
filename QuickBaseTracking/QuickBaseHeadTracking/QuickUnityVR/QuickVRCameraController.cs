@@ -56,7 +56,11 @@ namespace QuickVR
             //Apply the correct rotation to the cameracontrollerroot:
             Vector3 up = _animator.transform.up;
             Vector3 rightCam = Vector3.ProjectOnPlane(_camera.transform.right, up).normalized;
-            Vector3 r = _animator.GetBoneTransform(HumanBodyBones.RightEye).position - _animator.GetBoneTransform(HumanBodyBones.LeftEye).position;
+            Vector3 r = Vector3.right;
+            Transform rightEye = _animator.GetBoneTransform(HumanBodyBones.RightEye);
+            Transform leftEye = _animator.GetBoneTransform(HumanBodyBones.LeftEye);
+            if (rightEye != null && leftEye != null)
+                r = rightEye.position - leftEye.position;
             Vector3 rightHead = Vector3.ProjectOnPlane(r, up).normalized;
             float rotOffset = Vector3.SignedAngle(rightCam, rightHead, up);
             transform.Rotate(up, rotOffset, Space.World);

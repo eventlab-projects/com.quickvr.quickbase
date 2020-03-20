@@ -57,6 +57,9 @@ namespace QuickVR {
         protected override Transform CreateIKTarget(HumanBodyBones? boneID)
         {
             Transform ikTarget = base.CreateIKTarget(boneID);
+            if (ikTarget == null)
+                return null;
+
             string bName = boneID.Value.ToString();
             if (IsBoneLimb(boneID.Value))
             {

@@ -178,9 +178,12 @@ namespace QuickVR
 
         public virtual void Calibrate()
         {
-            _initialLocalRotationUpper = _boneUpper.localRotation;
-            _initialLocalRotationMid = _boneMid.localRotation;
-            _initialLocalRotationLimb = _boneLimb.localRotation;
+            if (_boneUpper != null)
+                _initialLocalRotationUpper = _boneUpper.localRotation;
+            if (_boneMid != null)
+                _initialLocalRotationMid = _boneMid.localRotation;
+            if (_boneLimb != null)
+                _initialLocalRotationLimb = _boneLimb.localRotation;
         }
 
         public virtual float GetUpperLength()
@@ -208,9 +211,12 @@ namespace QuickVR
         {
             if (!_initialized) return;
 
-            _boneUpper.localRotation = _initialLocalRotationUpper;
-            _boneMid.localRotation = _initialLocalRotationMid;
-            _boneLimb.localRotation = _initialLocalRotationLimb;
+            if (_boneUpper != null)
+                _boneUpper.localRotation = _initialLocalRotationUpper;
+            if (_boneMid != null)
+                _boneMid.localRotation = _initialLocalRotationMid;
+            if (_boneLimb != null)
+                _boneLimb.localRotation = _initialLocalRotationLimb;
         }
 
         #endregion

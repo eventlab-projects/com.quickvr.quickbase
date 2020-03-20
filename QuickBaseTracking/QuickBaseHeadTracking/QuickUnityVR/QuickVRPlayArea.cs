@@ -22,6 +22,13 @@ namespace QuickVR
 
         #endregion
 
+        #region EVENTS
+
+        public delegate void CalibrateVRPlayArea();
+        public static event CalibrateVRPlayArea OnCalibrateVRPlayArea;
+
+        #endregion
+
         #region CREATION AND DESTRUCTION
 
         protected virtual void Awake()
@@ -201,6 +208,8 @@ namespace QuickVR
                 QuickVRNode n = GetVRNode(t);
                 if (n) n.Calibrate();
             }
+
+            if (OnCalibrateVRPlayArea != null) OnCalibrateVRPlayArea();
         }
 
         protected virtual void InitHipsAndHands(List<XRNodeState> bodyTrackers)

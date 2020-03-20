@@ -124,13 +124,16 @@ namespace QuickVR
         protected override void CreateVRCursors()
         {
             base.CreateVRCursors();
-
+            
             CreateVRCursorHand(VRCursorType.LEFT, _vrHandLeft._handBone, _vrHandLeft._handBoneIndexDistal);
             CreateVRCursorHand(VRCursorType.RIGHT, _vrHandRight._handBone, _vrHandRight._handBoneIndexDistal);
         }
 
         protected virtual void CreateVRCursorHand(VRCursorType cType, Transform tHand, Transform tDistal)
         {
+            if (tHand == null || tDistal == null)
+                return;
+                
             Transform tIntermediate = tDistal.parent;
             Transform tProximal = tIntermediate.parent;
             float l1 = Vector3.Distance(tDistal.position, tIntermediate.position);
@@ -319,8 +322,10 @@ namespace QuickVR
 
         protected virtual void UpdateVRCursors()
         {
-            GetVRCursor(VRCursorType.LEFT).transform.position = _vrHandLeft._handBoneIndexDistal.position;
-            GetVRCursor(VRCursorType.RIGHT).transform.position = _vrHandRight._handBoneIndexDistal.position;
+            if (_vrHandLeft._handBoneIndexDistal != null)
+                GetVRCursor(VRCursorType.LEFT).transform.position = _vrHandLeft._handBoneIndexDistal.position;
+            if (_vrHandRight._handBoneIndexDistal != null)
+                GetVRCursor(VRCursorType.RIGHT).transform.position = _vrHandRight._handBoneIndexDistal.position;
         }
 
         #endregion

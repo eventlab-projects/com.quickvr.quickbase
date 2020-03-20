@@ -202,11 +202,14 @@ namespace QuickVR {
 
             foreach (IQuickIKSolver ikSolver in GetIKSolvers())
             {
-                QuickIKData ikData = new QuickIKData();
-                ikData._targetLimbLocalPosition = ikSolver._targetLimb.localPosition;
-                ikData._targetLimbLocalRotation = ikSolver._targetLimb.localRotation;
-                if (ikSolver._targetHint) ikData._targetHintLocalPosition = ikSolver._targetHint.localPosition;
-                _initialIKPose[ikSolver._boneID] = ikData;
+                if (ikSolver._targetLimb != null)
+                {
+                    QuickIKData ikData = new QuickIKData();
+                    ikData._targetLimbLocalPosition = ikSolver._targetLimb.localPosition;
+                    ikData._targetLimbLocalRotation = ikSolver._targetLimb.localRotation;
+                    if (ikSolver._targetHint) ikData._targetHintLocalPosition = ikSolver._targetHint.localPosition;
+                    _initialIKPose[ikSolver._boneID] = ikData;
+                }
             }
         }
 
@@ -217,9 +220,13 @@ namespace QuickVR {
 
             //Create the ikTarget if necessary
             if (!ikTarget)
-            {
-                ikTarget = GetIKTargetParent(boneID.Value).CreateChild(GetIKTargetName(boneID.Value));
+            {                
                 Transform bone = _animator.GetBoneTransform(boneID.Value);
+                if (bone == null)
+                    return null;
+
+                ikTarget = GetIKTargetParent(boneID.Value).CreateChild(GetIKTargetName(boneID.Value));
+
                 string boneName = boneID.Value.ToString();
 
                 //Set the position of the IKTarget
@@ -339,10 +346,13 @@ namespace QuickVR {
         public virtual void ResetIKSolver(HumanBodyBones boneID)
         {
             IQuickIKSolver ikSolver = GetIKSolver(boneID);
-            QuickIKData initialIKData = _initialIKPose[ikSolver._boneID];
-            ikSolver._targetLimb.localPosition = initialIKData._targetLimbLocalPosition;
-            ikSolver._targetLimb.localRotation = initialIKData._targetLimbLocalRotation;
-            if (ikSolver._targetHint) ikSolver._targetHint.localPosition = initialIKData._targetHintLocalPosition;
+            if (_initialIKPose.ContainsKey(ikSolver._boneID))
+            {
+                QuickIKData initialIKData = _initialIKPose[ikSolver._boneID];
+                ikSolver._targetLimb.localPosition = initialIKData._targetLimbLocalPosition;
+                ikSolver._targetLimb.localRotation = initialIKData._targetLimbLocalRotation;
+                if (ikSolver._targetHint) ikSolver._targetHint.localPosition = initialIKData._targetHintLocalPosition;
+            }
         }
 
         protected virtual Transform GetIKSolversRoot(HumanBodyBones boneID)
