@@ -386,7 +386,7 @@ namespace QuickVR {
         {
             _debugManager.Log(message, color);
             _instructionsManager.Play(clip);
-            while (_instructionsManager.IsPlaying() && !InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE))
+            while (_instructionsManager.IsPlaying() && !IsContinueTriggered())
             {
                 yield return null;
             }
