@@ -18,9 +18,14 @@ namespace QuickVR
 
         protected QuickIKManager _ikManager = null;
         
-        [SerializeField] protected bool _showCfgBody = false;
-        [SerializeField] protected bool _showCfgLeftHand = false;
-        [SerializeField] protected bool _showCfgRightHand = false;
+        [SerializeField] 
+        protected bool _showCfgBody = false;
+
+        [SerializeField]
+        protected bool _showCfgLeftHand = false;
+
+        [SerializeField]
+        protected bool _showCfgRightHand = false;
 
         #endregion
 
@@ -54,13 +59,13 @@ namespace QuickVR
             base.DrawGUI();
 
             EditorGUILayout.Space();
-            _showCfgBody = EditorGUILayout.Foldout(_showCfgBody, "Body IK Solvers");
+            _showCfgBody = EditorGUILayout.Foldout(_showCfgBody, "Body IK Solvers", true);
             if (_showCfgBody)
             {
                 EditorGUI.indentLevel++;
-                foreach (string boneName in QuickUtils.GetEnumValuesToString<IKLimbBones>())
+                foreach (IKLimbBones boneID in QuickUtils.GetEnumValues<IKLimbBones>())
                 {
-                    DrawIKSolverProperties(_ikManager.GetIKSolver(boneName), boneName);
+                    DrawIKSolverProperties(_ikManager.GetIKSolver(QuickIKManager.ToUnity(boneID)), boneID.ToString());
                     EditorGUILayout.Space();
                 }
                 EditorGUI.indentLevel--;
@@ -70,9 +75,9 @@ namespace QuickVR
             if (_showCfgLeftHand)
             {
                 EditorGUI.indentLevel++;
-                foreach (string boneName in QuickUtils.GetEnumValuesToString<IKLimbBonesHand>())
+                foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
                 {
-                    DrawIKSolverProperties(_ikManager.GetIKSolver("Left" + boneName + "Distal"), boneName);
+                    DrawIKSolverProperties(_ikManager.GetIKSolver(QuickIKManager.ToUnity(f, true)), f.ToString());
                     EditorGUILayout.Space();
                 }
                 EditorGUI.indentLevel--;
@@ -82,9 +87,9 @@ namespace QuickVR
             if (_showCfgRightHand)
             {
                 EditorGUI.indentLevel++;
-                foreach (string boneName in QuickUtils.GetEnumValuesToString<IKLimbBonesHand>())
+                foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
                 {
-                    DrawIKSolverProperties(_ikManager.GetIKSolver("Right" + boneName + "Distal"), boneName);
+                    DrawIKSolverProperties(_ikManager.GetIKSolver(QuickIKManager.ToUnity(f, false)), f.ToString());
                     EditorGUILayout.Space();
                 }
                 EditorGUI.indentLevel--;
@@ -111,9 +116,9 @@ namespace QuickVR
             //DrawIKTargets(GetIKTargetsLimb(), Handles.CubeHandleCap);
             //DrawIKTargets(GetIKTargetsMid(), Handles.SphereHandleCap);
 
-            foreach (IQuickIKSolver s in _ikManager.GetIKSolversBody<IQuickIKSolver>()) DrawIKSolver(s, false);
-            foreach (IQuickIKSolver s in _ikManager.GetIKSolversLeftHand<IQuickIKSolver>()) DrawIKSolver(s, true);
-            foreach (IQuickIKSolver s in _ikManager.GetIKSolversRightHand<IQuickIKSolver>()) DrawIKSolver(s, true);
+            foreach (IQuickIKSolver s in _ikManager.GetIKSolversBody()) DrawIKSolver(s, false);
+            foreach (IQuickIKSolver s in _ikManager.GetIKSolversHand(true)) DrawIKSolver(s, true);
+            foreach (IQuickIKSolver s in _ikManager.GetIKSolversHand(false)) DrawIKSolver(s, true);
         }
 
         protected virtual void DrawIKTarget(Transform t, Handles.CapFunction function, bool isSolverFinger)

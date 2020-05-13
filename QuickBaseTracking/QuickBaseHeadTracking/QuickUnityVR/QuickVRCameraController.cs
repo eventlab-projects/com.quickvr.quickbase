@@ -8,18 +8,34 @@ namespace QuickVR
     public class QuickVRCameraController : MonoBehaviour
     {
 
+        #region PUBLIC PARAMETERS
+
+        public LayerMask _visibleLayers = -1;	//The layers that will be rendered by the cameras of the head tracking system. 
+
+        public Camera _pfCamera = null;
+        public float _cameraNearPlane = DEFAULT_NEAR_CLIP_PLANE;
+        public float _cameraFarPlane = DEFAULT_FAR_CLIP_PLANE;
+
+        #endregion
+
         #region PROTECTED ATTRIBUTES
 
         protected Camera _camera = null;
-        protected Animator _animator = null;
+
+        #endregion
+
+        #region CONSTANTS
+
+        protected const float DEFAULT_NEAR_CLIP_PLANE = 0.05f;
+        protected const float DEFAULT_FAR_CLIP_PLANE = 500.0f;
 
         #endregion
 
         #region CREATION AND DESTRUCTION
 
-        public virtual void CreateCamera(Camera pfCamera)
+        protected virtual void Awake()
         {
-            _camera = pfCamera ? Instantiate<Camera>(pfCamera) : new GameObject().GetOrCreateComponent<Camera>();
+            _camera = _pfCamera ? Instantiate<Camera>(_pfCamera) : new GameObject().GetOrCreateComponent<Camera>();
             _camera.name = "__Camera__";
             _camera.transform.parent = transform;
             _camera.transform.ResetTransformation();
@@ -37,36 +53,26 @@ namespace QuickVR
             return _camera;
         }
 
-        public virtual void SetAnimator(Animator animator)
-        {
-            _animator = animator;
-        }
-
-        public virtual Animator GetAnimator()
-        {
-            return _animator;
-        }
-
         #endregion
 
         #region UPDATE
 
-        public virtual void UpdateCameraPosition()
+        public virtual void UpdateCameraPosition(Animator animator)
         {
+            _camera.nearClipPlane = _cameraNearPlane;
+            _camera.farClipPlane = _cameraFarPlane;
+            _camera.cullingMask = _visibleLayers.value;
+
             //Apply the correct rotation to the cameracontrollerroot:
-            Vector3 up = _animator.transform.up;
+            Vector3 up = animator.transform.up;
             Vector3 rightCam = Vector3.ProjectOnPlane(_camera.transform.right, up).normalized;
-            Vector3 r = Vector3.right;
-            Transform rightEye = _animator.GetBoneTransform(HumanBodyBones.RightEye);
-            Transform leftEye = _animator.GetBoneTransform(HumanBodyBones.LeftEye);
-            if (rightEye != null && leftEye != null)
-                r = rightEye.position - leftEye.position;
+            Vector3 r = animator.GetBoneTransform(HumanBodyBones.RightEye).position - animator.GetBoneTransform(HumanBodyBones.LeftEye).position;
             Vector3 rightHead = Vector3.ProjectOnPlane(r, up).normalized;
             float rotOffset = Vector3.SignedAngle(rightCam, rightHead, up);
             transform.Rotate(up, rotOffset, Space.World);
 
             //This forces the camera to be in the Avatar's eye center. 
-            Vector3 offset = _animator.GetEyeCenterPosition() - _camera.transform.position;
+            Vector3 offset = animator.GetEyeCenterPosition() - _camera.transform.position;
             transform.position += offset;
         }
 

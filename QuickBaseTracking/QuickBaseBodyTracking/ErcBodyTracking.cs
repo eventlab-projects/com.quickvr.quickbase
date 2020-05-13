@@ -266,16 +266,16 @@ public class ErcBodyTracking : QuickBodyTracking<ErcBodyJoints> {
 
     #region UPDATE
 
-    public override void UpdateTracking()
+    public override void UpdateTrackingLate()
     {
         _animator.GetBoneTransform(HumanBodyBones.Hips).localPosition = _initialLocalPositionHips;
 
-        base.UpdateTracking();
+        base.UpdateTrackingLate();
         _animTime += Time.deltaTime;
 
         UpdateHeadRotation();
 
-        _ikManager.UpdateTracking();
+        _ikManager.UpdateTrackingLate();
     }
 
     protected override void UpdateRootPosition()

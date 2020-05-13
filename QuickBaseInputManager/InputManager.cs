@@ -335,7 +335,7 @@ public class InputManager : MonoBehaviour
 
     #region UPDATE
 
-    protected virtual void LateUpdate()
+    public virtual void UpdateState()
     {
         if (OnPreUpdateInput != null) OnPreUpdateInput();
 

@@ -57,17 +57,11 @@ namespace QuickVR {
         protected override Transform CreateIKTarget(HumanBodyBones? boneID)
         {
             Transform ikTarget = base.CreateIKTarget(boneID);
-            if (ikTarget == null)
-                return null;
-
             string bName = boneID.Value.ToString();
             if (IsBoneLimb(boneID.Value))
             {
                 //Create a child that will contain the real rotation of the bone
-                if (!ikTarget.Find("__BoneRotation__"))
-                {
-                    ikTarget.CreateChild("__BoneRotation__").rotation = _animator.GetBoneTransform(boneID.Value).rotation;
-                }
+                ikTarget.CreateChild("__BoneRotation__").rotation = _animator.GetBoneTransform(boneID.Value).rotation;
             }
             
             return ikTarget;
@@ -110,13 +104,14 @@ namespace QuickVR {
 
 		#region UPDATE
 
-        public override void UpdateTracking() {
+        public override void UpdateTrackingLate() 
+        {
             foreach (IKLimbBones boneID in GetIKLimbBones())
             {
                 QuickIKSolver ikSolver = GetIKSolver<QuickIKSolver>(ToUnity(boneID));
                 if (ikSolver && ((_ikMaskBody & (1 << (int)boneID)) != 0))
                 {
-                    ikSolver.ResetIKChain();
+                    //ikSolver.ResetIKChain();
                     //Correct the rotations of the limb bones by accounting for human body constraints
                     if (boneID == IKLimbBones.LeftHand || boneID == IKLimbBones.RightHand)
                     {
@@ -145,7 +140,7 @@ namespace QuickVR {
                 }
             }
 
-            base.UpdateTracking();
+            base.UpdateTrackingLate();
         }
 
         protected virtual void CorrectRotation(Transform tBone, Vector3 rotAxis, float rotAngle)

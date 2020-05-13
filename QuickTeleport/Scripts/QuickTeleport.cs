@@ -22,7 +22,7 @@ namespace QuickVR
         protected Transform _trajectoryTarget = null;
         protected CameraFade _cameraFade = null;
 
-        protected QuickHeadTracking _hTracking = null;
+        protected QuickUnityVR _hTracking = null;
 
         #endregion
 
@@ -47,8 +47,7 @@ namespace QuickVR
 
         protected virtual void Start()
         {
-            _hTracking = GetComponentInChildren<QuickHeadTracking>();
-
+            _hTracking = GetComponentInChildren<QuickUnityVR>();
         }
 
         protected virtual void OnEnable()

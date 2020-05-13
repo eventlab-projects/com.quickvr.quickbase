@@ -152,6 +152,8 @@ namespace QuickVR
         protected Quaternion _initialLocalRotationUpper = Quaternion.identity;
         protected Quaternion _initialLocalRotationMid = Quaternion.identity;
         protected Quaternion _initialLocalRotationLimb = Quaternion.identity;
+        protected float _lengthUpper = 0;
+        protected float _lengthMid = 0;
 
         protected HumanBodyBones m_boneID = HumanBodyBones.LastBone;
 
@@ -178,22 +180,22 @@ namespace QuickVR
 
         public virtual void Calibrate()
         {
-            if (_boneUpper != null)
-                _initialLocalRotationUpper = _boneUpper.localRotation;
-            if (_boneMid != null)
-                _initialLocalRotationMid = _boneMid.localRotation;
-            if (_boneLimb != null)
-                _initialLocalRotationLimb = _boneLimb.localRotation;
+            _initialLocalRotationUpper = _boneUpper.localRotation;
+            _initialLocalRotationMid = _boneMid.localRotation;
+            _initialLocalRotationLimb = _boneLimb.localRotation;
+
+            _lengthUpper = Vector3.Distance(_boneUpper.position, _boneMid.position);
+            _lengthMid = Vector3.Distance(_boneMid.position, _boneLimb.position);
         }
 
         public virtual float GetUpperLength()
         {
-            return Vector3.Distance(_boneUpper.position, _boneMid.position);
+            return _lengthUpper;
         }
 
         public virtual float GetMidLength()
         {
-            return Vector3.Distance(_boneMid.position, _boneLimb.position);
+            return _lengthMid;
         }
 
         public virtual float GetChainLength()
@@ -211,12 +213,9 @@ namespace QuickVR
         {
             if (!_initialized) return;
 
-            if (_boneUpper != null)
-                _boneUpper.localRotation = _initialLocalRotationUpper;
-            if (_boneMid != null)
-                _boneMid.localRotation = _initialLocalRotationMid;
-            if (_boneLimb != null)
-                _boneLimb.localRotation = _initialLocalRotationLimb;
+            _boneUpper.localRotation = _initialLocalRotationUpper;
+            _boneMid.localRotation = _initialLocalRotationMid;
+            //_boneLimb.localRotation = _initialLocalRotationLimb;
         }
 
         #endregion

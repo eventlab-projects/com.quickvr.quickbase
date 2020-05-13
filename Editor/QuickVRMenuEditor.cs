@@ -34,11 +34,11 @@ namespace QuickVR
             AddUniqueComponent<QuickUnityVR>();
         }
 
-        [MenuItem(MENU_QUICKVR_ROOT + "/" + MENU_QUICKVR_HEADTRACKING + "/" + "QuickUnityVRHands")]
-        static void AddQuickUnityVRHands()
-        {
-            AddUniqueComponent<QuickUnityVRHands>();
-        }
+        //[MenuItem(MENU_QUICKVR_ROOT + "/" + MENU_QUICKVR_HEADTRACKING + "/" + "QuickUnityVRHands")]
+        //static void AddQuickUnityVRHands()
+        //{
+        //    AddUniqueComponent<QuickUnityVRHands>();
+        //}
 
         #endregion
 

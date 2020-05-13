@@ -36,12 +36,6 @@ namespace QuickVR {
 
         protected QuickVRManager _vrManager = null;
 
-        protected enum CalibrationStep
-        {
-            HMDAdjustment,
-            ForwardDirection,
-        }
-
         protected Transform _player = null;
 
         protected DebugManager _debugManager = null;
@@ -51,18 +45,16 @@ namespace QuickVR {
 		protected bool _running = false;
 		protected bool _finishing = false;
 
-		protected PerformanceFPS _fps = null;
-		
 		protected float _timeRunning = 0.0f;    //The time elapsed since the application entered in Running state. 
 
         protected QuickInstructionsManager _instructionsManager = null;
 
-        protected QuickUnityVRBase _hTracking;
-
-        protected Matrix4x4 _relativeMatrix = Matrix4x4.identity;
+        protected QuickUnityVR _hTracking;
 
         protected QuickTeleport _teleport = null;
         protected Coroutine _coUpdateTeleport = null;
+
+        protected QuickUserGUICalibration _guiCalibration = null;
 
         #endregion
 
@@ -80,7 +72,6 @@ namespace QuickVR {
         protected virtual void OnEnable()
         {            
             OnRunning += StartTeleport;
-            QuickTeleport.OnPreTeleport += SaveRelativeMatrix;
             QuickTeleport.OnPostTeleport += SetInitialPositionAndRotation;
         }
 
@@ -88,7 +79,6 @@ namespace QuickVR {
         {
             OnRunning -= StartTeleport;
             QuickTeleport.OnPostTeleport -= SetInitialPositionAndRotation;
-            QuickTeleport.OnPreTeleport -= SaveRelativeMatrix;
         }
 
         protected virtual void StartTeleport()
@@ -102,8 +92,8 @@ namespace QuickVR {
             _instructionsManager = QuickSingletonManager.GetInstance<QuickInstructionsManager>();
 			_debugManager = QuickSingletonManager.GetInstance<DebugManager>();
             _sceneManager = QuickSingletonManager.GetInstance<QuickSceneManager>();
-            _fps = QuickSingletonManager.GetInstance<PerformanceFPS>();
             _cameraFade = QuickSingletonManager.GetInstance<CameraFade>();
+            _guiCalibration = QuickSingletonManager.GetInstance<QuickUserGUICalibration>();
 
             if (!_headTrackingCalibrationInstructions) {
 				_headTrackingCalibrationInstructions = Resources.Load<AudioClip>(GetDefaultHMDCalibrationInstructions());
@@ -121,7 +111,6 @@ namespace QuickVR {
         {
             StartPlayer();
 
-            _hTracking = _player ? _player.GetComponent<QuickUnityVRBase>() : null;
             if (_hTracking)
             {
                 StartCoroutine(CoUpdate());
@@ -140,7 +129,7 @@ namespace QuickVR {
             _player = (SettingsBase.GetGender() == SettingsBase.Genders.FEMALE) ? _playerFemale : _playerMale;
             if (!_player)
             {
-                QuickHeadTracking hTracking = FindObjectOfType<QuickHeadTracking>();
+                QuickUnityVR hTracking = FindObjectOfType<QuickUnityVR>();
                 if (hTracking) _player = hTracking.transform;
             }
             if (_player) _player.gameObject.SetActive(true);
@@ -148,11 +137,9 @@ namespace QuickVR {
 
         protected virtual void StartPlayer()
         {
-            if (_player && !_player.GetComponent<QuickHeadTracking>())
+            if (_player)
             {
-                Animator animator = _player.GetComponent<Animator>();
-                if (animator && animator.isHuman) _player.gameObject.AddComponent<QuickUnityVR>();
-                else _player.gameObject.AddComponent<QuickUnityVRHands>();
+                _hTracking = _player.GetOrCreateComponent<QuickUnityVR>();
             }
         }
 
@@ -163,27 +150,7 @@ namespace QuickVR {
 			return path + "instructions";
 		}
 
-        protected virtual Texture2D GetHMDCalibrationScreen(CalibrationStep step)
-        {
-            string path = "HMDCalibrationScreens/";
-            path += SettingsBase.GetLanguage() == SettingsBase.Languages.ENGLISH ? "en/" : "es/";
-            path += "CalibrationScreen_";
-            if (_calibrationAssisted)
-            {
-                path += "v1";
-            }
-            else
-            {
-                if (_hTracking._handTrackingMode == QuickUnityVRBase.HandTrackingMode.Controllers) path += "v2";
-                else path += "v3";
-            }
-            
-            path += step == CalibrationStep.HMDAdjustment ? "_00" : "_01";
-
-            return Resources.Load<Texture2D>(path);
-        }
-
-		protected virtual void InitGameConfiguration() {
+        protected virtual void InitGameConfiguration() {
 
 		}
 
@@ -212,33 +179,12 @@ namespace QuickVR {
 			StartCoroutine(CoFinish());
 		}
 
-        protected virtual void SaveRelativeMatrix()
-        {
-            _relativeMatrix = GetPlayer().transform.worldToLocalMatrix;
-        }
-
         public virtual void SetInitialPositionAndRotation()
         {
             Transform target = GetPlayer().transform;
 
-            //Vector3 footPrintsLocalPos = Vector3.zero;
-            //Vector3 footPrintsLocalForward = Vector3.forward;
-            //if (_footprints != null)
-            //{
-            //    footPrintsLocalPos = _relativeMatrix.MultiplyPoint(_footprints.position);
-            //    footPrintsLocalForward = _relativeMatrix.MultiplyVector(_footprints.forward);
-            //}
-
             _hTracking.SetInitialPosition(target.position);
             _hTracking.SetInitialRotation(target.rotation);
-
-            //if (_footprints != null)
-            //{
-            //    _footprints.position = target.localToWorldMatrix.MultiplyPoint(footPrintsLocalPos);
-            //    _footprints.forward = target.localToWorldMatrix.MultiplyVector(footPrintsLocalForward);
-            //}
-
-            _relativeMatrix = Matrix4x4.identity;
         }
 
         protected bool IsPlayerOnSpot()
@@ -260,8 +206,6 @@ namespace QuickVR {
 
         public virtual void MovePlayerTo(Transform target, bool calibrate = true)
         {
-            SaveRelativeMatrix();
-
             GetPlayer().position = target.position;
 
             GetPlayer().rotation = target.rotation;
@@ -310,6 +254,7 @@ namespace QuickVR {
             //Start loading the next scene
             if (_nextSceneName != "") _sceneManager.LoadSceneAsync(_nextSceneName);
 
+            _cameraFade.SetColor(Color.black);
             //Adjust the HMD
             yield return StartCoroutine(CoUpdateHMDAdjustment());
 
@@ -319,7 +264,8 @@ namespace QuickVR {
             //Start the calibration process
             if (OnCalibrating != null) OnCalibrating();
             yield return StartCoroutine(CoUpdateStateCalibrating());	//Wait for the VR Devices Calibration
-            _vrManager.Calibrate();
+            _guiCalibration.ClearAllText();
+            _vrManager.RequestCalibration();
             _debugManager.Clear();
 
             //Start the application
@@ -332,6 +278,7 @@ namespace QuickVR {
 			_timeRunning = 0.0f;
 
 			if (OnRunning != null) OnRunning();
+            if (!_initialStage) _initialStage = GetComponentInChildren<QuickStageBase>();
 			if (_initialStage) _initialStage.Init();
 		}
 
@@ -352,23 +299,19 @@ namespace QuickVR {
 
         protected virtual IEnumerator CoUpdateHMDAdjustment()
         {
-            _cameraFade.SetColor(Color.white);
-            _cameraFade.SetTexture(GetHMDCalibrationScreen(CalibrationStep.HMDAdjustment));
-
+            _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.HMDAdjustment, _calibrationAssisted, _hTracking._handTrackingMode);
+            
             //HMD Adjustment
             _debugManager.Log("Adjusting HMD. Press CONTINUE when ready.");
             while (!IsContinueTriggered()) yield return null;
             
-            _cameraFade.SetColor(Color.black);
-            _cameraFade.SetTexture(null);
             yield return null;
         }
 
 		protected virtual IEnumerator CoUpdateStateCalibrating() {
             //HMD Forward Direction calibration
             _instructionsManager.Play(_headTrackingCalibrationInstructions);
-            _cameraFade.SetColor(Color.white);
-            _cameraFade.SetTexture(GetHMDCalibrationScreen(CalibrationStep.ForwardDirection));
+            _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.ForwardDirection, _calibrationAssisted, _hTracking._handTrackingMode);
 
             _debugManager.Log("[WAIT] Playing calibration instructions.", Color.red);
             while (_instructionsManager.IsPlaying() && !IsContinueTriggered()) yield return null;
@@ -377,8 +320,6 @@ namespace QuickVR {
             while (!IsContinueTriggered()) yield return null;
 
             _instructionsManager.Stop();
-            _cameraFade.SetColor(Color.black);
-            _cameraFade.SetTexture(null);
             yield return null;
 		}
 
@@ -386,7 +327,7 @@ namespace QuickVR {
         {
             _debugManager.Log(message, color);
             _instructionsManager.Play(clip);
-            while (_instructionsManager.IsPlaying() && !IsContinueTriggered())
+            while (_instructionsManager.IsPlaying() && !InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE))
             {
                 yield return null;
             }
@@ -396,8 +337,6 @@ namespace QuickVR {
         protected virtual IEnumerator CoShowLogos()
         {
             //Show the logos
-            Texture calibrationTexture = _cameraFade.GetTexture();
-            
             foreach (Texture2D logo in _logos)
             {
                 _cameraFade.SetTexture(logo);
@@ -410,8 +349,6 @@ namespace QuickVR {
                 _cameraFade.FadeOut(_logoFadeTime);
                 while (_cameraFade.IsFading()) yield return null;
             }
-
-            _cameraFade.SetTexture(calibrationTexture);
         }
 
 		protected virtual IEnumerator CoUpdateTeleport()
@@ -420,7 +357,7 @@ namespace QuickVR {
             if (_teleport != null)
             {
                 VRCursorType cType = VRCursorType.RIGHT;
-                QuickUnityVRBase hTracking = GetPlayer().GetComponent<QuickUnityVRBase>();
+                QuickUnityVR hTracking = GetPlayer().GetComponent<QuickUnityVR>();
                 _teleport.enabled = true;
                 QuickUICursor cursor = hTracking.GetVRCursor(cType);
 

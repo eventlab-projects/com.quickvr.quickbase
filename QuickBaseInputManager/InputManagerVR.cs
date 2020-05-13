@@ -59,7 +59,7 @@ namespace QuickVR {
 
         public string GetRealCode(string code)
         {
-            if (QuickUnityVRBase._handsSwaped)
+            if (QuickUnityVR._handsSwaped)
             {
                 if (code.Contains("Left")) code = code.Replace("Left", "Right");
                 else code = code.Replace("Right", "Left");

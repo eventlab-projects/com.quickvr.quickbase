@@ -1,10 +1,5 @@
 ﻿using UnityEngine;
-using UnityEngine.SceneManagement;
 using UnityEditor;
-using UnityEditor.SceneManagement;
-using System.IO;
-using System.CodeDom.Compiler;
-using System.Collections.Generic;
 using System.Reflection;
 
 namespace QuickVR {
@@ -20,10 +15,6 @@ namespace QuickVR {
 		#endregion
 
         #region GET AND SET
-
-        protected virtual void MarkSceneDirty() {
-			EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
-		}
 
         public static string GetScriptPath(System.Type t)
         {
@@ -75,9 +66,18 @@ namespace QuickVR {
                 foreach (MethodInfo m in methods)
                 {
                     ButtonMethodAttribute attribute = QuickUtils.GetCustomAttribute<ButtonMethodAttribute>(m);
-                    if ((attribute != null) && DrawButton(m.Name)) QuickUtils.Invoke(target, m.Name);
+                    if ((attribute != null) && DrawButton(m.Name))
+                    {
+                        QuickUtils.Invoke(target, m.Name);
+                        OnButtonMethod(m.Name);
+                    }
                 }
             }
+        }
+
+        protected virtual void OnButtonMethod(string methodName)
+        {
+
         }
 
         #endregion

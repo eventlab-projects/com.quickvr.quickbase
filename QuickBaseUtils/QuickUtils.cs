@@ -152,6 +152,26 @@ namespace QuickVR
             return obj != null;
         }
 
+        public static List<T> ParseEnum<T, U>()
+        {
+            return ParseEnum<T, U>(GetEnumValues<U>());
+        }
+
+        public static List<T> ParseEnum<T, U>(List<U> source)
+        {
+            List<T> result = new List<T>();
+            foreach (U src in source)
+            {
+                string s = src.ToString();
+                if (IsEnumValue<T>(s))
+                {
+                    result.Add(ParseEnum<T>(s));
+                }
+            }
+
+            return result;
+        }
+
         public static T ParseEnum<T>(string value)
         {
             object obj = ParseEnum(typeof(T), value);
@@ -361,7 +381,6 @@ namespace QuickVR
 
         public static Mesh GetUnityPrimitiveMesh(PrimitiveType primitiveType)
         {
-            Debug.Log("Getting Unity Primitive Mesh: " + primitiveType);
             Mesh primMesh = Resources.GetBuiltinResource<Mesh>(GetPrimitiveMeshPath(primitiveType));
 
             if (primMesh == null)
@@ -501,18 +520,6 @@ namespace QuickVR
             transform.localScale = Vector3.one;
         }
 
-        public static void GetProperties(this Transform transform, out Vector3 pos, out Quaternion rot)
-        {
-            pos = transform.position;
-            rot = transform.rotation;
-        }
-
-        public static void SetProperties(this Transform transform, Vector3 pos, Quaternion rot)
-        {
-            transform.position = pos;
-            transform.rotation = rot;
-        }
-
         public static Transform CreateChild(this Transform transform, string name, bool checkName = true)
         {
             Transform t = transform.Find(name);
@@ -539,6 +546,11 @@ namespace QuickVR
                 foreach (Transform t in c) queue.Enqueue(t);
             }
             return null;
+        }
+
+        public static void Destroy(Component c)
+        {
+            if (c) GameObject.DestroyImmediate(c.gameObject);
         }
 
         public static void DestroyChild(this Transform transform, int childID)

@@ -37,7 +37,7 @@ namespace QuickVR
 
         protected QuickTrackedObject _trackedObject = null;
 
-        protected QuickUnityVRBase _headTracking = null;
+        protected QuickUnityVR _headTracking = null;
         protected QuickVRPlayArea _vrPlayArea = null;
 
         #endregion
@@ -48,7 +48,7 @@ namespace QuickVR
         {
             base.Start();
 
-            _headTracking = GetComponent<QuickUnityVRBase>();
+            _headTracking = GetComponent<QuickUnityVR>();
             QuickIKManager ikManager = GetComponent<QuickIKManager>();
             ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.LeftFoot);
             ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.RightFoot);
@@ -105,11 +105,11 @@ namespace QuickVR
         protected virtual IEnumerator CoUpdate()
         {
             //Wait for the node of the head to be created. 
-            QuickUnityVRBase hTracking = GetComponent<QuickUnityVRBase>();
+            QuickUnityVR hTracking = GetComponent<QuickUnityVR>();
             QuickVRNode nodeHead = null;
             while (nodeHead == null)
             {
-                nodeHead = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head);
+                nodeHead = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
                 yield return null;
             }
             _trackedObject = nodeHead.GetTrackedObject();
@@ -139,10 +139,10 @@ namespace QuickVR
 
         protected virtual void CoUpdateTrackedNode()
         {
-            QuickVRNode hipsNode = _vrPlayArea.GetVRNode(QuickVRNode.Type.Hips);
+            QuickVRNode hipsNode = _vrPlayArea.GetVRNode(HumanBodyBones.Hips);
             if (hipsNode)
             {
-                QuickTrackedObject tObject = hipsNode.IsTracked()? hipsNode.GetTrackedObject() : _vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject();
+                QuickTrackedObject tObject = hipsNode.IsTracked()? hipsNode.GetTrackedObject() : _vrPlayArea.GetVRNode(HumanBodyBones.Head).GetTrackedObject();
                 if (tObject != _trackedObject)
                 {
                     _trackedObject = tObject;

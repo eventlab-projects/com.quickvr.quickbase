@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.Rendering;
+using UnityEngine.Animations;
 using System.Collections;
 using System.Collections.Generic;
 
@@ -17,8 +18,7 @@ namespace QuickVR
 
         protected bool _isFading = false;
         protected Material _material = null;
-        protected MeshFilter _meshFilter = null;
-
+        
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -26,9 +26,9 @@ namespace QuickVR
         protected virtual void Awake()
         {
             //Create the mesh filter
-            _meshFilter = gameObject.GetOrCreateComponent<MeshFilter>();
-            _meshFilter.mesh = QuickUtils.CreateFullScreenQuad();
-            _meshFilter.mesh.bounds = new Bounds(Vector3.zero, new Vector3(1000000, 1000000, 1000000));
+            MeshFilter mFilter = gameObject.GetOrCreateComponent<MeshFilter>();
+            mFilter.mesh = QuickUtils.CreateFullScreenQuad();
+            mFilter.mesh.bounds = new Bounds(Vector3.zero, new Vector3(1000000, 1000000, 1000000));
 
             //Create the mesh renderer
             MeshRenderer r = gameObject.GetOrCreateComponent<MeshRenderer>();
@@ -43,14 +43,13 @@ namespace QuickVR
             SetColor(Color.clear);
         }
 
-        protected virtual void OnEnable()
+        protected virtual IEnumerator Start()
         {
-            QuickVRManager.OnPostUpdateTracking += UpdatePosition; 
-        }
+            while (!Camera.main) yield return null;
 
-        protected virtual void OnDisable()
-        {
-            QuickVRManager.OnPostUpdateTracking -= UpdatePosition;
+            transform.parent = Camera.main.transform;
+            transform.localPosition = new Vector3(0, 0, 0.75f);
+            transform.localScale = new Vector3(10, 10, 10);
         }
 
         #endregion
@@ -102,16 +101,6 @@ namespace QuickVR
         #endregion
 
         #region UPDATE
-
-        protected virtual void UpdatePosition()
-        {
-            if (!Camera.main) return;
-
-            Transform tCamera = Camera.main.transform;
-
-            transform.position = tCamera.position + tCamera.forward * 0.75f;
-            transform.LookAt(tCamera.position, tCamera.up);
-        }
 
         protected virtual IEnumerator CoFade(Color fromColor, Color toColor, float fadeTime)
         {

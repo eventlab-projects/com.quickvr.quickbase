@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
 using UnityEngine;
 
 namespace QuickVR {
@@ -8,18 +9,55 @@ namespace QuickVR {
 
         #region PUBLIC PARAMETERS
 
-        protected Animator _source = null;
-        protected Animator _dest = null;
+        public enum TrackedJointBody
+        {
+            Hips, 
+            
+            Spine,
+            Chest,
+            UpperChest,
+            Neck,
+            Head, 
+            
+            LeftUpperArm, 
+            LeftLowerArm,
+            LeftHand,
+
+            RightUpperArm,
+            RightLowerArm,
+            RightHand,
+
+            LeftUpperLeg,
+            LeftLowerLeg,
+            LeftFoot,
+
+            RightUpperLeg,
+            RightLowerLeg,
+            RightFoot,
+        }
+
+        [BitMask(typeof(TrackedJointBody))]
+        public int _trackedJointsBody = -1;
+
+        [BitMask(typeof(QuickHumanFingers))]
+        public int _trackedJointsHandLeft = -1;
+
+        [BitMask(typeof(QuickHumanFingers))]
+        public int _trackedJointsHandRight = -1;
 
         #endregion
 
         #region PROTECTED PARAMETERS
 
+        protected static List<QuickHumanBodyBones> _allJoints = null;
+        protected static Dictionary<QuickHumanBodyBones, TrackedJointBody> _toTrackedJointBody = new Dictionary<QuickHumanBodyBones, TrackedJointBody>();
+        
+        protected Animator _source = null;
+        protected Animator _dest = null;
+
         protected Transform _sourceOrigin = null;
         protected Transform _destOrigin = null;
 
-        protected HumanPoseHandler _handlerSource = null;
-        protected HumanPoseHandler _handlerDest = null;
         protected HumanPose _poseSource = new HumanPose();
         protected HumanPose _poseDest = new HumanPose();
         protected HumanPose _initialPoseDest = new HumanPose();
@@ -28,35 +66,36 @@ namespace QuickVR {
 
         #region CREATION AND DESTRUCTION
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void Init()
+        {
+            _allJoints = QuickUtils.ParseEnum<QuickHumanBodyBones, TrackedJointBody>();
+            foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
+            {
+                _allJoints.AddRange(QuickHumanTrait.GetBonesFromFinger(f, true));
+                _allJoints.AddRange(QuickHumanTrait.GetBonesFromFinger(f, false));
+            }
+
+            foreach (TrackedJointBody j in QuickUtils.GetEnumValues<TrackedJointBody>())
+            {
+                _toTrackedJointBody[QuickUtils.ParseEnum<QuickHumanBodyBones>(j.ToString())] = j;
+            }
+        }
+
         protected virtual void OnEnable()
         {
-            QuickVRManager.OnPostUpdateTracking += CopyPose;
+            QuickVRManager.OnPreCameraUpdate += CopyPose;
         }
 
         protected virtual void OnDisable()
         {
-            QuickVRManager.OnPostUpdateTracking -= CopyPose;
+            QuickVRManager.OnPreCameraUpdate -= CopyPose;
         }
 
         protected virtual void Awake()
         {
             _destOrigin = transform.CreateChild("__DestOrigin__");
             _sourceOrigin = transform.CreateChild("__SourceOrigin__");
-        }
-
-        protected virtual HumanPoseHandler CreatePoseHandler(Animator animator, Transform origin)
-        {
-            HumanPoseHandler poseHandler = null;
-
-            if (animator)
-            {
-                poseHandler = new HumanPoseHandler(animator.avatar, animator.transform);
-
-                origin.position = animator.transform.position;
-                origin.rotation = animator.transform.rotation;
-            }
-
-            return poseHandler;
         }
 
         #endregion
@@ -76,7 +115,6 @@ namespace QuickVR {
         public virtual void SetAnimatorSource(Animator animator)
         {
             _source = animator;
-            _handlerSource = CreatePoseHandler(_source, _sourceOrigin);
         }
 
         public virtual void SetAnimatorDest(Animator animator)
@@ -84,46 +122,80 @@ namespace QuickVR {
             //Restore the initial HumanPose that _dest had at the begining
             if (_dest)
             {
-                _handlerDest.SetHumanPose(ref _initialPoseDest);
+                QuickHumanPoseHandler.SetHumanPose(_dest, ref _initialPoseDest);
             }
 
             _dest = animator;
-            _handlerDest = CreatePoseHandler(_dest, _destOrigin);
 
             //Save the current HumanPose of the new _dest
             if (_dest)
             {
-                GetHumanPose(_dest, _handlerDest, ref _initialPoseDest);
+                QuickHumanPoseHandler.GetHumanPose(_dest, ref _initialPoseDest);
             }
         }
 
-        public virtual void GetHumanPose(Animator animator, HumanPoseHandler poseHandler, ref HumanPose result)
+        protected virtual bool IsTrackedJointBody(TrackedJointBody joint)
         {
-            //Save the current transform properties
-            Vector3 tmpPos = animator.transform.position;
-            Quaternion tmpRot = animator.transform.rotation;
+            return IsTrackedJoint(_trackedJointsBody, (int)joint);
+        }
 
-            //Set the transform to the world origin
-            animator.transform.SetProperties(Vector3.zero, Quaternion.identity);
+        protected virtual bool IsTrackedJointHandLeft(QuickHumanFingers joint)
+        {
+            return IsTrackedJoint(_trackedJointsHandLeft, (int)joint);
+        }
 
-            //Copy the pose
-            poseHandler.GetHumanPose(ref result);
+        protected virtual bool IsTrackedJointHandRight(QuickHumanFingers joint)
+        {
+            return IsTrackedJoint(_trackedJointsHandRight, (int)joint);
+        }
 
-            //Restore the transform properties
-            animator.transform.SetProperties(tmpPos, tmpRot);
+        protected virtual bool IsTrackedJoint(int mask, int jointID)
+        {
+            return ((_trackedJointsBody & (1 << jointID)) != 0);
+        }
+
+        protected virtual bool IsTrackedJoint(QuickHumanBodyBones boneID)
+        {
+            if (QuickHumanTrait.IsBoneFingerLeft(boneID)) return IsTrackedJointHandLeft(QuickHumanTrait.GetFingerFromBone(boneID));
+            else if (QuickHumanTrait.IsBoneFingerRight(boneID)) return IsTrackedJointHandRight(QuickHumanTrait.GetFingerFromBone(boneID));
+            return IsTrackedJointBody(_toTrackedJointBody[boneID]);
         }
 
         #endregion
 
         #region UPDATE
 
-        protected virtual void CopyPose()
+        public virtual void CopyPose()
         {
-            if (_source && _dest)
+            if (_source && _dest && _source != _dest)
             {
-                GetHumanPose(_source, _handlerSource, ref _poseSource);
-                GetHumanPose(_dest, _handlerDest, ref _poseDest);
-                _handlerDest.SetHumanPose(ref _poseSource);
+                //For some obscure reason, we have to set source and dest to null parent in order to work. 
+                QuickHumanPoseHandler.GetHumanPose(_source, ref _poseSource);
+                QuickHumanPoseHandler.GetHumanPose(_dest, ref _poseDest);
+
+                foreach (QuickHumanBodyBones boneID in _allJoints)
+                {
+                    if (!IsTrackedJoint(boneID))
+                    {
+                        for (int i = 0; i < 3; i++)
+                        {
+                            int m = QuickHumanTrait.GetMuscleFromBone(boneID, i);
+                            if (m != -1)
+                            {
+                                _poseSource.muscles[m] = _poseDest.muscles[m];
+                            }
+                        }
+                    }
+                }
+
+                //The hips is a special case, it modifies the bodyPosition and bodyRotation fields
+                if (!IsTrackedJointBody(TrackedJointBody.Hips))
+                {
+                    _poseSource.bodyPosition = _poseDest.bodyPosition;
+                    _poseSource.bodyRotation = _poseDest.bodyRotation;
+                }
+                
+                QuickHumanPoseHandler.SetHumanPose(_dest, ref _poseSource);
             }
         }
 

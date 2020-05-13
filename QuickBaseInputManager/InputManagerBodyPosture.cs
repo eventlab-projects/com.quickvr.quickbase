@@ -67,7 +67,9 @@ public class InputManagerBodyPosture : BaseInputManager {
 	#region CREATION AND DESTRUCTION
 
 	protected virtual void Start() {
-		
+		_animator = QuickSingletonManager.GetInstance<QuickVRManager>().GetTargetAnimator();
+		_head = _animator.GetBoneTransform(HumanBodyBones.Head);
+		_hips = _animator.GetBoneTransform(HumanBodyBones.Hips);
 	}
 
 	#endregion
@@ -173,25 +175,8 @@ public class InputManagerBodyPosture : BaseInputManager {
 
 	#region UPDATE
 
-    protected virtual void CheckResources()
-    {
-        if (!_animator)
-        {
-            QuickHeadTracking hTracking = FindObjectOfType<QuickHeadTracking>();
-            if (!hTracking) return;
-
-            _animator = hTracking.GetComponent<Animator>();
-            if (!_animator) return;
-
-            _head = _animator.GetBoneTransform(HumanBodyBones.Head);
-            _hips = _animator.GetBoneTransform(HumanBodyBones.Hips);
-        }
-    }
-
-	protected virtual void Update() {
-        CheckResources();
-
-		if (!_animator) return; 
+    protected virtual void Update() {
+        if (!_animator) return; 
 
 		_leftArmDir = (_animator.GetBoneTransform(HumanBodyBones.LeftHand).position - _animator.GetBoneTransform(HumanBodyBones.LeftShoulder).position).normalized; 
 		_rightArmDir = (_animator.GetBoneTransform(HumanBodyBones.RightHand).position - _animator.GetBoneTransform(HumanBodyBones.RightShoulder).position).normalized; 

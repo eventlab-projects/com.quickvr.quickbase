@@ -108,7 +108,7 @@ namespace QuickVR
         
         protected virtual IEnumerator CoUpdate()
         {
-            _trackedObject = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject();
+            _trackedObject = _vrPlayArea.GetVRNode(HumanBodyBones.Head).GetTrackedObject();
 
             while (true)
             {
@@ -123,11 +123,11 @@ namespace QuickVR
 
         protected virtual void CoUpdateTrackedNode()
         {
-            QuickUnityVRBase hTracking = GetComponent<QuickUnityVRBase>();
-            QuickVRNode hipsNode = _vrPlayArea.GetVRNode(QuickVRNode.Type.Hips);
+            QuickUnityVR hTracking = GetComponent<QuickUnityVR>();
+            QuickVRNode hipsNode = _vrPlayArea.GetVRNode(HumanBodyBones.Hips);
             if (hipsNode)
             {
-                QuickTrackedObject tObject = hipsNode.IsTracked()? hipsNode.GetTrackedObject() : _vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject();
+                QuickTrackedObject tObject = hipsNode.IsTracked()? hipsNode.GetTrackedObject() : _vrPlayArea.GetVRNode(HumanBodyBones.Head).GetTrackedObject();
                 if (tObject != _trackedObject)
                 {
                     _trackedObject = tObject;

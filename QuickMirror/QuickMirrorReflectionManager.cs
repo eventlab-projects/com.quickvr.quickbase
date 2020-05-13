@@ -27,8 +27,8 @@ namespace QuickVR
 #if UNITY_EDITOR
             UnityEditor.SceneView.beforeSceneGui += UpdateMirrorsSceneView;
 #endif
-            //QuickVRManager.OnPostUpdateTracking += UpdateMirrors;
-            Camera.onPreRender += UpdateMirrors;
+            QuickVRManager.OnPostCameraUpdate += UpdateMirrorsMainCamera;
+            //Camera.onPreRender += UpdateMirrors;
         }
 
         #endregion
@@ -69,6 +69,11 @@ namespace QuickVR
             {
                 mirror.BeginCameraRendering(cam);
             }
+        }
+
+        static void UpdateMirrorsMainCamera()
+        {
+            UpdateMirrors(Camera.main);
         }
 
         #endregion

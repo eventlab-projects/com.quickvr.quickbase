@@ -2,43 +2,213 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-//Extents the functionalities of Unity's HumanTrait class
-public static class QuickHumanTrait
+namespace QuickVR
 {
+    //Extents the functionalities of Unity's HumanTrait class
 
-    #region PRIVATE ATTRIBUTES
-
-    private static Dictionary<int, List<int>> _childBones = null;
-    private static List<int> _bonesHierarchy = null;
-
-    private static Dictionary<HumanBodyBones, HumanBodyBones> _lookAtBone = null;
-
-    private static string[] _fingers = { "Thumb", "Index", "Middle", "Ring", "Little" };
-
-    private static List<string> _muscleNames = null;
-
-    #endregion
-
-    #region CREATION AND DESTRUCTION
-
-    private static void CheckChildBones()
+    public enum QuickHumanBodyBones
     {
-        if (_childBones == null)
-        {
-            _childBones = new Dictionary<int, List<int>>();
-            for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
-            {
-                int parentID = HumanTrait.GetParentBone(i);
-                if (!_childBones.ContainsKey(parentID)) _childBones[parentID] = new List<int>();
+        Hips = HumanBodyBones.Hips,
 
-                _childBones[parentID].Add(i);
-            }
-        }
+        //Spine bones
+        Spine = HumanBodyBones.Spine,
+        Chest = HumanBodyBones.Chest,
+        UpperChest = HumanBodyBones.UpperChest,
+        Neck = HumanBodyBones.Neck,
+        Head = HumanBodyBones.Head,
+
+        //Face bones
+        LeftEye = HumanBodyBones.LeftEye,
+        RightEye = HumanBodyBones.RightEye,
+        Jaw = HumanBodyBones.Jaw,
+
+        //Left leg bones
+        LeftUpperLeg = HumanBodyBones.LeftUpperLeg,
+        LeftLowerLeg = HumanBodyBones.LeftLowerLeg,
+        LeftFoot = HumanBodyBones.LeftFoot,
+        LeftToes = HumanBodyBones.LeftToes,
+
+        //Right leg bones
+        RightUpperLeg = HumanBodyBones.RightUpperLeg,
+        RightLowerLeg = HumanBodyBones.RightLowerLeg,
+        RightFoot = HumanBodyBones.RightFoot,
+        RightToes = HumanBodyBones.RightToes,
+
+        //Left arm bones
+        LeftShoulder = HumanBodyBones.LeftShoulder,
+        LeftUpperArm = HumanBodyBones.LeftUpperArm,
+        LeftLowerArm = HumanBodyBones.LeftLowerArm,
+        LeftHand = HumanBodyBones.LeftHand,
+
+        //Right arm bones
+        RightShoulder = HumanBodyBones.RightShoulder,
+        RightUpperArm = HumanBodyBones.RightUpperArm,
+        RightLowerArm = HumanBodyBones.RightLowerArm,
+        RightHand = HumanBodyBones.RightHand,
+
+        //Left hand finger bones        
+        LeftThumbProximal = HumanBodyBones.LeftThumbProximal,
+        LeftThumbIntermediate = HumanBodyBones.LeftThumbIntermediate,
+        LeftThumbDistal = HumanBodyBones.LeftThumbDistal,
+        LeftIndexProximal = HumanBodyBones.LeftIndexProximal,
+        LeftIndexIntermediate = HumanBodyBones.LeftIndexIntermediate,
+        LeftIndexDistal = HumanBodyBones.LeftIndexDistal,
+        LeftMiddleProximal = HumanBodyBones.LeftMiddleProximal,
+        LeftMiddleIntermediate = HumanBodyBones.LeftMiddleIntermediate,
+        LeftMiddleDistal = HumanBodyBones.LeftMiddleDistal,
+        LeftRingProximal = HumanBodyBones.LeftRingProximal,
+        LeftRingIntermediate = HumanBodyBones.LeftRingIntermediate,
+        LeftRingDistal = HumanBodyBones.LeftRingDistal,
+        LeftLittleProximal = HumanBodyBones.LeftLittleProximal,
+        LeftLittleIntermediate = HumanBodyBones.LeftLittleIntermediate,
+        LeftLittleDistal = HumanBodyBones.LeftLittleDistal,
+
+        //Right hand finger bones
+        RightThumbProximal = HumanBodyBones.RightThumbProximal,
+        RightThumbIntermediate = HumanBodyBones.RightThumbIntermediate,
+        RightThumbDistal = HumanBodyBones.RightThumbDistal,
+        RightIndexProximal = HumanBodyBones.RightIndexProximal,
+        RightIndexIntermediate = HumanBodyBones.RightIndexIntermediate,
+        RightIndexDistal = HumanBodyBones.RightIndexDistal,
+        RightMiddleProximal = HumanBodyBones.RightMiddleProximal,
+        RightMiddleIntermediate = HumanBodyBones.RightMiddleIntermediate,
+        RightMiddleDistal = HumanBodyBones.RightMiddleDistal,
+        RightRingProximal = HumanBodyBones.RightRingProximal,
+        RightRingIntermediate = HumanBodyBones.RightRingIntermediate,
+        RightRingDistal = HumanBodyBones.RightRingDistal,
+        RightLittleProximal = HumanBodyBones.RightLittleProximal,
+        RightLittleIntermediate = HumanBodyBones.RightLittleIntermediate,
+        RightLittleDistal = HumanBodyBones.RightLittleDistal,
+        
+        //Left hand tip bones
+        LeftThumbTip = HumanBodyBones.LastBone, 
+        LeftIndexTip, 
+        LeftMiddleTip,
+        LeftRingTip,
+        LeftLittleTip,
+
+        //Right hand tip bones
+        RightThumbTip,
+        RightIndexTip,
+        RightMiddleTip,
+        RightRingTip,
+        RightLittleTip,
     }
 
-    private static void InitLookAtBones()
+    public enum QuickHumanFingers
     {
-        if (_lookAtBone == null)
+        Thumb, 
+        Index,
+        Middle,
+        Ring,
+        Little,
+    }
+
+    public static class QuickHumanTrait
+    {
+
+        #region PRIVATE ATTRIBUTES
+
+        private static Dictionary<QuickHumanBodyBones, QuickHumanBodyBones> _parentBone = new Dictionary<QuickHumanBodyBones, QuickHumanBodyBones>();
+        private static Dictionary<int, List<int>> _childBones = null;
+        private static List<int> _bonesHierarchy = null;
+
+        private static Dictionary<HumanBodyBones, HumanBodyBones> _lookAtBone = null;
+
+        private static List<string> _muscleNames = null;
+
+        private static List<HumanBodyBones> _humanBodyBones = null;
+        private static List<QuickHumanFingers> _fingers = null;
+        private static List<QuickHumanBodyBones> _handBoneTips = null;
+        private static List<QuickHumanBodyBones> _handBoneTipsLeft = null;
+        private static List<QuickHumanBodyBones> _HandBoneTipsRight = null;
+
+        private static Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> _bonesFromFingerLeft = new Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>>();
+        private static Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> _bonesFromFingerRight = new Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>>();
+        private static Dictionary<QuickHumanBodyBones, QuickHumanFingers> _fingerFromBone = new Dictionary<QuickHumanBodyBones, QuickHumanFingers>();
+        private static HashSet<QuickHumanBodyBones> _fingerBonesLeft = new HashSet<QuickHumanBodyBones>();
+        private static HashSet<QuickHumanBodyBones> _fingerBonesRight = new HashSet<QuickHumanBodyBones>();
+
+        #endregion
+
+        #region CREATION AND DESTRUCTION
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
+        private static void Init()
+        {
+            InitHumanBodyBones();
+            InitHumanFingers();
+            InitMuscleNames();
+            InitLookAtBones();
+            InitChildBones();
+            InitParentBones();
+            InitBonesHierarchy();
+            InitHandBoneTips();
+        }
+
+        private static void InitHumanBodyBones()
+        {
+            _humanBodyBones = QuickUtils.GetEnumValues<HumanBodyBones>();
+            _humanBodyBones.RemoveAt(_humanBodyBones.Count - 1);  //Remove the LastBone, which is not a valid HumanBodyBone ID
+        }
+
+        private static void InitHumanFingers()
+        {
+            _fingers = QuickUtils.GetEnumValues<QuickHumanFingers>();
+
+            _bonesFromFingerLeft = InitHumanFingers(true);
+            _bonesFromFingerRight = InitHumanFingers(false);
+        }
+
+        private static Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> InitHumanFingers(bool isLeft)
+        {
+            Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> result = new Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>>();
+            string prefix = isLeft ? "Left" : "Right";
+            string[] phalanges = { "Proximal", "Intermediate", "Distal", "Tip" };
+            foreach (QuickHumanFingers f in _fingers)
+            {
+                result[f] = new List<QuickHumanBodyBones>();
+                foreach (string p in phalanges)
+                {
+                    QuickHumanBodyBones fingerBone = QuickUtils.ParseEnum<QuickHumanBodyBones>(prefix + f.ToString() + p);
+                    result[f].Add(fingerBone);
+                    _fingerFromBone[fingerBone] = f;
+                    if (isLeft) _fingerBonesLeft.Add(fingerBone);
+                    else _fingerBonesRight.Add(fingerBone);
+                }
+            }
+
+            return result;
+        }
+
+        private static void InitMuscleNames()
+        {
+            _muscleNames = new List<string>();
+
+            for (int muscleID = 0; muscleID < HumanTrait.MuscleCount; muscleID++)
+            {
+                string name = HumanTrait.MuscleName[muscleID];
+                for (int h = 0; h <= 1; h++)
+                {
+                    string hName = h == 0 ? "Left" : "Right";
+                    foreach (QuickHumanFingers f in _fingers)
+                    {
+                        for (int i = 1; i <= 3; i++)
+                        {
+                            if (name == hName + " " + f.ToString() + " " + i.ToString() + " Stretched") name = hName + "Hand." + f.ToString() + "." + i.ToString() + " Stretched";
+                        }
+                    }
+                    foreach (QuickHumanFingers f in _fingers)
+                    {
+                        if (name == hName + " " + f.ToString() + " Spread") name = hName + "Hand." + f.ToString() + ".Spread";
+                    }
+                }
+
+                _muscleNames.Add(name);
+            }
+        }
+
+        private static void InitLookAtBones()
         {
             _lookAtBone = new Dictionary<HumanBodyBones, HumanBodyBones>();
 
@@ -93,183 +263,329 @@ public static class QuickHumanTrait
             _lookAtBone[HumanBodyBones.RightLittleProximal] = HumanBodyBones.RightLittleIntermediate;
             _lookAtBone[HumanBodyBones.RightLittleIntermediate] = HumanBodyBones.RightLittleDistal;
         }
-    }
 
-    private static void InitBonesHierarchy(int boneID)
-    {
-        List<int> childBones = GetChildBones(boneID);
-        _bonesHierarchy.AddRange(childBones);
-
-        foreach (int c in childBones)
+        private static void InitChildBones()
         {
-            InitBonesHierarchy(c);
+            _childBones = new Dictionary<int, List<int>>();
+            for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+            {
+                int parentID = HumanTrait.GetParentBone(i);
+                if (!_childBones.ContainsKey(parentID)) _childBones[parentID] = new List<int>();
+
+                _childBones[parentID].Add(i);
+            }
         }
-    }
 
-    #endregion
-
-    #region GET AND SET
-
-    public static List<int> GetBonesHierarchy()
-    {
-        if (_bonesHierarchy == null)
+        private static void InitParentBones()
         {
-            CheckChildBones();
+            _parentBone[QuickHumanBodyBones.LeftThumbTip] = QuickHumanBodyBones.LeftThumbDistal;
+            _parentBone[QuickHumanBodyBones.LeftIndexTip] = QuickHumanBodyBones.LeftIndexDistal;
+            _parentBone[QuickHumanBodyBones.LeftMiddleTip] = QuickHumanBodyBones.LeftMiddleDistal;
+            _parentBone[QuickHumanBodyBones.LeftRingTip] = QuickHumanBodyBones.LeftRingDistal;
+            _parentBone[QuickHumanBodyBones.LeftLittleTip] = QuickHumanBodyBones.LeftLittleDistal;
+
+            _parentBone[QuickHumanBodyBones.RightThumbTip] = QuickHumanBodyBones.RightThumbDistal;
+            _parentBone[QuickHumanBodyBones.RightIndexTip] = QuickHumanBodyBones.RightIndexDistal;
+            _parentBone[QuickHumanBodyBones.RightMiddleTip] = QuickHumanBodyBones.RightMiddleDistal;
+            _parentBone[QuickHumanBodyBones.RightRingTip] = QuickHumanBodyBones.RightRingDistal;
+            _parentBone[QuickHumanBodyBones.RightLittleTip] = QuickHumanBodyBones.RightLittleDistal;
+        }
+
+        private static void InitBonesHierarchy()
+        {
             _bonesHierarchy = new List<int>();
 
             int initialBone = (int)HumanBodyBones.Hips;
             _bonesHierarchy.Add(initialBone);
             InitBonesHierarchy(initialBone);
         }
-
-        return _bonesHierarchy;
-    }
-
-    public static int GetNumBones()
-    {
-        return HumanTrait.BoneCount;
-    }
-
-    public static string GetBoneName(int boneID)
-    {
-        return HumanTrait.BoneName[boneID];
-    }
-
-    public static int GetNumMuscles()
-    {
-        return HumanTrait.MuscleCount;
-    }
-
-    public static List<string> GetMuscleNames()
-    {
-        if (_muscleNames == null)
+    
+        private static void InitBonesHierarchy(int boneID)
         {
-            _muscleNames = new List<string>();
+            List<int> childBones = GetChildBones(boneID);
+            _bonesHierarchy.AddRange(childBones);
 
-            for (int muscleID = 0; muscleID < HumanTrait.MuscleCount; muscleID++)
+            foreach (int c in childBones)
             {
-                string name = HumanTrait.MuscleName[muscleID];
-                for (int h = 0; h <= 1; h++)
-                {
-                    string hName = h == 0 ? "Left" : "Right";
-                    foreach (string f in _fingers)
-                    {
-                        for (int i = 1; i <= 3; i++)
-                        {
-                            if (name == hName + " " + f + " " + i.ToString() + " Stretched") name = hName + "Hand." + f + "." + i.ToString() + " Stretched";
-                        }
-                    }
-                    foreach (string f in _fingers)
-                    {
-                        if (name == hName + " " + f + " Spread") name = hName + "Hand." + f + ".Spread";
-                    }
-                }
-
-                _muscleNames.Add(name);
+                InitBonesHierarchy(c);
             }
         }
 
-        return _muscleNames;
-    }
-
-    public static string GetMuscleName(int muscleID)
-    {
-        return GetMuscleNames()[muscleID];
-    }
-
-    public static int GetRequiredBoneCount()
-    {
-        return HumanTrait.RequiredBoneCount;
-    }
-
-    public static int GetMuscleFromBone(int boneID, int dofID)
-    {
-        return HumanTrait.MuscleFromBone(boneID, dofID);
-    }
-
-    public static int GetBoneFromMuscle(int muscleID)
-    {
-        return HumanTrait.BoneFromMuscle(muscleID);
-    }
-
-    public static float GetBoneDefaultHierarchyMass(int boneID)
-    {
-        return HumanTrait.GetBoneDefaultHierarchyMass(boneID);
-    }
-
-    public static float GetMuscleDefaultMin(int muscleID)
-    {
-        return HumanTrait.GetMuscleDefaultMin(muscleID);
-    }
-
-    public static float GetMuscleDefaultMax(int muscleID)
-    {
-        return HumanTrait.GetMuscleDefaultMax(muscleID);
-    }
-
-    public static int GetParentBone(int boneID)
-    {
-        return HumanTrait.GetParentBone(boneID);
-    }
-
-    public static HumanBodyBones GetParentBone(HumanBodyBones boneID)
-    {
-        return (HumanBodyBones)GetParentBone((int)boneID);
-    }
-
-    public static List<int> GetChildBones(int boneID)
-    {
-        CheckChildBones();
-
-        return _childBones.ContainsKey(boneID)? _childBones[boneID] : new List<int>();
-    }
-
-    public static bool IsRequiredBone(int boneID)
-    {
-        return HumanTrait.RequiredBone(boneID);
-    }
-
-    public static bool IsBoneFinger(HumanBodyBones boneID)
-    {
-        return IsBoneFingerLeft(boneID) || IsBoneFingerRight(boneID);
-    }
-
-    public static bool IsBoneFingerLeft(HumanBodyBones boneID)
-    {
-        int i = (int)boneID;
-        return (i >= (int)HumanBodyBones.LeftThumbProximal && i <= (int)HumanBodyBones.LeftLittleDistal);
-    }
-
-    public static bool IsBoneFingerRight(HumanBodyBones boneID)
-    {
-        int i = (int)boneID;
-        return (i >= (int)HumanBodyBones.RightThumbProximal && i <= (int)HumanBodyBones.RightLittleDistal);
-    }
-
-    public static HumanBodyBones? GetLookAtBone(HumanBodyBones boneID)
-    {
-        InitLookAtBones();
-
-        HumanBodyBones? result = null;
-        if (_lookAtBone.ContainsKey(boneID)) result = _lookAtBone[boneID];
-
-        return result;
-    }
-
-    public static Vector3 GetDefaultLookAtDirection(HumanBodyBones boneID)
-    {
-        string bName = boneID.ToString();
-
-        if (bName.Contains("Foot")) return Vector3.forward + Vector3.down;
-
-        if (bName.Contains("Proximal") || bName.Contains("Intermediate") || bName.Contains("Distal"))
+        private static void InitHandBoneTips()
         {
-            return bName.Contains("Left") ? Vector3.left : Vector3.right;
+            _handBoneTipsLeft = InitHandBoneTips(true);
+            _HandBoneTipsRight = InitHandBoneTips(false);
+
+            _handBoneTips = new List<QuickHumanBodyBones>();
+            _handBoneTips.AddRange(_handBoneTipsLeft);
+            _handBoneTips.AddRange(_HandBoneTipsRight);
         }
 
-        return Vector3.zero;
+        private static List<QuickHumanBodyBones> InitHandBoneTips(bool isLeft)
+        {
+            List<QuickHumanBodyBones> result = new List<QuickHumanBodyBones>();
+            int initialBoneID = isLeft ? (int)QuickHumanBodyBones.LeftThumbTip : (int)QuickHumanBodyBones.LeftLittleTip;
+            int finalBoneID = isLeft ? (int)QuickHumanBodyBones.RightThumbTip : (int)QuickHumanBodyBones.RightLittleTip;
+            
+            for (int i = initialBoneID; i <= finalBoneID; i++)
+            {
+                result.Add((QuickHumanBodyBones)i);
+            }
+
+            return result;
+        }
+
+        #endregion
+
+        #region GET AND SET
+
+        public static List<int> GetBonesHierarchy()
+        {
+            return _bonesHierarchy;
+        }
+
+        public static int GetNumBones()
+        {
+            return HumanTrait.BoneCount;
+        }
+
+        public static string GetBoneName(HumanBodyBones boneID)
+        {
+            return GetBoneName((int)boneID);
+        }
+
+        public static string GetBoneName(int boneID)
+        {
+            return HumanTrait.BoneName[boneID];
+        }
+
+        public static int GetNumMuscles()
+        {
+            return HumanTrait.MuscleCount;
+        }
+
+        public static List<string> GetMuscleNames()
+        {
+            return _muscleNames;
+        }
+
+        public static string GetMuscleName(int muscleID)
+        {
+            return GetMuscleNames()[muscleID];
+        }
+
+        public static int GetRequiredBoneCount()
+        {
+            return HumanTrait.RequiredBoneCount;
+        }
+
+        public static int GetMuscleFromBone(QuickHumanBodyBones boneID, int dofID)
+        {
+            return (int)boneID < (int)HumanBodyBones.LastBone ? GetMuscleFromBone((HumanBodyBones)boneID, dofID) : -1;
+        }
+
+        public static int GetMuscleFromBone(HumanBodyBones boneID, int dofID)
+        {
+            return HumanTrait.MuscleFromBone((int)boneID, dofID);
+        }
+
+        public static HumanBodyBones GetBoneFromMuscle(int muscleID)
+        {
+            return (HumanBodyBones)HumanTrait.BoneFromMuscle(muscleID);
+        }
+
+        public static float GetBoneDefaultHierarchyMass(int boneID)
+        {
+            return HumanTrait.GetBoneDefaultHierarchyMass(boneID);
+        }
+
+        public static float GetMuscleDefaultMin(int muscleID)
+        {
+            return HumanTrait.GetMuscleDefaultMin(muscleID);
+        }
+
+        public static float GetMuscleDefaultMax(int muscleID)
+        {
+            return HumanTrait.GetMuscleDefaultMax(muscleID);
+        }
+
+        public static List<HumanBodyBones> GetHumanBodyBones()
+        {
+            return _humanBodyBones;
+        }
+
+        public static int GetParentBone(int boneID)
+        {
+            return HumanTrait.GetParentBone(boneID);
+        }
+
+        public static HumanBodyBones GetParentBone(HumanBodyBones boneID)
+        {
+            return (HumanBodyBones)GetParentBone((int)boneID);
+        }
+
+        public static QuickHumanBodyBones GetParentBone(QuickHumanBodyBones boneID)
+        {
+            if ((int)boneID < (int)HumanBodyBones.LastBone)
+            {
+                return (QuickHumanBodyBones)GetParentBone((int)boneID);
+            }
+
+            return _parentBone[boneID];
+        }
+
+        public static List<int> GetChildBones(int boneID)
+        {
+            return _childBones.ContainsKey(boneID) ? _childBones[boneID] : new List<int>();
+        }
+
+        public static bool IsRequiredBone(int boneID)
+        {
+            return HumanTrait.RequiredBone(boneID);
+        }
+
+        public static HumanBodyBones? GetLookAtBone(HumanBodyBones boneID)
+        {
+            HumanBodyBones? result = null;
+            if (_lookAtBone.ContainsKey(boneID)) result = _lookAtBone[boneID];
+
+            return result;
+        }
+
+        public static Vector3 GetDefaultLookAtDirection(HumanBodyBones boneID)
+        {
+            string bName = boneID.ToString();
+
+            if (bName.Contains("Foot")) return Vector3.forward + Vector3.down;
+
+            if (bName.Contains("Proximal") || bName.Contains("Intermediate") || bName.Contains("Distal"))
+            {
+                return bName.Contains("Left") ? Vector3.left : Vector3.right;
+            }
+
+            return Vector3.zero;
+        }
+
+        public static List<QuickHumanBodyBones> GetHandBoneTips()
+        {
+            return _handBoneTips;
+        }
+
+        public static List<QuickHumanBodyBones> GetHandBoneTips(bool isLeft)
+        {
+            return isLeft ? _handBoneTipsLeft : _HandBoneTipsRight;
+        }
+
+        public static Transform GetBoneTransform(this Animator animator, QuickHumanBodyBones boneID)
+        {
+            Transform result = null;
+
+            if ((int)boneID < (int)HumanBodyBones.LastBone) result = animator.GetBoneTransform((HumanBodyBones)boneID);
+            else
+            {
+                //At this point, boneID is a bone finger tip
+                Transform tBoneParent = animator.GetBoneTransform(GetParentBone(boneID));
+                if (tBoneParent)
+                {
+                    result = (tBoneParent.childCount > 0) ? tBoneParent.GetChild(0) : tBoneParent;
+                }
+            }
+
+            return result;
+        }
+
+        public static List<QuickHumanFingers> GetHumanFingers()
+        {
+            return _fingers;
+        }
+
+        public static List<QuickHumanBodyBones> GetBonesFromFinger(QuickHumanFingers finger, bool isLeft)
+        {
+            return isLeft ? _bonesFromFingerLeft[finger] : _bonesFromFingerRight[finger];
+        }
+
+        public static QuickHumanFingers GetFingerFromBone(QuickHumanBodyBones bone)
+        {
+            return _fingerFromBone[bone];
+        }
+
+        public static bool IsBoneFingerLeft(QuickHumanBodyBones boneID)
+        {
+            return _fingerBonesLeft.Contains(boneID);
+        }
+
+        public static bool IsBoneFingerLeft(HumanBodyBones boneID)
+        {
+            return IsBoneFingerLeft((QuickHumanBodyBones)boneID);
+        }
+
+        public static bool IsBoneFingerRight(QuickHumanBodyBones boneID)
+        {
+            return _fingerBonesRight.Contains(boneID);
+        }
+
+        public static bool IsBoneFingerRight(HumanBodyBones boneID)
+        {
+            return IsBoneFingerRight((QuickHumanBodyBones)boneID);
+        }
+
+        public static bool IsFingerBoneLeft(QuickHumanBodyBones bone)
+        {
+            return _fingerBonesLeft.Contains(bone);
+        }
+
+        #endregion
+
     }
 
-    #endregion
+    public static class QuickHumanPoseHandler
+    {
 
+        #region PROTECTED ATTRIBUTES
+
+        private static Dictionary<Animator, HumanPoseHandler> _poseHandlers = new Dictionary<Animator, HumanPoseHandler>();
+
+        #endregion
+
+        #region GET AND SET
+
+        public static HumanPoseHandler GetHumanPoseHandler(Animator animator)
+        {
+            if (!_poseHandlers.ContainsKey(animator))
+            {
+                _poseHandlers[animator] = new HumanPoseHandler(animator.avatar, animator.transform);
+            }
+
+            return _poseHandlers[animator];
+        }
+
+        public static void GetHumanPose(Animator animator, ref HumanPose result)
+        {
+            //Save the current transform properties
+            Transform tmpParent = animator.transform.parent;
+            Vector3 tmpPos = animator.transform.position;
+            Quaternion tmpRot = animator.transform.rotation;
+
+            //Set the transform to the world origin
+            animator.transform.parent = null;
+            animator.transform.position = Vector3.zero;
+            animator.transform.rotation = Quaternion.identity;
+
+            //Copy the pose
+            GetHumanPoseHandler(animator).GetHumanPose(ref result);
+
+            //Restore the transform properties
+            animator.transform.parent = tmpParent;
+            animator.transform.position = tmpPos;
+            animator.transform.rotation = tmpRot;
+        }
+
+        public static void SetHumanPose(Animator animator, ref HumanPose pose)
+        {
+            GetHumanPoseHandler(animator).SetHumanPose(ref pose);
+        }
+
+        #endregion
+
+    }
 }

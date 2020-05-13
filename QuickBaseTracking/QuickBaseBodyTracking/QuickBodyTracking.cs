@@ -35,14 +35,12 @@ namespace QuickVR {
 
 		#region CREATION AND DESTRUCTION
 
-        protected override void Start()
-        {
-            base.Start();
+		protected override void RegisterTrackingManager()
+		{
+			_vrManager.AddBodyTrackingSystem(this);
+		}
 
-            _vrManager.AddBodyTrackingSystem(this);
-        }
-
-        #endregion
+		#endregion
 
 	}
 
@@ -71,8 +69,7 @@ namespace QuickVR {
 
 		#region CREATION AND DESTRUCTION
 
-		protected override void Awake() {
-			base.Awake();
+		protected virtual void Awake() {
 			CreateSkeleton();
             _initialRootRotation = transform.rotation;
             _initialForward = ComputeRootForward();
@@ -285,7 +282,7 @@ namespace QuickVR {
 
 		#region UPDATE
 
-		public override void UpdateTracking() {
+		public override void UpdateTrackingLate() {
 			if (!IsTrackingConnected()) return;
 
             //Vector3 fwd = ComputeTorsoForward();

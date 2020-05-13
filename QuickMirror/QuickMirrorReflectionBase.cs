@@ -61,6 +61,12 @@ namespace QuickVR {
 
         #region CREATION AND DESTRUCTION
 
+        protected virtual void Awake()
+        {
+            CreateReflectionTexture();
+            CreateReflectionCamera();
+        }
+
         protected virtual void OnEnable() {
             //Create the mesh filter
 			_mFilter = gameObject.GetOrCreateComponent<MeshFilter>();
@@ -112,7 +118,7 @@ namespace QuickVR {
 
         protected virtual RenderTexture CreateRenderTexture(string name, int size, RenderTextureFormat format = RenderTextureFormat.Default)
         {
-            RenderTexture rTex = new RenderTexture(size, size, 24, format);
+            RenderTexture rTex = new RenderTexture(size, size, 16, format);
             rTex.name = name;
             rTex.isPowerOfTwo = true;
             rTex.hideFlags = HideFlags.DontSave;
@@ -262,7 +268,9 @@ namespace QuickVR {
             if (_currentCamera.stereoEnabled)
             {
                 float stereoSign = mirrorStereo ? -1.0f : 1.0f;
-                float stereoSeparation = QuickSingletonManager.GetInstance<QuickVRPlayArea>().GetEyeStereoSeparation();
+                float stereoSeparation = _currentCamera.stereoSeparation;
+
+                if (stereoSeparation == 0) return;
 
                 if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Both || _currentCamera.stereoTargetEye == StereoTargetEyeMask.Left)
                 {

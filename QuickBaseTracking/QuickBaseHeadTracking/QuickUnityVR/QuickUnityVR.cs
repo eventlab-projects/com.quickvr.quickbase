@@ -1,15 +1,39 @@
 ﻿using UnityEngine;
-using UnityEngine.XR;
-using System.Collections;
+using UnityEngine.Animations;
+
 using System.Collections.Generic;
-using System;
 
 namespace QuickVR {
 
-    public class QuickUnityVR : QuickUnityVRBase
+    public class QuickUnityVR : QuickIKManager_v1
     {
+        #region CONSTANTS
+
+        protected static float HUMAN_HEADS_TALL = 7.5f;
+        protected static float HUMAN_HEADS_TALL_EYES = HUMAN_HEADS_TALL - 0.5f;
+        protected static float HUMAN_HEADS_TALL_HEAD = HUMAN_HEADS_TALL - 1.0f;
+
+        public static Vector3 HAND_CONTROLLER_POSITION_OFFSET = new Vector3(0, 0, -0.1f);
+
+        #endregion
 
         #region PUBLIC ATTRIBUTES
+
+        public bool _useFootprints = true;
+
+        public static bool _handsSwaped = false;
+
+        public enum HandTrackingMode
+        {
+            Controllers,
+            Hands,
+        }
+        public HandTrackingMode _handTrackingMode = HandTrackingMode.Hands;
+
+        public bool _updatePosition = false;
+        public bool _updateRotation = false;
+
+        public bool _isStanding = true;
 
         public bool _applyUserScale = false;
 
@@ -17,10 +41,20 @@ namespace QuickVR {
 
         #region PROTECTED PARAMETERS
 
-        [SerializeField, HideInInspector]
-        protected QuickIKManager _ikManager = null;
-
         protected float _unscaledHeadHeight = 0.0f;
+
+        protected QuickVRPlayArea _vrPlayArea = null;
+
+        protected Transform _calibrationPose = null;
+
+        protected Vector3 _headOffset = Vector3.zero;
+
+        protected PositionConstraint _footprints = null;
+
+        protected Dictionary<VRCursorType, QuickUICursor> _vrCursors = new Dictionary<VRCursorType, QuickUICursor>();
+
+        protected QuickVRHand _vrHandLeft = null;
+        protected QuickVRHand _vrHandRight = null;
 
         #endregion
 
@@ -30,14 +64,20 @@ namespace QuickVR {
         {
             base.OnEnable();
 
+            QuickVRNode.OnCalibrateVRNodeHead += OnCalibrateVRNodeHead;
+            QuickVRNode.OnCalibrateVRNodeHips += OnCalibrateVRNodeHips;
+            QuickVRNode.OnCalibrateVRNodeLeftHand += OnCalibrateVRNodeLeftHand;
+            QuickVRNode.OnCalibrateVRNodeRightHand += OnCalibrateVRNodeRightHand;
             QuickVRNode.OnCalibrateVRNodeLeftFoot += OnCalibrateVRNodeFoot;
             QuickVRNode.OnCalibrateVRNodeRightFoot += OnCalibrateVRNodeFoot;
         }
 
-        protected override void OnDisable()
+        protected virtual void OnDisable()
         {
-            base.OnDisable();
-
+            QuickVRNode.OnCalibrateVRNodeHead -= OnCalibrateVRNodeHead;
+            QuickVRNode.OnCalibrateVRNodeHips -= OnCalibrateVRNodeHips;
+            QuickVRNode.OnCalibrateVRNodeLeftHand -= OnCalibrateVRNodeLeftHand;
+            QuickVRNode.OnCalibrateVRNodeRightHand -= OnCalibrateVRNodeRightHand;
             QuickVRNode.OnCalibrateVRNodeLeftFoot -= OnCalibrateVRNodeFoot;
             QuickVRNode.OnCalibrateVRNodeRightFoot -= OnCalibrateVRNodeFoot;
         }
@@ -46,23 +86,65 @@ namespace QuickVR {
         {
             base.Awake();
 
-            _headOffset = Quaternion.Inverse(transform.rotation) * (_animator.GetBoneTransform(HumanBodyBones.Head).position - GetEyeCenterPosition());
+            _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
+            _vrPlayArea.transform.parent = transform;
 
-            //Create the IKManager
-            if (!gameObject.GetComponent<QuickIKManager>())
-            {
-                //#if UNITY_2019_1_OR_NEWER 
-                //                gameObject.AddComponent<QuickIKManager_v2>();
-                //#else
-                //                gameObject.AddComponent<QuickIKManager_v1>();
-                //#endif
-                gameObject.AddComponent<QuickIKManager_v1>();
-            }
-            _ikManager = gameObject.GetComponent<QuickIKManager>();
-            _ikManager.enabled = false; //We control when to update the IK
+            CreateVRHands();
+            CreateVRCursors();
+            CreateFootPrints();
+
+            _calibrationPose = new GameObject("__CalibrationPose__").transform;
+            _calibrationPose.position = transform.position;
+            _calibrationPose.rotation = transform.rotation;
+
+            _headOffset = Quaternion.Inverse(transform.rotation) * (_animator.GetBoneTransform(HumanBodyBones.Head).position - _animator.GetEyeCenterPosition());
         }
 
-        protected override void CreateVRHands()
+        protected override void RegisterTrackingManager()
+        {
+            _vrManager.AddUnityVRTrackingSystem(this);
+        }
+
+        protected virtual void Start()
+        {
+            if (!QuickUtils.IsHandTrackingSupported())
+            {
+                _handTrackingMode = HandTrackingMode.Controllers;
+            }
+        }
+
+        protected virtual void CreateFootPrints()
+        {
+            _footprints = Instantiate<GameObject>(Resources.Load<GameObject>("Footprints/Footprints")).GetOrCreateComponent<PositionConstraint>();
+            _footprints.transform.ResetTransformation();
+            ConstraintSource source = new ConstraintSource();
+            source.sourceTransform = transform;
+            source.weight = 1.0f;
+            _footprints.AddSource(source);
+            _footprints.constraintActive = true;
+        }
+
+        protected virtual void CreateVRCursors()
+        {
+            //CreateVRCursor(VRCursorType.HEAD, Camera.main.transform);
+            CreateVRCursorHand(VRCursorType.LEFT, _vrHandLeft._handBone, _vrHandLeft._handBoneIndexDistal);
+            CreateVRCursorHand(VRCursorType.RIGHT, _vrHandRight._handBone, _vrHandRight._handBoneIndexDistal);
+        }
+
+        protected virtual void CreateVRCursorHand(VRCursorType cType, Transform tHand, Transform tDistal)
+        {
+            Transform tIntermediate = tDistal.parent;
+            Transform tProximal = tIntermediate.parent;
+            float l1 = Vector3.Distance(tDistal.position, tIntermediate.position);
+            float l2 = Vector3.Distance(tIntermediate.position, tProximal.position);
+            Transform cursorOrigin = tHand.CreateChild("__CursorOrigin__");
+            cursorOrigin.forward = (tIntermediate.position - tProximal.position).normalized;
+            cursorOrigin.position = tProximal.position + cursorOrigin.forward * (l1 + l2 + (l2 - l1));
+
+            CreateVRCursor(cType, cursorOrigin);
+        }
+
+        protected virtual void CreateVRHands()
         {
             _vrHandLeft = gameObject.AddComponent<QuickVRHand>();
             _vrHandLeft._handBone = _animator.GetBoneTransform(HumanBodyBones.LeftHand);
@@ -72,61 +154,213 @@ namespace QuickVR {
             _vrHandRight._handBone = _animator.GetBoneTransform(HumanBodyBones.RightHand);
             _vrHandRight._handBoneIndexDistal = _animator.GetBoneTransform(HumanBodyBones.RightIndexDistal);
 
-            base.CreateVRHands();
+            if (_vrHandLeft._axisAnim == "") _vrHandLeft._axisAnim = "LeftTrigger";
+            if (_vrHandRight._axisAnim == "") _vrHandRight._axisAnim = "RightTrigger";
+        }
+
+        protected virtual void CreateVRCursor(VRCursorType cType, Transform cTransform)
+        {
+            QuickUICursor vrCursor = cTransform.gameObject.AddComponent<QuickUICursor>();
+            vrCursor._TriggerVirtualKey = InputManager.DEFAULT_BUTTON_CONTINUE;
+            vrCursor._drawRay = (cType == VRCursorType.LEFT || cType == VRCursorType.RIGHT);
+
+            _vrCursors[cType] = vrCursor;
+            SetVRCursorActive(cType, false);
         }
 
         #endregion
 
         #region GET AND SET
 
+        public virtual QuickUICursor GetVRCursor(VRCursorType cType)
+        {
+            if (!_vrCursors.ContainsKey(cType)) return null;
+
+            return _vrCursors[cType];
+        }
+
+        public virtual bool IsVRCursorActive(VRCursorType cType)
+        {
+            QuickUICursor cursor = GetVRCursor(cType);
+            return cursor ? cursor.enabled : false;
+        }
+
+        public virtual void SetVRCursorActive(VRCursorType cType, bool active)
+        {
+            if (!_vrCursors.ContainsKey(cType)) return;
+
+            _vrCursors[cType].enabled = active;
+        }
+
+        public virtual int GetNumExtraTrackers()
+        {
+            return 0;
+        }
+
+        public virtual void SetInitialPosition(Vector3 initialPosition)
+        {
+            _calibrationPose.position = initialPosition;
+        }
+
+        public virtual void SetInitialRotation(Quaternion initialRotation)
+        {
+            _calibrationPose.rotation = initialRotation;
+        }
+
         protected virtual float GetHeadHeight()
         {
             return _unscaledHeadHeight * (1.0f / transform.lossyScale.y);
         }
 
+        public virtual Vector3 GetDisplacement()
+        {
+            //if (_isStanding)
+            //{
+            //    QuickVRNode hipsNode = _vrPlayArea.GetVRNode(QuickVRNode.Type.Hips);
+            //    if (_vrPlayArea.IsTrackedNode(hipsNode)) return hipsNode.GetTrackedObject().GetDisplacement();
+            //    else if (_displaceWithCamera) return _vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject().GetDisplacement();
+            //}
+
+            QuickVRNode n = _vrPlayArea.GetVRNodeMain();
+            Vector3 offset = n.GetTrackedObject().transform.position - n.GetCalibrationPose().position;
+
+            return Vector3.Scale(offset, Vector3.right + Vector3.forward);
+        }
+
+        protected virtual float GetRotationOffset()
+        {
+            Vector3 userForward = _vrPlayArea.GetUserForward();
+            return Vector3.SignedAngle(transform.forward, userForward, transform.up);
+        }
+
         public override void Calibrate()
         {
-            _ikManager.Calibrate();
-
-            transform.localScale = Vector3.one;
-            _unscaledHeadHeight = _ikManager.GetIKSolver(HumanBodyBones.Head)._targetLimb.position.y - transform.position.y;
-
             base.Calibrate();
 
+            transform.localScale = Vector3.one;
+            _unscaledHeadHeight = GetIKSolver(HumanBodyBones.Head)._targetLimb.position.y - transform.position.y;
+
+            transform.position = _calibrationPose.position;
+            transform.rotation = _calibrationPose.rotation;
+            _footprints.translationOffset = Vector3.zero;
+            _footprints.transform.rotation = transform.rotation;
+
+            _vrPlayArea.Calibrate();
+
+            float rotAngle = Vector3.SignedAngle(_vrPlayArea.GetUserForward(), transform.forward, transform.up);
+            _vrPlayArea.transform.Rotate(transform.up, rotAngle, Space.World);
+
             //Set the offset of the TrackedObject of the head
-            QuickVRNode node = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head);
-            Vector3 offset = _ikManager.GetIKTarget(HumanBodyBones.Head).position - node.GetTrackedObject().transform.position;
+            QuickVRNode node = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
+            Vector3 offset = GetIKTarget(HumanBodyBones.Head).position - node.GetTrackedObject().transform.position;
             _vrPlayArea.transform.position += offset;
+        }
+
+        protected virtual void OnCalibrateVRNodeHead(QuickVRNode node)
+        {
+            node.GetTrackedObject().transform.localPosition = _headOffset;
+        }
+
+        protected virtual void OnCalibrateVRNodeHips(QuickVRNode node)
+        {
+            QuickTrackedObject tObjectHead = _vrPlayArea.GetVRNode(HumanBodyBones.Head).GetTrackedObject();
+            QuickTrackedObject tObjectHips = node.GetTrackedObject();
+            tObjectHips.transform.position = new Vector3(tObjectHead.transform.position.x, tObjectHips.transform.position.y, tObjectHead.transform.position.z);
+        }
+
+        protected virtual void OnCalibrateVRNodeLeftHand(QuickVRNode node)
+        {
+            QuickTrackedObject tObject = node.GetTrackedObject();
+            if (_handTrackingMode == HandTrackingMode.Controllers)
+            {
+                tObject.transform.Rotate(tObject.transform.forward, 90.0f, Space.World);
+                tObject.transform.localPosition = HAND_CONTROLLER_POSITION_OFFSET;
+            }
+            else
+            {
+                tObject.transform.LookAt(tObject.transform.position + node.transform.right, -node.transform.up);
+            }
+        }
+
+        protected virtual void OnCalibrateVRNodeRightHand(QuickVRNode node)
+        {
+            QuickTrackedObject tObject = node.GetTrackedObject();
+            if (_handTrackingMode == HandTrackingMode.Controllers)
+            {
+                tObject.transform.Rotate(tObject.transform.forward, -90.0f, Space.World);
+                tObject.transform.localPosition = HAND_CONTROLLER_POSITION_OFFSET;
+            }
+            else
+            {
+                tObject.transform.LookAt(tObject.transform.position - node.transform.right, node.transform.up);
+            }
         }
 
         protected virtual void OnCalibrateVRNodeFoot(QuickVRNode node)
         {
-            HumanBodyBones boneID = QuickVRNode.ToHumanBodyBone(node.GetRole());
-            Transform ikTarget = _ikManager.GetIKTarget(boneID);
+            Transform ikTarget = GetIKTarget(node.GetRole());
             QuickTrackedObject tObject = node.GetTrackedObject();
             tObject.transform.rotation = ikTarget.rotation;
         }
 
-        public override Vector3 GetEyeCenterPosition()
+        public virtual QuickVRHand GetVRHand(QuickVRNode.Type nType)
         {
-            return _animator.GetEyeCenterPosition();
+            if (nType == QuickVRNode.Type.LeftHand) return _vrHandLeft;
+            if (nType == QuickVRNode.Type.RightHand) return _vrHandRight;
+
+            return null;
         }
 
         #endregion
 
         #region UPDATE
 
-        protected override void UpdateTransformNodes()
+        public override void UpdateTrackingEarly()
         {
-            base.UpdateTransformNodes();
+            base.UpdateTrackingEarly();
 
-            //1) Update all the nodes but the hips, which has to be treated differently. 
-            foreach (QuickVRNode.Type t in QuickVRNode.GetTypeList())
+            UpdateTransformRoot();
+            UpdateTransformNodes();
+
+            UpdateVRCursors();
+
+            _footprints.gameObject.SetActive(_useFootprints);
+        }
+
+        protected virtual void UpdateTransformRoot()
+        {
+            if (!_isStanding) return;
+
+            _vrPlayArea.transform.parent = null;
+
+            if (_updateRotation)
             {
-                QuickVRNode node = _vrPlayArea.GetVRNode(t);
+                //Update the rotation
+                float rotOffset = GetRotationOffset();
+                transform.Rotate(transform.up, rotOffset, Space.World);
+            }
+
+            if (_updatePosition)
+            {
+                //Update the position
+                Vector3 disp = GetDisplacement();
+                transform.Translate(disp, Space.World);
+                _vrPlayArea.GetCalibrationPoseRoot().Translate(disp, Space.World);
+
+                _footprints.translationOffset -= disp;
+            }
+
+            _vrPlayArea.transform.parent = transform;
+        }
+
+        protected virtual void UpdateTransformNodes()
+        {
+            //1) Update all the nodes but the hips, which has to be treated differently. 
+            foreach (HumanBodyBones boneID in QuickVRNode.GetTypeList())
+            {
+                QuickVRNode node = _vrPlayArea.GetVRNode(boneID);
                 if (!node.IsTracked()) continue;
                 
-                HumanBodyBones boneID = QuickUtils.ParseEnum<HumanBodyBones>(t.ToString());
                 QuickTrackedObject tObject = node.GetTrackedObject();
 
                 //Update the QuickVRNode's position
@@ -139,22 +373,20 @@ namespace QuickVR {
             }
 
             //2) Special case: The user is standing but there is no tracker on the hips. So the hips position is estimated by the movement of the head
-            QuickVRNode nodeHips = _vrPlayArea.GetVRNode(QuickVRNode.Type.Hips);
+            QuickVRNode nodeHips = _vrPlayArea.GetVRNode(HumanBodyBones.Hips);
             if (_isStanding && !nodeHips.IsTracked())
             {
-                QuickVRNode vrNode = _vrPlayArea.GetVRNode(QuickVRNode.Type.Head);
+                QuickVRNode vrNode = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
                 UpdateTransformNodePosFromCalibrationPose(vrNode, HumanBodyBones.Hips, Vector3.up);
-                float maxY = _ikManager.GetInitialIKDataLocalPos(HumanBodyBones.Hips).y;
-                Transform targetHips = _ikManager.GetIKTarget(HumanBodyBones.Hips);
+                float maxY = GetInitialIKDataLocalPos(HumanBodyBones.Hips).y;
+                Transform targetHips = GetIKTarget(HumanBodyBones.Hips);
                 targetHips.localPosition = new Vector3(targetHips.localPosition.x, Mathf.Min(targetHips.localPosition.y, maxY), targetHips.localPosition.z);
             }
-
-            UpdateTrackingIK();
         }
 
         protected virtual void UpdateTransformNodePosFromUser(QuickVRNode node, HumanBodyBones boneID)
         {
-            Transform t = _ikManager.GetIKTarget(boneID);
+            Transform t = GetIKTarget(boneID);
             if (!t) return;
 
             t.position = node.GetTrackedObject().transform.position;
@@ -162,7 +394,7 @@ namespace QuickVR {
 
         protected virtual void UpdateTransformNodeRotFromUser(QuickVRNode node, HumanBodyBones boneID)
         {
-            Transform t = _ikManager.GetIKTarget(boneID);
+            Transform t = GetIKTarget(boneID);
             if (!t) return;
 
             t.rotation = node.GetTrackedObject().transform.rotation;
@@ -175,69 +407,30 @@ namespace QuickVR {
 
         protected virtual void UpdateTransformNodePosFromCalibrationPose(QuickVRNode node, HumanBodyBones boneID, Vector3 offsetScale)
         {
-            Transform t = _ikManager.GetIKTarget(boneID);
+            Transform t = GetIKTarget(boneID);
             Transform calibrationPose = node.GetCalibrationPose();
             if (!t || !calibrationPose) return;
 
-            t.localPosition = _ikManager.GetInitialIKDataLocalPos(boneID);
+            t.localPosition = GetInitialIKDataLocalPos(boneID);
             Vector3 offset = Vector3.Scale(node.GetTrackedObject().transform.position - calibrationPose.position, offsetScale);
             t.position += offset;
         }
 
         protected virtual void UpdateTransformNodeRotFromCalibrationPose(QuickVRNode node, HumanBodyBones boneID)
         {
-            Transform t = _ikManager.GetIKTarget(boneID);
+            Transform t = GetIKTarget(boneID);
             Transform calibrationPose = node.GetCalibrationPose();
             if (!t || !calibrationPose) return;
 
-            t.localRotation = _ikManager.GetInitialIKDataLocalRot(boneID);
+            t.localRotation = GetInitialIKDataLocalRot(boneID);
             Quaternion rotOffset = node.GetTrackedObject().transform.rotation * Quaternion.Inverse(calibrationPose.rotation);
             t.rotation = rotOffset * t.rotation;
         }
 
-        protected virtual void UpdateTrackingIK()
+        protected virtual void UpdateVRCursors()
         {
-            //_ikManager._ikMask = _trackedJoints;
-            //Check if the IKHint targets are actually tracked. 
-            //foreach (IKLimbBones b in QuickIKManager.GetIKLimbBones())
-            //{
-            //    HumanBodyBones boneLimbID = QuickIKManager.ToUnity(b);
-            //    HumanBodyBones boneMidID = QuickHumanTrait.GetParentBone(boneLimbID);
-            //    IQuickIKSolver ikSolver = _ikManager.GetIKSolver(boneLimbID);
-            //    QuickVRNode nodeMid = _vrPlayArea.GetVRNode(boneMidID);
-            //    if (nodeMid && nodeMid.IsTracked())
-            //    {
-            //        _ikManager._ikHintMaskUpdate &= ~(1 << (int)boneLimbID);
-            //        //ikSolver.ResetIKChain();
-
-            //        //Compute the rotation of the Bone Upper
-            //        HumanBodyBones boneUpperID = QuickHumanTrait.GetParentBone(boneMidID);
-            //        Vector3 userBoneMidPos = _vrPlayArea.GetVRNode(boneMidID).GetTrackedObject().transform.position;
-            //        Vector3 userBoneUpperPos = _vrPlayArea.GetVRNode(boneUpperID).GetTrackedObject().transform.position;
-
-            //        Vector3 currentBoneDir = ikSolver._boneMid.position - ikSolver._boneUpper.position;
-            //        Vector3 targetBoneDir = ToAvatarSpace(userBoneMidPos - userBoneUpperPos);
-
-            //        Vector3 rotAxis = Vector3.Cross(currentBoneDir, targetBoneDir).normalized;
-            //        float rotAngle = Vector3.Angle(currentBoneDir, targetBoneDir);
-            //        ikSolver._boneUpper.Rotate(rotAxis, rotAngle, Space.World);
-
-            //        //Compute the rotation of the Bone Mid
-            //        Vector3 userBoneLimbPos = _vrPlayArea.GetVRNode(boneLimbID).GetTrackedObject().transform.position;
-
-            //        currentBoneDir = ikSolver._boneLimb.position - ikSolver._boneMid.position;
-            //        targetBoneDir = ToAvatarSpace(userBoneLimbPos - userBoneMidPos);
-
-            //        rotAxis = Vector3.Cross(currentBoneDir, targetBoneDir).normalized;
-            //        rotAngle = Vector3.Angle(currentBoneDir, targetBoneDir);
-            //        ikSolver._boneMid.Rotate(rotAxis, rotAngle, Space.World);
-
-            //        ikSolver._weightIKPos = 0.0f;
-            //    }
-            //    else ikSolver._weightIKPos = 1.0f;
-            //}
-
-            _ikManager.UpdateTracking();
+            GetVRCursor(VRCursorType.LEFT).transform.position = _vrHandLeft._handBoneIndexDistal.position;
+            GetVRCursor(VRCursorType.RIGHT).transform.position = _vrHandRight._handBoneIndexDistal.position;
         }
 
         #endregion

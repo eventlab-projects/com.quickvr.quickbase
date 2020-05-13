@@ -7,54 +7,75 @@ namespace QuickVR {
 	[System.Serializable]
     public abstract class QuickBaseTrackingManager : MonoBehaviour {
 
-		#region PROTECTED PARAMETERS
+        #region PROTECTED PARAMETERS
 
-		[SerializeField, HideInInspector] 
-        protected Animator _animator = null;	
-
-        protected QuickVRManager _vrManager = null;
-
-		#endregion
-
-		#region ABSTRACT
-
-		public abstract void UpdateTracking();
-
-		#endregion
-
-		#region CREATION AND DESTRUCTION
-
-        protected virtual void Reset()
+        protected Animator _animator
         {
-            _animator = GetComponent<Animator>();
+            get
+            {
+                if (!m_animator)
+                {
+                    m_animator = GetComponent<Animator>();
+                    m_animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+                }
+
+                return m_animator;
+            }
         }
 
-        protected virtual void Awake() {
-            _animator = GetComponent<Animator>();
-            _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
-            if (_animator) _animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
-		}
-
-		protected virtual void Start() {
-            SkinnedMeshRenderer[] renderers = transform.GetComponentsInChildren<SkinnedMeshRenderer>();
-            foreach (SkinnedMeshRenderer r in renderers)
+        protected QuickVRManager _vrManager
+        {
+            get
             {
-                r.updateWhenOffscreen = true;
+                return QuickSingletonManager.GetInstance<QuickVRManager>();
             }
-		}
+        }
 
         #endregion
 
-		#region GET AND SET
+        #region PRIVATE ATTRIBUTES
 
-		public virtual bool IsHumanoid() {
-			return _animator && _animator.isHuman;
-		}
+        Animator m_animator = null;
+
+        #endregion
+
+        #region CREATION AND DESTRUCTION
+
+        protected virtual void OnEnable()
+        {
+            SkinnedMeshRenderer[] smRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
+            foreach (SkinnedMeshRenderer r in smRenderers)
+            {
+                r.updateWhenOffscreen = true;
+            }
+
+            RegisterTrackingManager();
+        }
+
+        protected abstract void RegisterTrackingManager();
+
+        #endregion
+
+        #region GET AND SET
 
         public abstract void Calibrate();
 
-		#endregion
+        #endregion
 
-	}
+        #region UPDATE
+
+        public virtual void UpdateTrackingEarly()
+        {
+
+        }
+
+        public virtual void UpdateTrackingLate()
+        {
+
+        }
+
+        #endregion
+
+    }
 
 }

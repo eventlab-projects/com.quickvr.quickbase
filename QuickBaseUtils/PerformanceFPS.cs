@@ -1,11 +1,10 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-using UnityEngine.UI;
+namespace QuickVR 
+{
 
-namespace QuickVR {
-
-    public class PerformanceFPS : MonoBehaviour
+    public class PerformanceFPS : QuickUserGUI
     {
 		
 		// Attach this to a GUIText to make a _frames/second indicator.
@@ -31,24 +30,19 @@ namespace QuickVR {
 		
 		protected float _accum = 0; 		//FPS _accumulated over the interval
 		protected int _frames = 0; 			//frames drawn over the interval
-		protected float _timeLeft = 0.0f; 	//Left time for current interval
-
-        protected Canvas _canvas = null;
-        protected Text _text = null;
+		protected float _timeLeft = 0.0f;   //Left time for current interval
 
 		#endregion
 
 		#region CREATION AND DESTRUCTION
 
-		protected virtual void Start() {
-			_timeLeft = _updateInterval;
+		protected override void Awake()
+		{
+			base.Awake();
 
-            _canvas = transform.CreateChild("__Canvas__").gameObject.AddComponent<Canvas>();
-            _canvas.renderMode = RenderMode.ScreenSpaceOverlay;
-            _text = _canvas.transform.CreateChild("__Text__").gameObject.AddComponent<Text>();
-            _text.fontSize = 20;
-            _text.font = Resources.Load<Font>("Fonts/arial");
-        }
+			_instructions.alignment = TextAnchor.MiddleCenter;
+			_timeLeft = _updateInterval;
+		}
 
 		#endregion
 
@@ -57,7 +51,7 @@ namespace QuickVR {
 		protected virtual void Update() {
 			if (Input.GetKeyDown(_showHideKey)) _showFPS = !_showFPS;
 
-            _canvas.gameObject.SetActive(_showFPS);
+			EnableInstructions(_showFPS);
 
 			_timeLeft -= Time.deltaTime;
 			_accum += Time.timeScale * Time.deltaTime;
@@ -67,11 +61,13 @@ namespace QuickVR {
 			if (_timeLeft <= 0.0) {
 				// display two fractional digits (f2 format)
 				float fps = (float)_frames / _accum;
-                _text.text = fps.ToString("f2") + " FPS"; 
+				SetTextInstructions(fps.ToString("f2") + " FPS");
+                
+				if(fps < 30) _instructions.color = Color.yellow;
+				else if (fps < 10) _instructions.color = Color.red;
+				else _instructions.color = Color.green;
 
-				if(fps < 30) _text.color = Color.yellow;
-				else if (fps < 10) _text.color = Color.red;
-				else _text.color = Color.green;
+				_instructions.material.color = _instructions.color;
 
 				_timeLeft = _updateInterval;
 				_accum = 0.0F;

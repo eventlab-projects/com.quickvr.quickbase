@@ -64,11 +64,6 @@ public class QuickMetallicMapFixer : EditorWindow
         else if (extension == ".exr") bytes = result.EncodeToEXR();
         else return;
 
-        Debug.Log(Application.dataPath);
-
-
-        //Debug.Log("path = " + Path.GetDirectoryName(pathSrc));
-
         string filePath = Path.Combine(Directory.GetCurrentDirectory(), pathSrc);
         filePath.Replace("/", "\\");
 

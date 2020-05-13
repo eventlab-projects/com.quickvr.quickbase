@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEditor;
+using UnityEditor.SceneManagement;
 
 using System.IO;
 
@@ -15,6 +17,11 @@ namespace QuickVR
         {
             QuickPlayerPrefs.OnSetValue += SaveSettingsAsset;
             EditorApplication.playModeStateChanged += PlayModeChanged;
+        }
+
+        public static void MarkSceneDirty()
+        {
+            EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
         }
 
         private static void SaveSettingsAsset()
