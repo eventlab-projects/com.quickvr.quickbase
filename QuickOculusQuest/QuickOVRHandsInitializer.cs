@@ -51,7 +51,7 @@ namespace QuickVR
 
         protected virtual void Start()
         {
-            if (QuickUtils.IsOculusQuest() && GetComponent<QuickUnityVR>())
+            if (QuickUtils.IsOculusQuest())
             {
                 QuickVRPlayArea vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
                 _leftHand = Instantiate<QuickOVRHand>(Resources.Load<QuickOVRHand>("Prefabs/pf_QuickOVRHandLeft"), vrPlayArea.GetVRNode(HumanBodyBones.LeftHand).transform);

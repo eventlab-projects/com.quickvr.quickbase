@@ -21,7 +21,6 @@ namespace QuickVR
 
         protected virtual void Awake()
         {
-            Debug.Log("AWAKE!!!");
             _target = (QuickUnityVR)target;
             _projectConfig = OVRProjectConfig.GetProjectConfig();
             UpdateHandTrackingSupport();
