@@ -24,8 +24,9 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected float _totalTime = 0;
         protected float _lastValue = Mathf.Infinity;
+
+        protected List<float> _sortedTime = new List<float>();
 
         #endregion
 
@@ -38,10 +39,11 @@ namespace QuickVR
             if (!Mathf.Approximately(_lastValue, value))
             {
                 index = base.AddKey(time, value);
-                if (index != -1 && time > _totalTime)
+                if (index != -1)
                 {
-                    _totalTime = time;
                     _lastValue = value;
+
+                    _sortedTime.Add(time);
                 }
             }
 
@@ -58,18 +60,27 @@ namespace QuickVR
 
         protected int GetKeyFrameID(float time)
         {
-            float f = _totalTime == 0? 0 : length * Mathf.Clamp01(time / _totalTime);
-            //Debug.Log("time = " + time.ToString("f3"));
-            //Debug.Log("totalTime = " + _totalTime.ToString("f3"));
-            //Debug.Log("f = " + f.ToString("f3"));
-            //Debug.Log("length = " + length);
+            int index = _sortedTime.BinarySearch(time);
+            if (index < 0)
+            {
+                index = Mathf.Max(0, ~index - 1);
+                //index = Mathf.Min(~index, _sortedTime.Count - 1);
+            }
 
-            int result = 0;
-            if (_evaluateMethod == QuickAnimEvaluateMethod.KeyFrameFloor) result = Mathf.FloorToInt(f) - 1;
-            else if (_evaluateMethod == QuickAnimEvaluateMethod.KeyFrameCeil) result = Mathf.CeilToInt(f);
-            else result = Mathf.RoundToInt(f);
+            return index;
 
-            return Mathf.Clamp(result, 0, length - 1);
+            //float f = _totalTime == 0? 0 : length * Mathf.Clamp01(time / _totalTime);
+            ////Debug.Log("time = " + time.ToString("f3"));
+            ////Debug.Log("totalTime = " + _totalTime.ToString("f3"));
+            ////Debug.Log("f = " + f.ToString("f3"));
+            ////Debug.Log("length = " + length);
+
+            //int result = 0;
+            //if (_evaluateMethod == QuickAnimEvaluateMethod.KeyFrameFloor) result = Mathf.FloorToInt(f) - 1;
+            //else if (_evaluateMethod == QuickAnimEvaluateMethod.KeyFrameCeil) result = Mathf.CeilToInt(f);
+            //else result = Mathf.RoundToInt(f);
+
+            //return Mathf.Clamp(result, 0, length - 1);
         }
 
         #endregion
