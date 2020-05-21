@@ -154,7 +154,6 @@ namespace QuickVR
             Debug.Log("NUM BODY TRACKERS = " + numTrackers);
 
             //InputDevice dHead = InputDevices.GetDeviceAtXRNode(XRNode.Head);
-            Debug.Log(InputTracking.GetLocalPosition(XRNode.LeftHand).ToString("f3"));
             //Debug.Log("dHead = " + dHead.name);
             ////Vector3 pos;
             ////if (dHead.TryGetFeatureValue(CommonUsages.devicePosition, out pos))

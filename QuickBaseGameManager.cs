@@ -88,7 +88,7 @@ namespace QuickVR {
 
         protected virtual void Awake() {
             _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
-            _calibrationAssisted = !QuickUtils.IsMobileTarget();
+            //_calibrationAssisted = !QuickUtils.IsMobileTarget();
             _instructionsManager = QuickSingletonManager.GetInstance<QuickInstructionsManager>();
 			_debugManager = QuickSingletonManager.GetInstance<DebugManager>();
             _sceneManager = QuickSingletonManager.GetInstance<QuickSceneManager>();
