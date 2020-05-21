@@ -2,6 +2,10 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+#if UNITY_WEBGL
+using WebXR;
+#endif
+
 namespace QuickVR
 {
 
@@ -35,6 +39,12 @@ namespace QuickVR
 
         protected virtual void Awake()
         {
+#if UNITY_WEBGL
+            WebXRCamera wxrCameras = Instantiate(Resources.Load<WebXRCamera>("Prefabs/WebXRCameras"));
+            wxrCameras.transform.parent = transform;
+            wxrCameras.transform.ResetTransformation();
+            wxrCameras.name = "WebXRCameras";
+#else
             _camera = _pfCamera ? Instantiate<Camera>(_pfCamera) : new GameObject().GetOrCreateComponent<Camera>();
             _camera.name = "__Camera__";
             _camera.transform.parent = transform;
@@ -42,27 +52,29 @@ namespace QuickVR
             _camera.tag = "MainCamera";
             _camera.gameObject.GetOrCreateComponent<AudioListener>();
             _camera.gameObject.GetOrCreateComponent<FlareLayer>();
+#endif
+            _camera = Camera.main;
         }
 
-        #endregion
+#endregion
 
-        #region GET AND SET
+#region GET AND SET
 
         public virtual Camera GetCamera()
         {
             return _camera;
         }
 
-        #endregion
+#endregion
 
-        #region UPDATE
+#region UPDATE
 
         public virtual void UpdateCameraPosition(Animator animator)
         {
             _camera.nearClipPlane = _cameraNearPlane;
             _camera.farClipPlane = _cameraFarPlane;
             _camera.cullingMask = _visibleLayers.value;
-
+            
             if (animator)
             {
                 //Apply the correct rotation to the cameracontrollerroot:
@@ -79,7 +91,7 @@ namespace QuickVR
             }
         }
 
-        #endregion
+#endregion
 
     }
 

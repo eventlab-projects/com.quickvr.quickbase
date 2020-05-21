@@ -2,6 +2,10 @@
 using System.Collections;
 using System.Collections.Generic;
 
+#if UNITY_WEBGL
+using WebXR;
+#endif
+
 namespace QuickVR
 {
 
@@ -16,8 +20,10 @@ namespace QuickVR
 
         #region PROTECTED PARAMETERS
 
-        protected InputManager _inputManager = null;
-
+        protected static InputManager _inputManager = null;
+        protected static QuickVRPlayArea _vrPlayArea = null;
+        protected static PerformanceFPS _fpsCounter = null;
+        
         protected Animator _targetAnimator = null;
 
         protected QuickUnityVR _unityVR = null;
@@ -25,9 +31,6 @@ namespace QuickVR
         protected List<QuickBaseTrackingManager> _bodyTrackingSystems = new List<QuickBaseTrackingManager>();
         protected List<QuickBaseTrackingManager> _ikManagerSystems = new List<QuickBaseTrackingManager>();
 
-        protected PerformanceFPS _fpsCounter = null;
-
-        protected QuickVRPlayArea _vrPlayArea = null;
         protected QuickCopyPoseBase _copyPose
         {
             get
@@ -61,11 +64,21 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        protected virtual void Awake()
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        protected static void Init()
         {
             _inputManager = QuickSingletonManager.GetInstance<InputManager>();
             _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
             _fpsCounter = QuickSingletonManager.GetInstance<PerformanceFPS>();
+#if UNITY_WEBGL
+            WebXRManager wxrManager = WebXRManager.Instance;
+            wxrManager.transform.parent = _vrPlayArea.transform;
+            wxrManager.transform.ResetTransformation();
+#endif
+        }
+
+        protected virtual void Awake()
+        {
             _copyPose.enabled = false;
             _cameraController = QuickSingletonManager.GetInstance<QuickVRCameraController>();
         }

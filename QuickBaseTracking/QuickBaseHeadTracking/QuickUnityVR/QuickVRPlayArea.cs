@@ -152,7 +152,22 @@ namespace QuickVR
 
             int numTrackers = bodyTrackers.Count;
             Debug.Log("NUM BODY TRACKERS = " + numTrackers);
-            
+
+            //InputDevice dHead = InputDevices.GetDeviceAtXRNode(XRNode.Head);
+            Debug.Log(InputTracking.GetLocalPosition(XRNode.LeftHand).ToString("f3"));
+            //Debug.Log("dHead = " + dHead.name);
+            ////Vector3 pos;
+            ////if (dHead.TryGetFeatureValue(CommonUsages.devicePosition, out pos))
+            ////{
+            ////    Debug.Log("pos = " + pos.ToString("f3"));
+            ////}
+
+            ////InputDevice dLeftHand = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
+            ////Debug.Log("dLeftHand = " + dLeftHand.name);
+
+            ////InputDevice dRightHand = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+            ////Debug.Log("dRightHand = " + dRightHand.name);
+
             if (numTrackers == 1 || numTrackers == 3 || numTrackers == 4 || numTrackers == 6 || numTrackers == 10)
             {
                 //The head will always be the upper body tracker
