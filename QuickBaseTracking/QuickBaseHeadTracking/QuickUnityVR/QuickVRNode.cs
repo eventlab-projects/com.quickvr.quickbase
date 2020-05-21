@@ -140,6 +140,11 @@ namespace QuickVR
 
         #region GET AND SET
 
+        public virtual void SetTracked(bool isTracked)
+        {
+            _isTracked = isTracked;
+        }
+
         public virtual bool IsTracked()
         {
             return _isTracked;
