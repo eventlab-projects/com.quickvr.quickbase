@@ -3,6 +3,7 @@ using UnityEngine.XR;
 
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.Rendering;
 
 namespace QuickVR {
 
@@ -50,7 +51,6 @@ namespace QuickVR {
 
         protected ReflectionQuality _oldReflectionQuality = ReflectionQuality.HIGH;
 
-        protected Camera _currentCamera = null;
         protected Camera _reflectionCamera = null;
 		protected static bool _insideRendering = false;
 
@@ -195,8 +195,8 @@ namespace QuickVR {
 
         #region MIRROR RENDER
 
-        protected virtual bool AllowRender() {
-            return (Vector3.Distance(_currentCamera.transform.position, transform.position) < _reflectionDistance);
+        protected virtual bool AllowRender(Camera cam) {
+            return (Vector3.Distance(cam.transform.position, transform.position) < _reflectionDistance);
         }
 
         //protected virtual void OnWillRenderObject()
@@ -206,13 +206,15 @@ namespace QuickVR {
 
         public virtual void BeginCameraRendering(Camera cam)
         {
-            if (cam == _reflectionCamera) return;
+            BeginCameraRendering(cam, cam);
+        }
 
-            _currentCamera = cam;
+        public virtual void BeginCameraRendering(Camera camLeft, Camera camRight)
+        {
             //Force the mirror to be in the Water layer, so it will avoid to be rendered by the reflection cameras
 			gameObject.layer = LayerMask.NameToLayer("Water");
 
-            if (AllowRender())
+            if (AllowRender(camLeft))
             {
                 if (!_insideRendering)
                 {
@@ -227,7 +229,7 @@ namespace QuickVR {
 
                     CreateReflectionTexture();
                     CreateReflectionCamera();
-                    RenderReflection();
+                    RenderReflection(camLeft, camRight);
 
                     _insideRendering = false;
 
@@ -253,50 +255,58 @@ namespace QuickVR {
             _insideRendering = false;
         }
 		
-		protected virtual void RenderReflection() {
-            UpdateCameraModes();
+		protected virtual void RenderReflection(Camera camLeft, Camera camRight) {
+            UpdateCameraModes(camLeft);
 
-            RenderVirtualImageStereo(_reflectionTextureLeft, _reflectionTextureRight);
+            if (camLeft == camRight)
+            {
+                if (camLeft.stereoEnabled)
+                {
+                    RenderVirtualImageStereo(camLeft, _reflectionTextureLeft, _reflectionTextureRight);
+                }
+                else
+                {
+                    RenderVirtualImage(camLeft, _reflectionTextureLeft, Camera.StereoscopicEye.Left);
+                }
+            }
+            else
+            {
+                RenderVirtualImage(camLeft, _reflectionTextureLeft, Camera.StereoscopicEye.Left);
+                RenderVirtualImage(camRight, _reflectionTextureRight, Camera.StereoscopicEye.Right);
+            }
 
             Material mat = GetMaterial();
             mat.SetTexture("_LeftEyeTexture", _reflectionTextureLeft);
             mat.SetTexture("_RightEyeTexture", _reflectionTextureRight);
         }
 		
-		protected virtual void RenderVirtualImageStereo(RenderTexture rtLeft, RenderTexture rtRight, bool mirrorStereo = true)
+		protected virtual void RenderVirtualImageStereo(Camera cam, RenderTexture rtLeft, RenderTexture rtRight, bool mirrorStereo = true)
         {
-            if (_currentCamera.stereoEnabled)
+            float stereoSign = mirrorStereo ? -1.0f : 1.0f;
+            float stereoSeparation = cam.stereoSeparation;
+
+            if (stereoSeparation == 0) return;
+
+            if (cam.stereoTargetEye == StereoTargetEyeMask.Both || cam.stereoTargetEye == StereoTargetEyeMask.Left)
             {
-                float stereoSign = mirrorStereo ? -1.0f : 1.0f;
-                float stereoSeparation = _currentCamera.stereoSeparation;
-
-                if (stereoSeparation == 0) return;
-
-                if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Both || _currentCamera.stereoTargetEye == StereoTargetEyeMask.Left)
-                {
-                    RenderVirtualImage(rtLeft, Camera.StereoscopicEye.Left, stereoSign * stereoSeparation * 0.5f);
-                }
-
-                if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Both || _currentCamera.stereoTargetEye == StereoTargetEyeMask.Right)
-                {
-                    RenderVirtualImage(rtRight, Camera.StereoscopicEye.Right, -stereoSign * stereoSeparation * 0.5f);
-                }
+                RenderVirtualImage(cam, rtLeft, Camera.StereoscopicEye.Left, stereoSign * stereoSeparation * 0.5f);
             }
-            else
+
+            if (cam.stereoTargetEye == StereoTargetEyeMask.Both || cam.stereoTargetEye == StereoTargetEyeMask.Right)
             {
-                RenderVirtualImage(rtLeft, Camera.StereoscopicEye.Left);
+                RenderVirtualImage(cam, rtRight, Camera.StereoscopicEye.Right, -stereoSign * stereoSeparation * 0.5f);
             }
         }
 
-        protected virtual void UpdateCameraModes()
+        protected virtual void UpdateCameraModes(Camera cam)
         {
             // set camera to clear the same way as current camera
             _reflectionCamera.cullingMask = ~(1 << LayerMask.NameToLayer("Water")) & ~(1 << LayerMask.NameToLayer("UI")) & _reflectLayers.value; // never render water layer
-            _reflectionCamera.clearFlags = _currentCamera.clearFlags;
-            _reflectionCamera.backgroundColor = _currentCamera.backgroundColor;
-            if (_currentCamera.clearFlags == CameraClearFlags.Skybox)
+            _reflectionCamera.clearFlags = cam.clearFlags;
+            _reflectionCamera.backgroundColor = cam.backgroundColor;
+            if (cam.clearFlags == CameraClearFlags.Skybox)
             {
-                Skybox sky = _currentCamera.GetComponent<Skybox>();
+                Skybox sky = cam.GetComponent<Skybox>();
                 Skybox mysky = _reflectionCamera.GetComponent<Skybox>();
                 if (!sky || !sky.material)
                 {
@@ -312,30 +322,30 @@ namespace QuickVR {
             // update other values to match current camera.
             // even if we are supplying custom camera&projection matrices,
             // some of values are used elsewhere (e.g. skybox uses far plane)
-            _reflectionCamera.nearClipPlane = Mathf.Max(_currentCamera.nearClipPlane, 0.1f);
-            _reflectionCamera.farClipPlane = Mathf.Min(_currentCamera.farClipPlane, 1000.0f);
-            _reflectionCamera.orthographic = _currentCamera.orthographic;
+            _reflectionCamera.nearClipPlane = Mathf.Max(cam.nearClipPlane, 0.1f);
+            _reflectionCamera.farClipPlane = Mathf.Min(cam.farClipPlane, 1000.0f);
+            _reflectionCamera.orthographic = cam.orthographic;
             //_reflectionCamera.fieldOfView = _currentCamera.fieldOfView;
-            _reflectionCamera.aspect = _currentCamera.aspect;
-            _reflectionCamera.orthographicSize = _currentCamera.orthographicSize;
+            _reflectionCamera.aspect = cam.aspect;
+            _reflectionCamera.orthographicSize = cam.orthographicSize;
         }
 
-        protected abstract void RenderVirtualImage(RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0.0f);
+        protected abstract void RenderVirtualImage(Camera cam, RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0.0f);
 
-        protected virtual void OnDrawGizmos()
-        {
-            if (_currentCamera && _reflectionCamera)
-            {
-                Gizmos.color = Color.red;
-                Gizmos.matrix = Matrix4x4.TRS(_currentCamera.transform.position, _currentCamera.transform.rotation, Vector3.one); 
-                Gizmos.DrawFrustum(Vector3.zero, _currentCamera.fieldOfView, _currentCamera.farClipPlane, _currentCamera.nearClipPlane, _currentCamera.aspect);
+        //protected virtual void OnDrawGizmos()
+        //{
+        //    if (_currentCamera && _reflectionCamera)
+        //    {
+        //        Gizmos.color = Color.red;
+        //        Gizmos.matrix = Matrix4x4.TRS(_currentCamera.transform.position, _currentCamera.transform.rotation, Vector3.one); 
+        //        Gizmos.DrawFrustum(Vector3.zero, _currentCamera.fieldOfView, _currentCamera.farClipPlane, _currentCamera.nearClipPlane, _currentCamera.aspect);
 
-                Gizmos.color = Color.blue;
-                Gizmos.matrix = Matrix4x4.TRS(_reflectionCamera.transform.position, _reflectionCamera.transform.rotation, Vector3.one);
-                Gizmos.DrawFrustum(Vector3.zero, _reflectionCamera.fieldOfView, _reflectionCamera.farClipPlane, _reflectionCamera.nearClipPlane, _reflectionCamera.aspect);
-            } 
+        //        Gizmos.color = Color.blue;
+        //        Gizmos.matrix = Matrix4x4.TRS(_reflectionCamera.transform.position, _reflectionCamera.transform.rotation, Vector3.one);
+        //        Gizmos.DrawFrustum(Vector3.zero, _reflectionCamera.fieldOfView, _reflectionCamera.farClipPlane, _reflectionCamera.nearClipPlane, _reflectionCamera.aspect);
+        //    } 
             
-        }
+        //}
 
         #endregion
 

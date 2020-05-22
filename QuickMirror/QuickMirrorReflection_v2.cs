@@ -62,9 +62,9 @@ namespace QuickVR
 
         #region UPDATE
 
-        protected override void UpdateCameraModes()
+        protected override void UpdateCameraModes(Camera cam)
         {
-            base.UpdateCameraModes();
+            base.UpdateCameraModes(cam);
 
             //_reflectionCamera.RemoveAllCommandBuffers();
             //CommandBuffer invertCullingON = CreateInvertCullingCommandBuffer(true);
@@ -73,37 +73,43 @@ namespace QuickVR
             //_reflectionCamera.AddCommandBuffer(CameraEvent.AfterEverything, CreateInvertCullingCommandBuffer(false));
         }
 
-        protected override void RenderReflection()
+        protected override void RenderReflection(Camera camLeft, Camera camRight)
         {
-            base.RenderReflection();
+            base.RenderReflection(camLeft, camRight);
 
             Material mat = GetMaterial();
-            Camera cam = _currentCamera;
-            Matrix4x4 refl = CalculateReflectionMatrix();
-            if (cam.stereoEnabled)
+            if (camLeft == camRight)
             {
-                mat.SetMatrix("_mvpEyeLeft", cam.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left) * cam.GetStereoViewMatrix(Camera.StereoscopicEye.Left) * transform.localToWorldMatrix);
+                if (camLeft.stereoEnabled)
+                {
+                    mat.SetMatrix("_mvpEyeLeft", camLeft.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left) * camLeft.GetStereoViewMatrix(Camera.StereoscopicEye.Left) * transform.localToWorldMatrix);
+                }
+                else
+                {
+                    mat.SetMatrix("_mvpEyeLeft", camLeft.projectionMatrix * camLeft.worldToCameraMatrix * transform.localToWorldMatrix);
+                }
+                mat.SetMatrix("_mvpEyeRight", camRight.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right) * camRight.GetStereoViewMatrix(Camera.StereoscopicEye.Right) * transform.localToWorldMatrix);
             }
             else
             {
-                mat.SetMatrix("_mvpEyeLeft", cam.projectionMatrix * cam.worldToCameraMatrix * transform.localToWorldMatrix);
+                mat.SetMatrix("_mvpEyeLeft", camLeft.projectionMatrix * camLeft.worldToCameraMatrix * transform.localToWorldMatrix);
+                mat.SetMatrix("_mvpEyeRight", camRight.projectionMatrix * camRight.worldToCameraMatrix * transform.localToWorldMatrix);
             }
-            mat.SetMatrix("_mvpEyeRight", cam.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right) * cam.GetStereoViewMatrix(Camera.StereoscopicEye.Right) * transform.localToWorldMatrix);
         }
 
-        protected virtual void ReflectCamera(float stereoSeparation)
+        protected virtual void ReflectCamera(Camera cam, float stereoSeparation)
         {
             //Reflect camera around reflection plane
             Vector3 normal = GetNormal();
             //Vector3 camToPlane = (_currentCamera.transform.position + _currentCamera.transform.right * stereoSeparation) - transform.position;
-            Vector3 camToPlane = _currentCamera.transform.position - transform.position;
+            Vector3 camToPlane = cam.transform.position - transform.position;
             Vector3 reflectionCamToPlane = Vector3.Reflect(camToPlane, normal);
             Vector3 camPosRS = transform.position + reflectionCamToPlane;
             _reflectionCamera.transform.position = camPosRS;
 
             ///Compute the orientation of the reflection camera
-            Vector3 reflectionFwd = Vector3.Reflect(_currentCamera.transform.forward, normal);
-            Vector3 reflectionUp = Vector3.Reflect(_currentCamera.transform.up, normal);
+            Vector3 reflectionFwd = Vector3.Reflect(cam.transform.forward, normal);
+            Vector3 reflectionUp = Vector3.Reflect(cam.transform.up, normal);
             Quaternion q = Quaternion.LookRotation(reflectionFwd, reflectionUp);
             _reflectionCamera.transform.rotation = q;
         }
@@ -149,16 +155,16 @@ namespace QuickVR
         //    }
         //}
 
-        protected override void RenderVirtualImage(RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0)
+        protected override void RenderVirtualImage(Camera cam, RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0)
         {
             GL.invertCulling = true;
 
             //1) Compute worldToCamera Matrix
-            _reflectionCamera.worldToCameraMatrix = _currentCamera.stereoEnabled ? _currentCamera.GetStereoViewMatrix(eye) : _currentCamera.worldToCameraMatrix;
+            _reflectionCamera.worldToCameraMatrix = cam.stereoEnabled ? cam.GetStereoViewMatrix(eye) : cam.worldToCameraMatrix;
             _reflectionCamera.worldToCameraMatrix *= CalculateReflectionMatrix();
 
             //2) Compute the projection matrix
-            _reflectionCamera.projectionMatrix = (_currentCamera.stereoEnabled) ? _currentCamera.GetStereoProjectionMatrix(eye) : _currentCamera.projectionMatrix;
+            _reflectionCamera.projectionMatrix = (cam.stereoEnabled) ? cam.GetStereoProjectionMatrix(eye) : cam.projectionMatrix;
             
             //3) Do the render
             _reflectionCamera.targetTexture = targetTexture;

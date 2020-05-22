@@ -60,7 +60,7 @@ namespace QuickVR {
 
         #region MIRROR RENDER
 
-        protected override void RenderVirtualImage(RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0.0f)
+        protected override void RenderVirtualImage(Camera cam, RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0.0f)
         {
             //Debug.Log("MATRICES");
             //Debug.Log(_currentCamera.transform.worldToLocalMatrix.ToString("f3"));
@@ -76,7 +76,7 @@ namespace QuickVR {
 			Vector3 pc = GetCornerPosition(Corner.TOP_LEFT);
 
             //Vector3 pe = GetReflectedPosition(_currentCamera.transform.position) + _currentCamera.transform.right * stereoSeparation; // eye position
-            Vector3 pe = GetReflectedPosition(_currentCamera.transform.position + _currentCamera.transform.right * stereoSeparation); // eye position
+            Vector3 pe = GetReflectedPosition(cam.transform.position + cam.transform.right * stereoSeparation); // eye position
 
             Vector3 va = pa - pe;
 			Vector3 vb = pb - pe;
@@ -88,8 +88,8 @@ namespace QuickVR {
             //Adjust the near and far clipping planes of the reflection camera. 
             Vector3 v = pe - transform.position;
             Vector3 projectedPoint = pe - Vector3.Project(v, vn);
-            float n = Mathf.Max(_currentCamera.nearClipPlane, Vector3.Distance(pe, projectedPoint));
-            float f = Mathf.Max(n, _currentCamera.farClipPlane);
+            float n = Mathf.Max(cam.nearClipPlane, Vector3.Distance(pe, projectedPoint));
+            float f = Mathf.Max(n, cam.farClipPlane);
 
             float d = -Vector3.Dot(va, vn);			// distance from eye to screen 
             float l = Vector3.Dot(vr, va) * n / d;	// distance to left screen edge
@@ -130,7 +130,7 @@ namespace QuickVR {
 
         #region DEBUG
 
-        protected override void OnDrawGizmos()
+        protected virtual void OnDrawGizmos()
         {
             float r = 0.05f;
 
