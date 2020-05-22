@@ -74,6 +74,7 @@ namespace QuickVR
             WebXRManager wxrManager = WebXRManager.Instance;
             wxrManager.transform.parent = _vrPlayArea.transform;
             wxrManager.transform.ResetTransformation();
+            wxrManager.GetOrCreateComponent<QuickWebXRHandlersManager>();
 #endif
         }
 
