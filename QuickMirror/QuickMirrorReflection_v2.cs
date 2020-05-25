@@ -87,15 +87,7 @@ namespace QuickVR
             }
             else
             {
-                Matrix4x4 mvp = cam.projectionMatrix * cam.worldToCameraMatrix * transform.localToWorldMatrix;
-                if (cam.stereoTargetEye == StereoTargetEyeMask.Left)
-                {
-                    mat.SetMatrix("_mvpEyeLeft", mvp);
-                }
-                else
-                {
-                    mat.SetMatrix("_mvpEyeRight", mvp);
-                }
+                mat.SetMatrix("_mvpEyeLeft", cam.projectionMatrix * cam.worldToCameraMatrix * transform.localToWorldMatrix);
             }
         }
 

@@ -232,9 +232,8 @@ namespace QuickVR {
 
             return Input.GetKey(k);
         }
-#endif
 
-        
+#endif
 
 #endregion
 

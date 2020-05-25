@@ -274,7 +274,6 @@ namespace QuickVR
         {
             if (_currentCamera.stereoEnabled)
             {
-                Shader.SetGlobalInt("MANUAL_RENDER_EYE", 0);
                 float stereoSign = mirrorStereo ? -1.0f : 1.0f;
                 float stereoSeparation = stereoSign * _currentCamera.stereoSeparation * 0.5f;
                 RenderVirtualImage(rtLeft, Camera.StereoscopicEye.Left, stereoSeparation);
@@ -282,13 +281,11 @@ namespace QuickVR
             }
             else if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Both || _currentCamera.stereoTargetEye == StereoTargetEyeMask.Left)
             {
-                Shader.SetGlobalInt("MANUAL_RENDER_EYE", 0);
                 RenderVirtualImage(rtLeft, Camera.StereoscopicEye.Left);
             }
             else if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Right)
             {
-                Shader.SetGlobalInt("MANUAL_RENDER_EYE", 1);
-                RenderVirtualImage(rtRight, Camera.StereoscopicEye.Right);
+                RenderVirtualImage(rtLeft, Camera.StereoscopicEye.Right);
             }
         }
 
