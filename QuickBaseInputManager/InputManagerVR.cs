@@ -2,10 +2,6 @@
 using System.Collections;
 using System.Collections.Generic;
 
-using UnityEngine.XR;
-using WebXR;
-using UnityEngine.UI;
-
 namespace QuickVR {
 
 	[System.Serializable]
