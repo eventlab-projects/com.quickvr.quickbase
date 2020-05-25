@@ -29,6 +29,7 @@ namespace QuickVR
 #endif
             QuickVRManager.OnPostCameraUpdate += UpdateMirrorsMainCamera;
             //Camera.onPreRender += UpdateMirrors;
+            Camera.onPreRender += Test;
         }
 
         #endregion
@@ -54,17 +55,14 @@ namespace QuickVR
         {
             if (Application.isPlaying) return;
 
-            foreach (QuickMirrorReflectionBase mirror in _mirrors)
-            {
-                mirror.BeginCameraRendering(sView.camera);
-            }
+            UpdateMirrors(sView.camera);
         }
 #endif
 
         static void UpdateMirrors(Camera cam)
         {
-            if (cam.name == MIRROR_CAMERA_NAME) return;
-
+            Debug.Log(cam.name);
+            Debug.Log(cam.stereoTargetEye);
             foreach (QuickMirrorReflectionBase mirror in _mirrors)
             {
                 mirror.BeginCameraRendering(cam);
@@ -73,7 +71,15 @@ namespace QuickVR
 
         static void UpdateMirrorsMainCamera()
         {
-            UpdateMirrors(Camera.main);
+            foreach (Camera cam in Camera.allCameras)
+            {
+                UpdateMirrors(cam);
+            }
+        }
+
+        static void Test(Camera cam)
+        {
+            //Debug.Log(cam.name);
         }
 
         #endregion

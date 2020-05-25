@@ -5,35 +5,39 @@ using System.Collections;
 using System.Collections.Generic;
 using System;
 
-namespace QuickVR {
+namespace QuickVR
+{
 
-	/// <summary>
-	/// Mirror Reflection Script for planar surfaces with dynamic shadows support. 
-	/// \author Ramon Oliva
-	/// </summary>
-	 
-	[ExecuteInEditMode] // Make mirror live-update even when not in play mode
-	public class QuickMirrorReflection : QuickMirrorReflectionBase {
-		
-		#region PROTECTED PARAMETERS
-		
-		protected enum Corner {
-			TOP_LEFT,
-			TOP_RIGHT,
-			BOTTOM_LEFT,
-			BOTTOM_RIGHT,
-		};
+    /// <summary>
+    /// Mirror Reflection Script for planar surfaces with dynamic shadows support. 
+    /// \author Ramon Oliva
+    /// </summary>
 
-		#endregion
-		
-		#region GET AND SET
+    [ExecuteInEditMode] // Make mirror live-update even when not in play mode
+    public class QuickMirrorReflection : QuickMirrorReflectionBase
+    {
+
+        #region PROTECTED PARAMETERS
+
+        protected enum Corner
+        {
+            TOP_LEFT,
+            TOP_RIGHT,
+            BOTTOM_LEFT,
+            BOTTOM_RIGHT,
+        };
+
+        #endregion
+
+        #region GET AND SET
 
         protected override string GetShaderName()
         {
             return "QuickVR/MirrorReflection";
         }
 
-        protected virtual Vector3 GetCornerPosition(Corner corner) {
+        protected virtual Vector3 GetCornerPosition(Corner corner)
+        {
             Bounds bounds = _mFilter.sharedMesh.bounds;
 
             if (corner == Corner.BOTTOM_LEFT) return transform.TransformPoint(new Vector3(bounds.min.x, bounds.min.y, bounds.center.z));
@@ -60,7 +64,7 @@ namespace QuickVR {
 
         #region MIRROR RENDER
 
-        protected override void RenderVirtualImage(Camera cam, RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0.0f)
+        protected override void RenderVirtualImage(RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0.0f)
         {
             //Debug.Log("MATRICES");
             //Debug.Log(_currentCamera.transform.worldToLocalMatrix.ToString("f3"));
@@ -72,47 +76,47 @@ namespace QuickVR {
             //http://csc.lsu.edu/~kooima/pdfs/gen-perspective.pdf 
 
             Vector3 pa = GetCornerPosition(Corner.BOTTOM_LEFT);
-			Vector3 pb = GetCornerPosition(Corner.BOTTOM_RIGHT);
-			Vector3 pc = GetCornerPosition(Corner.TOP_LEFT);
+            Vector3 pb = GetCornerPosition(Corner.BOTTOM_RIGHT);
+            Vector3 pc = GetCornerPosition(Corner.TOP_LEFT);
 
             //Vector3 pe = GetReflectedPosition(_currentCamera.transform.position) + _currentCamera.transform.right * stereoSeparation; // eye position
-            Vector3 pe = GetReflectedPosition(cam.transform.position + cam.transform.right * stereoSeparation); // eye position
+            Vector3 pe = GetReflectedPosition(_currentCamera.transform.position + _currentCamera.transform.right * stereoSeparation); // eye position
 
             Vector3 va = pa - pe;
-			Vector3 vb = pb - pe;
-			Vector3 vc = pc - pe;
+            Vector3 vb = pb - pe;
+            Vector3 vc = pc - pe;
             Vector3 vr = transform.right;       // right axis of screen
-			Vector3 vu = transform.up;		    // up axis of screen
-			Vector3 vn = -transform.forward;    // normal vector of screen
+            Vector3 vu = transform.up;          // up axis of screen
+            Vector3 vn = -transform.forward;    // normal vector of screen
 
             //Adjust the near and far clipping planes of the reflection camera. 
             Vector3 v = pe - transform.position;
             Vector3 projectedPoint = pe - Vector3.Project(v, vn);
-            float n = Mathf.Max(cam.nearClipPlane, Vector3.Distance(pe, projectedPoint));
-            float f = Mathf.Max(n, cam.farClipPlane);
+            float n = Mathf.Max(_currentCamera.nearClipPlane, Vector3.Distance(pe, projectedPoint));
+            float f = Mathf.Max(n, _currentCamera.farClipPlane);
 
             float d = -Vector3.Dot(va, vn);			// distance from eye to screen 
-            float l = Vector3.Dot(vr, va) * n / d;	// distance to left screen edge
-			float r = Vector3.Dot(vr, vb) * n / d;	// distance to right screen edge
-			float b = Vector3.Dot(vu, va) * n / d;	// distance to bottom screen edge
-			float t = Vector3.Dot(vu, vc) * n / d;  // distance to top screen edge
+            float l = Vector3.Dot(vr, va) * n / d;  // distance to left screen edge
+            float r = Vector3.Dot(vr, vb) * n / d;  // distance to right screen edge
+            float b = Vector3.Dot(vu, va) * n / d;  // distance to bottom screen edge
+            float t = Vector3.Dot(vu, vc) * n / d;  // distance to top screen edge
 
             //Projection matrix
-			Matrix4x4 p = new Matrix4x4();
-			p.SetRow(0, new Vector4(2.0f * n / (r-l), 	0.0f, 				(r+l) / (r-l), 	0.0f));
-			p.SetRow(1, new Vector4(0.0f, 				2.0f * n / (t-b), 	(t+b) / (t-b), 	0.0f));
-			p.SetRow(2, new Vector4(0.0f, 				0.0f, 				(f+n) / (n-f), 	2.0f * f * n / (n-f)));
-			p.SetRow(3, new Vector4(0.0f, 				0.0f, 				-1.0f, 			0.0f));
+            Matrix4x4 p = new Matrix4x4();
+            p.SetRow(0, new Vector4(2.0f * n / (r - l), 0.0f, (r + l) / (r - l), 0.0f));
+            p.SetRow(1, new Vector4(0.0f, 2.0f * n / (t - b), (t + b) / (t - b), 0.0f));
+            p.SetRow(2, new Vector4(0.0f, 0.0f, (f + n) / (n - f), 2.0f * f * n / (n - f)));
+            p.SetRow(3, new Vector4(0.0f, 0.0f, -1.0f, 0.0f));
 
-			//Rotation matrix
-			Matrix4x4 rm = Matrix4x4.identity; 
-			rm.SetRow(0, new Vector4(vr.x, vr.y, vr.z, 0.0f));
-			rm.SetRow(1, new Vector4(vu.x, vu.y, vu.z, 0.0f));
-			rm.SetRow(2, new Vector4(vn.x, vn.y, vn.z, 0.0f));
+            //Rotation matrix
+            Matrix4x4 rm = Matrix4x4.identity;
+            rm.SetRow(0, new Vector4(vr.x, vr.y, vr.z, 0.0f));
+            rm.SetRow(1, new Vector4(vu.x, vu.y, vu.z, 0.0f));
+            rm.SetRow(2, new Vector4(vn.x, vn.y, vn.z, 0.0f));
 
-			//Translation matrix
-			Matrix4x4 tm = Matrix4x4.identity;
-			tm.SetColumn(3, new Vector4(-pe.x, -pe.y, -pe.z, 1.0f));
+            //Translation matrix
+            Matrix4x4 tm = Matrix4x4.identity;
+            tm.SetColumn(3, new Vector4(-pe.x, -pe.y, -pe.z, 1.0f));
 
             // set matrices
             _reflectionCamera.projectionMatrix = p;
@@ -124,13 +128,13 @@ namespace QuickVR {
             // work with Unity's shadow maps.
             _reflectionCamera.targetTexture = targetTexture;
             _reflectionCamera.Render();
-		}
+        }
 
         #endregion
 
         #region DEBUG
 
-        protected virtual void OnDrawGizmos()
+        protected override void OnDrawGizmos()
         {
             float r = 0.05f;
 
@@ -185,7 +189,7 @@ namespace QuickVR {
             Vector3 tr = Vector3.zero;
             Vector3 bl = Vector3.zero;
             Vector3 br = Vector3.zero;
-            
+
             if (plane.Raycast(new Ray(pe, camCornerRays[Corner.TOP_LEFT]), out rayDistance))
             {
                 tl = pe + camCornerRays[Corner.TOP_LEFT].normalized * rayDistance;
