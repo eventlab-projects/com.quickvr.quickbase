@@ -13,6 +13,8 @@ uniform float4 _NoiseColor;			//The color of the noise
 
 uniform int REFLECTION_INVERT_Y;
 
+uniform int MANUAL_RENDER_EYE;
+
 struct v2f
 {
 	float2 uv : TEXCOORD0;
@@ -42,9 +44,20 @@ v2f vert(float4 pos : POSITION, float2 uv : TEXCOORD0)
 	return o;
 }
 
+int isEyeLeft() 
+{
+	if (unity_StereoEyeIndex == 0) 
+	{
+		return (MANUAL_RENDER_EYE == 0) ? 1 : 0;
+	}
+	return 0;
+}
+
 fixed4 ComputeFinalColor(float2 uvReflection, float2 uvTex) 
 {
-	fixed4 refl = (unity_StereoEyeIndex == 0) ? tex2D(_LeftEyeTexture, uvReflection) : tex2D(_RightEyeTexture, uvReflection);
+	//return isEyeLeft() ? fixed4(1,0,0,1) : fixed4(0,1,0,1);
+
+	fixed4 refl = isEyeLeft() ? tex2D(_LeftEyeTexture, uvReflection) : tex2D(_RightEyeTexture, uvReflection);
 	fixed4 noiseColor = tex2D(_NoiseMask, uvTex) * _NoiseColor;
 	fixed4 finalColor = refl * _ReflectionPower + noiseColor * _NoisePower;
 

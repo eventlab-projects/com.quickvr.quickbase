@@ -1448,6 +1448,26 @@ PrefabInstance:
       propertyPath: orthographic size
       value: 5
       objectReference: {fileID: 0}
+    - target: {fileID: 1411516550990969898, guid: 1c0a1103aa90aff45a648827e87681a5,
+        type: 3}
+      propertyPath: m_ClearFlags
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1411516550990969898, guid: 1c0a1103aa90aff45a648827e87681a5,
+        type: 3}
+      propertyPath: m_BackGroundColor.a
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1411516550990969898, guid: 1c0a1103aa90aff45a648827e87681a5,
+        type: 3}
+      propertyPath: near clip plane
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1411516550990969898, guid: 1c0a1103aa90aff45a648827e87681a5,
+        type: 3}
+      propertyPath: far clip plane
+      value: 1000
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1c0a1103aa90aff45a648827e87681a5, type: 3}
 --- !u!1 &567922442
@@ -4184,6 +4204,26 @@ PrefabInstance:
         type: 3}
       propertyPath: orthographic size
       value: 5
+      objectReference: {fileID: 0}
+    - target: {fileID: 1411516550990969898, guid: 1c0a1103aa90aff45a648827e87681a5,
+        type: 3}
+      propertyPath: m_ClearFlags
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1411516550990969898, guid: 1c0a1103aa90aff45a648827e87681a5,
+        type: 3}
+      propertyPath: m_BackGroundColor.a
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1411516550990969898, guid: 1c0a1103aa90aff45a648827e87681a5,
+        type: 3}
+      propertyPath: near clip plane
+      value: 0.1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1411516550990969898, guid: 1c0a1103aa90aff45a648827e87681a5,
+        type: 3}
+      propertyPath: far clip plane
+      value: 1000
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 114777982434440394, guid: 1c0a1103aa90aff45a648827e87681a5, type: 3}

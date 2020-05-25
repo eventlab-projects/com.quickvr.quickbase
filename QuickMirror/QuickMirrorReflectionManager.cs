@@ -27,7 +27,8 @@ namespace QuickVR
 #if UNITY_EDITOR
             UnityEditor.SceneView.beforeSceneGui += UpdateMirrorsSceneView;
 #endif
-            QuickVRManager.OnPostCameraUpdate += UpdateMirrorsMainCamera;
+            //QuickVRManager.OnPostCameraUpdate += UpdateMirrorsMainCamera;
+            Camera.onPreCull += UpdateMirrors;
         }
 
         #endregion
