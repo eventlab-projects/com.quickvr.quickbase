@@ -3529,7 +3529,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _showInInspector: 1
-  _axisCode: Vertical
+  _axisCode: None
   _value: 0
   _positiveButton: {fileID: 1358146225}
   _negativeButton: {fileID: 1358146224}

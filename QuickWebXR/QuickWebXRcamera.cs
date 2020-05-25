@@ -2,17 +2,28 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class QuickWebXRcamera : MonoBehaviour
+using WebXR;
+
+namespace QuickVR
 {
-    // Start is called before the first frame update
-    void Start()
+    public class QuickWebXRCamera : WebXRCamera
     {
-        
+
+        #region CREATION AND DESTRUCTION
+
+        protected virtual void Awake()
+        {
+            Camera camLeft = transform.GetChild(1).GetComponent<Camera>();
+            camLeft.stereoTargetEye = StereoTargetEyeMask.Left;
+            camLeft.tag = "MainCamera";
+
+            transform.GetChild(2).GetComponent<Camera>().stereoTargetEye = StereoTargetEyeMask.Right;
+        }
+
+        #endregion
+
     }
 
-    // Update is called once per frame
-    void Update()
-    {
-        
-    }
 }
+
+

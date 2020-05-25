@@ -272,26 +272,17 @@ namespace QuickVR
 
         protected virtual void RenderVirtualImageStereo(RenderTexture rtLeft, RenderTexture rtRight, bool mirrorStereo = true)
         {
-            if (_currentCamera.stereoEnabled)
+            float stereoSign = mirrorStereo ? -1.0f : 1.0f;
+            float stereoSeparation = _currentCamera.stereoEnabled? _currentCamera.stereoSeparation : 0;
+
+            if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Both || _currentCamera.stereoTargetEye == StereoTargetEyeMask.Left)
             {
-                float stereoSign = mirrorStereo ? -1.0f : 1.0f;
-                float stereoSeparation = _currentCamera.stereoSeparation;
-
-                if (stereoSeparation == 0) return;
-
-                if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Both || _currentCamera.stereoTargetEye == StereoTargetEyeMask.Left)
-                {
-                    RenderVirtualImage(rtLeft, Camera.StereoscopicEye.Left, stereoSign * stereoSeparation * 0.5f);
-                }
-
-                if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Both || _currentCamera.stereoTargetEye == StereoTargetEyeMask.Right)
-                {
-                    RenderVirtualImage(rtRight, Camera.StereoscopicEye.Right, -stereoSign * stereoSeparation * 0.5f);
-                }
+                RenderVirtualImage(rtLeft, Camera.StereoscopicEye.Left, stereoSign * stereoSeparation * 0.5f);
             }
-            else
+
+            if ((_currentCamera.stereoEnabled && _currentCamera.stereoTargetEye == StereoTargetEyeMask.Both) || _currentCamera.stereoTargetEye == StereoTargetEyeMask.Right)
             {
-                RenderVirtualImage(rtLeft, Camera.StereoscopicEye.Left);
+                RenderVirtualImage(rtRight, Camera.StereoscopicEye.Right, -stereoSign * stereoSeparation * 0.5f);
             }
         }
 

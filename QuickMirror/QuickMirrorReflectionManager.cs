@@ -28,8 +28,6 @@ namespace QuickVR
             UnityEditor.SceneView.beforeSceneGui += UpdateMirrorsSceneView;
 #endif
             QuickVRManager.OnPostCameraUpdate += UpdateMirrorsMainCamera;
-            //Camera.onPreRender += UpdateMirrors;
-            Camera.onPreRender += Test;
         }
 
         #endregion
@@ -61,8 +59,6 @@ namespace QuickVR
 
         static void UpdateMirrors(Camera cam)
         {
-            Debug.Log(cam.name);
-            Debug.Log(cam.stereoTargetEye);
             foreach (QuickMirrorReflectionBase mirror in _mirrors)
             {
                 mirror.BeginCameraRendering(cam);
@@ -75,11 +71,6 @@ namespace QuickVR
             {
                 UpdateMirrors(cam);
             }
-        }
-
-        static void Test(Camera cam)
-        {
-            //Debug.Log(cam.name);
         }
 
         #endregion

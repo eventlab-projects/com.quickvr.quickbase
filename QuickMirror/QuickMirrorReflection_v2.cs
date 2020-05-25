@@ -83,12 +83,20 @@ namespace QuickVR
             if (cam.stereoEnabled)
             {
                 mat.SetMatrix("_mvpEyeLeft", cam.GetStereoProjectionMatrix(Camera.StereoscopicEye.Left) * cam.GetStereoViewMatrix(Camera.StereoscopicEye.Left) * transform.localToWorldMatrix);
+                mat.SetMatrix("_mvpEyeRight", cam.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right) * cam.GetStereoViewMatrix(Camera.StereoscopicEye.Right) * transform.localToWorldMatrix);
             }
             else
             {
-                mat.SetMatrix("_mvpEyeLeft", cam.projectionMatrix * cam.worldToCameraMatrix * transform.localToWorldMatrix);
+                Matrix4x4 mvp = cam.projectionMatrix * cam.worldToCameraMatrix * transform.localToWorldMatrix;
+                if (cam.stereoTargetEye == StereoTargetEyeMask.Left)
+                {
+                    mat.SetMatrix("_mvpEyeLeft", mvp);
+                }
+                else
+                {
+                    mat.SetMatrix("_mvpEyeRight", mvp);
+                }
             }
-            mat.SetMatrix("_mvpEyeRight", cam.GetStereoProjectionMatrix(Camera.StereoscopicEye.Right) * cam.GetStereoViewMatrix(Camera.StereoscopicEye.Right) * transform.localToWorldMatrix);
         }
 
         protected virtual void ReflectCamera(float stereoSeparation)
