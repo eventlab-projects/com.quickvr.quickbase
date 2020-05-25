@@ -122,30 +122,9 @@ namespace QuickVR {
 
         #region INPUT MANAGEMENT
 
+#if UNITY_WEBGL && !UNITY_EDITOR
+
         protected override float ImpGetAxis(string axis)
-        {
-#if UNITY_WEBGL && !UNITY_EDITOR
-            return ImpGetAxisWebXR(axis);
-#else
-            return ImpGetAxisUnityVR(axis);
-#endif
-        }
-
-        protected override bool ImpGetButton(string button)
-        {
-#if UNITY_WEBGL && !UNITY_EDITOR
-            return ImpGetButtonWebXR(button);
-#else
-            return ImpGetButtonUnityVR(button);
-#endif
-        }
-
-        protected virtual float ImpGetAxisUnityVR(string axis)
-        {
-            return Input.GetAxis("QuickVR_" + GetRealCode(axis));
-        }
-
-        protected virtual float ImpGetAxisWebXR(string axis)
         {
             QuickWebXRHandlerController h = GetHandlerController(axis);
             AxisCodes aCode = _toAxis[axis];
@@ -169,7 +148,43 @@ namespace QuickVR {
             return 0;
         }
 
-        protected virtual bool ImpGetButtonUnityVR(string button)
+        protected override bool ImpGetButton(string button)
+        {
+            QuickWebXRHandlerController h = GetHandlerController(button);
+            ButtonCodes bCode = _toButton[button];
+
+            if (bCode == ButtonCodes.TriggerIndexPressLeft || bCode == ButtonCodes.TriggerIndexPressRight)
+            {
+                return h.GetAxis(0) > AXIS_PRESSED_THRESHOLD;
+            }
+            if (bCode == ButtonCodes.TriggerHandPressLeft || bCode == ButtonCodes.TriggerHandPressRight)
+            {
+                return h.GetAxis(1) > AXIS_PRESSED_THRESHOLD;
+            }
+            if (bCode == ButtonCodes.PadPressLeft || bCode == ButtonCodes.PadPressRight)
+            {
+                return h.GetButton(3);
+            }
+            if (bCode == ButtonCodes.PrimaryLeft || bCode == ButtonCodes.PrimaryRight)
+            {
+                return h.GetButton(4);
+            }
+            if (bCode == ButtonCodes.SecondaryLeft || bCode == ButtonCodes.SecondaryRight)
+            {
+                return h.GetButton(5);
+            }
+
+            return false;
+        }
+
+#else
+
+        protected override float ImpGetAxis(string axis)
+        {
+            return Input.GetAxis("QuickVR_" + GetRealCode(axis));
+        }
+
+        protected override bool ImpGetButton(string button)
         {
             button = GetRealCode(button);
 
@@ -217,35 +232,9 @@ namespace QuickVR {
 
             return Input.GetKey(k);
         }
+#endif
 
-        protected virtual bool ImpGetButtonWebXR(string button)
-        {
-            QuickWebXRHandlerController h = GetHandlerController(button);
-            ButtonCodes bCode = _toButton[button];
-
-            if (bCode == ButtonCodes.TriggerIndexPressLeft || bCode == ButtonCodes.TriggerIndexPressRight)
-            {
-                return h.GetAxis(0) > AXIS_PRESSED_THRESHOLD;
-            }
-            if (bCode == ButtonCodes.TriggerHandPressLeft || bCode == ButtonCodes.TriggerHandPressRight)
-            {
-                return h.GetAxis(1) > AXIS_PRESSED_THRESHOLD;
-            }
-            if (bCode == ButtonCodes.PadPressLeft || bCode == ButtonCodes.PadPressRight)
-            {
-                return h.GetButton(3);
-            }
-            if (bCode == ButtonCodes.PrimaryLeft || bCode == ButtonCodes.PrimaryRight)
-            {
-                return h.GetButton(4);
-            }
-            if (bCode == ButtonCodes.SecondaryLeft || bCode == ButtonCodes.SecondaryRight)
-            {
-                return h.GetButton(5);
-            }
-
-            return false;
-        }
+        
 
 #endregion
 
