@@ -106,10 +106,26 @@ namespace QuickVR {
 
         public override void UpdateTrackingLate() 
         {
-            foreach (IKLimbBones boneID in GetIKLimbBones())
+            Vector3 offset = Vector3.zero;
+            if (IsTrackedIKLimbBone(IKLimbBones.Head))
             {
+                QuickIKSolver ikSolverHead = GetIKSolver<QuickIKSolver>(HumanBodyBones.Head);
+                ikSolverHead.UpdateIK();
+                offset = ikSolverHead._targetLimb.position - ikSolverHead._boneLimb.position;
+            }
+
+            if (IsTrackedIKLimbBone(IKLimbBones.Hips))
+            {
+                QuickIKSolver ikSolverHips = GetIKSolver<QuickIKSolver>(HumanBodyBones.Hips);
+                ikSolverHips._targetLimb.position += offset;
+                ikSolverHips.UpdateIK();
+            }
+
+            for (int i = (int)IKLimbBones.LeftHand; i <= (int)IKLimbBones.RightFoot; i++)
+            {
+                IKLimbBones boneID = (IKLimbBones)i;
                 QuickIKSolver ikSolver = GetIKSolver<QuickIKSolver>(ToUnity(boneID));
-                if (ikSolver && ((_ikMaskBody & (1 << (int)boneID)) != 0))
+                if (ikSolver && ((_ikMaskBody & (1 << i)) != 0))
                 {
                     //ikSolver.ResetIKChain();
                     //Correct the rotations of the limb bones by accounting for human body constraints

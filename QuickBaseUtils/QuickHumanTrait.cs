@@ -578,6 +578,8 @@ namespace QuickVR
             animator.transform.parent = tmpParent;
             animator.transform.position = tmpPos;
             animator.transform.rotation = tmpRot;
+
+            animator.transform.localScale = Vector3.one;
         }
 
         public static void SetHumanPose(Animator animator, ref HumanPose pose)

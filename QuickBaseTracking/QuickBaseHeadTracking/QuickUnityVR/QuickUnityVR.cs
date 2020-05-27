@@ -33,8 +33,6 @@ namespace QuickVR {
         public bool _updatePosition = false;
         public bool _updateRotation = false;
 
-        public bool _isStanding = true;
-
         public bool _applyUserScale = false;
 
         #endregion
@@ -334,8 +332,6 @@ namespace QuickVR {
 
         protected virtual void UpdateTransformRoot()
         {
-            if (!_isStanding) return;
-
             _vrPlayArea.transform.parent = null;
 
             if (_updateRotation)
@@ -377,9 +373,9 @@ namespace QuickVR {
                 else UpdateTransformNodeRotFromCalibrationPose(node, boneID);
             }
 
-            //2) Special case: The user is standing but there is no tracker on the hips. So the hips position is estimated by the movement of the head
+            //2) Special case: There is no tracker on the hips. So the hips position is estimated by the movement of the head
             QuickVRNode nodeHips = _vrPlayArea.GetVRNode(HumanBodyBones.Hips);
-            if (_isStanding && !nodeHips.IsTracked())
+            if (!nodeHips.IsTracked())
             {
                 QuickVRNode vrNode = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
                 UpdateTransformNodePosFromCalibrationPose(vrNode, HumanBodyBones.Hips, Vector3.up);

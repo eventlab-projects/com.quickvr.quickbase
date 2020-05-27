@@ -12,15 +12,6 @@ namespace QuickVR
 
         public bool _enableIK = true;
 
-        //The bone chain hierarchy
-        public Transform m_boneUpper = null;
-        public Transform m_boneMid = null;
-        public Transform m_boneLimb = null;
-
-        //The IK parameters
-        public Transform m_targetLimb = null;
-        public Transform m_targetHint = null;
-
         public Vector3 _offsetTargetLimbPos = Vector3.zero;
 
         public virtual HumanBodyBones _boneID
@@ -146,6 +137,15 @@ namespace QuickVR
         #endregion
 
         #region PROTECTED PARAMETERS
+
+        //The bone chain hierarchy
+        protected Transform m_boneUpper = null;
+        protected Transform m_boneMid = null;
+        protected Transform m_boneLimb = null;
+
+        //The IK parameters
+        protected Transform m_targetLimb = null;
+        protected Transform m_targetHint = null;
 
         protected bool _initialized = false;
 

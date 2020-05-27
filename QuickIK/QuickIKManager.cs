@@ -575,6 +575,11 @@ namespace QuickVR {
             }
         }
 
+        protected virtual bool IsTrackedIKLimbBone(IKLimbBones boneID)
+        {
+            return (_ikMaskBody & (1 << (int)boneID)) != 0;
+        }
+
         #endregion
 
         #region UPDATE
