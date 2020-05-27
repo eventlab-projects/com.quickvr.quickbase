@@ -129,10 +129,10 @@ namespace QuickVR {
 
         public override void UpdateTrackingEarly()
         {
-            foreach (IKLimbBones boneID in GetIKLimbBones())
+            for (int i = 0; i < _ikLimbBones.Count; i++)
             {
-                IQuickIKSolver ikSolver = GetIKSolver(ToUnity(boneID));
-                ikSolver._weight = (_ikMaskBody & (1 << (int)boneID)) != 0 ? 1 : 0;
+                IQuickIKSolver ikSolver = GetIKSolver(_ikLimbBones[i]);
+                ikSolver._weight = (_ikMaskBody & (1 << i)) != 0 ? 1 : 0;
             }
 
             foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())

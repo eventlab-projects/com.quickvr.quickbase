@@ -63,9 +63,9 @@ namespace QuickVR
             if (_showCfgBody)
             {
                 EditorGUI.indentLevel++;
-                foreach (IKLimbBones boneID in QuickUtils.GetEnumValues<IKLimbBones>())
+                foreach (HumanBodyBones boneID in QuickIKManager.GetIKLimbBones())
                 {
-                    DrawIKSolverProperties(_ikManager.GetIKSolver(QuickIKManager.ToUnity(boneID)), boneID.ToString());
+                    DrawIKSolverProperties(_ikManager.GetIKSolver(boneID), boneID.ToString());
                     EditorGUILayout.Space();
                 }
                 EditorGUI.indentLevel--;
