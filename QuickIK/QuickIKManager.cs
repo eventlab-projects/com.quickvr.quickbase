@@ -96,7 +96,7 @@ namespace QuickVR {
         }
 
         protected Dictionary<HumanBodyBones, IQuickIKSolver> _ikSolvers = new Dictionary<HumanBodyBones, IQuickIKSolver>();
-        protected static List<IKLimbBones> _ikLimbBones = null;
+        protected static List<HumanBodyBones> _ikLimbBones = new List<HumanBodyBones>();
 
         protected Dictionary<HumanBodyBones, QuickIKData> _initialIKPose = new Dictionary<HumanBodyBones, QuickIKData>();
 
@@ -106,8 +106,6 @@ namespace QuickVR {
         [SerializeField, HideInInspector]
         protected Vector3 _initialHipsLocalPosition = Vector3.zero;
 
-        protected static Dictionary<IKLimbBones, HumanBodyBones> _toUnity = new Dictionary<IKLimbBones, HumanBodyBones>();
-        
         #endregion
 
         #region PRIVATE ATTRIBUTES
@@ -145,7 +143,7 @@ namespace QuickVR {
         {
             foreach (IKLimbBones boneID in QuickUtils.GetEnumValues<IKLimbBones>())
             {
-                _toUnity[boneID] = QuickUtils.ParseEnum<HumanBodyBones>(boneID.ToString());
+                _ikLimbBones.Add(QuickUtils.ParseEnum<HumanBodyBones>(boneID.ToString()));
             }
         }
 
@@ -173,9 +171,9 @@ namespace QuickVR {
                 _initialLocalRotations.Add(tBone? tBone.localRotation : Quaternion.identity);
             }
 
-            foreach (IKLimbBones boneID in GetIKLimbBones())
+            foreach (HumanBodyBones boneID in GetIKLimbBones())
             {
-                CreateBoneHint(ToUnity(boneID));
+                CreateBoneHint(boneID);
             }
 
             if (_animator.runtimeAnimatorController)
@@ -197,9 +195,9 @@ namespace QuickVR {
                 _animator.GetBoneTransform(b).localRotation = _initialLocalRotations[(int)b];
             }
 
-            foreach (IKLimbBones boneID in GetIKLimbBones())
+            foreach (HumanBodyBones boneID in GetIKLimbBones())
             {
-                QuickUtils.Destroy(GetBoneHint(ToUnity(boneID)));
+                QuickUtils.Destroy(GetBoneHint(boneID));
             }
 
             QuickUtils.Destroy(m_ikTargetsRoot);
@@ -451,19 +449,9 @@ namespace QuickVR {
             return "_IKTarget_" + boneID.ToString();
         }
 
-        public static List<IKLimbBones> GetIKLimbBones()
+        public static List<HumanBodyBones> GetIKLimbBones()
         {
-            if (_ikLimbBones == null)
-            {
-                _ikLimbBones = QuickUtils.GetEnumValues<IKLimbBones>();
-            }
-
             return _ikLimbBones;
-        }
-
-        public static HumanBodyBones ToUnity(IKLimbBones boneID)
-        {
-            return _toUnity[boneID];
         }
 
         public static HumanBodyBones ToUnity(QuickHumanFingers finger, bool isLeft)
@@ -529,9 +517,9 @@ namespace QuickVR {
 
         public static bool IsBoneMid(HumanBodyBones boneID)
         {
-            foreach (IKLimbBones b in GetIKLimbBones())
+            foreach (HumanBodyBones b in GetIKLimbBones())
             {
-                if (boneID == (HumanBodyBones)HumanTrait.GetParentBone((int)ToUnity(b))) return true;
+                if (boneID == (HumanBodyBones)HumanTrait.GetParentBone((int)b)) return true;
             }
 
             return false;

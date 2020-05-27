@@ -29,10 +29,9 @@ namespace QuickVR {
         protected override void CreateIKSolversBody()
         {
             CreateIKSolver<QuickIKSolverHips_v1>(HumanBodyBones.Hips);
-            foreach (IKLimbBones boneID in GetIKLimbBones())
+            foreach (HumanBodyBones boneID in GetIKLimbBones())
             {
-                HumanBodyBones uBone = ToUnity(boneID);
-                CreateIKSolver<QuickIKSolver>(uBone);
+                CreateIKSolver<QuickIKSolver>(boneID);
             }
         }
 
@@ -133,13 +132,12 @@ namespace QuickVR {
 
             for (int i = (int)IKLimbBones.LeftHand; i <= (int)IKLimbBones.RightFoot; i++)
             {
-                IKLimbBones boneID = (IKLimbBones)i;
-                QuickIKSolver ikSolver = GetIKSolver<QuickIKSolver>(ToUnity(boneID));
+                QuickIKSolver ikSolver = GetIKSolver<QuickIKSolver>(_ikLimbBones[i]);
                 if (ikSolver && ((_ikMaskBody & (1 << i)) != 0))
                 {
                     //ikSolver.ResetIKChain();
                     //Correct the rotations of the limb bones by accounting for human body constraints
-                    if (boneID == IKLimbBones.LeftHand || boneID == IKLimbBones.RightHand)
+                    if (i == (int)IKLimbBones.LeftHand || i == (int)IKLimbBones.RightHand)
                     {
                         Transform tmpParent = ikSolver._targetLimb.parent;
                         ikSolver._targetLimb.parent = transform;
