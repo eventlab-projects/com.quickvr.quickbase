@@ -314,6 +314,11 @@ namespace QuickVR {
             return null;
         }
 
+        protected override Vector3 GetIKTargetHipsOffset()
+        {
+            return _vrPlayArea.GetVRNode(HumanBodyBones.Head).transform.position - _animator.GetEyeCenterPosition();
+        }
+
         #endregion
 
         #region UPDATE

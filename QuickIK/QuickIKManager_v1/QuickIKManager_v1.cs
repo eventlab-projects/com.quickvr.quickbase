@@ -100,24 +100,34 @@ namespace QuickVR {
         //    }
         //}
 
+        protected virtual Vector3 GetIKTargetHipsOffset()
+        {
+            QuickIKSolver ikSolverHead = GetIKSolver<QuickIKSolver>(HumanBodyBones.Head);
+            return ikSolverHead._targetLimb.position - ikSolverHead._boneLimb.position;
+        }
+
         #endregion
 
 		#region UPDATE
 
         public override void UpdateTrackingLate() 
         {
-            Vector3 offset = Vector3.zero;
+            if (IsTrackedIKLimbBone(IKLimbBones.Hips))
+            {
+                QuickIKSolver ikSolverHips = GetIKSolver<QuickIKSolver>(HumanBodyBones.Hips);
+                ikSolverHips.UpdateIK();
+            }
+
             if (IsTrackedIKLimbBone(IKLimbBones.Head))
             {
                 QuickIKSolver ikSolverHead = GetIKSolver<QuickIKSolver>(HumanBodyBones.Head);
                 ikSolverHead.UpdateIK();
-                offset = ikSolverHead._targetLimb.position - ikSolverHead._boneLimb.position;
             }
 
             if (IsTrackedIKLimbBone(IKLimbBones.Hips))
             {
                 QuickIKSolver ikSolverHips = GetIKSolver<QuickIKSolver>(HumanBodyBones.Hips);
-                ikSolverHips._targetLimb.position += offset;
+                ikSolverHips._targetLimb.position += GetIKTargetHipsOffset();
                 ikSolverHips.UpdateIK();
             }
 
