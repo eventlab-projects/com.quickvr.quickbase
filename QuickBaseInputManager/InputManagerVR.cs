@@ -50,7 +50,7 @@ namespace QuickVR {
         {
             get
             {
-                return WebXRManager.Instance.transform.GetOrCreateComponent<QuickWebXRHandlersManager>();
+                return WebXR.WebXRManager.Instance.transform.GetOrCreateComponent<QuickWebXRHandlersManager>();
             }
         }
 #endif
