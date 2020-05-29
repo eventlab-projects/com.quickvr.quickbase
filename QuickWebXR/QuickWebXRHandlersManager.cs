@@ -55,8 +55,8 @@ namespace QuickVR
 
             if (!controller)
             {
-                controller = transform.CreateChild(isLeft ? "HandLeft" : "HandRight").gameObject.AddComponent<WebXRController>();
-                controller.hand = isLeft ? WebXRControllerHand.LEFT : WebXRControllerHand.RIGHT;
+                controller = Instantiate(Resources.Load<WebXRController>("Prefabs/WebXRController" + (isLeft ? "Left" : "Right")));
+                controller.transform.parent = transform;
             }
 
             return controller.GetOrCreateComponent<QuickWebXRHandlerController>();
