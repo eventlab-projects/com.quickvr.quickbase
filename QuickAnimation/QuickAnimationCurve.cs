@@ -151,6 +151,11 @@ namespace QuickVR
             return _x.Evaluate(time);
         }
 
+        public virtual int EvaluateInt(float time)
+        {
+            return Mathf.RoundToInt(Evaluate(time));
+        }
+
         public virtual bool EvaluateBool(float time)
         {
             return Evaluate(time) != 0;
