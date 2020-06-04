@@ -279,7 +279,7 @@ namespace QuickVR {
 
 			if (OnRunning != null) OnRunning();
             if (!_initialStage) _initialStage = GetComponentInChildren<QuickStageBase>();
-			if (_initialStage) _initialStage.Init();
+			if (_initialStage && _initialStage.gameObject.activeInHierarchy) _initialStage.Init();
 		}
 
 		protected virtual void LateUpdate() {
