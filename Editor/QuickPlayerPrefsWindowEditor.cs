@@ -32,9 +32,6 @@ namespace QuickVR
         [SerializeField]
         protected string _customSettingsScriptName = "SettingsCustom";
 
-        [SerializeField]
-        protected QuickSettingsAsset _settings = null;
-
         protected Vector2 _scrollPos;
 
         protected enum PrefType
@@ -54,6 +51,28 @@ namespace QuickVR
         public static void ShowWindow()
         {
             EditorWindow.GetWindow<QuickPlayerPrefsWindowEditor>();
+
+            string path = "Assets/QuickVRCfg/Resources/QuickSettingsCustom.asset";
+            QuickSettingsAsset settings = AssetDatabase.LoadAssetAtPath<QuickSettingsAsset>(path);
+            if (!settings)
+            {
+                settings = ScriptableObject.CreateInstance<QuickSettingsAsset>();
+                QuickUtilsEditor.CreateDataFolder("QuickVRCfg/Resources");
+                AssetDatabase.CreateAsset(settings, path);
+                AssetDatabase.SaveAssets();
+            }
+
+            QuickPlayerPrefs.Init();
+
+            //Check if the base settings are defined
+            SettingsBase.SetSubjectID(SettingsBase.GetSubjectID());
+            SettingsBase.SetSubjectHeight(SettingsBase.GetSubjectHeight());
+            SettingsBase.SetGender(SettingsBase.GetGender());
+            SettingsBase.SetLanguage(SettingsBase.GetLanguage());
+            SettingsBase.SetEnvironment(SettingsBase.GetEnvironment());
+            SettingsBase.SetCOMPort(SettingsBase.GetCOMPort());
+            SettingsBase.SetTimeOutMinutes(SettingsBase.GetTimeOutMinutes());
+            SettingsBase.SetHeightMode(SettingsBase.GetHeightMode());
         }
 
         protected virtual bool CreateNewSetting(out object value)
@@ -87,34 +106,6 @@ namespace QuickVR
             }
 
             return true;
-        }
-
-        protected virtual void CheckSettings()
-        {
-            if (!_settings)
-            {
-                _settings = Resources.Load<QuickSettingsAsset>("QuickSettingsCustom");
-                if (!_settings)
-                {
-                    _settings = ScriptableObject.CreateInstance<QuickSettingsAsset>();
-
-                    QuickUtilsEditor.CreateDataFolder("QuickVRCfg/Resources");
-                    string path = "Assets/QuickVRCfg/Resources/QuickSettingsCustom.asset";
-
-                    AssetDatabase.CreateAsset(_settings, path);
-                    AssetDatabase.SaveAssets();
-                }
-            }
-
-            //Check if the base settings are defined
-            SettingsBase.SetSubjectID(SettingsBase.GetSubjectID());
-            SettingsBase.SetSubjectHeight(SettingsBase.GetSubjectHeight());
-            SettingsBase.SetGender(SettingsBase.GetGender());
-            SettingsBase.SetLanguage(SettingsBase.GetLanguage());
-            SettingsBase.SetEnvironment(SettingsBase.GetEnvironment());
-            SettingsBase.SetCOMPort(SettingsBase.GetCOMPort());
-            SettingsBase.SetTimeOutMinutes(SettingsBase.GetTimeOutMinutes());
-            SettingsBase.SetHeightMode(SettingsBase.GetHeightMode());
         }
 
         public virtual void CreateSettingsScript(string scriptName, List<string> keys)
@@ -242,11 +233,14 @@ namespace QuickVR
 
         protected virtual void OnGUI()
         {
+            if (!QuickPlayerPrefs.GetSettingsAsset())
+            {
+                QuickPlayerPrefs.Init();
+            }
+
             _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos, GUILayout.Height(512));
 
             titleContent.text = "PlayerPrefs";
-
-            CheckSettings();
 
             GUILayoutOption[] options = { GUILayout.Width(256) };
 

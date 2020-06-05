@@ -14,6 +14,7 @@ namespace QuickVR
 
         #region PRIVATE PARAMETERS
 
+        [SerializeField]
         private static QuickSettingsAsset _settings = null;
 
         #endregion
@@ -27,20 +28,14 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        private static void CheckSettings()
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        public static void Init()
         {
-            if (_settings != null) return;
-
             //Check if the asset exists
             _settings = Resources.Load<QuickSettingsAsset>("QuickSettingsCustom");
             if (_settings == null)
             {
                 _settings = ScriptableObject.CreateInstance<QuickSettingsAsset>();
-            }
-
-            if (Application.isPlaying)
-            {
-                _settings.LoadPlayerPrefs();
             }
         }
 
@@ -50,8 +45,6 @@ namespace QuickVR
 
         public static QuickSettingsAsset GetSettingsAsset()
         {
-            CheckSettings();
-
             return _settings;
         }
 
@@ -69,14 +62,11 @@ namespace QuickVR
 
         public static bool HasKey(string key)
         {
-            CheckSettings();
-
             return _settings.IsSettingDefined(key);
         }
 
         public static string GetString(string key, string defaultValue = "")
         {
-            CheckSettings();
             QuickSetting s = _settings.GetSetting(key);
             if (s == null) s = _settings.CreateSetting(key);
 
@@ -114,7 +104,6 @@ namespace QuickVR
 
         public static void SetValue(string key, object value)
         {
-            CheckSettings();
             QuickSetting s = _settings.GetSetting(key);
             if (s == null) s = _settings.CreateSetting(key);
 
@@ -125,25 +114,21 @@ namespace QuickVR
 
         public static QuickSetting GetSetting(string key)
         {
-            CheckSettings();
             return _settings.GetSetting(key);
         }
 
         public static List<QuickSetting> GetSettingsBase()
         {
-            CheckSettings();
             return _settings._settingsBase.OrderBy(o => o.GetOrder()).ToList();
         }
 
         public static List<QuickSetting> GetSettingsCustom()
         {
-            CheckSettings();
             return _settings._settingsCustom.OrderBy(o => o.GetOrder()).ToList();
         }
 
         public static void DeleteSetting(string key)
         {
-            CheckSettings();
             _settings.RemoveSetting(key);
         }
 

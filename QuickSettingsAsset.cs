@@ -59,9 +59,6 @@ namespace QuickVR
             {
                 _type = value.GetType().AssemblyQualifiedName;
             }
-
-            PlayerPrefs.SetString(_key, _value);
-            PlayerPrefs.Save();
         }
 
         public virtual int GetOrder()
@@ -139,21 +136,6 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
-
-        public virtual void LoadPlayerPrefs()
-        {
-            foreach (QuickSetting s in _settingsBase)
-            {
-                string key = s.GetKey();
-                s.SetValue(PlayerPrefs.GetString(key));
-            }
-
-            foreach (QuickSetting s in _settingsCustom)
-            {
-                string key = s.GetKey();
-                s.SetValue(PlayerPrefs.GetString(key));
-            }
-        }
 
         public virtual QuickSetting GetSetting(string key)
         {
