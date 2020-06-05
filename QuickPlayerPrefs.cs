@@ -8,13 +8,11 @@ using System.Linq;
 namespace QuickVR
 {
 
-    [System.Serializable]
     public class QuickPlayerPrefs
     {
 
         #region PRIVATE PARAMETERS
 
-        [SerializeField]
         private static QuickSettingsAsset _settings = null;
 
         #endregion
