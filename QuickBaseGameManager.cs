@@ -23,7 +23,6 @@ namespace QuickVR {
         public float _minDistToFootPrints = 0.5f;        
 
         public AudioClip _headTrackingCalibrationInstructions = null;
-        public bool _calibrationAssisted = true;
 		
 		public float _timeOut = -1;	//Number of seconds to wait until automatic finishing the game
 		public QuickStageBase _initialStage = null;
@@ -240,12 +239,6 @@ namespace QuickVR {
             }
         }
 
-        protected virtual bool IsContinueTriggered()
-        {
-            if (_calibrationAssisted) return Input.GetKeyDown(KeyCode.Return);
-            return InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE);
-        }
-
         #endregion
 
         #region UPDATE
@@ -299,11 +292,11 @@ namespace QuickVR {
 
         protected virtual IEnumerator CoUpdateHMDAdjustment()
         {
-            _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.HMDAdjustment, _calibrationAssisted, _hTracking._handTrackingMode);
+            _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.HMDAdjustment, _hTracking._handTrackingMode);
             
             //HMD Adjustment
             _debugManager.Log("Adjusting HMD. Press CONTINUE when ready.");
-            while (!IsContinueTriggered()) yield return null;
+            while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
             
             yield return null;
         }
@@ -311,13 +304,13 @@ namespace QuickVR {
 		protected virtual IEnumerator CoUpdateStateCalibrating() {
             //HMD Forward Direction calibration
             _instructionsManager.Play(_headTrackingCalibrationInstructions);
-            _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.ForwardDirection, _calibrationAssisted, _hTracking._handTrackingMode);
+            _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.ForwardDirection, _hTracking._handTrackingMode);
 
             _debugManager.Log("[WAIT] Playing calibration instructions.", Color.red);
-            while (_instructionsManager.IsPlaying() && !IsContinueTriggered()) yield return null;
+            while (_instructionsManager.IsPlaying() && !InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
 
             _debugManager.Log("Wait for the user to look forward. Press RETURN when ready.");
-            while (!IsContinueTriggered()) yield return null;
+            while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
 
             _instructionsManager.Stop();
             yield return null;

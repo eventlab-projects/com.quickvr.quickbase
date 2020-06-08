@@ -80,7 +80,7 @@ namespace QuickVR
 
         #region GET AND SET
 
-        public virtual void SetCalibrationInstructions(CalibrationStep step, bool isCalibrationAssisted, QuickUnityVR.HandTrackingMode handTrackingMode)
+        public virtual void SetCalibrationInstructions(CalibrationStep step, QuickUnityVR.HandTrackingMode handTrackingMode)
         {
             //Fill the instructions field
             bool isEnglish = SettingsBase.GetLanguage() == SettingsBase.Languages.ENGLISH;
@@ -94,20 +94,13 @@ namespace QuickVR
             }
 
             //Fill the hint field
-            if (isCalibrationAssisted)
+            if (handTrackingMode == QuickUnityVR.HandTrackingMode.Controllers)
             {
-                SetTextHint("");
+                SetTextHint(isEnglish ? HINT_CONTROLLERS_EN : HINT_CONTROLLERS_ES);
             }
             else
             {
-                if (handTrackingMode == QuickUnityVR.HandTrackingMode.Controllers)
-                {
-                    SetTextHint(isEnglish ? HINT_CONTROLLERS_EN : HINT_CONTROLLERS_ES);
-                }
-                else
-                {
-                    SetTextHint(isEnglish ? HINT_HANDS_EN : HINT_HANDS_ES);
-                }
+                SetTextHint(isEnglish ? HINT_HANDS_EN : HINT_HANDS_ES);
             }
         }
 
