@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: GUIText
-  m_Shader: {fileID: 4800000, guid: dd4f45a5fff422045865eeb82248164f, type: 3}
+  m_Shader: {fileID: 4800000, guid: e7aa60b6ca05dca4187bcd0a52882a62, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4
   m_EnableInstancingVariants: 0
