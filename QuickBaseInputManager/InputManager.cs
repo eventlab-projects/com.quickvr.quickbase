@@ -33,9 +33,6 @@ public class InputManager : MonoBehaviour
         PRESSED,
     }
 
-    [SerializeField, HideInInspector]
-    protected bool _initialized = false;
-
     #endregion
 
     #region CONSTANTS
@@ -64,7 +61,7 @@ public class InputManager : MonoBehaviour
 
     protected virtual void Awake()
     {
-        if (!_initialized) Reset();
+        Reset();
     }
 
     protected virtual void Reset()
@@ -75,12 +72,12 @@ public class InputManager : MonoBehaviour
         CreateDefaultButtons();
 
         //Create the default InputManagerUnity implementation
-        InputManagerUnity iManager = new GameObject().AddComponent<InputManagerUnity>();
-        iManager.transform.parent = transform;
-        iManager.transform.ResetTransformation();
-        iManager.Reset();
-
-        _initialized = true;
+        InputManagerUnity iManager = GetComponentInChildren<InputManagerUnity>();
+        if (!iManager)
+        {
+            iManager = transform.CreateChild("").GetOrCreateComponent<InputManagerUnity>();
+            iManager.Reset();
+        }
     }
 
     protected virtual void CreateDefaultAxes()

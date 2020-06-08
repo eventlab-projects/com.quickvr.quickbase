@@ -99,6 +99,12 @@ namespace QuickVR
         protected override bool ImpGetButton(string button)
         {
             KeyCode key = (KeyCode)System.Enum.Parse(typeof(KeyCode), button);
+#if UNITY_WEBGL 
+            if ((int)key >= (int)KeyCode.JoystickButton0)
+            {
+                return false;
+            }
+#endif
             return Input.GetKey(key);
         }
 
