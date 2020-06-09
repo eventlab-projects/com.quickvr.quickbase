@@ -34,10 +34,7 @@ namespace QuickVR
         protected virtual void Awake()
         {
 #if UNITY_WEBGL
-            WebXRCamera wxrCameras = Instantiate(Resources.Load<WebXRCamera>("Prefabs/WebXRCameras"));
-            wxrCameras.transform.parent = transform;
-            wxrCameras.transform.ResetTransformation();
-            wxrCameras.name = "WebXRCameras";
+            QuickWebXRCamera wxrCameras = transform.CreateChild("WebXRCameras").GetOrCreateComponent<QuickWebXRCamera>();
 #else
             Camera camera = _pfCamera ? Instantiate<Camera>(_pfCamera) : new GameObject().GetOrCreateComponent<Camera>();
             camera.name = "__Camera__";
@@ -47,6 +44,7 @@ namespace QuickVR
             camera.gameObject.GetOrCreateComponent<AudioListener>();
             camera.gameObject.GetOrCreateComponent<FlareLayer>();
 #endif
+            Camera.main.GetOrCreateComponent<AudioListener>();
         }
 
 #endregion

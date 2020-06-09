@@ -71,10 +71,9 @@ namespace QuickVR
             _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
             _fpsCounter = QuickSingletonManager.GetInstance<PerformanceFPS>();
 #if UNITY_WEBGL
-            WebXRManager wxrManager = WebXRManager.Instance;
-            wxrManager.transform.parent = _vrPlayArea.transform;
-            wxrManager.transform.ResetTransformation();
-            wxrManager.GetOrCreateComponent<QuickWebXRHandlersManager>();
+            QuickWebXRHandlersManager wxrHandlersManager = QuickSingletonManager.GetInstance<QuickWebXRHandlersManager>();
+            wxrHandlersManager.transform.parent = _vrPlayArea.transform;
+            wxrHandlersManager.transform.ResetTransformation();
 #endif
         }
 
