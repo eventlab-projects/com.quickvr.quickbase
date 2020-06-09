@@ -207,23 +207,23 @@ namespace QuickVR {
             KeyCode k = KeyCode.None;
             if (button.Contains("Primary"))
             {
-                k = QuickUtils.ParseEnum<KeyCode>(kName + (button.Contains("Left") ? "2" : "0"));
+                k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "2" : "0"));
             }
             else if (button.Contains("Secondary"))
             {
-                k = QuickUtils.ParseEnum<KeyCode>(kName + (button.Contains("Left") ? "3" : "1"));
+                k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "3" : "1"));
             }
             else if (button.Contains("PadPress"))
             {
-                k = QuickUtils.ParseEnum<KeyCode>(kName + (button.Contains("Left") ? "8" : "9"));
+                k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "8" : "9"));
             }
             else if (button.Contains("PadTouch"))
             {
-                k = QuickUtils.ParseEnum<KeyCode>(kName + (button.Contains("Left") ? "16" : "17"));
+                k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "16" : "17"));
             }
             else if (button.Contains("TriggerIndexTouch"))
             {
-                k = QuickUtils.ParseEnum<KeyCode>(kName + (button.Contains("Left") ? "14" : "15"));
+                k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "14" : "15"));
             }
 
             return Input.GetKey(k);

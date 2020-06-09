@@ -19,6 +19,8 @@ namespace QuickVR
             Mouse_Y,
         };
 
+        protected static Dictionary<string, KeyCode> _toKeyCode = null;
+
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -61,6 +63,20 @@ namespace QuickVR
 
         #region GET AND SET
 
+        public static KeyCode ToKeyCode(string keyName)
+        {
+            if (_toKeyCode == null)
+            {
+                _toKeyCode = new Dictionary<string, KeyCode>();
+                foreach (KeyCode k in QuickUtils.GetEnumValues<KeyCode>())
+                {
+                    _toKeyCode[k.ToString()] = k;
+                }
+            }
+
+            return _toKeyCode[keyName];
+        }
+
         public override string[] GetAxisCodes()
         {
             List<string> virtualAxes = new List<string>();
@@ -98,7 +114,7 @@ namespace QuickVR
 
         protected override bool ImpGetButton(string button)
         {
-            KeyCode key = (KeyCode)System.Enum.Parse(typeof(KeyCode), button);
+            KeyCode key = ToKeyCode(button);
 #if UNITY_WEBGL 
             if ((int)key >= (int)KeyCode.JoystickButton0)
             {
