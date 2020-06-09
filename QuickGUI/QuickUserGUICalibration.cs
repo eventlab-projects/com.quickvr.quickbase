@@ -53,7 +53,7 @@ namespace QuickVR
             _hint = CreateHint();
 
             _instructions.alignment = TextAnchor.MiddleCenter;
-            _instructions.fontSize = 2;
+            //_instructions.fontSize = 2;
         }
 
         protected virtual Text CreateHint()

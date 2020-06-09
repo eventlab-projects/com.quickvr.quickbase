@@ -74,12 +74,12 @@ namespace QuickVR
         {
             Text result = transform.CreateChild(NAME_INSTRUCTIONS_TRANSFORM).GetOrCreateComponent<Text>();
             RectTransform t = result.GetComponent<RectTransform>();
-            t.sizeDelta = new Vector2(30, 24);
+            t.sizeDelta = new Vector2(15, 12);
             t.anchorMin = new Vector2(0.5f, 1.0f);
             t.anchorMax = new Vector2(0.5f, 1.0f);
             t.pivot = new Vector2(0.5f, 1.0f);
             
-            t.localScale = Vector3.one * 0.125f;
+            t.localScale = Vector3.one * 0.25f;
 
             result.font = Resources.Load<Font>("Fonts/arial");
             result.fontSize = 1;
