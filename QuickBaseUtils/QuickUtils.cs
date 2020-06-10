@@ -429,10 +429,14 @@ namespace QuickVR
 
         public static bool IsHandTrackingSupported()
         {
+#if UNITY_WEBGL
+            return false;
+#else
             return IsOculusQuest();
+#endif
         }
 
-        #region EXTENSION METHODS
+#region EXTENSION METHODS
 
         public static int GetNumSiblings(this Component c)
         {
