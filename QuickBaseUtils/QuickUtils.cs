@@ -526,7 +526,7 @@ namespace QuickVR
 
         public static Transform CreateChild(this Transform transform, string name, bool checkName = true)
         {
-            Transform t = transform.Find(name);
+            Transform t = name.Length != 0? transform.Find(name) : null;
             if (!t || !checkName)
             {
                 t = new GameObject(name).transform;

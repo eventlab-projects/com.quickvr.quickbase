@@ -22,6 +22,14 @@ public abstract class BaseInputManager : MonoBehaviour {
 	[SerializeField, HideInInspector] 
     protected Transform _buttonMappingRoot = null;
 
+	protected static InputManager _inputManager
+	{
+		get
+		{
+			return QuickSingletonManager.GetInstance<InputManager>();
+		}
+	}
+
 	#endregion
 
 	#region CONSTANTS
@@ -45,16 +53,22 @@ public abstract class BaseInputManager : MonoBehaviour {
 
 	#region CREATION AND DESTRUCTION
 
-    public virtual void Reset() {
+	protected virtual void Awake()
+	{
+		Reset();
+	}
+
+    public virtual void Reset() 
+	{
         name = this.GetType().FullName;
 
         _axisMappingRoot = transform.CreateChild(ROOT_AXIS_MAPPING_NAME);
         _buttonMappingRoot = transform.CreateChild(ROOT_BUTTON_MAPPING_NAME);
 
-        int numVirtualAxes = GetComponentInParent<InputManager>().GetVirtualAxes().Count;
+        int numVirtualAxes = _inputManager.GetVirtualAxes().Count;
         while (_axisMappingRoot.childCount != numVirtualAxes) AddAxisMapping();
 
-        int numVirtualButtons = GetComponentInParent<InputManager>().GetVirtualButtons().Count;
+        int numVirtualButtons = _inputManager.GetVirtualButtons().Count;
         while (_buttonMappingRoot.childCount != numVirtualButtons) AddButtonMapping();
 	}
 
@@ -88,7 +102,7 @@ public abstract class BaseInputManager : MonoBehaviour {
 	}
 
 	public AxisMapping GetAxisMapping(string virtualAxis) {
-        List<string> virtualAxes = QuickSingletonManager.GetInstance<InputManager>().GetVirtualAxes();
+        List<string> virtualAxes = _inputManager.GetVirtualAxes();
         for (int i = 0; i < virtualAxes.Count; i++)
         {
             if (virtualAxes[i] == virtualAxis) return _axisMappingRoot.GetChild(i).GetComponent<AxisMapping>();
@@ -102,7 +116,7 @@ public abstract class BaseInputManager : MonoBehaviour {
 	}
 
 	public ButtonMapping GetButtonMapping(string virtualButton) {
-        List<string> virtualButtons = QuickSingletonManager.GetInstance<InputManager>().GetVirtualButtons();
+        List<string> virtualButtons = _inputManager.GetVirtualButtons();
         for (int i = 0; i < virtualButtons.Count; i++)
         {
             if (virtualButtons[i] == virtualButton) return _buttonMappingRoot.GetChild(i).GetComponent<ButtonMapping>();
@@ -131,7 +145,7 @@ public abstract class BaseInputManager : MonoBehaviour {
 		DestroyAxisMapping();
         _axisMappingRoot = transform.CreateChild(ROOT_AXIS_MAPPING_NAME);
 
-		int numAxes = QuickSingletonManager.GetInstance<InputManager>().GetNumAxes();
+		int numAxes = _inputManager.GetNumAxes();
         for (int i = 0; i < numAxes; i++) AddAxisMapping();
 	}
 
@@ -139,7 +153,7 @@ public abstract class BaseInputManager : MonoBehaviour {
 		DestroyButtonMapping();
 		_buttonMappingRoot = transform.CreateChild(ROOT_BUTTON_MAPPING_NAME);
 
-		int numButtons = QuickSingletonManager.GetInstance<InputManager>().GetNumButtons();
+		int numButtons = _inputManager.GetNumButtons();
 		for (int i = 0; i < numButtons; i++) AddButtonMapping();
 	}
 

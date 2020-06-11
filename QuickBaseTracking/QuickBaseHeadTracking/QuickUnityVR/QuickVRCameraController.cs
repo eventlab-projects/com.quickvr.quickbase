@@ -2,10 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-#if UNITY_WEBGL
-using WebXR;
-#endif
-
 namespace QuickVR
 {
 
@@ -31,19 +27,18 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        protected virtual void Awake()
+        protected virtual void Start()
         {
-#if UNITY_WEBGL
-            QuickWebXRCamera wxrCameras = transform.CreateChild("WebXRCameras").GetOrCreateComponent<QuickWebXRCamera>();
-#else
-            Camera camera = _pfCamera ? Instantiate<Camera>(_pfCamera) : new GameObject().GetOrCreateComponent<Camera>();
-            camera.name = "__Camera__";
-            camera.transform.parent = transform;
-            camera.transform.ResetTransformation();
-            camera.tag = "MainCamera";
-            camera.gameObject.GetOrCreateComponent<AudioListener>();
-            camera.gameObject.GetOrCreateComponent<FlareLayer>();
-#endif
+            if (!Camera.main)
+            {
+                Camera camera = _pfCamera ? Instantiate<Camera>(_pfCamera) : new GameObject().GetOrCreateComponent<Camera>();
+                camera.name = "__Camera__";
+                camera.transform.parent = transform;
+                camera.transform.ResetTransformation();
+                camera.tag = "MainCamera";
+                camera.gameObject.GetOrCreateComponent<FlareLayer>();
+            }
+            
             Camera.main.GetOrCreateComponent<AudioListener>();
         }
 

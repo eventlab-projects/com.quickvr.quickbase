@@ -5,6 +5,7 @@ using UnityEngine;
 using System.Runtime.InteropServices;
 
 using WebXR;
+using UnityEditor;
 
 namespace QuickVR
 {
@@ -38,6 +39,17 @@ namespace QuickVR
         #endregion
 
         #region CREATION AND DESTRUCTION
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        protected static void Init()
+        {
+            if (Camera.main)
+            {
+                Camera.main.gameObject.SetActive(false);
+            }
+            QuickVRCameraController cameraController = QuickSingletonManager.GetInstance<QuickVRCameraController>();
+            QuickWebXRCamera wxrCameras = cameraController.transform.CreateChild("WebXRCameras").GetOrCreateComponent<QuickWebXRCamera>();
+        }
 
         protected virtual void Awake()
         {

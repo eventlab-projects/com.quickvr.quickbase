@@ -1,0 +1,15 @@
+{
+    "name": "QuickBase",
+    "references": [
+        "GUID:7f7d1af65c2641843945d409d28f2e20"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

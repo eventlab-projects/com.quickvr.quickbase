@@ -1,0 +1,16 @@
+{
+    "name": "QuickBaseEditor",
+    "references": [
+        "GUID:707846450004269438d1a41ff342c945",
+        "GUID:d2761a0af0f567748a72629d4bb18a26"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

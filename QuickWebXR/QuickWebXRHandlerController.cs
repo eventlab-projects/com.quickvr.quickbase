@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
-using TMPro;
+//using TMPro;
 using UnityEngine;
 using UnityEngine.PlayerLoop;
 using WebXR;
@@ -41,12 +41,12 @@ namespace QuickVR
 
         public virtual int GetNumAxes()
         {
-            return _axesValues != null ? _axesValues.Length : 0;
+            return _axesValues != null ? _axesValues.Length : -1;
         } 
 
         public virtual int GetNumButtons()
         {
-            return _buttonValues != null ? _buttonValues.Length : 0;
+            return _buttonValues != null ? _buttonValues.Length : -1;
         }
 
         public float GetAxis(int axisID)
@@ -58,17 +58,17 @@ namespace QuickVR
                 return b != null ? b.value : 0;
             }
 
-            return _axesValues != null && axisID < _axesValues.Length ? _axesValues[axisID] : 0;
+            return axisID < GetNumAxes() ? _axesValues[axisID] : 0;
         }
 
         public bool GetButton(int buttonID)
         {
-            return _buttonValues != null && buttonID < _buttonValues.Length? _buttonValues[buttonID].pressed : false;
+            return buttonID < GetNumButtons() ? _buttonValues[buttonID].pressed : false;
         }
 
         protected WebXRControllerButton GetControllerButton(int buttonID)
         {
-            return buttonID < _buttonValues.Length ? _buttonValues[buttonID] : null;
+            return buttonID < GetNumButtons() ? _buttonValues[buttonID] : null;
         }
 
         #endregion

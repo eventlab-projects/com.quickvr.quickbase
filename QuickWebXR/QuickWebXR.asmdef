@@ -1,0 +1,19 @@
+{
+    "name": "QuickWebXR",
+    "references": [
+        "GUID:13e84aeb609bf472ca773e87abfcaa32",
+        "GUID:707846450004269438d1a41ff342c945"
+    ],
+    "includePlatforms": [
+        "Editor",
+        "WebGL"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -124,28 +124,6 @@ public class InputManager : MonoBehaviour
         return GetComponentsInChildren<BaseInputManager>();
     }
 
-    public static T GetInputImplementation<T>() where T : BaseInputManager
-    {
-        BaseInputManager[] inputManagers = QuickSingletonManager.GetInstance<InputManager>().GetInputManagers();
-        foreach (BaseInputManager bManager in inputManagers)
-        {
-            if (bManager is T) return (T)bManager;
-        }
-        return null;
-    }
-
-    public virtual void SetInputImplementationActive<T>(bool active) where T : BaseInputManager
-    {
-        BaseInputManager iManager = GetInputImplementation<T>();
-        if (iManager) iManager._active = active;
-    }
-
-    public virtual bool IsInputImplementationActive<T>() where T : BaseInputManager
-    {
-        BaseInputManager iManager = GetInputImplementation<T>();
-        return (iManager && (iManager.IsActive()));
-    }
-
     public virtual bool IsActiveVirtualAxis(string aName)
     {
         if (IsVirtualAxis(aName))
