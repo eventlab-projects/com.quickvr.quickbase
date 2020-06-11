@@ -17,7 +17,13 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected Animator _animator = null;
+        protected Animator _animator
+        {
+            get
+            {
+                return QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource();
+            }
+        }
 
         protected OVRSkeleton _skeleton = null;
         protected SkinnedMeshRenderer _renderer = null;
@@ -39,7 +45,6 @@ namespace QuickVR
 
         protected virtual void Start()
         {
-            _animator = GetComponentInParent<Animator>();
             _skeleton = transform.GetOrCreateComponent<OVRSkeleton>();
             transform.GetOrCreateComponent<OVRMesh>();
             transform.GetOrCreateComponent<OVRMeshRenderer>();
@@ -227,17 +232,20 @@ namespace QuickVR
 
         protected virtual void UpdateTracking(QuickHumanBodyBones boneID0, QuickHumanBodyBones boneID1)
         {
-            Transform bone0 = _animator.GetBoneTransform(boneID0);
-            Transform bone1 = _animator.GetBoneTransform(boneID1);
-            Transform ovrBone0 = GetOVRBoneTransform(QuickOVRHandsInitializer.ToOVR(boneID0));
-            Transform ovrBone1 = GetOVRBoneTransform(QuickOVRHandsInitializer.ToOVR(boneID1));
+            if (_animator)
+            {
+                Transform bone0 = _animator.GetBoneTransform(boneID0);
+                Transform bone1 = _animator.GetBoneTransform(boneID1);
+                Transform ovrBone0 = GetOVRBoneTransform(QuickOVRHandsInitializer.ToOVR(boneID0));
+                Transform ovrBone1 = GetOVRBoneTransform(QuickOVRHandsInitializer.ToOVR(boneID1));
 
-            Vector3 currentDir = bone1.position - bone0.position;
-            Vector3 targetDir = ovrBone1.position - ovrBone0.position;
-            float rotAngle = Vector3.Angle(currentDir, targetDir);
-            Vector3 rotAxis = Vector3.Cross(currentDir, targetDir).normalized;
+                Vector3 currentDir = bone1.position - bone0.position;
+                Vector3 targetDir = ovrBone1.position - ovrBone0.position;
+                float rotAngle = Vector3.Angle(currentDir, targetDir);
+                Vector3 rotAxis = Vector3.Cross(currentDir, targetDir).normalized;
 
-            bone0.Rotate(rotAxis, rotAngle, Space.World);
+                bone0.Rotate(rotAxis, rotAngle, Space.World);
+            }
         }
 
         #endregion

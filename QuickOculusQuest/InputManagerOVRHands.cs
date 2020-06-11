@@ -23,15 +23,12 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected QuickOVRHandsInitializer _ovrHands = null;
-
-        #endregion
-
-        #region CREATION AND DESTRUCTION
-
-        protected virtual void Start()
+        protected QuickOVRHandsInitializer _ovrHands
         {
-            _ovrHands = FindObjectOfType<QuickOVRHandsInitializer>();
+            get
+            {
+                return QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource().GetComponent<QuickOVRHandsInitializer>();
+            }
         }
 
         #endregion
@@ -55,7 +52,7 @@ namespace QuickVR
 
         protected virtual QuickOVRHand GetOVRhand(string button)
         {
-            return _ovrHands.GetOVRHand(button.Contains("Left"));
+            return _ovrHands? _ovrHands.GetOVRHand(button.Contains("Left")) : null;
         }
 
         protected override float ImpGetAxis(string axis)
@@ -82,14 +79,6 @@ namespace QuickVR
             }
             
             return false;
-        }
-
-        protected virtual void Update()
-        {
-            if (!_ovrHands)
-            {
-                _ovrHands = QuickSingletonManager.GetInstance<QuickUnityVR>().GetComponent<QuickOVRHandsInitializer>();
-            }
         }
 
         #endregion

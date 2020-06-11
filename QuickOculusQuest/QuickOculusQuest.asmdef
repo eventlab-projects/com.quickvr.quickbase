@@ -4,7 +4,10 @@
         "GUID:707846450004269438d1a41ff342c945",
         "GUID:f64c9ebcd7899c3448a08dc9f9ddbe30"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Android",
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": false,

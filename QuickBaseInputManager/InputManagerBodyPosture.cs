@@ -67,7 +67,7 @@ public class InputManagerBodyPosture : BaseInputManager {
 	#region CREATION AND DESTRUCTION
 
 	protected virtual void Start() {
-		_animator = QuickSingletonManager.GetInstance<QuickVRManager>().GetTargetAnimator();
+		_animator = QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorTarget();
 		_head = _animator.GetBoneTransform(HumanBodyBones.Head);
 		_hips = _animator.GetBoneTransform(HumanBodyBones.Hips);
 	}

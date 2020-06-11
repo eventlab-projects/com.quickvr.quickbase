@@ -15,7 +15,6 @@ namespace QuickVR
 
         #endregion
 
-
         #region PROTECTED ATTRIBUTES
 
         protected QuickOVRHand _leftHand = null;
@@ -47,6 +46,13 @@ namespace QuickVR
                     }
                 }
             }
+
+            QuickVRManager.OnSourceAnimatorSet += OnSourceAnimatorSet;
+        }
+
+        protected static void OnSourceAnimatorSet()
+        {
+            QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource().GetOrCreateComponent<QuickOVRHandsInitializer>();
         }
 
         protected virtual void Start()
