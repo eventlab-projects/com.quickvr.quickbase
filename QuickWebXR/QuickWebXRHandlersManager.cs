@@ -19,6 +19,15 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        protected static void Init()
+        {
+            QuickWebXRHandlersManager wxrHandlersManager = QuickSingletonManager.GetInstance<QuickWebXRHandlersManager>();
+            QuickVRPlayArea vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
+            wxrHandlersManager.transform.parent = vrPlayArea.transform;
+            wxrHandlersManager.transform.ResetTransformation();
+        }
+
         protected virtual void Awake()
         {
             _handlerHead = CreateHandlerHead();
