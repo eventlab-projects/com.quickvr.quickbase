@@ -17,8 +17,9 @@ namespace QuickVR
 
         #endregion
 
-        #region CREATION AND DESTRUCTION
+#region CREATION AND DESTRUCTION
 
+#if UNITY_WEBGL
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         protected static void Init()
         {
@@ -27,6 +28,7 @@ namespace QuickVR
             wxrHandlersManager.transform.parent = vrPlayArea.transform;
             wxrHandlersManager.transform.ResetTransformation();
         }
+#endif
 
         protected virtual void Awake()
         {
@@ -71,9 +73,9 @@ namespace QuickVR
             return controller.GetOrCreateComponent<QuickWebXRHandlerController>();
         }
 
-        #endregion
+#endregion
 
-        #region GET AND SET
+#region GET AND SET
 
         public virtual QuickWebXRHandlerController GetHandlerController(bool isLeft)
         {
@@ -85,7 +87,7 @@ namespace QuickVR
             return _handlerHead;
         }
 
-        #endregion
+#endregion
 
     }
 

@@ -20,38 +20,39 @@ namespace QuickVR
 
         #endregion
 
-        #region CREATION AND DESTRUCTION
+#region CREATION AND DESTRUCTION
+
+#if UNITY_WEBGL
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         protected static void Init()
         {
-            _inputManager.transform.CreateChild("").GetOrCreateComponent<InputManagerWebXR>();
-        }
-
-        public override void Reset()
-        {
-            base.Reset();
-
-            InputManagerVR iManager = _inputManager.GetComponentInChildren<InputManagerVR>();
-            for (int i = 0; i < iManager.GetNumAxesMapped(); i++)
+            InputManagerVR iManagerVR = _inputManager.GetComponentInChildren<InputManagerVR>();
+            if (iManagerVR)
             {
-                AxisMapping tmp = iManager.GetAxisMapping(i);
-                AxisMapping aMapping = GetAxisMapping(i);
-                aMapping._axisCode = tmp._axisCode;
-            }
+                InputManagerWebXR iManagerWebXR = _inputManager.transform.CreateChild("").GetOrCreateComponent<InputManagerWebXR>();
+                for (int i = 0; i < iManagerVR.GetNumAxesMapped(); i++)
+                {
+                    AxisMapping tmp = iManagerVR.GetAxisMapping(i);
+                    AxisMapping aMapping = iManagerWebXR.GetAxisMapping(i);
+                    aMapping._axisCode = tmp._axisCode;
+                }
 
-            for (int i = 0; i < iManager.GetNumButtonsMapped(); i++)
-            {
-                ButtonMapping tmp = iManager.GetButtonMapping(i);
-                ButtonMapping bMapping = GetButtonMapping(i);
-                bMapping._keyCode = tmp._keyCode;
-                bMapping._altKeyCode = tmp._altKeyCode;
+                for (int i = 0; i < iManagerVR.GetNumButtonsMapped(); i++)
+                {
+                    ButtonMapping tmp = iManagerVR.GetButtonMapping(i);
+                    ButtonMapping bMapping = iManagerWebXR.GetButtonMapping(i);
+                    bMapping._keyCode = tmp._keyCode;
+                    bMapping._altKeyCode = tmp._altKeyCode;
+                }
             }
         }
 
-        #endregion
+#endif
 
-        #region GET AND SET
+#endregion
+
+#region GET AND SET
 
         public override string[] GetAxisCodes()
         {
@@ -121,7 +122,7 @@ namespace QuickVR
             return false;
         }
 
-        #endregion
+#endregion
 
     }
 

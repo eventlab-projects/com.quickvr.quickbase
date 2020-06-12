@@ -38,8 +38,9 @@ namespace QuickVR
 
         #endregion
 
-        #region CREATION AND DESTRUCTION
+#region CREATION AND DESTRUCTION
 
+#if UNITY_WEBGL
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         protected static void Init()
         {
@@ -50,6 +51,7 @@ namespace QuickVR
             QuickVRCameraController cameraController = QuickSingletonManager.GetInstance<QuickVRCameraController>();
             QuickWebXRCamera wxrCameras = cameraController.transform.CreateChild("WebXRCameras").GetOrCreateComponent<QuickWebXRCamera>();
         }
+#endif
 
         protected virtual void Awake()
         {
@@ -83,9 +85,9 @@ namespace QuickVR
             }
         }
 
-        #endregion
+#endregion
 
-        #region UPDATE
+#region UPDATE
 
         protected IEnumerator endOfFrame()
         {
@@ -123,7 +125,7 @@ namespace QuickVR
             }
         }
 
-        #endregion
+#endregion
 
     }
 
