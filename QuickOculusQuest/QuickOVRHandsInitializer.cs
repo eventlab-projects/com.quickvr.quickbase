@@ -19,6 +19,13 @@ namespace QuickVR
 
         protected QuickOVRHand _leftHand = null;
         protected QuickOVRHand _rightHand = null;
+        protected QuickUnityVR _hTracking
+        {
+            get
+            {
+                return QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource().GetComponent<QuickUnityVR>();
+            }
+        }
 
         private static Dictionary<QuickHumanBodyBones, OVRSkeleton.BoneId> _toOVR = new Dictionary<QuickHumanBodyBones, OVRSkeleton.BoneId>();
 
@@ -57,15 +64,12 @@ namespace QuickVR
 
         protected virtual void Start()
         {
-            if (QuickUtils.IsOculusQuest())
-            {
-                QuickVRPlayArea vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
-                _leftHand = Instantiate<QuickOVRHand>(Resources.Load<QuickOVRHand>("Prefabs/pf_QuickOVRHandLeft"), vrPlayArea.GetVRNode(HumanBodyBones.LeftHand).transform);
-                _leftHand.transform.ResetTransformation();
+            QuickVRPlayArea vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
+            _leftHand = Instantiate<QuickOVRHand>(Resources.Load<QuickOVRHand>("Prefabs/pf_QuickOVRHandLeft"), vrPlayArea.GetVRNode(HumanBodyBones.LeftHand).transform);
+            _leftHand.transform.ResetTransformation();
 
-                _rightHand = Instantiate<QuickOVRHand>(Resources.Load<QuickOVRHand>("Prefabs/pf_QuickOVRHandRight"), vrPlayArea.GetVRNode(HumanBodyBones.RightHand).transform);
-                _rightHand.transform.ResetTransformation();
-            }
+            _rightHand = Instantiate<QuickOVRHand>(Resources.Load<QuickOVRHand>("Prefabs/pf_QuickOVRHandRight"), vrPlayArea.GetVRNode(HumanBodyBones.RightHand).transform);
+            _rightHand.transform.ResetTransformation();
         }
 
         protected override void RegisterTrackingManager()
@@ -98,8 +102,11 @@ namespace QuickVR
 
         public override void UpdateTrackingLate()
         {
-            if (_leftHand) _leftHand.UpdateTracking();
-            if (_rightHand) _rightHand.UpdateTracking();
+            if (_hTracking && _hTracking._handTrackingMode == QuickUnityVR.HandTrackingMode.Hands)
+            {
+                if (_leftHand) _leftHand.UpdateTracking();
+                if (_rightHand) _rightHand.UpdateTracking();
+            }
         }
 
         #endregion

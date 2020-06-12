@@ -1,10 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-
-#if UNITY_WEBGL
-using WebXR;
-#endif
+using System.ComponentModel.Design;
 
 namespace QuickVR
 {
@@ -20,16 +17,29 @@ namespace QuickVR
 
         #region PROTECTED PARAMETERS
 
-        protected static InputManager _inputManager = null;
-        protected static QuickVRPlayArea _vrPlayArea = null;
-        protected static PerformanceFPS _fpsCounter = null;
-        
-        protected Animator _targetAnimator = null;
+        protected Animator _animatorTarget = null;
+        protected Animator _animatorSource = null;
 
         protected QuickUnityVR _unityVR = null;
         protected QuickBaseTrackingManager _handTracking = null;
         protected List<QuickBaseTrackingManager> _bodyTrackingSystems = new List<QuickBaseTrackingManager>();
         protected List<QuickBaseTrackingManager> _ikManagerSystems = new List<QuickBaseTrackingManager>();
+
+        protected QuickVRPlayArea _vrPlayArea
+        {
+            get
+            {
+                return QuickSingletonManager.GetInstance<QuickVRPlayArea>();
+            }
+        }
+
+        protected static InputManager _inputManager
+        {
+            get
+            {
+                return QuickSingletonManager.GetInstance<InputManager>();
+            }
+        }
 
         protected QuickCopyPoseBase _copyPose
         {
@@ -38,6 +48,15 @@ namespace QuickVR
                 return gameObject.GetOrCreateComponent<QuickCopyPoseBase>();
             }
         }
+
+        protected static PerformanceFPS _fpsCounter
+        {
+            get
+            {
+                return QuickSingletonManager.GetInstance<PerformanceFPS>();
+            }
+        }
+
         protected QuickVRCameraController _cameraController = null;
 
         protected bool _isCalibrationRequired = false;
@@ -59,23 +78,12 @@ namespace QuickVR
 
         public static event QuickVRManagerAction OnPreCameraUpdate;
         public static event QuickVRManagerAction OnPostCameraUpdate;
+
+        public static event QuickVRManagerAction OnSourceAnimatorSet;
         
         #endregion
 
         #region CREATION AND DESTRUCTION
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        protected static void Init()
-        {
-            _inputManager = QuickSingletonManager.GetInstance<InputManager>();
-            _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
-            _fpsCounter = QuickSingletonManager.GetInstance<PerformanceFPS>();
-#if UNITY_WEBGL
-            QuickWebXRHandlersManager wxrHandlersManager = QuickSingletonManager.GetInstance<QuickWebXRHandlersManager>();
-            wxrHandlersManager.transform.parent = _vrPlayArea.transform;
-            wxrHandlersManager.transform.ResetTransformation();
-#endif
-        }
 
         protected virtual void Awake()
         {
@@ -87,15 +95,28 @@ namespace QuickVR
 
         #region GET AND SET
 
-        public virtual Animator GetTargetAnimator()
+        public virtual Animator GetAnimatorTarget()
         {
-            return _targetAnimator;
+            return _animatorTarget;
         }
 
-        public virtual void SetTargetAnimator(Animator animator)
+        public virtual void SetAnimatorTarget(Animator animator)
         {
-            _targetAnimator = animator;
-            _copyPose.SetAnimatorDest(_targetAnimator);
+            _animatorTarget = animator;
+            _copyPose.SetAnimatorDest(_animatorTarget);
+        }
+
+        public virtual Animator GetAnimatorSource()
+        {
+            return _animatorSource;
+        }
+
+        protected virtual void SetAnimatorSource(Animator animator)
+        {
+            _animatorSource = animator;
+            _copyPose.SetAnimatorSource(_animatorSource);
+
+            if (OnSourceAnimatorSet != null) OnSourceAnimatorSet();
         }
 
         public virtual QuickVRCameraController GetCameraController()
@@ -108,8 +129,8 @@ namespace QuickVR
             _unityVR = unityVR;
 
             Animator animator = _unityVR.GetComponent<Animator>();
-            _copyPose.SetAnimatorSource(animator);
-            SetTargetAnimator(animator);
+            SetAnimatorSource(animator);
+            SetAnimatorTarget(animator);
         }
 
         public virtual void AddBodyTrackingSystem(QuickBaseTrackingManager bTracking)
@@ -192,7 +213,7 @@ namespace QuickVR
 
             //Update the Camera position
             if (OnPreCameraUpdate != null) OnPreCameraUpdate();
-            _cameraController.UpdateCameraPosition(_targetAnimator);
+            _cameraController.UpdateCameraPosition(_animatorTarget);
             if (OnPostCameraUpdate != null) OnPostCameraUpdate();
 
             //Update the InputState

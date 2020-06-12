@@ -109,11 +109,6 @@ namespace QuickVR {
             {
                 _handTrackingMode = HandTrackingMode.Controllers;
             }
-
-            if (_handTrackingMode == HandTrackingMode.Hands)
-            {
-                gameObject.GetOrCreateComponent<QuickOVRHandsInitializer>();
-            }
         }
 
         protected virtual void CreateFootPrints()
