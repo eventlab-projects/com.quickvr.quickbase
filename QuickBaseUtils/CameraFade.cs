@@ -48,6 +48,7 @@ namespace QuickVR
             while (!Camera.main) yield return null;
 
             transform.parent = Camera.main.transform;
+            transform.forward = Camera.main.transform.forward;
             transform.localPosition = new Vector3(0, 0, 0.75f);
             transform.localScale = new Vector3(10, 10, 10);
         }
