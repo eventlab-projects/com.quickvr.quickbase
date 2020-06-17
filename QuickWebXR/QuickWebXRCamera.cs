@@ -44,12 +44,18 @@ namespace QuickVR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         protected static void Init()
         {
-            if (Camera.main)
-            {
-                Camera.main.gameObject.SetActive(false);
-            }
+            Camera tmpCamera = Camera.main;
+            
             QuickVRCameraController cameraController = QuickSingletonManager.GetInstance<QuickVRCameraController>();
             QuickWebXRCamera wxrCameras = cameraController.transform.CreateChild("WebXRCameras").GetOrCreateComponent<QuickWebXRCamera>();
+
+            if (tmpCamera) 
+            {
+                wxrCameras.transform.position = tmpCamera.transform.position;
+                wxrCameras.transform.forward = tmpCamera.transform.forward;
+
+                tmpCamera.gameObject.SetActive(false);
+            }
         }
 #endif
 
