@@ -49,6 +49,8 @@ namespace QuickVR
 
         protected RenderTexture _reflectionTextureLeft = null;
         protected RenderTexture _reflectionTextureRight = null;
+        protected RenderTexture _bakedReflectionTextureLeft = null;
+        protected RenderTexture _bakedReflectionTextureRight = null;
 
         protected ReflectionQuality _oldReflectionQuality = ReflectionQuality.HIGH;
 
@@ -95,6 +97,8 @@ namespace QuickVR
         {
             DestroyImmediate(_reflectionTextureLeft);
             DestroyImmediate(_reflectionTextureRight);
+            DestroyImmediate(_bakedReflectionTextureLeft);
+            DestroyImmediate(_bakedReflectionTextureRight);
 
             QuickMirrorReflectionManager.RemoveMirror(this);
         }
@@ -104,31 +108,26 @@ namespace QuickVR
             int texSize = GetTextureSize(_reflectionQuality);
 
             //Check the reflection texture for the left eye
-            if (!_reflectionTextureLeft || _reflectionQuality != _oldReflectionQuality)
-            {
-                if (_reflectionTextureLeft) DestroyImmediate(_reflectionTextureLeft);
-                _reflectionTextureLeft = CreateRenderTexture("__ReflectionTextureLeft__", texSize);
-            }
-
-            //Check the reflection texture for the right eye
-            if (!_reflectionTextureRight || _reflectionQuality != _oldReflectionQuality)
-            {
-                if (_reflectionTextureRight) DestroyImmediate(_reflectionTextureRight);
-                _reflectionTextureRight = CreateRenderTexture("__ReflectionTextureRight__", texSize);
-            }
+            CreateRenderTexture(ref _reflectionTextureLeft, "__ReflectionTextureLeft__", texSize);
+            CreateRenderTexture(ref _reflectionTextureRight, "__ReflectionTextureRight__", texSize);
+            CreateRenderTexture(ref _bakedReflectionTextureLeft, "__BakedReflectionTextureLeft__", texSize);
+            CreateRenderTexture(ref _bakedReflectionTextureRight, "__BakedReflectionTextureRight__", texSize);
 
             _oldReflectionQuality = _reflectionQuality;
         }
 
-        protected virtual RenderTexture CreateRenderTexture(string name, int size, RenderTextureFormat format = RenderTextureFormat.Default)
+        protected virtual void CreateRenderTexture(ref RenderTexture result, string name, int size, RenderTextureFormat format = RenderTextureFormat.Default)
         {
-            RenderTexture rTex = new RenderTexture(size, size, 16, format);
-            rTex.name = name;
-            rTex.isPowerOfTwo = true;
-            rTex.hideFlags = HideFlags.DontSave;
-            rTex.antiAliasing = 2;
+            if (!result || _reflectionQuality != _oldReflectionQuality)
+            {
+                if (result) DestroyImmediate(result);
 
-            return rTex;
+                result = new RenderTexture(size, size, 16, format);
+                result.name = name;
+                result.isPowerOfTwo = true;
+                result.hideFlags = HideFlags.DontSave;
+                result.antiAliasing = 2;
+            }
         }
 
         protected virtual void ClearRenderTexture(RenderTexture rTex, Color bgColor)
