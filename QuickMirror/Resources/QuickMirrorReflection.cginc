@@ -12,6 +12,7 @@ uniform float _NoisePower;			//Indicates how much powerful is the noise texture
 uniform float4 _NoiseColor;			//The color of the noise
 
 uniform int REFLECTION_INVERT_Y;
+uniform int STEREO_TARGET_EYE;
 
 struct v2f
 {
@@ -44,6 +45,9 @@ v2f vert(float4 pos : POSITION, float2 uv : TEXCOORD0)
 
 int isEyeLeft() 
 {
+	if (STEREO_TARGET_EYE == 1) return 1;
+	else if (STEREO_TARGET_EYE == 2) return 0;
+
 	return unity_StereoEyeIndex == 0 ? 1 : 0;
 }
 

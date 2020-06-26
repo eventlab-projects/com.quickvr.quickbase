@@ -17,6 +17,8 @@ namespace QuickVR
         #region PRIVATE ATTRIBUTES
 
         private static HashSet<QuickMirrorReflectionBase> _mirrors = new HashSet<QuickMirrorReflectionBase>();
+        private static bool _renderReflection = false;
+        private static float _timeLastRender = 0;
 
         #endregion
 
@@ -29,6 +31,7 @@ namespace QuickVR
 #endif
             //QuickVRManager.OnPostCameraUpdate += UpdateMirrorsMainCamera;
             Camera.onPreCull += UpdateMirrors;
+            Application.onBeforeRender += AllowRenderReflection;
         }
 
         #endregion
@@ -60,9 +63,12 @@ namespace QuickVR
 
         static void UpdateMirrors(Camera cam)
         {
-            foreach (QuickMirrorReflectionBase mirror in _mirrors)
+            if (cam.enabled && _renderReflection)
             {
-                mirror.BeginCameraRendering(cam);
+                foreach (QuickMirrorReflectionBase mirror in _mirrors)
+                {
+                    mirror.BeginCameraRendering(cam);
+                }
             }
         }
 
@@ -71,6 +77,20 @@ namespace QuickVR
             foreach (Camera cam in Camera.allCameras)
             {
                 UpdateMirrors(cam);
+            }
+        }
+
+        static void AllowRenderReflection()
+        {
+            if (_renderReflection)
+            {
+                _renderReflection = false;
+            }
+
+            if (Time.time - _timeLastRender > 1)
+            {
+                _renderReflection = true;
+                _timeLastRender = Time.time;
             }
         }
 

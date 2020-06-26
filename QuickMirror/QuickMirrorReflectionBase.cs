@@ -243,8 +243,8 @@ namespace QuickVR
             }
             else
             {
-                ClearRenderTexture(_reflectionTextureLeft, Color.black);
-                ClearRenderTexture(_reflectionTextureRight, Color.black);
+                ClearRenderTexture(_reflectionTextureLeft, Color.red);
+                ClearRenderTexture(_reflectionTextureRight, Color.red);
             }
         }
 
@@ -271,20 +271,15 @@ namespace QuickVR
 
         protected virtual void RenderVirtualImageStereo(RenderTexture rtLeft, RenderTexture rtRight, bool mirrorStereo = true)
         {
-            if (_currentCamera.stereoEnabled)
+            float stereoSign = mirrorStereo ? -1.0f : 1.0f;
+            float stereoSeparation = stereoSign * _currentCamera.stereoSeparation * 0.5f;
+            if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Both || _currentCamera.stereoTargetEye == StereoTargetEyeMask.Left)
             {
-                float stereoSign = mirrorStereo ? -1.0f : 1.0f;
-                float stereoSeparation = stereoSign * _currentCamera.stereoSeparation * 0.5f;
                 RenderVirtualImage(rtLeft, Camera.StereoscopicEye.Left, stereoSeparation);
+            }
+            if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Both || _currentCamera.stereoTargetEye == StereoTargetEyeMask.Right)
+            {
                 RenderVirtualImage(rtRight, Camera.StereoscopicEye.Right, -stereoSeparation);
-            }
-            else if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Both || _currentCamera.stereoTargetEye == StereoTargetEyeMask.Left)
-            {
-                RenderVirtualImage(rtLeft, Camera.StereoscopicEye.Left);
-            }
-            else if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Right)
-            {
-                RenderVirtualImage(rtLeft, Camera.StereoscopicEye.Right);
             }
         }
 
