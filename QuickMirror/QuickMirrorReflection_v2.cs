@@ -62,17 +62,6 @@ namespace QuickVR
 
         #region UPDATE
 
-        protected override void UpdateCameraModes()
-        {
-            base.UpdateCameraModes();
-
-            //_reflectionCamera.RemoveAllCommandBuffers();
-            //CommandBuffer invertCullingON = CreateInvertCullingCommandBuffer(true);
-            //_reflectionCamera.AddCommandBuffer(CameraEvent.BeforeGBuffer, invertCullingON);
-            //_reflectionCamera.AddCommandBuffer(CameraEvent.BeforeDepthTexture, invertCullingON);
-            //_reflectionCamera.AddCommandBuffer(CameraEvent.AfterEverything, CreateInvertCullingCommandBuffer(false));
-        }
-
         protected override void RenderReflection()
         {
             base.RenderReflection();

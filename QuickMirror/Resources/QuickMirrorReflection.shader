@@ -4,6 +4,8 @@ Shader "QuickVR/MirrorReflection"
 	{
 		_LeftEyeTexture("Left Eye Texture", 2D) = "white" {}
 		_RightEyeTexture("Right Eye Texture", 2D) = "white" {}
+		_LeftEyeBakedTexture("Left Eye Baked Texture", 2D) = "white" {}
+		_RightEyeBakedTexture("Right Eye Baked Texture", 2D) = "white" {}
 		_ReflectionPower("Reflection Power", Range(0.0, 1.0)) = 1.0
 		_NoiseMask("Noise Mask", 2D) = "white" {}
 		_NoiseColor("Noise Color", Color) = (1.0, 1.0, 1.0, 1.0)

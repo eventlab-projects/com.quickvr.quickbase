@@ -17,6 +17,13 @@ namespace QuickVR
     public class QuickMirrorReflection : QuickMirrorReflectionBase
     {
 
+        #region PUBLIC ATTRIBUTES
+
+        [Range(1.0f, 2.0f)]
+        public float _reflectionScale = 1.0f;
+
+        #endregion
+
         #region PROTECTED PARAMETERS
 
         protected enum Corner
@@ -39,11 +46,27 @@ namespace QuickVR
         protected virtual Vector3 GetCornerPosition(Corner corner)
         {
             Bounds bounds = _mFilter.sharedMesh.bounds;
+            Vector3 result = bounds.center;
+            Vector3 halfSize = bounds.extents * _reflectionScale;
 
-            if (corner == Corner.BOTTOM_LEFT) return transform.TransformPoint(new Vector3(bounds.min.x, bounds.min.y, bounds.center.z));
-            if (corner == Corner.TOP_LEFT) return transform.TransformPoint(new Vector3(bounds.min.x, bounds.max.y, bounds.center.z));
-            if (corner == Corner.BOTTOM_RIGHT) return transform.TransformPoint(new Vector3(bounds.max.x, bounds.min.y, bounds.center.z));
-            return transform.TransformPoint(new Vector3(bounds.max.x, bounds.max.y, bounds.center.z));
+            if (corner == Corner.BOTTOM_LEFT)
+            {
+                result += Vector3.Scale(halfSize, new Vector3(-1, -1, 0));
+            }
+            else if (corner == Corner.TOP_LEFT)
+            {
+                result += Vector3.Scale(halfSize, new Vector3(-1, 1, 0));
+            }
+            else if (corner == Corner.BOTTOM_RIGHT)
+            {
+                result += Vector3.Scale(halfSize, new Vector3(1, -1, 0));
+            }
+            else
+            {
+                result += Vector3.Scale(halfSize, new Vector3(1, 1, 0));
+            }
+
+            return transform.TransformPoint(result);
         }
 
         protected virtual Dictionary<Corner, Vector3> GetCameraCornerRays(Camera cam, float d)
@@ -128,6 +151,19 @@ namespace QuickVR
             // work with Unity's shadow maps.
             _reflectionCamera.targetTexture = targetTexture;
             _reflectionCamera.Render();
+        }
+
+        protected virtual void Update()
+        {
+            float uvScale = 1.0f / _reflectionScale;
+            Vector2 uvCenter = new Vector2(0.5f, 0.5f);
+            _mFilter.sharedMesh.uv = new Vector2[]
+            {
+                Vector2.Lerp(uvCenter, new Vector2(0, 0), uvScale),
+                Vector2.Lerp(uvCenter, new Vector2(1, 0), uvScale),
+                Vector2.Lerp(uvCenter, new Vector2(1, 1), uvScale),
+                Vector2.Lerp(uvCenter, new Vector2(0, 1), uvScale),
+            };
         }
 
         #endregion

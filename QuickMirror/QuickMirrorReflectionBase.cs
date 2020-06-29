@@ -262,9 +262,21 @@ namespace QuickVR
         {
             UpdateCameraModes();
 
+            Material mat = GetMaterial();
+
+            //Render the static geometry
+            if (QuickMirrorReflectionManager.IsRenderStaticGeometry())
+            {
+                _reflectionCamera.cullingMask = (1 << LayerMask.NameToLayer("Water"));
+                RenderVirtualImageStereo(_bakedReflectionTextureLeft, _bakedReflectionTextureRight);
+                mat.SetTexture("_LeftEyeBakedTexture", _bakedReflectionTextureLeft);
+                mat.SetTexture("_RightEyeBakedTexture", _bakedReflectionTextureRight);
+            }
+            
+            //Render the dynamic geometry
+            _reflectionCamera.cullingMask = ~(1 << LayerMask.NameToLayer("Water")) & ~(1 << LayerMask.NameToLayer("UI")) & _reflectLayers.value; // never render water layer
             RenderVirtualImageStereo(_reflectionTextureLeft, _reflectionTextureRight);
 
-            Material mat = GetMaterial();
             mat.SetTexture("_LeftEyeTexture", _reflectionTextureLeft);
             mat.SetTexture("_RightEyeTexture", _reflectionTextureRight);
         }
@@ -286,7 +298,6 @@ namespace QuickVR
         protected virtual void UpdateCameraModes()
         {
             // set camera to clear the same way as current camera
-            _reflectionCamera.cullingMask = ~(1 << LayerMask.NameToLayer("Water")) & ~(1 << LayerMask.NameToLayer("UI")) & _reflectLayers.value; // never render water layer
             _reflectionCamera.clearFlags = _currentCamera.clearFlags;
             _reflectionCamera.backgroundColor = _currentCamera.backgroundColor;
             if (_currentCamera.clearFlags == CameraClearFlags.Skybox)

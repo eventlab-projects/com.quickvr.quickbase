@@ -20,6 +20,8 @@ namespace QuickVR
         private static bool _renderReflection = false;
         private static float _timeLastRender = 0;
 
+        private static bool _renderStaticGeometry = true;
+
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -37,6 +39,11 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
+
+        public static bool IsRenderStaticGeometry()
+        {
+            return _renderStaticGeometry;
+        }
 
         public static void AddMirror(QuickMirrorReflectionBase mirror)
         {
@@ -82,14 +89,27 @@ namespace QuickVR
 
         static void AllowRenderReflection()
         {
-            if (_renderReflection)
+            //if (_renderReflection)
+            //{
+            //    _renderReflection = false;
+            //}
+
+            //if (Time.time - _timeLastRender > (1.0f / 30.0f))
+            //{
+            //    _renderReflection = true;
+            //    _timeLastRender = Time.time;
+            //}
+            _renderReflection = true;
+
+            if (_renderStaticGeometry)
             {
-                _renderReflection = false;
+                _renderStaticGeometry = false;
             }
 
-            if (Time.time - _timeLastRender > 1)
+            if (Time.time - _timeLastRender > 10)
             {
-                _renderReflection = true;
+                Debug.Log("RENDER STATIC GEOMETRY!!!");
+                _renderStaticGeometry = true;
                 _timeLastRender = Time.time;
             }
         }
