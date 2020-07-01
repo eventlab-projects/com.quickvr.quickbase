@@ -17,13 +17,6 @@ namespace QuickVR
     public class QuickMirrorReflection : QuickMirrorReflectionBase
     {
 
-        #region PUBLIC ATTRIBUTES
-
-        [Range(1.0f, 2.0f)]
-        public float _reflectionScale = 1.0f;
-
-        #endregion
-
         #region PROTECTED PARAMETERS
 
         protected enum Corner
@@ -102,7 +95,6 @@ namespace QuickVR
             Vector3 pb = GetCornerPosition(Corner.BOTTOM_RIGHT);
             Vector3 pc = GetCornerPosition(Corner.TOP_LEFT);
 
-            //Vector3 pe = GetReflectedPosition(_currentCamera.transform.position) + _currentCamera.transform.right * stereoSeparation; // eye position
             Vector3 pe = GetReflectedPosition(_currentCamera.transform.position + _currentCamera.transform.right * stereoSeparation); // eye position
 
             Vector3 va = pa - pe;
@@ -151,19 +143,6 @@ namespace QuickVR
             // work with Unity's shadow maps.
             _reflectionCamera.targetTexture = targetTexture;
             _reflectionCamera.Render();
-        }
-
-        protected virtual void Update()
-        {
-            float uvScale = 1.0f / _reflectionScale;
-            Vector2 uvCenter = new Vector2(0.5f, 0.5f);
-            _mFilter.sharedMesh.uv = new Vector2[]
-            {
-                Vector2.Lerp(uvCenter, new Vector2(0, 0), uvScale),
-                Vector2.Lerp(uvCenter, new Vector2(1, 0), uvScale),
-                Vector2.Lerp(uvCenter, new Vector2(1, 1), uvScale),
-                Vector2.Lerp(uvCenter, new Vector2(0, 1), uvScale),
-            };
         }
 
         #endregion

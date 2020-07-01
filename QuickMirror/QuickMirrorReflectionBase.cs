@@ -43,6 +43,16 @@ namespace QuickVR
         }
         public NormalDirection _normalDirection = NormalDirection.Forward;
 
+        public enum UpdateMode
+        {
+            Automatic,
+            ByScript, 
+        }
+        public UpdateMode _updateMode = UpdateMode.Automatic;
+        
+        [Range(1.0f, 2.0f)]
+        public float _reflectionScale = 1.0f;
+
         #endregion
 
         #region PROTECTED PARAMETERS
@@ -55,11 +65,15 @@ namespace QuickVR
         protected ReflectionQuality _oldReflectionQuality = ReflectionQuality.HIGH;
 
         protected Camera _currentCamera = null;
+        protected Vector3 _currentCameraPosBaked = Vector3.zero;
         protected Camera _reflectionCamera = null;
         protected static bool _insideRendering = false;
 
         protected MeshFilter _mFilter;
         protected Renderer _renderer;
+
+        protected bool _requestRenderGeometryBaked = false;
+        protected bool _requestRenderGeometryDefault = false;
 
         #endregion
 
@@ -264,13 +278,15 @@ namespace QuickVR
 
             Material mat = GetMaterial();
 
-            //Render the static geometry
-            if (QuickMirrorReflectionManager.IsRenderStaticGeometry())
+            //Render the baked geometry
+            if (_updateMode == UpdateMode.Automatic || _requestRenderGeometryBaked)
             {
+                _currentCameraPosBaked = _currentCamera.transform.position;
                 _reflectionCamera.cullingMask = (1 << LayerMask.NameToLayer("Water"));
                 RenderVirtualImageStereo(_bakedReflectionTextureLeft, _bakedReflectionTextureRight);
                 mat.SetTexture("_LeftEyeBakedTexture", _bakedReflectionTextureLeft);
                 mat.SetTexture("_RightEyeBakedTexture", _bakedReflectionTextureRight);
+                UpdateReflectionUV();
             }
             
             //Render the dynamic geometry
@@ -279,6 +295,34 @@ namespace QuickVR
 
             mat.SetTexture("_LeftEyeTexture", _reflectionTextureLeft);
             mat.SetTexture("_RightEyeTexture", _reflectionTextureRight);
+        }
+
+        protected virtual void UpdateReflectionUV()
+        {
+            Vector3 realSize = _mFilter.sharedMesh.bounds.size;
+            Vector3 totalSize = _mFilter.sharedMesh.bounds.size * _reflectionScale;
+            Vector3 maxOffset = (totalSize - realSize) * 0.5f;
+
+            Vector3 c0 = transform.position + Vector3.ProjectOnPlane(_currentCameraPosBaked - transform.position, transform.forward);
+            Vector3 c1 = transform.position + Vector3.ProjectOnPlane(_currentCamera.transform.position - transform.position, transform.forward);
+            Vector3 cOffset = c1 - c0;
+            cOffset = new Vector3
+                (
+                Mathf.Sign(cOffset.x) * Mathf.Min(Mathf.Abs(cOffset.x), maxOffset.x),
+                Mathf.Sign(cOffset.y) * Mathf.Min(Mathf.Abs(cOffset.y), maxOffset.y),
+                0
+                );
+
+            float t = 1.0f / _reflectionScale;
+            Vector2 uvOffset = new Vector2(cOffset.x / totalSize.x, cOffset.y / totalSize.y);
+            Vector2 uvCenter = new Vector2(0.5f, 0.5f) + uvOffset;
+            _mFilter.sharedMesh.uv = new Vector2[]
+            {
+                Vector2.Lerp(uvCenter, new Vector2(0, 0), t),
+                Vector2.Lerp(uvCenter, new Vector2(1, 0), t),
+                Vector2.Lerp(uvCenter, new Vector2(1, 1), t),
+                Vector2.Lerp(uvCenter, new Vector2(0, 1), t),
+            };
         }
 
         protected virtual void RenderVirtualImageStereo(RenderTexture rtLeft, RenderTexture rtRight, bool mirrorStereo = true)

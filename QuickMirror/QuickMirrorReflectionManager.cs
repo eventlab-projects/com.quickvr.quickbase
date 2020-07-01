@@ -17,10 +17,7 @@ namespace QuickVR
         #region PRIVATE ATTRIBUTES
 
         private static HashSet<QuickMirrorReflectionBase> _mirrors = new HashSet<QuickMirrorReflectionBase>();
-        private static bool _renderReflection = false;
         private static float _timeLastRender = 0;
-
-        private static bool _renderStaticGeometry = true;
 
         #endregion
 
@@ -33,17 +30,12 @@ namespace QuickVR
 #endif
             //QuickVRManager.OnPostCameraUpdate += UpdateMirrorsMainCamera;
             Camera.onPreCull += UpdateMirrors;
-            Application.onBeforeRender += AllowRenderReflection;
+            //Application.onBeforeRender += AllowRenderReflection;
         }
 
         #endregion
 
         #region GET AND SET
-
-        public static bool IsRenderStaticGeometry()
-        {
-            return _renderStaticGeometry;
-        }
 
         public static void AddMirror(QuickMirrorReflectionBase mirror)
         {
@@ -70,7 +62,7 @@ namespace QuickVR
 
         static void UpdateMirrors(Camera cam)
         {
-            if (cam.enabled && _renderReflection)
+            if (cam.enabled)
             {
                 foreach (QuickMirrorReflectionBase mirror in _mirrors)
                 {
@@ -99,19 +91,19 @@ namespace QuickVR
             //    _renderReflection = true;
             //    _timeLastRender = Time.time;
             //}
-            _renderReflection = true;
+            //_renderReflection = true;
 
-            if (_renderStaticGeometry)
-            {
-                _renderStaticGeometry = false;
-            }
+            //if (_renderStaticGeometry)
+            //{
+            //    _renderStaticGeometry = false;
+            //}
 
-            if (Time.time - _timeLastRender > 10)
-            {
-                Debug.Log("RENDER STATIC GEOMETRY!!!");
-                _renderStaticGeometry = true;
-                _timeLastRender = Time.time;
-            }
+            //if (Time.time - _timeLastRender > 10)
+            //{
+            //    Debug.Log("RENDER STATIC GEOMETRY!!!");
+            //    _renderStaticGeometry = true;
+            //    _timeLastRender = Time.time;
+            //}
         }
 
         #endregion

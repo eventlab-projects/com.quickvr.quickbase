@@ -12,13 +12,40 @@ namespace QuickVR
         #region PROTECTED PARAMETERS
 
         private static Dictionary<Type, Component> _instances = new Dictionary<Type, Component>();
+        private static bool _isQuitting = false;
+        
+        #endregion
+
+        #region CREATION AND DESTRUCTION
+
+        [RuntimeInitializeOnLoadMethod]
+        private static void Init()
+        {
+            _isQuitting = false;
+            Application.quitting += ApplicationQuitting;
+        }
 
         #endregion
 
         #region GET AND SET
 
+        public static bool IsQuitting()
+        {
+            if (Application.isEditor && !Application.isPlaying)
+            {
+                _isQuitting = false;
+            }
+
+            return _isQuitting;
+        }
+
         public static T GetInstance<T>() where T : Component
         {
+            if (IsQuitting())
+            {
+                return null;
+            }
+
             Type type = typeof(T);
             if (!_instances.ContainsKey(type) || _instances[type] == null)
             {
@@ -38,6 +65,11 @@ namespace QuickVR
         public static bool IsInstantiated<T>() where T : Component
         {
             return (_instances.ContainsKey(typeof(T)) && _instances[typeof(T)] != null) || (GameObject.FindObjectOfType<T>() != null);
+        }
+
+        private static void ApplicationQuitting()
+        {
+            _isQuitting = true;
         }
 
         #endregion
