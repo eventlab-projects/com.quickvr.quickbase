@@ -272,29 +272,50 @@ namespace QuickVR
             _insideRendering = false;
         }
 
+        public virtual void RenderGeometryBaked()
+        {
+            _requestRenderGeometryBaked = true;
+        }
+
+        public virtual void RenderGeometryDefault()
+        {
+            _requestRenderGeometryDefault = true;
+        }
+
         protected virtual void RenderReflection()
         {
             UpdateCameraModes();
 
             Material mat = GetMaterial();
 
-            //Render the baked geometry
             if (_updateMode == UpdateMode.Automatic || _requestRenderGeometryBaked)
             {
+                //Render the baked geometry
                 _currentCameraPosBaked = _currentCamera.transform.position;
                 _reflectionCamera.cullingMask = (1 << LayerMask.NameToLayer("Water"));
+                _reflectionCamera.clearFlags = _currentCamera.clearFlags;
+                _reflectionCamera.backgroundColor = _currentCamera.backgroundColor;
                 RenderVirtualImageStereo(_bakedReflectionTextureLeft, _bakedReflectionTextureRight);
                 mat.SetTexture("_LeftEyeBakedTexture", _bakedReflectionTextureLeft);
                 mat.SetTexture("_RightEyeBakedTexture", _bakedReflectionTextureRight);
                 UpdateReflectionUV();
+
+                _requestRenderGeometryBaked = false;
             }
             
-            //Render the dynamic geometry
-            _reflectionCamera.cullingMask = ~(1 << LayerMask.NameToLayer("Water")) & ~(1 << LayerMask.NameToLayer("UI")) & _reflectLayers.value; // never render water layer
-            RenderVirtualImageStereo(_reflectionTextureLeft, _reflectionTextureRight);
+            if (_updateMode == UpdateMode.Automatic || _requestRenderGeometryDefault)
+            {
+                //Render the dynamic geometry
+                _reflectionCamera.cullingMask = ~(1 << LayerMask.NameToLayer("Water")) & ~(1 << LayerMask.NameToLayer("UI")) & _reflectLayers.value; // never render water layer
+                _reflectionCamera.clearFlags = CameraClearFlags.SolidColor;
+                _reflectionCamera.backgroundColor = Color.clear;
+                RenderVirtualImageStereo(_reflectionTextureLeft, _reflectionTextureRight);
 
-            mat.SetTexture("_LeftEyeTexture", _reflectionTextureLeft);
-            mat.SetTexture("_RightEyeTexture", _reflectionTextureRight);
+                mat.SetTexture("_LeftEyeTexture", _reflectionTextureLeft);
+                mat.SetTexture("_RightEyeTexture", _reflectionTextureRight);
+
+                _requestRenderGeometryDefault = false;
+            }
         }
 
         protected virtual void UpdateReflectionUV()
@@ -342,8 +363,6 @@ namespace QuickVR
         protected virtual void UpdateCameraModes()
         {
             // set camera to clear the same way as current camera
-            _reflectionCamera.clearFlags = _currentCamera.clearFlags;
-            _reflectionCamera.backgroundColor = _currentCamera.backgroundColor;
             if (_currentCamera.clearFlags == CameraClearFlags.Skybox)
             {
                 Skybox sky = _currentCamera.GetComponent<Skybox>();
