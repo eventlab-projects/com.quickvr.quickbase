@@ -83,6 +83,7 @@ namespace QuickVR
         {
             CreateReflectionTexture();
             CreateReflectionCamera();
+            StartCoroutine(CoResetRenderRequest());
         }
 
         protected virtual void OnEnable()
@@ -299,10 +300,8 @@ namespace QuickVR
                 mat.SetTexture("_LeftEyeBakedTexture", _bakedReflectionTextureLeft);
                 mat.SetTexture("_RightEyeBakedTexture", _bakedReflectionTextureRight);
                 UpdateReflectionUV();
-
-                _requestRenderGeometryBaked = false;
             }
-            
+
             if (_updateMode == UpdateMode.Automatic || _requestRenderGeometryDefault)
             {
                 //Render the dynamic geometry
@@ -313,8 +312,6 @@ namespace QuickVR
 
                 mat.SetTexture("_LeftEyeTexture", _reflectionTextureLeft);
                 mat.SetTexture("_RightEyeTexture", _reflectionTextureRight);
-
-                _requestRenderGeometryDefault = false;
             }
         }
 
@@ -404,6 +401,14 @@ namespace QuickVR
                 Gizmos.DrawFrustum(Vector3.zero, _reflectionCamera.fieldOfView, _reflectionCamera.farClipPlane, _reflectionCamera.nearClipPlane, _reflectionCamera.aspect);
             }
 
+        }
+
+        protected virtual IEnumerator CoResetRenderRequest()
+        {
+            yield return new WaitForEndOfFrame();
+
+            _requestRenderGeometryBaked = false;
+            _requestRenderGeometryDefault = false;
         }
 
         #endregion

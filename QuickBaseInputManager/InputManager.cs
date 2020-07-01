@@ -50,13 +50,6 @@ public class InputManager : MonoBehaviour
 
     #endregion
 
-    #region EVENTS
-
-    public static Action OnPreUpdateInput;
-    public static Action OnPostUpdateInput;
-
-    #endregion
-
     #region CREATION AND DESTRUCTION
 
     protected virtual void Awake()
@@ -312,15 +305,11 @@ public class InputManager : MonoBehaviour
 
     public virtual void UpdateState()
     {
-        if (OnPreUpdateInput != null) OnPreUpdateInput();
-
         BaseInputManager[] inputManagers = GetInputManagers();
         foreach (BaseInputManager iManager in inputManagers)
         {
             iManager.UpdateMappingState();
         }
-
-        if (OnPostUpdateInput != null) OnPostUpdateInput();
     }
 
     #endregion
