@@ -6,8 +6,6 @@
 /////////////////////////////////////////////////////////
 uniform sampler2D _LeftEyeTexture;			//The texture containing the reflection of the DEFAULT geometry for the left eye
 uniform sampler2D _RightEyeTexture;			//The texture containing the reflection of the DEFAULT geometry for the right eye
-uniform sampler2D _LeftEyeBakedTexture;		//The texture containing the reflection of the BAKED geometry for the left eye
-uniform sampler2D _RightEyeBakedTexture;	//The texture containing the reflection of the BAKED geometry for the right eye
 uniform sampler2D _NoiseMask;				//A texture used to create imperfections in the reflection
 uniform float _ReflectionPower;				//Indicates how much light is the reflection. It is used to simulate the light lost during the reflection
 uniform float _NoisePower;					//Indicates how much powerful is the noise texture
@@ -22,7 +20,6 @@ struct v2f
 	float4 screenPos : TEXCOORD1;
 	float4 pos : SV_POSITION;
 };
-
 
 float2 GetProjUV(float4 screenPos) 
 {
@@ -57,13 +54,18 @@ fixed4 ComputeFinalColor(float2 uvReflection, float2 uvTex)
 {
 	//return isEyeLeft() ? fixed4(1,0,0,1) : fixed4(0,1,0,1);
 
-	fixed4 reflBaked = isEyeLeft() ? tex2D(_LeftEyeBakedTexture, uvReflection) : tex2D(_RightEyeBakedTexture, uvReflection);
-	fixed4 reflDefault = isEyeLeft() ? tex2D(_LeftEyeTexture, uvReflection) : tex2D(_RightEyeTexture, uvReflection);
-	fixed4 refl = reflDefault.a == 0 ? reflBaked : reflDefault;
+	fixed4 refl = isEyeLeft() ? tex2D(_LeftEyeTexture, uvReflection) : tex2D(_RightEyeTexture, uvReflection);
 	fixed4 noiseColor = tex2D(_NoiseMask, uvTex) * _NoiseColor;
 	fixed4 finalColor = refl * _ReflectionPower + noiseColor * _NoisePower;
 
 	return saturate(finalColor);
+}
+
+fixed4 ComputeFinalColor_MOBILE(float2 uvReflection, float2 uvTex)
+{
+	//return isEyeLeft() ? fixed4(1,0,0,1) : fixed4(0,1,0,1);
+
+	return isEyeLeft() ? tex2D(_LeftEyeTexture, uvReflection) : tex2D(_RightEyeTexture, uvReflection);
 }
 
 #endif

@@ -33,7 +33,11 @@ namespace QuickVR
 
         protected override string GetShaderName()
         {
+#if UNITY_WEBGL
+            return "QuickVR/MirrorReflection_MOBILE";
+#else
             return "QuickVR/MirrorReflection";
+#endif
         }
 
         protected virtual Vector3 GetCornerPosition(Corner corner)
@@ -76,9 +80,9 @@ namespace QuickVR
             return result;
         }
 
-        #endregion
+#endregion
 
-        #region MIRROR RENDER
+#region MIRROR RENDER
 
         protected override void RenderVirtualImage(RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0.0f)
         {
@@ -145,9 +149,9 @@ namespace QuickVR
             _reflectionCamera.Render();
         }
 
-        #endregion
+#endregion
 
-        #region DEBUG
+#region DEBUG
 
         protected override void OnDrawGizmos()
         {
@@ -229,7 +233,7 @@ namespace QuickVR
             Gizmos.DrawLine(bl, tl);
         }
 
-        #endregion
+#endregion
     }
 
 }
