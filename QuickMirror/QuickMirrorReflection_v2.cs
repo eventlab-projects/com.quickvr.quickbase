@@ -138,7 +138,7 @@ namespace QuickVR
         //    }
         //}
 
-        protected override void RenderVirtualImage(RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0)
+        protected override void RenderVirtualImage(Camera.StereoscopicEye eye, float stereoSeparation = 0)
         {
             GL.invertCulling = true;
 
@@ -150,7 +150,6 @@ namespace QuickVR
             _reflectionCamera.projectionMatrix = (_currentCamera.stereoEnabled) ? _currentCamera.GetStereoProjectionMatrix(eye) : _currentCamera.projectionMatrix;
 
             //3) Do the render
-            _reflectionCamera.targetTexture = targetTexture;
             Shader.SetGlobalInt(QuickMirrorReflectionManager.REFLECTION_INVERT_Y, Application.isMobilePlatform ? 0 : 1);
             if (_useRenderWithShader)
             {

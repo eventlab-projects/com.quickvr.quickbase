@@ -84,7 +84,7 @@ namespace QuickVR
 
 #region MIRROR RENDER
 
-        protected override void RenderVirtualImage(RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0.0f)
+        protected override void RenderVirtualImage(Camera.StereoscopicEye eye, float stereoSeparation = 0.0f)
         {
             //Debug.Log("MATRICES");
             //Debug.Log(_currentCamera.transform.worldToLocalMatrix.ToString("f3"));
@@ -145,7 +145,6 @@ namespace QuickVR
             // matrix (i.e. sets it to p * rm * tm and the other 
             // matrix to the identity), but this doesn't appear to 
             // work with Unity's shadow maps.
-            _reflectionCamera.targetTexture = targetTexture;
             _reflectionCamera.Render();
         }
 

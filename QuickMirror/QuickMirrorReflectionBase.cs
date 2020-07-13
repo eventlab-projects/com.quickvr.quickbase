@@ -275,7 +275,7 @@ namespace QuickVR
             if (_updateMode == UpdateMode.Automatic || _requestRenderGeometryDefault)
             {
                 _reflectionCamera.cullingMask = ~(1 << LayerMask.NameToLayer("Water")) & ~(1 << LayerMask.NameToLayer("UI")) & _reflectLayers.value; // never render water layer
-                RenderVirtualImageStereo(_reflectionTextureLeft, _reflectionTextureRight);
+                RenderVirtualImageStereo();
 
                 mat.SetTexture("_LeftEyeTexture", _reflectionTextureLeft);
                 mat.SetTexture("_RightEyeTexture", _reflectionTextureRight);
@@ -310,17 +310,19 @@ namespace QuickVR
             };
         }
 
-        protected virtual void RenderVirtualImageStereo(RenderTexture rtLeft, RenderTexture rtRight, bool mirrorStereo = true)
+        protected virtual void RenderVirtualImageStereo(bool mirrorStereo = true)
         {
             float stereoSign = mirrorStereo ? -1.0f : 1.0f;
             float stereoSeparation = stereoSign * _currentCamera.stereoSeparation * 0.5f;
             if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Both || _currentCamera.stereoTargetEye == StereoTargetEyeMask.Left)
             {
-                RenderVirtualImage(rtLeft, Camera.StereoscopicEye.Left, stereoSeparation);
+                _reflectionCamera.SetTargetBuffers(_reflectionTextureLeft.colorBuffer, _reflectionTextureLeft.depthBuffer);
+                RenderVirtualImage(Camera.StereoscopicEye.Left, stereoSeparation);
             }
             if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Both || _currentCamera.stereoTargetEye == StereoTargetEyeMask.Right)
             {
-                RenderVirtualImage(rtRight, Camera.StereoscopicEye.Right, -stereoSeparation);
+                _reflectionCamera.SetTargetBuffers(_reflectionTextureRight.colorBuffer, _reflectionTextureRight.depthBuffer);
+                RenderVirtualImage(Camera.StereoscopicEye.Right, -stereoSeparation);
             }
         }
 
@@ -339,7 +341,7 @@ namespace QuickVR
             _reflectionCamera.orthographicSize = _currentCamera.orthographicSize;
         }
 
-        protected abstract void RenderVirtualImage(RenderTexture targetTexture, Camera.StereoscopicEye eye, float stereoSeparation = 0.0f);
+        protected abstract void RenderVirtualImage(Camera.StereoscopicEye eye, float stereoSeparation = 0.0f);
 
         protected virtual void OnDrawGizmos()
         {
