@@ -319,10 +319,17 @@ public abstract class BaseInputManager : MonoBehaviour {
 		}
 	}
 
-	protected virtual bool CheckButtonPressed(ButtonMapping mapping) {
-		List<string> keyCodes = mapping.GetValidKeyCodes();
+	protected virtual bool CheckButtonPressed(ButtonMapping mapping) 
+	{
 		bool pressed = false;
-		foreach (string k in keyCodes) pressed = pressed || ImpGetButton(k);
+		if (mapping._keyCode != NULL_MAPPING)
+        {
+			pressed = ImpGetButton(mapping._keyCode);
+		}
+		if (!pressed && mapping._altKeyCode != NULL_MAPPING)
+        {
+			pressed = ImpGetButton(mapping._altKeyCode);
+		}
 
 		return pressed;
 	}

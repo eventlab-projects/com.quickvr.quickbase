@@ -19,11 +19,28 @@ namespace QuickVR
             Mouse_Y,
         };
 
-        protected static Dictionary<string, KeyCode> _toKeyCode = null;
+        protected static Dictionary<string, KeyCode> _stringToKeyCode = new Dictionary<string, KeyCode>();
+        protected static Dictionary<KeyCode, string> _keyCodeToString = new Dictionary<KeyCode, string>();
+        protected static Dictionary<AxisCode, string> _axisCodeToString = new Dictionary<AxisCode, string>();
 
         #endregion
 
         #region CREATION AND DESTRUCTION
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        protected static void Init()
+        {
+            foreach (KeyCode k in QuickUtils.GetEnumValues<KeyCode>())
+            {
+                _stringToKeyCode[k.ToString()] = k;
+                _keyCodeToString[k] = k.ToString();
+            }
+
+            foreach (AxisCode c in QuickUtils.GetEnumValues<AxisCode>())
+            {
+                _axisCodeToString[c] = c.ToString();
+            }
+        }
 
         public override void Reset()
         {
@@ -46,8 +63,8 @@ namespace QuickVR
             if (aMapping == null) return;
 
             aMapping._axisCode = virtualAxisName;
-            if (aMapping.GetPositiveButton()._keyCode == NULL_MAPPING) aMapping.GetPositiveButton()._keyCode = kPositive.ToString();
-            if (aMapping.GetNegativeButton()._keyCode == NULL_MAPPING) aMapping.GetNegativeButton()._keyCode = kNegative.ToString();
+            if (aMapping.GetPositiveButton()._keyCode == NULL_MAPPING) aMapping.GetPositiveButton()._keyCode = ToString(kPositive);
+            if (aMapping.GetNegativeButton()._keyCode == NULL_MAPPING) aMapping.GetNegativeButton()._keyCode = ToString(kNegative);
         }
 
         public virtual void ConfigureDefaultButton(string virtualButtonName, KeyCode key, KeyCode altKey = KeyCode.None)
@@ -55,8 +72,8 @@ namespace QuickVR
             ButtonMapping bMapping = GetButtonMapping(virtualButtonName);
             if (bMapping == null) return;
 
-            if (bMapping._keyCode == NULL_MAPPING) bMapping._keyCode = key.ToString();
-            if (bMapping._altKeyCode == NULL_MAPPING) bMapping._altKeyCode = altKey.ToString();
+            if (bMapping._keyCode == NULL_MAPPING) bMapping._keyCode = ToString(key);
+            if (bMapping._altKeyCode == NULL_MAPPING) bMapping._altKeyCode = ToString(altKey);
         }
 
         #endregion
@@ -65,16 +82,17 @@ namespace QuickVR
 
         public static KeyCode ToKeyCode(string keyName)
         {
-            if (_toKeyCode == null)
-            {
-                _toKeyCode = new Dictionary<string, KeyCode>();
-                foreach (KeyCode k in QuickUtils.GetEnumValues<KeyCode>())
-                {
-                    _toKeyCode[k.ToString()] = k;
-                }
-            }
+            return _stringToKeyCode[keyName];
+        }
 
-            return _toKeyCode[keyName];
+        public static string ToString(KeyCode k)
+        {
+            return _keyCodeToString[k];
+        }
+
+        protected static string ToString(AxisCode c)
+        {
+            return _axisCodeToString[c];
         }
 
         public override string[] GetAxisCodes()
@@ -104,7 +122,7 @@ namespace QuickVR
 
         protected override float ImpGetAxis(string axis)
         {
-            if ((axis == AxisCode.Mouse_X.ToString()) || (axis == AxisCode.Mouse_Y.ToString()))
+            if (axis == ToString(AxisCode.Mouse_X) || axis == ToString(AxisCode.Mouse_Y))
             {
                 axis = axis.Replace('_', ' ');			//This is to transform from Mouse_X/Y to Mouse X/Y
             }

@@ -70,15 +70,6 @@ public class ButtonMapping : MonoBehaviour {
 		_state = state;
 	}
 
-	public virtual List<string> GetValidKeyCodes() {
-		List<string> result = new List<string>();
-
-		if (_keyCode != BaseInputManager.NULL_MAPPING) result.Add(_keyCode);
-		if (_altKeyCode != BaseInputManager.NULL_MAPPING) result.Add(_altKeyCode);
-
-		return result;
-	}
-
 	#endregion
 
 }
