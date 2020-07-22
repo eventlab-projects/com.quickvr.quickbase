@@ -33,6 +33,18 @@ namespace QuickVR
 
         #endregion
 
+        #region CREATION AND DESTRUCTION
+
+        protected override void Awake()
+        {
+            base.Awake();
+#if !UNITY_ANDROID
+            gameObject.SetActive(false);
+#endif
+        }
+
+        #endregion
+
         #region GET AND SET
 
         public override string[] GetButtonCodes()

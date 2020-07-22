@@ -54,7 +54,9 @@ namespace QuickVR
                 }
             }
 
+#if UNITY_ANDROID
             QuickVRManager.OnSourceAnimatorSet += OnSourceAnimatorSet;
+#endif
         }
 
         protected static void OnSourceAnimatorSet()
@@ -77,9 +79,9 @@ namespace QuickVR
             _vrManager.AddHandTrackingSystem(this);
         }
         
-        #endregion
+#endregion
 
-        #region GET AND SET
+#region GET AND SET
 
         public static OVRSkeleton.BoneId ToOVR(QuickHumanBodyBones boneID)
         {
@@ -96,9 +98,9 @@ namespace QuickVR
             return left ? _leftHand : _rightHand;
         }
 
-        #endregion
+#endregion
 
-        #region UPDATE
+#region UPDATE
 
         public override void UpdateTrackingLate()
         {
@@ -109,7 +111,7 @@ namespace QuickVR
             }
         }
 
-        #endregion
+#endregion
 
     }
 }
