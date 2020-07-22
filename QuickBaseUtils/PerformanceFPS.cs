@@ -40,6 +40,8 @@ namespace QuickVR
 		{
 			base.Awake();
 
+			gameObject.layer = LayerMask.NameToLayer("UI");
+
 			_instructions.alignment = TextAnchor.MiddleCenter;
 			_timeLeft = _updateInterval;
 		}
