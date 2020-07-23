@@ -33,11 +33,7 @@ namespace QuickVR
 
         protected override string GetShaderName()
         {
-#if UNITY_WEBGL
-            return "QuickVR/MirrorReflection_MOBILE";
-#else
             return "QuickVR/MirrorReflection";
-#endif
         }
 
         protected virtual Vector3 GetCornerPosition(Corner corner)

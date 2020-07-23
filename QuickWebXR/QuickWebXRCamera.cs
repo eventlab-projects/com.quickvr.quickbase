@@ -75,12 +75,14 @@ namespace QuickVR
         protected virtual void OnEnable()
         {
             _wxrManager.OnHeadsetUpdate += onHeadsetUpdate;
+            _wxrManager.OnXRChange += onVRChange;
 
 #if UNITY_EDITOR
             // No editor specific funtionality
 #elif UNITY_WEBGL
 			_coPostRender = StartCoroutine(endOfFrame());
 #endif
+            Camera.onPreRender += UpdateStereoTargetEye;
         }
 
         protected virtual void OnDisable()
@@ -105,23 +107,13 @@ namespace QuickVR
             }
         }
 
-        protected void onHeadsetUpdate(
-            Matrix4x4 leftProjectionMatrix,
-            Matrix4x4 rightProjectionMatrix,
-            Matrix4x4 leftViewMatrix,
-            Matrix4x4 rightViewMatrix,
-            Matrix4x4 sitStandMatrix)
+        protected virtual void onVRChange(WebXRState state)
         {
-            if (_wxrManager.xrState == WebXRState.ENABLED)
+            if (state == WebXRState.ENABLED)
             {
                 _cameraLeft.rect = RECT_WEBXR_ENABLED;
                 _cameraLeft.stereoTargetEye = StereoTargetEyeMask.Left;
                 _cameraRight.gameObject.SetActive(true);
-
-                WebXRMatrixUtil.SetTransformFromViewMatrix(_cameraLeft.transform, leftViewMatrix * sitStandMatrix.inverse);
-                _cameraLeft.projectionMatrix = leftProjectionMatrix;
-                WebXRMatrixUtil.SetTransformFromViewMatrix(_cameraRight.transform, rightViewMatrix * sitStandMatrix.inverse);
-                _cameraRight.projectionMatrix = rightProjectionMatrix;
             }
             else
             {
@@ -131,7 +123,28 @@ namespace QuickVR
             }
         }
 
-#endregion
+        protected void onHeadsetUpdate(
+            Matrix4x4 leftProjectionMatrix,
+            Matrix4x4 rightProjectionMatrix,
+            Matrix4x4 leftViewMatrix,
+            Matrix4x4 rightViewMatrix,
+            Matrix4x4 sitStandMatrix)
+        {
+            if (_wxrManager.xrState == WebXRState.ENABLED)
+            {
+                WebXRMatrixUtil.SetTransformFromViewMatrix(_cameraLeft.transform, leftViewMatrix * sitStandMatrix.inverse);
+                _cameraLeft.projectionMatrix = leftProjectionMatrix;
+                WebXRMatrixUtil.SetTransformFromViewMatrix(_cameraRight.transform, rightViewMatrix * sitStandMatrix.inverse);
+                _cameraRight.projectionMatrix = rightProjectionMatrix;
+            }
+        }
+
+        protected virtual void UpdateStereoTargetEye(Camera cam)
+        {
+            Shader.SetGlobalInt("STEREO_TARGET_EYE", (int)cam.stereoTargetEye);
+        }
+
+        #endregion
 
     }
 

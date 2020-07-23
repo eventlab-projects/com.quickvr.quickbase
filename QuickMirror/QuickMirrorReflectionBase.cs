@@ -70,7 +70,7 @@ namespace QuickVR
         protected MeshFilter _mFilter;
         protected Renderer _renderer;
 
-        protected bool _requestRenderGeometryDefault = false;
+        protected bool _requestRender = false;
 
         #endregion
 
@@ -80,7 +80,6 @@ namespace QuickVR
         {
             CreateReflectionTexture();
             _reflectionCamera = CreateReflectionCamera(QuickMirrorReflectionManager.MIRROR_CAMERA_NAME);
-            StartCoroutine(CoResetRenderRequest());
         }
 
         protected virtual void OnEnable()
@@ -133,7 +132,11 @@ namespace QuickVR
                 result.name = name;
                 result.isPowerOfTwo = true;
                 result.hideFlags = HideFlags.DontSave;
+#if UNITY_WEBGL
+                result.antiAliasing = 1;
+#else
                 result.antiAliasing = 2;
+#endif
             }
         }
 
@@ -155,7 +158,13 @@ namespace QuickVR
             result.enabled = false;
             result.renderingPath = _reflectedRenderingPath;
 
+#if UNITY_WEBGL
+            result.allowMSAA = false;
+            result.allowHDR = false;
+#else
             result.allowMSAA = true;
+            result.allowHDR = true;
+#endif
 
             return result;
         }
@@ -248,22 +257,9 @@ namespace QuickVR
             }
         }
 
-        protected virtual void UpdateReflectionTexture()
+        public virtual void RequestRender()
         {
-            //Check the reflection texture for the left eye
-            if (_reflectionQuality != _oldReflectionQuality)
-            {
-                int size = GetTextureSize(_reflectionQuality);
-                _reflectionTextureLeft.width = _reflectionTextureLeft.height = size;
-                _reflectionTextureRight.width = _reflectionTextureRight.height = size;
-
-                _oldReflectionQuality = _reflectionQuality;
-            }
-        }
-
-        public virtual void RenderGeometryDefault()
-        {
-            _requestRenderGeometryDefault = true;
+            _requestRender = true;
         }
 
         protected virtual void RenderReflection()
@@ -272,13 +268,15 @@ namespace QuickVR
 
             Material mat = GetMaterial();
 
-            if (_updateMode == UpdateMode.Automatic || _requestRenderGeometryDefault)
+            if (_updateMode == UpdateMode.Automatic || _requestRender)
             {
                 _reflectionCamera.cullingMask = ~(1 << LayerMask.NameToLayer("Water")) & ~(1 << LayerMask.NameToLayer("UI")) & _reflectLayers.value; // never render water layer
                 RenderVirtualImageStereo();
 
                 mat.SetTexture("_LeftEyeTexture", _reflectionTextureLeft);
                 mat.SetTexture("_RightEyeTexture", _reflectionTextureRight);
+
+                _requestRender = false;
             }
         }
 
@@ -316,12 +314,14 @@ namespace QuickVR
             float stereoSeparation = stereoSign * _currentCamera.stereoSeparation * 0.5f;
             if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Both || _currentCamera.stereoTargetEye == StereoTargetEyeMask.Left)
             {
-                _reflectionCamera.SetTargetBuffers(_reflectionTextureLeft.colorBuffer, _reflectionTextureLeft.depthBuffer);
+                //_reflectionCamera.SetTargetBuffers(_reflectionTextureLeft.colorBuffer, _reflectionTextureLeft.depthBuffer);
+                _reflectionCamera.targetTexture = _reflectionTextureLeft;
                 RenderVirtualImage(Camera.StereoscopicEye.Left, stereoSeparation);
             }
             if (_currentCamera.stereoTargetEye == StereoTargetEyeMask.Both || _currentCamera.stereoTargetEye == StereoTargetEyeMask.Right)
             {
-                _reflectionCamera.SetTargetBuffers(_reflectionTextureRight.colorBuffer, _reflectionTextureRight.depthBuffer);
+                //_reflectionCamera.SetTargetBuffers(_reflectionTextureRight.colorBuffer, _reflectionTextureRight.depthBuffer);
+                _reflectionCamera.targetTexture = _reflectionTextureRight;
                 RenderVirtualImage(Camera.StereoscopicEye.Right, -stereoSeparation);
             }
         }
@@ -334,7 +334,7 @@ namespace QuickVR
             // even if we are supplying custom camera&projection matrices,
             // some of values are used elsewhere (e.g. skybox uses far plane)
             _reflectionCamera.nearClipPlane = Mathf.Max(_currentCamera.nearClipPlane, 0.1f);
-            _reflectionCamera.farClipPlane = Mathf.Min(_currentCamera.farClipPlane, 1000.0f);
+            _reflectionCamera.farClipPlane = Mathf.Min(_currentCamera.farClipPlane, _reflectionDistance);
             _reflectionCamera.orthographic = _currentCamera.orthographic;
             //_reflectionCamera.fieldOfView = _currentCamera.fieldOfView;
             _reflectionCamera.aspect = _currentCamera.aspect;
@@ -356,16 +356,6 @@ namespace QuickVR
                 Gizmos.DrawFrustum(Vector3.zero, _reflectionCamera.fieldOfView, _reflectionCamera.farClipPlane, _reflectionCamera.nearClipPlane, _reflectionCamera.aspect);
             }
 
-        }
-
-        protected virtual IEnumerator CoResetRenderRequest()
-        {
-            while (true)
-            {
-                yield return new WaitForEndOfFrame();
-
-                _requestRenderGeometryDefault = false;
-            }
         }
 
 #endregion
