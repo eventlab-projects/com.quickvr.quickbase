@@ -15,6 +15,7 @@ namespace QuickVR
         {
             HMDAdjustment,
             ForwardDirection,
+            TimeExpired,
         }
 
         #endregion
@@ -32,9 +33,11 @@ namespace QuickVR
         public const string INSTRUCTIONS_HMD_ADJUSTMENT_EN = "Adjust the HMD\n until you can read\n this text.";
         public const string INSTRUCTIONS_HMD_ADJUSTMENT_ES = "Ajusta el casco hasta que\n puedas leer este texto\n de forma nítida.";
 
-        //public const string INSTRUCTIONS_LOOK_FORWARD_EN = "Please, keep your head\n looking front, and do not\n move while the \n screen is in black.";
         public const string INSTRUCTIONS_LOOK_FORWARD_EN = "Please, keep your head\n looking front, and do not\n move while the\n screen is in black.";
         public const string INSTRUCTIONS_LOOK_FORWARD_ES = "Por favor, mantén la cabeza\n mirando al frente, y no te\n muevas mientras la\n pantalla esté oscura.";
+
+        public const string INSTRUCTIONS_TIME_EXPIRED_EN = "The expiration date\n of the application is reached\n and cannot be used anymore. ";
+        public const string INSTRUCTIONS_TIME_EXPIRED_ES = "Se ha superado \n la fecha de expiración y\n la aplicación ya no se puede usar. ";
 
         public const string HINT_CONTROLLERS_EN = "Press the \"Right Trigger\" to continue.";
         public const string HINT_CONTROLLERS_ES = "Pulsa el \"Botón del mando derecho\" para continuar.";
@@ -91,6 +94,10 @@ namespace QuickVR
             else if (step == CalibrationStep.ForwardDirection)
             {
                 SetTextInstructions(isEnglish ? INSTRUCTIONS_LOOK_FORWARD_EN : INSTRUCTIONS_LOOK_FORWARD_ES);
+            }
+            else if (step == CalibrationStep.TimeExpired)
+            {
+                SetTextInstructions(isEnglish ? INSTRUCTIONS_TIME_EXPIRED_EN : INSTRUCTIONS_TIME_EXPIRED_ES);
             }
 
             //Fill the hint field

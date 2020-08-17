@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System;
 using System.Reflection;
 using System.IO;
+using System.Net;
+using System.Globalization;
 
 namespace QuickVR
 {
@@ -105,6 +107,25 @@ namespace QuickVR
             m.RecalculateBounds();
 
             return m;
+        }
+
+        public static DateTime GetDateOnline()
+        {
+            var myHttpWebRequest = (HttpWebRequest)WebRequest.Create("http://www.google.com");
+            var response = myHttpWebRequest.GetResponse();
+            string todaysDates = response.Headers["date"];
+            return DateTime.ParseExact(todaysDates,
+                                       "ddd, dd MMM yyyy HH:mm:ss 'GMT'",
+                                       CultureInfo.InvariantCulture.DateTimeFormat,
+                                       DateTimeStyles.AssumeUniversal);
+        }
+
+        public static void GetDateOnline(out int day, out int month, out int year)
+        {
+            DateTime t = GetDateOnline();
+            day = t.Day;
+            month = t.Month;
+            year = t.Year;
         }
 
         public static List<T> GetEnumValues<T>()

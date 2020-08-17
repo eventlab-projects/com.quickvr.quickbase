@@ -29,6 +29,8 @@ namespace QuickVR {
 
         public string _nextSceneName = "";
 
+        public bool _useExpirationDate = false;
+        
         #endregion
 
         #region PROTECTED PARAMETERS
@@ -54,6 +56,15 @@ namespace QuickVR {
         protected Coroutine _coUpdateTeleport = null;
 
         protected QuickUserGUICalibration _guiCalibration = null;
+
+        [SerializeField, HideInInspector]
+        protected int _expirationDay = 0;
+
+        [SerializeField, HideInInspector]
+        protected int _expirationMonth = 0;
+
+        [SerializeField, HideInInspector]
+        protected int _expirationYear = 0;
 
         #endregion
 
@@ -239,6 +250,20 @@ namespace QuickVR {
             }
         }
 
+        public virtual void GetExpirationDate(out int day, out int month, out int year)
+        {
+            day = _expirationDay;
+            month = _expirationMonth;
+            year = _expirationYear;
+        }
+
+        public virtual void SetExpirationDate(int day, int month, int year)
+        {
+            _expirationDay = day;
+            _expirationMonth = month;
+            _expirationYear = year;
+        }
+
         #endregion
 
         #region UPDATE
@@ -248,31 +273,55 @@ namespace QuickVR {
             if (_nextSceneName != "") _sceneManager.LoadSceneAsync(_nextSceneName);
 
             _cameraFade.SetColor(Color.black);
-            //Adjust the HMD
-            yield return StartCoroutine(CoUpdateHMDAdjustment());
 
-            //Show the logos if any
-            yield return StartCoroutine(CoShowLogos());
+            //Check if the game has expired
+            bool gameExpired = false;
+            if (_useExpirationDate)
+            {
+                int day, month, year;
+                QuickUtils.GetDateOnline(out day, out month, out year);
+                DateTime timeNow = new DateTime(year, month, day);
+                DateTime timeExp = new DateTime(_expirationYear, _expirationMonth, _expirationDay);
+                if (timeNow >= timeExp)
+                {
+                    _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.TimeExpired, _hTracking._handTrackingMode);
+                    gameExpired = true;
+                    Debug.Log("GAME DATE EXPIRED!!!");
+                }
+            }
 
-            //Start the calibration process
-            if (OnCalibrating != null) OnCalibrating();
-            yield return StartCoroutine(CoUpdateStateCalibrating());	//Wait for the VR Devices Calibration
-            _guiCalibration.ClearAllText();
-            _vrManager.RequestCalibration();
-            _debugManager.Clear();
+            if (gameExpired)
+            {
+                Finish();
+            }
+            else
+            {
+                //Adjust the HMD
+                yield return StartCoroutine(CoUpdateHMDAdjustment());
 
-            //Start the application
-            _cameraFade.FadeIn(5.0f);
-            while (_cameraFade.IsFading()) yield return null;
-			
-			Debug.Log("APPLICATION READY");
-			Debug.Log("Time.time = " + Time.time);
-			_running = true;
-			_timeRunning = 0.0f;
+                //Show the logos if any
+                yield return StartCoroutine(CoShowLogos());
 
-			if (OnRunning != null) OnRunning();
-            if (!_initialStage) _initialStage = GetComponentInChildren<QuickStageBase>();
-			if (_initialStage && _initialStage.gameObject.activeInHierarchy) _initialStage.Init();
+                //Start the calibration process
+                if (OnCalibrating != null) OnCalibrating();
+                yield return StartCoroutine(CoUpdateStateCalibrating());    //Wait for the VR Devices Calibration
+                _guiCalibration.ClearAllText();
+                _vrManager.RequestCalibration();
+                _debugManager.Clear();
+
+                //Start the application
+                _cameraFade.FadeIn(5.0f);
+                while (_cameraFade.IsFading()) yield return null;
+
+                Debug.Log("APPLICATION READY");
+                Debug.Log("Time.time = " + Time.time);
+                _running = true;
+                _timeRunning = 0.0f;
+
+                if (OnRunning != null) OnRunning();
+                if (!_initialStage) _initialStage = GetComponentInChildren<QuickStageBase>();
+                if (_initialStage && _initialStage.gameObject.activeInHierarchy) _initialStage.Init();
+            }
 		}
 
 		protected virtual void LateUpdate() {
