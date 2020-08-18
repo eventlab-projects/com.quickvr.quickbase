@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.UI;
 
 namespace QuickVR 
 {
@@ -72,6 +73,15 @@ namespace QuickVR
             {
                 _toButton[button.ToString()] = button;
             }
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+
+            //Configure the default buttons
+            ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CONTINUE, ButtonCodes.TriggerIndexPressRight.ToString());
+            ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CANCEL, ButtonCodes.TriggerIndexPressLeft.ToString());
         }
 
         #endregion

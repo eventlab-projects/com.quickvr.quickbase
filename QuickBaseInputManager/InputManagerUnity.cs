@@ -47,33 +47,14 @@ namespace QuickVR
             base.Reset();
 
             //Configure the default axes
-            ConfigureDefaultAxis(InputManager.DEFAULT_AXIS_HORIZONTAL, KeyCode.D, KeyCode.A);
-            ConfigureDefaultAxis(InputManager.DEFAULT_AXIS_VERTICAL, KeyCode.W, KeyCode.S);
+            ConfigureDefaultAxis(InputManager.DEFAULT_AXIS_HORIZONTAL, KeyCode.D.ToString(), KeyCode.A.ToString());
+            ConfigureDefaultAxis(InputManager.DEFAULT_AXIS_VERTICAL, KeyCode.W.ToString(), KeyCode.S.ToString());
             
             //Configure the default buttons
-            ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CONTINUE, KeyCode.Return, KeyCode.JoystickButton0);
-            ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CANCEL, KeyCode.Backspace, KeyCode.JoystickButton1);
-            ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_EXIT, KeyCode.Escape);
-            ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CALIBRATE, KeyCode.R, KeyCode.JoystickButton3);
-        }
-
-        public virtual void ConfigureDefaultAxis(string virtualAxisName, KeyCode kPositive, KeyCode kNegative)
-        {
-            AxisMapping aMapping = GetAxisMapping(virtualAxisName);
-            if (aMapping == null) return;
-
-            aMapping._axisCode = virtualAxisName;
-            if (aMapping.GetPositiveButton()._keyCode == NULL_MAPPING) aMapping.GetPositiveButton()._keyCode = ToString(kPositive);
-            if (aMapping.GetNegativeButton()._keyCode == NULL_MAPPING) aMapping.GetNegativeButton()._keyCode = ToString(kNegative);
-        }
-
-        public virtual void ConfigureDefaultButton(string virtualButtonName, KeyCode key, KeyCode altKey = KeyCode.None)
-        {
-            ButtonMapping bMapping = GetButtonMapping(virtualButtonName);
-            if (bMapping == null) return;
-
-            if (bMapping._keyCode == NULL_MAPPING) bMapping._keyCode = ToString(key);
-            if (bMapping._altKeyCode == NULL_MAPPING) bMapping._altKeyCode = ToString(altKey);
+            ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CONTINUE, KeyCode.Return.ToString(), KeyCode.JoystickButton0.ToString());
+            ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CANCEL, KeyCode.Backspace.ToString(), KeyCode.JoystickButton1.ToString());
+            ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_EXIT, KeyCode.Escape.ToString());
+            ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CALIBRATE, KeyCode.R.ToString(), KeyCode.JoystickButton3.ToString());
         }
 
         #endregion

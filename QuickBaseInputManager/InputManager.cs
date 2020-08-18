@@ -64,13 +64,8 @@ public class InputManager : MonoBehaviour
         CreateDefaultAxes();
         CreateDefaultButtons();
 
-        //Create the default InputManagerUnity implementation
-        InputManagerUnity iManager = GetComponentInChildren<InputManagerUnity>();
-        if (!iManager)
-        {
-            iManager = transform.CreateChild("").GetOrCreateComponent<InputManagerUnity>();
-            iManager.Reset();
-        }
+        CreateDefaultImplementation<InputManagerUnity>();
+        CreateDefaultImplementation<InputManagerVR>();
     }
 
     protected virtual void CreateDefaultAxes()
@@ -106,6 +101,18 @@ public class InputManager : MonoBehaviour
 
         AddNewAxis();
         _virtualAxes[_virtualAxes.Count - 1] = virtualAxisName;
+    }
+
+    protected virtual T CreateDefaultImplementation<T>() where T : BaseInputManager
+    {
+        T iManager = GetComponentInChildren<T>();
+        if (!iManager)
+        {
+            iManager = transform.CreateChild("").GetOrCreateComponent<T>();
+            iManager.Reset();
+        }
+
+        return iManager;
     }
 
     #endregion

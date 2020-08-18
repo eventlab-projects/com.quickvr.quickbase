@@ -85,6 +85,25 @@ public abstract class BaseInputManager : MonoBehaviour {
         _buttonMappingRoot.DestroyChildsImmediate();
 	}
 
+	public virtual void ConfigureDefaultAxis(string virtualAxisName, string kPositive, string kNegative)
+	{
+		AxisMapping aMapping = GetAxisMapping(virtualAxisName);
+		if (aMapping == null) return;
+
+		aMapping._axisCode = virtualAxisName;
+		if (aMapping.GetPositiveButton()._keyCode == NULL_MAPPING) aMapping.GetPositiveButton()._keyCode = kPositive;
+		if (aMapping.GetNegativeButton()._keyCode == NULL_MAPPING) aMapping.GetNegativeButton()._keyCode = kNegative;
+	}
+
+	public virtual void ConfigureDefaultButton(string virtualButtonName, string key, string altKey = NULL_MAPPING)
+	{
+		ButtonMapping bMapping = GetButtonMapping(virtualButtonName);
+		if (bMapping == null) return;
+
+		if (bMapping._keyCode == NULL_MAPPING) bMapping._keyCode = key;
+		if (bMapping._altKeyCode == NULL_MAPPING) bMapping._altKeyCode = altKey;
+	}
+
 	#endregion
 
 	#region MAPPING
