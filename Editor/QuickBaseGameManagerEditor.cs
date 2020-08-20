@@ -65,6 +65,7 @@ namespace QuickVR
         {
             base.DrawGUI();
 
+            DrawPropertyField("_useExpirationDate", "Use Expiration Date");
             if (_target._useExpirationDate)
             {
                 if (_days == null) InitDays();

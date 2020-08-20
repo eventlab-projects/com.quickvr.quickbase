@@ -109,15 +109,39 @@ namespace QuickVR
             return m;
         }
 
+        public static bool IsInternetConnection()
+        {
+            try
+            {
+                using (var client = new WebClient())
+                using (var stream = client.OpenRead("http://www.google.com"))
+                {
+                    return true;
+                }
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public static DateTime GetDateOnline()
         {
             var myHttpWebRequest = (HttpWebRequest)WebRequest.Create("http://www.google.com");
-            var response = myHttpWebRequest.GetResponse();
-            string todaysDates = response.Headers["date"];
-            return DateTime.ParseExact(todaysDates,
-                                       "ddd, dd MMM yyyy HH:mm:ss 'GMT'",
-                                       CultureInfo.InvariantCulture.DateTimeFormat,
-                                       DateTimeStyles.AssumeUniversal);
+            try
+            {
+                var response = myHttpWebRequest.GetResponse();
+                string todaysDates = response.Headers["date"];
+                return DateTime.ParseExact(todaysDates,
+                                           "ddd, dd MMM yyyy HH:mm:ss 'GMT'",
+                                           CultureInfo.InvariantCulture.DateTimeFormat,
+                                           DateTimeStyles.AssumeUniversal);
+            }
+            catch
+            {
+                Debug.Log("NO INTERNET CONNECTION!!!");
+                return new DateTime();
+            }
         }
 
         public static void GetDateOnline(out int day, out int month, out int year)

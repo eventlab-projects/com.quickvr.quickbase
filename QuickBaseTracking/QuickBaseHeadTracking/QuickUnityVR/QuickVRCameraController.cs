@@ -42,9 +42,9 @@ namespace QuickVR
             Camera.main.GetOrCreateComponent<AudioListener>();
         }
 
-#endregion
+        #endregion
 
-#region UPDATE
+        #region UPDATE
 
         public virtual void UpdateCameraPosition(Animator animator)
         {
@@ -73,7 +73,7 @@ namespace QuickVR
             }
         }
 
-#endregion
+        #endregion
 
     }
 

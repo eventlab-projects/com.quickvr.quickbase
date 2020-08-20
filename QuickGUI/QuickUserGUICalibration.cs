@@ -16,6 +16,7 @@ namespace QuickVR
             HMDAdjustment,
             ForwardDirection,
             TimeExpired,
+            InternetConnectionRequired,
         }
 
         #endregion
@@ -38,6 +39,9 @@ namespace QuickVR
 
         public const string INSTRUCTIONS_TIME_EXPIRED_EN = "The expiration date\n of the application is reached\n and cannot be used anymore. ";
         public const string INSTRUCTIONS_TIME_EXPIRED_ES = "Se ha superado \n la fecha de expiración y\n la aplicación ya no se puede usar. ";
+
+        public const string INSTRUCTIONS_INTERNET_CONNECTION_REQUIRED_EN = "An Internet connection is\n required. Please, connect the\n device to the Internet.";
+        public const string INSTRUCTIONS_INTERNET_CONNECTION_REQUIRED_ES = "Se requiere conexión a\n Internet. Por favor, conecte el\n dispositivo a Internet.";
 
         public const string HINT_CONTROLLERS_EN = "Press the \"Right Trigger\" to continue.";
         public const string HINT_CONTROLLERS_ES = "Pulsa el \"Botón del mando derecho\" para continuar.";
@@ -99,16 +103,23 @@ namespace QuickVR
             {
                 SetTextInstructions(isEnglish ? INSTRUCTIONS_TIME_EXPIRED_EN : INSTRUCTIONS_TIME_EXPIRED_ES);
             }
+            else if (step == CalibrationStep.InternetConnectionRequired)
+            {
+                SetTextInstructions(isEnglish ? INSTRUCTIONS_INTERNET_CONNECTION_REQUIRED_EN : INSTRUCTIONS_INTERNET_CONNECTION_REQUIRED_ES);
+            }
 
             //Fill the hint field
+            string hint = "";
             if (handTrackingMode == QuickUnityVR.HandTrackingMode.Controllers)
             {
-                SetTextHint(isEnglish ? HINT_CONTROLLERS_EN : HINT_CONTROLLERS_ES);
+                hint = isEnglish ? HINT_CONTROLLERS_EN : HINT_CONTROLLERS_ES;
             }
             else
             {
-                SetTextHint(isEnglish ? HINT_HANDS_EN : HINT_HANDS_ES);
+                hint = isEnglish ? HINT_HANDS_EN : HINT_HANDS_ES;
             }
+            
+            SetTextHint(hint);
         }
 
         public virtual void SetTextHint(string text)

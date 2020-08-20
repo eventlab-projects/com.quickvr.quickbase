@@ -27,8 +27,7 @@ namespace QuickVR {
 		public float _timeOut = -1;	//Number of seconds to wait until automatic finishing the game
 		public QuickStageBase _initialStage = null;
 
-        public string _nextSceneName = "";
-
+        [HideInInspector] 
         public bool _useExpirationDate = false;
         
         #endregion
@@ -123,6 +122,7 @@ namespace QuickVR {
 
             if (_hTracking)
             {
+                _cameraFade.SetColor(Color.black);
                 StartCoroutine(CoUpdate());
             }
             else
@@ -183,10 +183,10 @@ namespace QuickVR {
             return _timeRunning;
         }
 
-		public virtual void Finish() {
+		public virtual void Finish(float fadeTime = 5.0f) {
             if (_finishing) return;
 
-			StartCoroutine(CoFinish());
+			StartCoroutine(CoFinish(fadeTime));
 		}
 
         public virtual void SetInitialPositionAndRotation()
@@ -269,45 +269,38 @@ namespace QuickVR {
         #region UPDATE
 
         protected virtual IEnumerator CoUpdate() {
-            //Start loading the next scene
-            if (_nextSceneName != "") _sceneManager.LoadSceneAsync(_nextSceneName);
-
-            _cameraFade.SetColor(Color.black);
-
             //Check if the game has expired
             bool gameExpired = false;
             if (_useExpirationDate)
             {
-                int day, month, year;
-                QuickUtils.GetDateOnline(out day, out month, out year);
-                DateTime timeNow = new DateTime(year, month, day);
-                DateTime timeExp = new DateTime(_expirationYear, _expirationMonth, _expirationDay);
-                if (timeNow >= timeExp)
+                if (!QuickUtils.IsInternetConnection())
                 {
-                    _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.TimeExpired, _hTracking._handTrackingMode);
+                    _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.InternetConnectionRequired, _hTracking._handTrackingMode);
                     gameExpired = true;
-                    Debug.Log("GAME DATE EXPIRED!!!");
+                }
+                else
+                {
+                    int day, month, year;
+                    QuickUtils.GetDateOnline(out day, out month, out year);
+                    DateTime timeNow = new DateTime(year, month, day);
+                    DateTime timeExp = new DateTime(_expirationYear, _expirationMonth, _expirationDay);
+                    if (timeNow >= timeExp)
+                    {
+                        _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.TimeExpired, _hTracking._handTrackingMode);
+                        gameExpired = true;
+                        Debug.Log("GAME DATE EXPIRED!!!");
+                    }
                 }
             }
 
             if (gameExpired)
             {
-                Finish();
+                while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
+                Finish(0);
             }
             else
             {
-                //Adjust the HMD
-                yield return StartCoroutine(CoUpdateHMDAdjustment());
-
-                //Show the logos if any
-                yield return StartCoroutine(CoShowLogos());
-
-                //Start the calibration process
-                if (OnCalibrating != null) OnCalibrating();
-                yield return StartCoroutine(CoUpdateStateCalibrating());    //Wait for the VR Devices Calibration
-                _guiCalibration.ClearAllText();
-                _vrManager.RequestCalibration();
-                _debugManager.Clear();
+                yield return StartCoroutine(CoUpdateStateCalibration());
 
                 //Start the application
                 _cameraFade.FadeIn(5.0f);
@@ -339,6 +332,22 @@ namespace QuickVR {
             }
 		}
 
+        protected virtual IEnumerator CoUpdateStateCalibration()
+        {
+            //Adjust the HMD
+            yield return StartCoroutine(CoUpdateHMDAdjustment());
+
+            //Show the logos if any
+            yield return StartCoroutine(CoShowLogos());
+
+            //Start the calibration process
+            if (OnCalibrating != null) OnCalibrating();
+            yield return StartCoroutine(CoUpdateStateForwardDirection());    //Wait for the VR Devices Calibration
+            _guiCalibration.ClearAllText();
+            _vrManager.RequestCalibration();
+            _debugManager.Clear();
+        }
+
         protected virtual IEnumerator CoUpdateHMDAdjustment()
         {
             _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.HMDAdjustment, _hTracking._handTrackingMode);
@@ -350,7 +359,7 @@ namespace QuickVR {
             yield return null;
         }
 
-		protected virtual IEnumerator CoUpdateStateCalibrating() {
+		protected virtual IEnumerator CoUpdateStateForwardDirection() {
             //HMD Forward Direction calibration
             _instructionsManager.Play(_headTrackingCalibrationInstructions);
             _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.ForwardDirection, _hTracking._handTrackingMode);
@@ -415,18 +424,17 @@ namespace QuickVR {
             }
         }
 
-        protected virtual IEnumerator CoFinish()
+        protected virtual IEnumerator CoFinish(float fadeTime)
         {
             if (!_finishing)
             {
                 _finishing = true;
                 if (OnFinished != null) OnFinished();
-                _cameraFade.FadeOut(5.0f);
+                _cameraFade.FadeOut(fadeTime);
                 while (_cameraFade.IsFading()) yield return null;
                 Debug.Log("Elapsed Time = " + _timeRunning.ToString("f3") + " seconds");
 
-                if (_nextSceneName == "") QuickUtils.CloseApplication();
-                else _sceneManager.ActivateScene(_nextSceneName);
+                QuickUtils.CloseApplication();
             }
         }
 
