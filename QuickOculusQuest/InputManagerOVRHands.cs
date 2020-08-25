@@ -77,17 +77,20 @@ namespace QuickVR
             if (QuickUtils.IsHandTrackingSupported() && _ovrHands)
             {
                 QuickOVRHand h = GetOVRhand(button);
-                //Pinching gestures
-                if (button.Contains("Pinch"))
+                if (h.IsInitialized())
                 {
-                    if (button.Contains("Thumb")) return h.GetFingerIsPinching(OVRHand.HandFinger.Thumb);
-                    if (button.Contains("Index")) return h.GetFingerIsPinching(OVRHand.HandFinger.Index);
-                    if (button.Contains("Middle")) return h.GetFingerIsPinching(OVRHand.HandFinger.Middle);
-                    if (button.Contains("Ring")) return h.GetFingerIsPinching(OVRHand.HandFinger.Ring);
-                    if (button.Contains("Little")) return h.GetFingerIsPinching(OVRHand.HandFinger.Pinky);
+                    //Pinching gestures
+                    if (button.Contains("Pinch"))
+                    {
+                        if (button.Contains("Thumb")) return h.GetFingerIsPinching(OVRHand.HandFinger.Thumb);
+                        if (button.Contains("Index")) return h.GetFingerIsPinching(OVRHand.HandFinger.Index);
+                        if (button.Contains("Middle")) return h.GetFingerIsPinching(OVRHand.HandFinger.Middle);
+                        if (button.Contains("Ring")) return h.GetFingerIsPinching(OVRHand.HandFinger.Ring);
+                        if (button.Contains("Little")) return h.GetFingerIsPinching(OVRHand.HandFinger.Pinky);
+                    }
+                    else if (button.Contains("ThumbUp")) return h.IsThumbUp();
+                    else if (button.Contains("ThumbDown")) return h.IsThumbDown();
                 }
-                else if (button.Contains("ThumbUp")) return h.IsThumbUp();
-                else if (button.Contains("ThumbDown")) return h.IsThumbDown();
             }
             
             return false;

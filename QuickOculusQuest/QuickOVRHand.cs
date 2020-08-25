@@ -17,6 +17,14 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
+        public enum FingerPhalange
+        {
+            Proximal, 
+            Intermediate, 
+            Distal, 
+            Tip,
+        }
+
         protected Animator _animator
         {
             get
@@ -98,9 +106,48 @@ namespace QuickVR
 
         #region GET AND SET
 
-        protected virtual Transform GetOVRBoneTransform(OVRSkeleton.BoneId boneID)
+        public virtual bool IsInitialized()
         {
-            return _skeleton.Bones[(int)boneID].Transform;
+            return _skeleton.IsInitialized;
+        }
+
+        public virtual Transform GetOVRBoneTransform(OVRSkeleton.BoneId boneID)
+        {
+            return IsInitialized()? _skeleton.Bones[(int)boneID].Transform : null;
+        }
+
+        public virtual Transform GetOVRBoneTransform(HandFinger fingerID, FingerPhalange phalangeID)
+        {
+            if (fingerID == HandFinger.Index)
+            {
+                if (phalangeID == FingerPhalange.Proximal) return GetOVRBoneTransform(OVRSkeleton.BoneId.Hand_Index1);
+                if (phalangeID == FingerPhalange.Intermediate) return GetOVRBoneTransform(OVRSkeleton.BoneId.Hand_Index2);
+                if (phalangeID == FingerPhalange.Distal) return GetOVRBoneTransform(OVRSkeleton.BoneId.Hand_Index3);
+                return GetOVRBoneTransform(OVRSkeleton.BoneId.Hand_IndexTip);
+            }
+            if (fingerID == HandFinger.Middle)
+            {
+                if (phalangeID == FingerPhalange.Proximal) return GetOVRBoneTransform(OVRSkeleton.BoneId.Hand_Middle1);
+                if (phalangeID == FingerPhalange.Intermediate) return GetOVRBoneTransform(OVRSkeleton.BoneId.Hand_Middle2);
+                if (phalangeID == FingerPhalange.Distal) return GetOVRBoneTransform(OVRSkeleton.BoneId.Hand_Middle3);
+                return GetOVRBoneTransform(OVRSkeleton.BoneId.Hand_MiddleTip);
+            }
+            if (fingerID == HandFinger.Ring)
+            {
+                if (phalangeID == FingerPhalange.Proximal) return GetOVRBoneTransform(OVRSkeleton.BoneId.Hand_Ring1);
+                if (phalangeID == FingerPhalange.Intermediate) return GetOVRBoneTransform(OVRSkeleton.BoneId.Hand_Ring2);
+                if (phalangeID == FingerPhalange.Distal) return GetOVRBoneTransform(OVRSkeleton.BoneId.Hand_Ring3);
+                return GetOVRBoneTransform(OVRSkeleton.BoneId.Hand_RingTip);
+            }
+            if (fingerID == HandFinger.Pinky)
+            {
+                if (phalangeID == FingerPhalange.Proximal) return GetOVRBoneTransform(OVRSkeleton.BoneId.Hand_Pinky1);
+                if (phalangeID == FingerPhalange.Intermediate) return GetOVRBoneTransform(OVRSkeleton.BoneId.Hand_Pinky2);
+                if (phalangeID == FingerPhalange.Distal) return GetOVRBoneTransform(OVRSkeleton.BoneId.Hand_Pinky3);
+                return GetOVRBoneTransform(OVRSkeleton.BoneId.Hand_PinkyTip);
+            }
+
+            return null;
         }
 
         protected virtual OVRSkeleton.BoneId GetHandBoneTip(HandFinger finger)
@@ -124,20 +171,30 @@ namespace QuickVR
 
         public bool GetFingerIsTouchingHand(HandFinger finger)
         {
-            QuickOVRHandBonePhysics tipBone = GetHandBonePhysics(GetHandBoneTip(finger));
-            if (tipBone)
-            {
-                Collider[] colliders = Physics.OverlapSphere(tipBone.transform.position, tipBone.GetCollider().radius);
-                foreach (Collider c in colliders)
-                {
-                    if (c == _handCollider)
-                    {
-                        return true;
-                    }
-                }
-            }
-            
-            return false;
+            Transform t1 = GetOVRBoneTransform(finger, FingerPhalange.Proximal);
+            Transform t2 = GetOVRBoneTransform(finger, FingerPhalange.Intermediate);
+            Transform t3 = GetOVRBoneTransform(finger, FingerPhalange.Distal);
+            Transform t4 = GetOVRBoneTransform(finger, FingerPhalange.Tip);
+
+            Vector3 u = t4.position - t3.position;
+            Vector3 v = t2.position - t3.position;
+            return Vector3.Angle(u, v) < 150;
+
+
+            //QuickOVRHandBonePhysics tipBone = GetHandBonePhysics(GetHandBoneTip(finger));
+            //if (tipBone)
+            //{
+            //    Collider[] colliders = Physics.OverlapSphere(tipBone.transform.position, tipBone.GetCollider().radius);
+            //    foreach (Collider c in colliders)
+            //    {
+            //        if (c == _handCollider)
+            //        {
+            //            return true;
+            //        }
+            //    }
+            //}
+
+            //return false;
 
             //QuickOVRHandBonePhysics tipBone = GetHandBonePhysics(GetHandBoneTip(finger));
             //QuickOVRHandBonePhysics proximalBone = GetHandBonePhysics(GetHandBoneProximal(finger));
@@ -212,7 +269,7 @@ namespace QuickVR
 
         public virtual void UpdateTracking()
         {
-            if (_skeleton.IsInitialized) 
+            if (IsInitialized()) 
             {
                 if (!_physicsInitialized)
                 {
@@ -232,7 +289,7 @@ namespace QuickVR
 
         protected virtual void UpdateTracking(QuickHumanBodyBones boneID0, QuickHumanBodyBones boneID1)
         {
-            if (_animator)
+            if (_animator && IsInitialized())
             {
                 Transform bone0 = _animator.GetBoneTransform(boneID0);
                 Transform bone1 = _animator.GetBoneTransform(boneID1);

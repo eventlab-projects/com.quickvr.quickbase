@@ -33,8 +33,10 @@ namespace QuickVR
         protected OVRProjectConfig.HandTrackingSupport ToOVR(QuickUnityVR.HandTrackingMode hMode)
         {
 
-            if (hMode == QuickUnityVR.HandTrackingMode.Hands) return OVRProjectConfig.HandTrackingSupport.HandsOnly;
-            return OVRProjectConfig.HandTrackingSupport.ControllersOnly;
+            //if (hMode == QuickUnityVR.HandTrackingMode.Hands) return OVRProjectConfig.HandTrackingSupport.HandsOnly;
+            //return OVRProjectConfig.HandTrackingSupport.ControllersOnly;
+
+            return OVRProjectConfig.HandTrackingSupport.ControllersAndHands;
         }
 
         #endregion

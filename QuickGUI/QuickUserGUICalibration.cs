@@ -13,6 +13,7 @@ namespace QuickVR
 
         public enum CalibrationStep
         {
+            HandTrackingMode,
             HMDAdjustment,
             ForwardDirection,
             TimeExpired,
@@ -30,6 +31,9 @@ namespace QuickVR
         #region CONSTANTS
 
         protected const string NAME_HINT_TRANSFORM = "__Hint__";
+
+        public const string INSTRUCTIONS_HAND_TRACKING_MODE_EN = "Leave the controllers\n on the table and use\n your hands to continue.";
+        public const string INSTRUCTIONS_HAND_TRACKING_MODE_ES = "Deja los mandos\n en la mesa y utiliza\n tus manos para continuar.";
 
         public const string INSTRUCTIONS_HMD_ADJUSTMENT_EN = "Adjust the HMD\n until you can read\n this text.";
         public const string INSTRUCTIONS_HMD_ADJUSTMENT_ES = "Ajusta el casco hasta que\n puedas leer este texto\n de forma nítida.";
@@ -91,7 +95,11 @@ namespace QuickVR
         {
             //Fill the instructions field
             bool isEnglish = SettingsBase.GetLanguage() == SettingsBase.Languages.ENGLISH;
-            if (step == CalibrationStep.HMDAdjustment)
+            if (step == CalibrationStep.HandTrackingMode)
+            {
+                SetTextInstructions(isEnglish ? INSTRUCTIONS_HAND_TRACKING_MODE_EN : INSTRUCTIONS_HAND_TRACKING_MODE_ES);
+            }
+            else if (step == CalibrationStep.HMDAdjustment)
             {
                 SetTextInstructions(isEnglish ? INSTRUCTIONS_HMD_ADJUSTMENT_EN : INSTRUCTIONS_HMD_ADJUSTMENT_ES);
             }

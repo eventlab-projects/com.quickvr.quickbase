@@ -334,6 +334,13 @@ namespace QuickVR {
 
         protected virtual IEnumerator CoUpdateStateCalibration()
         {
+#if UNITY_ANDROID
+            if (_hTracking._handTrackingMode == QuickUnityVR.HandTrackingMode.Hands)
+            {
+                yield return StartCoroutine(CoUpdateHandTrackingMode());
+            }
+#endif
+
             //Adjust the HMD
             yield return StartCoroutine(CoUpdateHMDAdjustment());
 
@@ -346,6 +353,16 @@ namespace QuickVR {
             _guiCalibration.ClearAllText();
             _vrManager.RequestCalibration();
             _debugManager.Clear();
+        }
+
+        protected virtual IEnumerator CoUpdateHandTrackingMode()
+        {
+            _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.HandTrackingMode, _hTracking._handTrackingMode);
+
+            //HMD Adjustment
+            while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
+
+            yield return null;
         }
 
         protected virtual IEnumerator CoUpdateHMDAdjustment()
