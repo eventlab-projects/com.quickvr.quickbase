@@ -41,6 +41,11 @@ namespace QuickVR
         protected Dictionary<OVRSkeleton.BoneId, QuickOVRHandBonePhysics> _handBonePhysics = new Dictionary<OVRSkeleton.BoneId, QuickOVRHandBonePhysics>();
         protected BoxCollider _handCollider = null;
 
+        protected QuickUnityVR _headTracking = null;
+        protected QuickVRPlayArea _playArea = null;
+
+        protected static Dictionary<QuickHumanFingers, HandFinger> _toOVRHandFinger = new Dictionary<QuickHumanFingers, HandFinger>();
+
         #endregion
 
         #region CONSTANTS
@@ -51,6 +56,16 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        protected static void Init()
+        {
+            _toOVRHandFinger[QuickHumanFingers.Thumb] = HandFinger.Thumb;
+            _toOVRHandFinger[QuickHumanFingers.Index] = HandFinger.Index;
+            _toOVRHandFinger[QuickHumanFingers.Middle] = HandFinger.Middle;
+            _toOVRHandFinger[QuickHumanFingers.Ring] = HandFinger.Ring;
+            _toOVRHandFinger[QuickHumanFingers.Little] = HandFinger.Pinky;
+        }
+
         protected virtual void Start()
         {
             _skeleton = transform.GetOrCreateComponent<OVRSkeleton>();
@@ -59,6 +74,19 @@ namespace QuickVR
             _renderer = transform.GetOrCreateComponent<SkinnedMeshRenderer>();
             //_renderer.material = Resources.Load<Material>("Materials/QuickDiffuseCyan");
             _renderer.material = Resources.Load<Material>("Materials/QuickOVRHandMaterial");
+
+            _headTracking = GetComponentInParent<QuickUnityVR>();
+            _playArea = GetComponentInParent<QuickVRPlayArea>();
+        }
+
+        protected virtual void OnEnable()
+        {
+            QuickVRManager.OnPreUpdateTrackingEarly += UpdateVRNodeTracked;
+        }
+
+        protected virtual void OnDisable()
+        {
+            QuickVRManager.OnPreUpdateTrackingEarly -= UpdateVRNodeTracked;
         }
 
         protected virtual void CreatePhysics()
@@ -258,6 +286,11 @@ namespace QuickVR
             return _skeleton.GetSkeletonType() == OVRSkeleton.SkeletonType.HandLeft;
         }
 
+        public virtual bool IsDataHighConfidenceFinger(QuickHumanFingers finger)
+        {
+            return IsDataHighConfidence && GetFingerConfidence(_toOVRHandFinger[finger]) == TrackingConfidence.High;
+        }
+
         #endregion
 
         #region UPDATE
@@ -279,11 +312,23 @@ namespace QuickVR
 
                 foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
                 {
-                    List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, IsLeft());
-                    UpdateTracking(fingerBones[0], fingerBones[1]); //Proximal, Intermediate
-                    UpdateTracking(fingerBones[1], fingerBones[2]); //Intermediate, Distal
-                    UpdateTracking(fingerBones[2], fingerBones[3]); //Distal, Tip
+                    if (IsDataHighConfidenceFinger(f))
+                    {
+                        List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, IsLeft());
+                        UpdateTracking(fingerBones[0], fingerBones[1]); //Proximal, Intermediate
+                        UpdateTracking(fingerBones[1], fingerBones[2]); //Intermediate, Distal
+                        UpdateTracking(fingerBones[2], fingerBones[3]); //Distal, Tip
+                    }
                 }
+            }
+        }
+
+        protected virtual void UpdateVRNodeTracked()
+        {
+            if (_headTracking._handTrackingMode == QuickUnityVR.HandTrackingMode.Hands)
+            {
+                QuickVRNode vrNode = _playArea.GetVRNode(IsLeft() ? HumanBodyBones.LeftHand : HumanBodyBones.RightHand);
+                vrNode.SetTracked(IsDataHighConfidence);
             }
         }
 
