@@ -25,14 +25,7 @@ namespace QuickVR
             Tip,
         }
 
-        protected Animator _animator
-        {
-            get
-            {
-                return QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource();
-            }
-        }
-
+        protected Animator _animator = null;
         protected OVRSkeleton _skeleton = null;
         protected SkinnedMeshRenderer _renderer = null;
 
@@ -45,11 +38,14 @@ namespace QuickVR
         protected QuickVRPlayArea _playArea = null;
 
         protected static Dictionary<QuickHumanFingers, HandFinger> _toOVRHandFinger = new Dictionary<QuickHumanFingers, HandFinger>();
+        protected Dictionary<QuickHumanFingers, int> _handFingerConfidence = new Dictionary<QuickHumanFingers, int>();
+        protected Dictionary<QuickHumanFingers, Quaternion[]> _handFingerLastRotation = new Dictionary<QuickHumanFingers, Quaternion[]>();
 
         #endregion
 
         #region CONSTANTS
 
+        protected const int NUM_FRAMES_CONFIDENCE = 5;
         protected const float BONE_RADIUS = 0.0075f;
 
         #endregion
@@ -77,6 +73,13 @@ namespace QuickVR
 
             _headTracking = GetComponentInParent<QuickUnityVR>();
             _playArea = GetComponentInParent<QuickVRPlayArea>();
+            _animator = _headTracking.GetComponent<Animator>();
+
+            foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
+            {
+                _handFingerConfidence[f] = NUM_FRAMES_CONFIDENCE;
+                _handFingerLastRotation[f] = null;
+            }
         }
 
         protected virtual void OnEnable()
@@ -288,7 +291,8 @@ namespace QuickVR
 
         public virtual bool IsDataHighConfidenceFinger(QuickHumanFingers finger)
         {
-            return IsDataHighConfidence && GetFingerConfidence(_toOVRHandFinger[finger]) == TrackingConfidence.High;
+            //return IsDataHighConfidence && GetFingerConfidence(_toOVRHandFinger[finger]) == TrackingConfidence.High;
+            return IsDataHighConfidence && _handFingerConfidence[finger] >= NUM_FRAMES_CONFIDENCE;
         }
 
         #endregion
@@ -298,6 +302,11 @@ namespace QuickVR
         protected virtual void Update()
         {
             _renderer.enabled = _debug;
+
+            foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
+            {
+                _handFingerConfidence[f] = IsDataHighConfidence ? Mathf.Min(_handFingerConfidence[f] + 1, NUM_FRAMES_CONFIDENCE) : 0;
+            }
         }
 
         public virtual void UpdateTracking()
@@ -312,12 +321,34 @@ namespace QuickVR
 
                 foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
                 {
+                    List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, IsLeft());
+                    if (_handFingerLastRotation[f] == null)
+                    {
+                        //The last rotation of this finger has not been initialized yet. Initialize it with the current local rotation
+                        //of the bone fingers. 
+                        _handFingerLastRotation[f] = new Quaternion[3];
+                        for (int i = 0; i < 3; i++)
+                        {
+                            _handFingerLastRotation[f][i] = _animator.GetBoneTransform(fingerBones[i]).localRotation;
+                        }
+                    }
+
                     if (IsDataHighConfidenceFinger(f))
                     {
-                        List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, IsLeft());
-                        UpdateTracking(fingerBones[0], fingerBones[1]); //Proximal, Intermediate
-                        UpdateTracking(fingerBones[1], fingerBones[2]); //Intermediate, Distal
-                        UpdateTracking(fingerBones[2], fingerBones[3]); //Distal, Tip
+                        //The finger is tracked.
+                        for (int i = 0; i < 3; i++)
+                        {
+                            UpdateTracking(fingerBones[i], fingerBones[i+1]);
+                            _handFingerLastRotation[f][i] = _animator.GetBoneTransform(fingerBones[i]).localRotation;
+                        }
+                    }
+                    else
+                    {
+                        //The finger is not tracked. Restore the last valid local rotation. 
+                        for (int i = 0; i < 3; i++)
+                        {
+                            _animator.GetBoneTransform(fingerBones[i]).localRotation = _handFingerLastRotation[f][i];
+                        }
                     }
                 }
             }
@@ -334,20 +365,17 @@ namespace QuickVR
 
         protected virtual void UpdateTracking(QuickHumanBodyBones boneID0, QuickHumanBodyBones boneID1)
         {
-            if (_animator && IsInitialized())
-            {
-                Transform bone0 = _animator.GetBoneTransform(boneID0);
-                Transform bone1 = _animator.GetBoneTransform(boneID1);
-                Transform ovrBone0 = GetOVRBoneTransform(QuickOVRHandsInitializer.ToOVR(boneID0));
-                Transform ovrBone1 = GetOVRBoneTransform(QuickOVRHandsInitializer.ToOVR(boneID1));
+            Transform bone0 = _animator.GetBoneTransform(boneID0);
+            Transform bone1 = _animator.GetBoneTransform(boneID1);
+            Transform ovrBone0 = GetOVRBoneTransform(QuickOVRHandsInitializer.ToOVR(boneID0));
+            Transform ovrBone1 = GetOVRBoneTransform(QuickOVRHandsInitializer.ToOVR(boneID1));
 
-                Vector3 currentDir = bone1.position - bone0.position;
-                Vector3 targetDir = ovrBone1.position - ovrBone0.position;
-                float rotAngle = Vector3.Angle(currentDir, targetDir);
-                Vector3 rotAxis = Vector3.Cross(currentDir, targetDir).normalized;
+            Vector3 currentDir = bone1.position - bone0.position;
+            Vector3 targetDir = ovrBone1.position - ovrBone0.position;
+            float rotAngle = Vector3.Angle(currentDir, targetDir);
+            Vector3 rotAxis = Vector3.Cross(currentDir, targetDir).normalized;
 
-                bone0.Rotate(rotAxis, rotAngle, Space.World);
-            }
+            bone0.Rotate(rotAxis, rotAngle, Space.World);
         }
 
         #endregion
