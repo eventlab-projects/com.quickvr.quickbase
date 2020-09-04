@@ -341,6 +341,12 @@ namespace QuickVR {
 
         #region GET AND SET
 
+        protected virtual Vector3 GetIKTargetHipsOffset()
+        {
+            QuickIKSolver ikSolverHead = GetIKSolver<QuickIKSolver>(HumanBodyBones.Head);
+            return ikSolverHead._targetLimb.position - ikSolverHead._boneLimb.position;
+        }
+
         protected virtual Transform GetBoneHint(HumanBodyBones boneID)
         {
             return _animator.GetBoneTransform(boneID).Find("__BoneHint__");
@@ -572,6 +578,27 @@ namespace QuickVR {
 
         #region UPDATE
 
+        public override void UpdateTrackingEarly()
+        {
+            //Update the position of the hint targets
+            if ((_ikHintMaskUpdate & (1 << (int)IKLimbBones.LeftHand)) > 0)
+            {
+                UpdateHintTargetElbow(HumanBodyBones.LeftHand);
+            }
+            if ((_ikHintMaskUpdate & (1 << (int)IKLimbBones.RightHand)) > 0)
+            {
+                UpdateHintTargetElbow(HumanBodyBones.RightHand);
+            }
+            if ((_ikHintMaskUpdate & (1 << (int)IKLimbBones.LeftFoot)) > 0)
+            {
+                UpdateHintTargetKnee(HumanBodyBones.LeftFoot);
+            }
+            if ((_ikHintMaskUpdate & (1 << (int)IKLimbBones.RightFoot)) > 0)
+            {
+                UpdateHintTargetKnee(HumanBodyBones.RightFoot);
+            }
+        }
+
         public override void UpdateTrackingLate()
         {
             //Update the IK for the fingers
@@ -593,24 +620,6 @@ namespace QuickVR {
             {
                 QuickIKSolver ikSolver = GetIKSolver<QuickIKSolver>(ToUnity(boneID, false));
                 if ((_ikMaskRightHand & (1 << (int)boneID)) != 0) ikSolver.UpdateIK();
-            }
-
-            //Update the position of the hint targets
-            if ((_ikHintMaskUpdate & (1 << (int)IKLimbBones.LeftHand)) > 0)
-            {
-                UpdateHintTargetElbow(HumanBodyBones.LeftHand);
-            }
-            if ((_ikHintMaskUpdate & (1 << (int)IKLimbBones.RightHand)) > 0)
-            {
-                UpdateHintTargetElbow(HumanBodyBones.RightHand);
-            }
-            if ((_ikHintMaskUpdate & (1 << (int)IKLimbBones.LeftFoot)) > 0)
-            {
-                UpdateHintTargetKnee(HumanBodyBones.LeftFoot);
-            }
-            if ((_ikHintMaskUpdate & (1 << (int)IKLimbBones.RightFoot)) > 0)
-            {
-                UpdateHintTargetKnee(HumanBodyBones.RightFoot);
             }
         }
 
@@ -634,8 +643,25 @@ namespace QuickVR {
         protected virtual void UpdateHintTargetKnee(HumanBodyBones boneLimbID)
         {
             IQuickIKSolver ikSolver = GetIKSolver(boneLimbID);
-            Vector3 n = Vector3.ProjectOnPlane(ikSolver._targetLimb.forward, transform.up).normalized;
-            ikSolver._targetHint.position = ikSolver._boneMid.position + n * DEFAULT_TARGET_HINT_DISTANCE;
+
+            //Compute the projection of the knee on the line passing by the limb bone and the upper bone. 
+            float a = Vector3.Magnitude(ikSolver._boneMid.position - ikSolver._boneLimb.position);
+            float b = Vector3.Magnitude(ikSolver._boneUpper.position - ikSolver._boneMid.position);
+            float c = Vector3.Magnitude(ikSolver._boneUpper.position - ikSolver._boneLimb.position);
+
+            float x = (b*b - (c*c) - (a*a)) / (-2 * c);
+
+            Vector3 u = (ikSolver._boneUpper.position - ikSolver._boneLimb.position).normalized;
+            Vector3 proj = ikSolver._boneLimb.position + u * x;
+
+            //Apply the Pitagora's theorem to obtain the height of the triangle
+            float h = Mathf.Sqrt(a * a - (x * x));
+
+            Vector3 n = Vector3.Cross(u, ikSolver._targetLimb.forward).normalized;
+            Vector3 v = Vector3.Cross(n, u).normalized;
+
+            Vector3 kneePos = proj + v * h;
+            ikSolver._targetHint.position = kneePos + ikSolver._targetLimb.forward * DEFAULT_TARGET_HINT_DISTANCE;
         }
 
         #endregion

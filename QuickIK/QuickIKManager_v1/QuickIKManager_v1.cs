@@ -99,12 +99,6 @@ namespace QuickVR {
         //    }
         //}
 
-        protected virtual Vector3 GetIKTargetHipsOffset()
-        {
-            QuickIKSolver ikSolverHead = GetIKSolver<QuickIKSolver>(HumanBodyBones.Head);
-            return ikSolverHead._targetLimb.position - ikSolverHead._boneLimb.position;
-        }
-
         #endregion
 
 		#region UPDATE
