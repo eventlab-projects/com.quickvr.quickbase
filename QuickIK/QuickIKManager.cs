@@ -657,11 +657,23 @@ namespace QuickVR {
             //Apply the Pitagora's theorem to obtain the height of the triangle
             float h = Mathf.Sqrt(a * a - (x * x));
 
-            Vector3 n = Vector3.Cross(u, ikSolver._targetLimb.forward).normalized;
+            Vector3 w = Vector3.Lerp(ikSolver._targetLimb.forward, transform.forward, 0.5f);
+            Vector3 n = Vector3.Cross(u, w).normalized;
+            //if (boneLimbID == HumanBodyBones.LeftFoot)
+            //{
+            //    Debug.Log(Vector3.Angle(u, ikSolver._targetLimb.forward).ToString("f3"));
+            //    Debug.Log(Vector3.SignedAngle(u, ikSolver._targetLimb.forward, ikSolver._targetLimb.right).ToString("f3"));
+            //    Debug.Log(Vector3.Dot(n, ikSolver._targetLimb.right).ToString("f3"));
+            //}
+            float angle = Vector3.SignedAngle(u, ikSolver._targetLimb.forward, ikSolver._targetLimb.right);
+            if (angle < 0 || angle > 170)
+            {
+                n = ikSolver._targetLimb.right;
+            }
             Vector3 v = Vector3.Cross(n, u).normalized;
 
             Vector3 kneePos = proj + v * h;
-            ikSolver._targetHint.position = kneePos + ikSolver._targetLimb.forward * DEFAULT_TARGET_HINT_DISTANCE;
+            ikSolver._targetHint.position = kneePos + w * DEFAULT_TARGET_HINT_DISTANCE;
         }
 
         #endregion

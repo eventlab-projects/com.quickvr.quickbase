@@ -123,8 +123,8 @@ namespace QuickVR
         private static List<QuickHumanBodyBones> _handBoneTipsLeft = null;
         private static List<QuickHumanBodyBones> _HandBoneTipsRight = null;
 
-        private static Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> _bonesFromFingerLeft = new Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>>();
-        private static Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> _bonesFromFingerRight = new Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>>();
+        private static Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> _bonesFromFingerLeft = null;
+        private static Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> _bonesFromFingerRight = null;
         private static Dictionary<QuickHumanBodyBones, QuickHumanFingers> _fingerFromBone = new Dictionary<QuickHumanBodyBones, QuickHumanFingers>();
         private static HashSet<QuickHumanBodyBones> _fingerBonesLeft = new HashSet<QuickHumanBodyBones>();
         private static HashSet<QuickHumanBodyBones> _fingerBonesRight = new HashSet<QuickHumanBodyBones>();
@@ -136,8 +136,6 @@ namespace QuickVR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
         private static void Init()
         {
-            InitHumanBodyBones();
-            InitHumanFingers();
             InitMuscleNames();
             InitLookAtBones();
             InitChildBones();
@@ -146,26 +144,12 @@ namespace QuickVR
             InitHandBoneTips();
         }
 
-        private static void InitHumanBodyBones()
-        {
-            _humanBodyBones = QuickUtils.GetEnumValues<HumanBodyBones>();
-            _humanBodyBones.RemoveAt(_humanBodyBones.Count - 1);  //Remove the LastBone, which is not a valid HumanBodyBone ID
-        }
-
-        private static void InitHumanFingers()
-        {
-            _fingers = QuickUtils.GetEnumValues<QuickHumanFingers>();
-
-            _bonesFromFingerLeft = InitHumanFingers(true);
-            _bonesFromFingerRight = InitHumanFingers(false);
-        }
-
         private static Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> InitHumanFingers(bool isLeft)
         {
             Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> result = new Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>>();
             string prefix = isLeft ? "Left" : "Right";
             string[] phalanges = { "Proximal", "Intermediate", "Distal", "Tip" };
-            foreach (QuickHumanFingers f in _fingers)
+            foreach (QuickHumanFingers f in GetHumanFingers())
             {
                 result[f] = new List<QuickHumanBodyBones>();
                 foreach (string p in phalanges)
@@ -191,14 +175,14 @@ namespace QuickVR
                 for (int h = 0; h <= 1; h++)
                 {
                     string hName = h == 0 ? "Left" : "Right";
-                    foreach (QuickHumanFingers f in _fingers)
+                    foreach (QuickHumanFingers f in GetHumanFingers())
                     {
                         for (int i = 1; i <= 3; i++)
                         {
                             if (name == hName + " " + f.ToString() + " " + i.ToString() + " Stretched") name = hName + "Hand." + f.ToString() + "." + i.ToString() + " Stretched";
                         }
                     }
-                    foreach (QuickHumanFingers f in _fingers)
+                    foreach (QuickHumanFingers f in GetHumanFingers())
                     {
                         if (name == hName + " " + f.ToString() + " Spread") name = hName + "Hand." + f.ToString() + ".Spread";
                     }
@@ -411,6 +395,12 @@ namespace QuickVR
 
         public static List<HumanBodyBones> GetHumanBodyBones()
         {
+            if (_humanBodyBones == null)
+            {
+                _humanBodyBones = QuickUtils.GetEnumValues<HumanBodyBones>();
+                _humanBodyBones.RemoveAt(_humanBodyBones.Count - 1);  //Remove the LastBone, which is not a valid HumanBodyBone ID
+            }
+
             return _humanBodyBones;
         }
 
@@ -496,12 +486,32 @@ namespace QuickVR
 
         public static List<QuickHumanFingers> GetHumanFingers()
         {
+            if (_fingers == null)
+            {
+                _fingers = QuickUtils.GetEnumValues<QuickHumanFingers>();
+            }
+
             return _fingers;
         }
 
         public static List<QuickHumanBodyBones> GetBonesFromFinger(QuickHumanFingers finger, bool isLeft)
         {
-            return isLeft ? _bonesFromFingerLeft[finger] : _bonesFromFingerRight[finger];
+            if (isLeft)
+            {
+                if (_bonesFromFingerLeft == null)
+                {
+                    _bonesFromFingerLeft = InitHumanFingers(true);
+                }
+
+                return _bonesFromFingerLeft[finger];
+            }
+
+            if (_bonesFromFingerRight == null)
+            {
+                _bonesFromFingerRight = InitHumanFingers(false);
+            }
+
+            return _bonesFromFingerRight[finger];
         }
 
         public static QuickHumanFingers GetFingerFromBone(QuickHumanBodyBones bone)
