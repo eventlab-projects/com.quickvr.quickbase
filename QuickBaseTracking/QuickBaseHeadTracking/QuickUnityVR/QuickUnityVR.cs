@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace QuickVR {
 
-    public class QuickUnityVR : QuickIKManager_v2
+    public class QuickUnityVR : QuickIKManager_v1
     {
         #region CONSTANTS
 
