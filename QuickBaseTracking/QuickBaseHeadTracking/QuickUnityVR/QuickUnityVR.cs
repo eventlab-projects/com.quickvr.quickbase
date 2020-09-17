@@ -330,6 +330,18 @@ namespace QuickVR {
             _footprints.gameObject.SetActive(_useFootprints);
         }
 
+        public override void UpdateTrackingLate()
+        {
+            //if (IsTrackedIKLimbBone(IKLimbBones.Hips))
+            //{
+            //    QuickIKSolver ikSolverHips = GetIKSolver<QuickIKSolver>(HumanBodyBones.Hips);
+            //    ikSolverHips._targetLimb.position += GetIKTargetHipsOffset();
+            //    ikSolverHips.UpdateIK();
+            //}
+
+            base.UpdateTrackingLate();
+        }
+
         protected virtual void UpdateTransformRoot()
         {
             _vrPlayArea.transform.parent = null;

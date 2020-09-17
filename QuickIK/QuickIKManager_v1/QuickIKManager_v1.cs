@@ -117,12 +117,12 @@ namespace QuickVR {
                 ikSolverHead.UpdateIK();
             }
 
-            if (IsTrackedIKLimbBone(IKLimbBones.Hips))
-            {
-                QuickIKSolver ikSolverHips = GetIKSolver<QuickIKSolver>(HumanBodyBones.Hips);
-                ikSolverHips._targetLimb.position += GetIKTargetHipsOffset();
-                ikSolverHips.UpdateIK();
-            }
+            //if (IsTrackedIKLimbBone(IKLimbBones.Hips))
+            //{
+            //    QuickIKSolver ikSolverHips = GetIKSolver<QuickIKSolver>(HumanBodyBones.Hips);
+            //    ikSolverHips._targetLimb.position += GetIKTargetHipsOffset();
+            //    ikSolverHips.UpdateIK();
+            //}
 
             for (int i = (int)IKLimbBones.LeftHand; i <= (int)IKLimbBones.RightFoot; i++)
             {
