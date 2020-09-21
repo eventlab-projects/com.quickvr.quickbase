@@ -96,7 +96,7 @@ namespace QuickVR {
         }
 
         protected Dictionary<HumanBodyBones, IQuickIKSolver> _ikSolvers = new Dictionary<HumanBodyBones, IQuickIKSolver>();
-        protected static List<HumanBodyBones> _ikLimbBones = new List<HumanBodyBones>();
+        protected static List<HumanBodyBones> _ikLimbBones = null;
 
         protected Dictionary<HumanBodyBones, QuickIKData> _initialIKPose = new Dictionary<HumanBodyBones, QuickIKData>();
 
@@ -137,15 +137,6 @@ namespace QuickVR {
         #endregion
 
         #region CREATION AND DESTRUCTION
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        protected static void Init()
-        {
-            foreach (IKLimbBones boneID in QuickUtils.GetEnumValues<IKLimbBones>())
-            {
-                _ikLimbBones.Add(QuickUtils.ParseEnum<HumanBodyBones>(boneID.ToString()));
-            }
-        }
 
         protected virtual void Awake()
         {
@@ -318,9 +309,13 @@ namespace QuickVR {
 
                 //Set the position of the IKTarget
                 ikTarget.position = bone.position;
-                if (boneName.Contains("LowerArm") || boneID.Value.ToString().Contains("Spine"))
+                if (boneID.Value.ToString().Contains("Spine"))
                 {
                     ikTarget.position -= transform.forward * DEFAULT_TARGET_HINT_DISTANCE;
+                }
+                else if (boneName.Contains("LowerArm"))
+                {
+                    ikTarget.position = ikTarget.position + Vector3.Lerp(-transform.forward, -transform.up, 0.35f).normalized * DEFAULT_TARGET_HINT_DISTANCE;
                 }
                 else if (boneName.Contains("LowerLeg"))
                 {
@@ -478,6 +473,15 @@ namespace QuickVR {
 
         public static List<HumanBodyBones> GetIKLimbBones()
         {
+            if (_ikLimbBones == null)
+            {
+                _ikLimbBones = new List<HumanBodyBones>();
+                foreach (IKLimbBones boneID in QuickUtils.GetEnumValues<IKLimbBones>())
+                {
+                    _ikLimbBones.Add(QuickUtils.ParseEnum<HumanBodyBones>(boneID.ToString()));
+                }
+            }
+
             return _ikLimbBones;
         }
 
@@ -665,81 +669,21 @@ namespace QuickVR {
         protected virtual void UpdateHintTargetElbow(HumanBodyBones boneLimbID)
         {
             IQuickIKSolver ikSolver = GetIKSolver(boneLimbID);
-            ParentConstraint p = ikSolver._targetHint.GetComponent<ParentConstraint>();
+            ParentConstraint constraint = ikSolver._targetHint.GetComponent<ParentConstraint>();
 
-            float r = Vector3.Distance(_animator.GetEyeCenterPosition(), _animator.GetBoneTransform(HumanBodyBones.Head).position);
+            float r = Vector3.Distance(ikSolver._boneUpper.position, ikSolver._boneMid.position) + Vector3.Distance(ikSolver._boneMid.position, ikSolver._boneLimb.position);
             float yUpper = ikSolver._boneUpper.position.y;
             float maxY = yUpper + r;
-            float minY = yUpper - r;
 
             float yLimb = ikSolver._targetLimb.position.y;
-            p.weight = Mathf.Clamp01((maxY - yLimb) / (r));
+            constraint.weight = Mathf.Clamp01((maxY - yLimb) / (r));
+            constraint.translationAtRest = transform.InverseTransformPoint(ikSolver._boneMid.position - transform.up * DEFAULT_TARGET_HINT_DISTANCE);
 
-            //Compute the projection of the knee on the line passing by the limb bone and the upper bone. 
-            float a = Vector3.Magnitude(ikSolver._boneMid.position - ikSolver._boneLimb.position);
-            float b = Vector3.Magnitude(ikSolver._boneUpper.position - ikSolver._boneMid.position);
-            float c = Vector3.Magnitude(ikSolver._boneUpper.position - ikSolver._boneLimb.position);
-
-            if (Mathf.Abs(c - a - b) > 0.01f)
-            {
-                float x = (b * b - (c * c) - (a * a)) / (-2 * c);
-
-                Vector3 u = (ikSolver._boneUpper.position - ikSolver._boneLimb.position).normalized;
-                Vector3 proj = ikSolver._boneLimb.position + u * x;
-
-                //Apply the Pitagora's theorem to obtain the height of the triangle
-                float h2 = a * a - (x * x);
-                Vector3 w = (ikSolver._boneMid.position - ikSolver._boneLimb.position).normalized; //Vector3.Lerp(ikSolver._targetLimb.forward, sign * transform.right, 0.5f).normalized;
-                Vector3 n = Vector3.Cross(u, w).normalized;
-                //if (boneLimbID == HumanBodyBones.LeftFoot)
-                //{
-                //    Debug.Log(Vector3.Angle(u, ikSolver._targetLimb.forward).ToString("f3"));
-                //    Debug.Log(Vector3.SignedAngle(u, ikSolver._targetLimb.forward, ikSolver._targetLimb.right).ToString("f3"));
-                //    Debug.Log(Vector3.Dot(n, ikSolver._targetLimb.right).ToString("f3"));
-                //}
-                //float angle = Vector3.SignedAngle(u, w, ikSolver._targetLimb.right);
-                //if (angle < 0 || angle > 170)
-                //{
-                //    n = ikSolver._targetLimb.right;
-                //}
-                Vector3 v = Vector3.Cross(n, u).normalized;
-
-                Vector3 hintPos = proj + v * Mathf.Sqrt(h2);
-                //Debug.DrawLine(proj, hintPos, Color.yellow);
-                //Vector3 fwd = ikSolver._targetLimb.forward;
-                Vector3 fwd = Vector3.ProjectOnPlane((_animator.GetBoneTransform(HumanBodyBones.Head).position - hintPos), transform.up).normalized;
-                //Vector3 fwd = Vector3.Lerp(Vector3.ProjectOnPlane(ikSolver._targetLimb.forward, transform.up), transform.up, 0.5f).normalized;
-                //Vector3 fwd = Vector3.Lerp(ikSolver._targetLimb.forward, ikSolver._targetLimb.right, 0.5f).normalized;
-                //Vector3 fwd = (_animator.GetBoneTransform(HumanBodyBones.Head).position - ikSolver._targetLimb.position).normalized;
-                //Vector3 fwd = Vector3.zero;
-                //Vector3 fwd = Vector3.Lerp((ikSolver._boneLimb.position - hintPos).normalized, (ikSolver._boneUpper.position - hintPos).normalized, 0.5f);
-                //Vector3 fwd = -v.normalized;
-                //Debug.DrawLine(hintPos, hintPos - fwd * DEFAULT_TARGET_HINT_DISTANCE, Color.black);
-
-                //ikSolver._targetHint.position = hintPos - fwd * DEFAULT_TARGET_HINT_DISTANCE;
-            } 
-            else
-            {
-                //ikSolver._targetHint.localPosition = GetInitialIKData(boneLimbID)._targetHintLocalPosition;
-            }
-            
-            
-            //Vector3 up = ikSolver._boneUpper.position + transform.up;
-            //if (boneLimbID == HumanBodyBones.LeftHand)
-            //{
-            //    Vector3 v = ikSolver._boneUpper 
-            //    Vector3 f = Vector3.Cross(up, )
-            //}
-
-            //Vector3 u = Vector3.Project(ikSolver._boneUpper.position - _animator.GetBoneTransform(HumanBodyBones.Head).position, transform.up);
-            //Vector3 v = Vector3.Project(ikSolver._bone)
-
-            //Vector3 w = Vector3.ProjectOnPlane(ikSolver._targetLimb.forward, transform.up);
-            //ikSolver._targetHint.position = ikSolver._boneMid.position - w * DEFAULT_TARGET_HINT_DISTANCE;
-            //if (boneLimbID == HumanBodyBones.LeftHand)
-            //{
-
-            //}
+            //float upperLength = Vector3.Distance(ikSolver._boneUpper.position, ikSolver._boneMid.position);
+            //float sign = boneLimbID == HumanBodyBones.RightHand ? 1 : -1;
+            //Vector3 v = (transform.forward - transform.up + sign * transform.right).normalized;
+            //Vector3 p = ikSolver._boneUpper.position + v * upperLength;
+            //constraint.translationAtRest = transform.InverseTransformPoint(p - transform.up * DEFAULT_TARGET_HINT_DISTANCE);
         }
 
         protected virtual void UpdateHintTargetKnee(HumanBodyBones boneLimbID)
