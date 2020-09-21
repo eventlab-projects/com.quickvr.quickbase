@@ -86,8 +86,6 @@ namespace QuickVR {
             CreateIKSolver<QuickIKSolverHumanoid>(HumanBodyBones.LeftFoot);
             CreateIKSolver<QuickIKSolverHumanoid>(HumanBodyBones.RightFoot);
             CreateIKSolverFinalStep();
-
-            base.CreateIKSolversBody();
         }
 
         protected virtual QuickIKSolverFinalStep CreateIKSolverFinalStep()
