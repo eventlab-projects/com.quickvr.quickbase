@@ -235,7 +235,28 @@ namespace QuickVR {
             _vrManager.AddIKManagerSystem(this);
         }
         
-        protected abstract void CreateIKSolversBody();
+        protected virtual void CreateIKSolversBody()
+        {
+            CreateConstraints(HumanBodyBones.LeftHand);
+            CreateConstraints(HumanBodyBones.RightHand);
+        }
+
+        protected virtual void CreateConstraints(HumanBodyBones boneID)
+        {
+            IQuickIKSolver ikSolver = GetIKSolver(boneID);
+            ParentConstraint p = ikSolver._targetHint.GetOrCreateComponent<ParentConstraint>();
+            ConstraintSource s = new ConstraintSource();
+            s.sourceTransform = ikSolver._boneUpper;
+            s.weight = 1;
+            p.AddSource(s);
+            p.SetTranslationOffset(0, s.sourceTransform.InverseTransformPoint(ikSolver._targetHint.position));
+            p.SetRotationOffset(0, (Quaternion.Inverse(s.sourceTransform.rotation) * transform.rotation).eulerAngles);
+
+            float d = Vector3.Distance(ikSolver._boneUpper.position, ikSolver._boneMid.position) + DEFAULT_TARGET_HINT_DISTANCE;
+            p.translationAtRest = transform.InverseTransformPoint(ikSolver._boneUpper.position - transform.up * d);
+
+            p.constraintActive = true;
+        }
 
         protected virtual void CreateIKSolversHand(HumanBodyBones boneHandID)
         {
@@ -644,6 +665,15 @@ namespace QuickVR {
         protected virtual void UpdateHintTargetElbow(HumanBodyBones boneLimbID)
         {
             IQuickIKSolver ikSolver = GetIKSolver(boneLimbID);
+            ParentConstraint p = ikSolver._targetHint.GetComponent<ParentConstraint>();
+
+            float r = Vector3.Distance(_animator.GetEyeCenterPosition(), _animator.GetBoneTransform(HumanBodyBones.Head).position);
+            float yUpper = ikSolver._boneUpper.position.y;
+            float maxY = yUpper + r;
+            float minY = yUpper - r;
+
+            float yLimb = ikSolver._targetLimb.position.y;
+            p.weight = Mathf.Clamp01((maxY - yLimb) / (r));
 
             //Compute the projection of the knee on the line passing by the limb bone and the upper bone. 
             float a = Vector3.Magnitude(ikSolver._boneMid.position - ikSolver._boneLimb.position);
@@ -677,14 +707,16 @@ namespace QuickVR {
                 Vector3 hintPos = proj + v * Mathf.Sqrt(h2);
                 //Debug.DrawLine(proj, hintPos, Color.yellow);
                 //Vector3 fwd = ikSolver._targetLimb.forward;
+                Vector3 fwd = Vector3.ProjectOnPlane((_animator.GetBoneTransform(HumanBodyBones.Head).position - hintPos), transform.up).normalized;
+                //Vector3 fwd = Vector3.Lerp(Vector3.ProjectOnPlane(ikSolver._targetLimb.forward, transform.up), transform.up, 0.5f).normalized;
                 //Vector3 fwd = Vector3.Lerp(ikSolver._targetLimb.forward, ikSolver._targetLimb.right, 0.5f).normalized;
                 //Vector3 fwd = (_animator.GetBoneTransform(HumanBodyBones.Head).position - ikSolver._targetLimb.position).normalized;
                 //Vector3 fwd = Vector3.zero;
                 //Vector3 fwd = Vector3.Lerp((ikSolver._boneLimb.position - hintPos).normalized, (ikSolver._boneUpper.position - hintPos).normalized, 0.5f);
-                Vector3 fwd = -v.normalized;
-                Debug.DrawLine(hintPos, hintPos - fwd * DEFAULT_TARGET_HINT_DISTANCE, Color.black);
+                //Vector3 fwd = -v.normalized;
+                //Debug.DrawLine(hintPos, hintPos - fwd * DEFAULT_TARGET_HINT_DISTANCE, Color.black);
 
-                ikSolver._targetHint.position = hintPos - fwd * DEFAULT_TARGET_HINT_DISTANCE;
+                //ikSolver._targetHint.position = hintPos - fwd * DEFAULT_TARGET_HINT_DISTANCE;
             } 
             else
             {

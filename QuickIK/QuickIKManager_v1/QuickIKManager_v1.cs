@@ -33,6 +33,8 @@ namespace QuickVR {
             {
                 CreateIKSolver<QuickIKSolver>(boneID);
             }
+
+            base.CreateIKSolversBody();
         }
 
         //protected override void CreateIKSolversHand(HumanBodyBones boneHandID)
