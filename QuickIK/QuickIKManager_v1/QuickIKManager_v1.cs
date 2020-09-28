@@ -31,6 +31,8 @@ namespace QuickVR {
             CreateIKSolver<QuickIKSolverHips_v1>(HumanBodyBones.Hips);
             foreach (HumanBodyBones boneID in GetIKLimbBones())
             {
+                if (boneID == HumanBodyBones.Hips) continue;
+
                 CreateIKSolver<QuickIKSolver>(boneID);
             }
         }
@@ -133,23 +135,15 @@ namespace QuickVR {
                     //Correct the rotations of the limb bones by accounting for human body constraints
                     if (i == (int)IKLimbBones.LeftHand || i == (int)IKLimbBones.RightHand)
                     {
-                        Transform tmpParent = ikSolver._targetLimb.parent;
-                        ikSolver._targetLimb.parent = transform;
-                        Vector3 localEuler = ikSolver._targetLimb.localEulerAngles;
-
-                        float rotAngle = localEuler.z;
-                        ikSolver._targetLimb.localRotation = Quaternion.Euler(localEuler.x, localEuler.y, rotAngle);
-
                         ikSolver.UpdateIK();
 
+                        Vector3 localEuler = ikSolver._targetLimb.localEulerAngles;
+                        float rotAngle = localEuler.z;
                         Vector3 rotAxis = (ikSolver._boneLimb.position - ikSolver._boneMid.position).normalized;
 
                         float boneMidWeight = 0.5f;
                         CorrectRotation(ikSolver._boneMid, rotAxis, rotAngle * boneMidWeight);
                         CorrectRotation(ikSolver._boneLimb, rotAxis, -rotAngle * (1.0f - boneMidWeight));
-
-                        ikSolver._targetLimb.parent = tmpParent;
-                        ikSolver._targetLimb.localScale = Vector3.one;
                     }
                     else
                     {
@@ -157,6 +151,8 @@ namespace QuickVR {
                     }
                 }
             }
+
+            _boneRotator.parent = transform;
 
             base.UpdateTrackingLate();
         }

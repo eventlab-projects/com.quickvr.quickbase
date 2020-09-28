@@ -20,6 +20,7 @@ namespace QuickVR {
         RightFoot,
     };
 
+    [ExecuteInEditMode]
     public abstract class QuickIKManager : QuickBaseTrackingManager 
     {
 
@@ -95,6 +96,36 @@ namespace QuickVR {
             }
         }
 
+        protected Dictionary<HumanBodyBones, HumanBodyBones> _hintToLimbBone
+        {
+            get
+            {
+                if (m_HintToLimbBone == null)
+                {
+                    m_HintToLimbBone = new Dictionary<HumanBodyBones, HumanBodyBones>();
+                    m_HintToLimbBone[HumanBodyBones.Spine] = HumanBodyBones.Head;
+                    m_HintToLimbBone[HumanBodyBones.LeftLowerArm] = HumanBodyBones.LeftHand;
+                    m_HintToLimbBone[HumanBodyBones.RightLowerArm] = HumanBodyBones.RightHand;
+                    m_HintToLimbBone[HumanBodyBones.LeftLowerLeg] = HumanBodyBones.LeftFoot;
+                    m_HintToLimbBone[HumanBodyBones.RightLowerLeg] = HumanBodyBones.RightFoot;
+
+                    m_HintToLimbBone[HumanBodyBones.LeftThumbIntermediate] = HumanBodyBones.LeftThumbDistal;
+                    m_HintToLimbBone[HumanBodyBones.LeftIndexIntermediate] = HumanBodyBones.LeftIndexDistal;
+                    m_HintToLimbBone[HumanBodyBones.LeftMiddleIntermediate] = HumanBodyBones.LeftMiddleDistal;
+                    m_HintToLimbBone[HumanBodyBones.LeftRingIntermediate] = HumanBodyBones.LeftRingDistal;
+                    m_HintToLimbBone[HumanBodyBones.LeftLittleIntermediate] = HumanBodyBones.LeftLittleDistal;
+
+                    m_HintToLimbBone[HumanBodyBones.RightThumbIntermediate] = HumanBodyBones.RightThumbDistal;
+                    m_HintToLimbBone[HumanBodyBones.RightIndexIntermediate] = HumanBodyBones.RightIndexDistal;
+                    m_HintToLimbBone[HumanBodyBones.RightMiddleIntermediate] = HumanBodyBones.RightMiddleDistal;
+                    m_HintToLimbBone[HumanBodyBones.RightRingIntermediate] = HumanBodyBones.RightRingDistal;
+                    m_HintToLimbBone[HumanBodyBones.RightLittleIntermediate] = HumanBodyBones.RightLittleDistal;
+                }
+
+                return m_HintToLimbBone;
+            }
+        } 
+
         protected Dictionary<HumanBodyBones, IQuickIKSolver> _ikSolvers = new Dictionary<HumanBodyBones, IQuickIKSolver>();
         protected static List<HumanBodyBones> _ikLimbBones = null;
 
@@ -127,6 +158,8 @@ namespace QuickVR {
 
         [SerializeField, HideInInspector]
         private Transform m_ikSolversRightHand = null;
+
+        private Dictionary<HumanBodyBones, HumanBodyBones> m_HintToLimbBone = null;
 
         #endregion
 
@@ -231,7 +264,10 @@ namespace QuickVR {
 
         protected override void RegisterTrackingManager()
         {
-            _vrManager.AddIKManagerSystem(this);
+            if (Application.isPlaying)
+            {
+                _vrManager.AddIKManagerSystem(this);
+            }
         }
 
         protected abstract void CreateIKSolversBody();
@@ -314,11 +350,6 @@ namespace QuickVR {
 
             Transform ikTarget = GetIKTarget(boneID.Value);
 
-            if (boneID.Value == HumanBodyBones.LeftLowerArm || boneID.Value == HumanBodyBones.LeftLowerLeg)
-            {
-                
-            }
-
             //Create the ikTarget if necessary
             if (!ikTarget)
             {
@@ -392,16 +423,16 @@ namespace QuickVR {
 			return ikTarget;
 		}
 
+        #endregion
+
+        #region GET AND SET
+
         protected virtual Transform GetIKTargetParent(HumanBodyBones boneID)
         {
             if (QuickHumanTrait.IsBoneFingerLeft(boneID)) return _ikTargetsLeftHand;
             if (QuickHumanTrait.IsBoneFingerRight(boneID)) return _ikTargetsRightHand;
             return _ikTargetsRoot;
         }
-
-        #endregion
-
-        #region GET AND SET
 
         protected virtual Vector3 GetIKTargetHipsOffset()
         {
@@ -509,7 +540,8 @@ namespace QuickVR {
 
         public virtual Transform GetIKTarget(HumanBodyBones boneID)
         {
-            return GetIKTargetParent(boneID).Find(GetIKTargetName(boneID));
+            IQuickIKSolver ikSolver = GetIKSolver(boneID);
+            return IsBoneMid(boneID) ? ikSolver._targetHint : ikSolver._targetLimb;
         }
 
         protected virtual string GetIKTargetName(HumanBodyBones boneID)
@@ -549,7 +581,13 @@ namespace QuickVR {
 
         public virtual IQuickIKSolver GetIKSolver(HumanBodyBones boneID)
         {
-            return GetIKSolver<IQuickIKSolver>(boneID);
+            HumanBodyBones boneLimbID = boneID;
+            if (IsBoneMid(boneID))
+            {
+                boneLimbID = _hintToLimbBone[boneID];
+            }
+            
+            return GetIKSolver<IQuickIKSolver>(boneLimbID);
         }
 
         public virtual List<IQuickIKSolver> GetIKSolvers() 
@@ -588,18 +626,12 @@ namespace QuickVR {
 
         public static bool IsBoneLimb(HumanBodyBones boneID)
         {
-            List<string> limbBones = QuickUtils.GetEnumValuesToString<IKLimbBones>();
-            return boneID.ToString().Contains("Distal") || limbBones.Contains(boneID.ToString());
+            return GetIKLimbBones().Contains(boneID) || boneID.ToString().Contains("Distal");
         }
 
-        public static bool IsBoneMid(HumanBodyBones boneID)
+        protected virtual bool IsBoneMid(HumanBodyBones boneID)
         {
-            foreach (HumanBodyBones b in GetIKLimbBones())
-            {
-                if (boneID == (HumanBodyBones)HumanTrait.GetParentBone((int)b)) return true;
-            }
-
-            return false;
+            return _hintToLimbBone.ContainsKey(boneID);
         }
 
         [ButtonMethod]
@@ -649,14 +681,14 @@ namespace QuickVR {
 
         #region UPDATE
 
-        //protected virtual void Update()
-        //{
-        //    if (Application.isEditor)
-        //    {
-        //        UpdateTrackingEarly();
-        //        UpdateTrackingLate();
-        //    }
-        //}
+        protected virtual void Update()
+        {
+            if (Application.isEditor)
+            {
+                UpdateTrackingEarly();
+                UpdateTrackingLate();
+            }
+        }
 
         public override void UpdateTrackingEarly()
         {

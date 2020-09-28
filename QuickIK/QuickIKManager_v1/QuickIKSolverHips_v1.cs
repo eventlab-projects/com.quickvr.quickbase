@@ -172,11 +172,6 @@ namespace QuickVR
 
         #region GET AND SET
 
-        public override void Calibrate()
-        {
-            ResetIKChain();
-        }
-
         public override void ResetIKChain()
         {
             _hips.localPosition = _hipsInitialLocalPos;
