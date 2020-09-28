@@ -42,12 +42,12 @@ namespace QuickVR
         {
             _ikManager = (QuickIKManager)target;
 
-            SceneView.duringSceneGui += UpdateDebug;
+            //SceneView.duringSceneGui += UpdateDebug;
         }
 
         protected virtual void OnDisable()
         {
-            SceneView.duringSceneGui -= UpdateDebug;
+            //SceneView.duringSceneGui -= UpdateDebug;
         }
 
         #endregion
@@ -95,6 +95,8 @@ namespace QuickVR
                 EditorGUI.indentLevel--;
             }
 
+            //UpdateDebug();
+
         }
 
         protected virtual void DrawIKSolverProperties(IQuickIKSolver ikSolver, string boneName)
@@ -110,7 +112,7 @@ namespace QuickVR
             }
         }
 
-        protected virtual void UpdateDebug(SceneView sceneView)
+        protected virtual void UpdateDebug()
         {
             if (!_ikManager.gameObject.activeInHierarchy) return;
             //DrawIKTargets(GetIKTargetsLimb(), Handles.CubeHandleCap);

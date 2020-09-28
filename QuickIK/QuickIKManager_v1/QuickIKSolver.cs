@@ -139,12 +139,20 @@ namespace QuickVR
         #region PROTECTED PARAMETERS
 
         //The bone chain hierarchy
+        [SerializeField, ReadOnly]
         protected Transform m_boneUpper = null;
+
+        [SerializeField, ReadOnly]
         protected Transform m_boneMid = null;
+
+        [SerializeField, ReadOnly]
         protected Transform m_boneLimb = null;
 
         //The IK parameters
+        [SerializeField, ReadOnly]
         protected Transform m_targetLimb = null;
+
+        [SerializeField, ReadOnly]
         protected Transform m_targetHint = null;
 
         protected bool _initialized = false;
@@ -294,13 +302,29 @@ namespace QuickVR
 
         #region DEBUG
 
-        protected virtual void OnDrawGizmos()
-        {
-            if (_boneUpper && _boneMid) Debug.DrawLine(_boneUpper.position, _boneMid.position, Color.magenta);
-            if (_boneMid && _boneLimb) Debug.DrawLine(_boneMid.position, _boneLimb.position, Color.magenta);
-            if (_boneMid && _targetHint) Debug.DrawLine(_boneMid.position, _targetHint.position, Color.yellow);
-            if (_boneUpper && _targetLimb) Debug.DrawLine(_boneUpper.position, GetIKTargetLimbPosition(), Color.cyan);
-        }
+        //protected virtual void OnDrawGizmos()
+        //{
+        //    if (_boneUpper && _boneMid)
+        //    {
+        //        Gizmos.color = Color.magenta;
+        //        Gizmos.DrawLine(_boneUpper.position, _boneMid.position);
+        //    }
+        //    if (_boneMid && _boneLimb)
+        //    {
+        //        Gizmos.color = Color.magenta;
+        //        Gizmos.DrawLine(_boneMid.position, _boneLimb.position);
+        //    }
+        //    if (_boneMid && _targetHint)
+        //    {
+        //        Gizmos.color = Color.yellow;
+        //        Gizmos.DrawLine(_boneMid.position, _targetHint.position);
+        //    }
+        //    if (_boneUpper && _targetLimb)
+        //    {
+        //        Gizmos.color = Color.cyan;
+        //        Gizmos.DrawLine(_boneUpper.position, GetIKTargetLimbPosition());
+        //    }
+        //}
 
         #endregion
 
