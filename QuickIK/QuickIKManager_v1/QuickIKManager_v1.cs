@@ -68,6 +68,13 @@ namespace QuickVR {
             return ikTarget;
         }
 
+        protected override void OnDestroy()
+        {
+            base.OnDestroy();
+
+            QuickUtils.Destroy(_boneRotator);
+        }
+
         #endregion
 
         #region GET AND SET
@@ -126,9 +133,10 @@ namespace QuickVR {
             //    ikSolverHips.UpdateIK();
             //}
 
+            List<HumanBodyBones> ikLimbBones = GetIKLimbBones();
             for (int i = (int)IKLimbBones.LeftHand; i <= (int)IKLimbBones.RightFoot; i++)
             {
-                QuickIKSolver ikSolver = GetIKSolver<QuickIKSolver>(_ikLimbBones[i]);
+                QuickIKSolver ikSolver = GetIKSolver<QuickIKSolver>(ikLimbBones[i]);
                 if (ikSolver && ((_ikMaskBody & (1 << i)) != 0))
                 {
                     //ikSolver.ResetIKChain();

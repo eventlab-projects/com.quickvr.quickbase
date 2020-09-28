@@ -137,6 +137,9 @@ namespace QuickVR {
         [SerializeField, HideInInspector]
         protected Vector3 _initialHipsLocalPosition = Vector3.zero;
 
+        [SerializeField, HideInInspector]
+        protected bool _isInitialized = false;
+
         #endregion
 
         #region PRIVATE ATTRIBUTES
@@ -187,49 +190,62 @@ namespace QuickVR {
 
         protected virtual void Reset()
         {
-            _initialHipsLocalPosition = _animator.GetBoneTransform(HumanBodyBones.Hips).localPosition;
-            _initialLocalRotations.Clear();
-            foreach (HumanBodyBones b in QuickHumanTrait.GetHumanBodyBones())
+            if (!_isInitialized)
             {
-                Transform tBone = _animator.GetBoneTransform(b);
-                _initialLocalRotations.Add(tBone? tBone.localRotation : Quaternion.identity);
+                _initialHipsLocalPosition = _animator.GetBoneTransform(HumanBodyBones.Hips).localPosition;
+                _initialLocalRotations.Clear();
+                foreach (HumanBodyBones b in QuickHumanTrait.GetHumanBodyBones())
+                {
+                    Transform tBone = _animator.GetBoneTransform(b);
+                    _initialLocalRotations.Add(tBone ? tBone.localRotation : Quaternion.identity);
+                }
+
+                foreach (HumanBodyBones boneID in GetIKLimbBones())
+                {
+                    CreateBoneHint(boneID);
+                }
+
+                RuntimeAnimatorController tmp = _animator.runtimeAnimatorController;
+                //_animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("TPose");
+                _animator.runtimeAnimatorController = null;
+                _animator.Update(0);
+
+                CreateIKSolversBody();
+                CreateIKSolversHand(HumanBodyBones.LeftHand);
+                CreateIKSolversHand(HumanBodyBones.RightHand);
+
+                foreach (HumanBodyBones boneID in GetIKLimbBones())
+                {
+                    CreateConstraintHint(boneID);
+                }
+
+                _animator.runtimeAnimatorController = tmp;
+
+                _isInitialized = true;
             }
-
-            foreach (HumanBodyBones boneID in GetIKLimbBones())
-            {
-                CreateBoneHint(boneID);
-            }
-
-            RuntimeAnimatorController tmp = _animator.runtimeAnimatorController;
-            //_animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("TPose");
-            _animator.runtimeAnimatorController = null;
-            _animator.Update(0);
-
-            CreateIKSolversBody();
-            CreateIKSolversHand(HumanBodyBones.LeftHand);
-            CreateIKSolversHand(HumanBodyBones.RightHand);
-            
-            foreach (HumanBodyBones boneID in GetIKLimbBones())
-            {
-                CreateConstraintHint(boneID);
-            }
-
-            _animator.runtimeAnimatorController = tmp;
-
         }
 
-        [ButtonMethod]
-        public virtual void RemoveComponent()
+        protected virtual void OnDestroy()
         {
             _animator.GetBoneTransform(HumanBodyBones.Hips).localPosition = _initialHipsLocalPosition;
             foreach (HumanBodyBones b in QuickHumanTrait.GetHumanBodyBones())
             {
-                _animator.GetBoneTransform(b).localRotation = _initialLocalRotations[(int)b];
+                Transform t = _animator.GetBoneTransform(b);
+                if (t)
+                {
+                    t.localRotation = _initialLocalRotations[(int)b];
+                }
             }
 
             foreach (HumanBodyBones boneID in GetIKLimbBones())
             {
                 QuickUtils.Destroy(GetBoneHint(boneID));
+            }
+
+            foreach (IQuickIKSolver ikSolver in GetIKSolvers())
+            {
+                QuickUtils.Destroy(ikSolver._targetLimb);
+                QuickUtils.Destroy(ikSolver._targetHint);
             }
 
             QuickUtils.Destroy(m_ikTargetsRoot);
@@ -239,8 +255,6 @@ namespace QuickVR {
             QuickUtils.Destroy(m_ikSolversBody);
             QuickUtils.Destroy(m_ikSolversLeftHand);
             QuickUtils.Destroy(m_ikSolversRightHand);
-
-            DestroyImmediate(this);
         }
 
         protected virtual Transform CreateBoneHint(HumanBodyBones boneID)
