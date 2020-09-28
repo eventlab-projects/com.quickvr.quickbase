@@ -205,11 +205,6 @@ namespace QuickVR {
                     CreateBoneHint(boneID);
                 }
 
-                RuntimeAnimatorController tmp = _animator.runtimeAnimatorController;
-                //_animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("TPose");
-                _animator.runtimeAnimatorController = null;
-                _animator.Update(0);
-
                 CreateIKSolversBody();
                 CreateIKSolversHand(HumanBodyBones.LeftHand);
                 CreateIKSolversHand(HumanBodyBones.RightHand);
@@ -219,7 +214,7 @@ namespace QuickVR {
                     CreateConstraintHint(boneID);
                 }
 
-                _animator.runtimeAnimatorController = tmp;
+                ResetIKTargets();
 
                 _isInitialized = true;
             }
@@ -227,15 +222,7 @@ namespace QuickVR {
 
         protected virtual void OnDestroy()
         {
-            _animator.GetBoneTransform(HumanBodyBones.Hips).localPosition = _initialHipsLocalPosition;
-            foreach (HumanBodyBones b in QuickHumanTrait.GetHumanBodyBones())
-            {
-                Transform t = _animator.GetBoneTransform(b);
-                if (t)
-                {
-                    t.localRotation = _initialLocalRotations[(int)b];
-                }
-            }
+            ResetInitialPose();
 
             foreach (HumanBodyBones boneID in GetIKLimbBones())
             {
@@ -262,7 +249,6 @@ namespace QuickVR {
             Transform tBone = _animator.GetBoneTransform(boneID);
             Transform tRotationHint = tBone.CreateChild("__BoneHint__");
 
-            tRotationHint.position = tBone.position;
             tRotationHint.rotation = transform.rotation;
             if (boneID == HumanBodyBones.LeftHand)
             {
@@ -440,6 +426,48 @@ namespace QuickVR {
         #endregion
 
         #region GET AND SET
+
+        protected virtual void ResetInitialPose()
+        {
+            _animator.GetBoneTransform(HumanBodyBones.Hips).localPosition = _initialHipsLocalPosition;
+            foreach (HumanBodyBones b in QuickHumanTrait.GetHumanBodyBones())
+            {
+                Transform t = _animator.GetBoneTransform(b);
+                if (t)
+                {
+                    t.localRotation = _initialLocalRotations[(int)b];
+                }
+            }
+        }
+
+        [ButtonMethod]
+        public virtual void ResetIKTargets()
+        {
+            //If we have an animatorcontroller defined, the targets are moved at the position of the 
+            //initial frame of the current animation in such controller. 
+            if (_animator.runtimeAnimatorController)
+            {
+                _animator.Update(0);
+                //Force the mouth to be closed
+                Transform tJaw = _animator.GetBoneTransform(HumanBodyBones.Jaw);
+                if (tJaw)
+                {
+                    tJaw.localRotation = _initialLocalRotations[(int)HumanBodyBones.Jaw];
+                }
+            }
+            else
+            {
+                ResetInitialPose();
+            }
+            
+            foreach (HumanBodyBones b in GetIKLimbBones())
+            {
+                IQuickIKSolver ikSolver = GetIKSolver(b);
+                Transform boneHint = GetBoneHint(b);
+                ikSolver._targetLimb.position = boneHint.position;
+                ikSolver._targetLimb.rotation = boneHint.rotation;
+            }
+        }
 
         protected virtual Transform GetIKTargetParent(HumanBodyBones boneID)
         {
