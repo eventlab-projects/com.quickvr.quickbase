@@ -185,6 +185,7 @@ namespace QuickVR
         [SerializeField, HideInInspector]
         protected float _lengthMid = 0;
 
+        [SerializeField, HideInInspector]
         protected HumanBodyBones m_boneID = HumanBodyBones.LastBone;
 
         [SerializeField, Range(0.0f, 1.0f)]
@@ -226,6 +227,11 @@ namespace QuickVR
         {
             Vector3 v = (_targetLimb.position + _offsetTargetLimbPos) - _boneUpper.position;
             return _boneUpper.position + (v.normalized * Mathf.Min(v.magnitude, GetChainLength()));
+        }
+
+        protected virtual Vector3 GetIKTargetHintPosition()
+        {
+            return _targetHint.position;
         }
 
         public virtual void ResetIKChain()
@@ -288,7 +294,7 @@ namespace QuickVR
                 float cos = (Mathf.Pow(midLength, 2) - Mathf.Pow(upperLength, 2) - Mathf.Pow(targetDistance, 2)) / (-2 * upperLength * targetDistance);
                 float ikAngle = Mathf.Acos(cos) * Mathf.Rad2Deg;
                 v = _boneMid.position - _boneUpper.position;
-                Vector3 w = _targetHint.position - _boneUpper.position;
+                Vector3 w = GetIKTargetHintPosition() - _boneUpper.position;
                 _boneUpper.Rotate(Vector3.Cross(v, w).normalized, ikAngle, Space.World);
             }
 

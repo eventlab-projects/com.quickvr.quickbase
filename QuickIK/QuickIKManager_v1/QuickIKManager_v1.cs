@@ -29,12 +29,11 @@ namespace QuickVR {
         protected override void CreateIKSolversBody()
         {
             CreateIKSolver<QuickIKSolverHips_v1>(HumanBodyBones.Hips);
-            foreach (HumanBodyBones boneID in GetIKLimbBones())
-            {
-                if (boneID == HumanBodyBones.Hips) continue;
-
-                CreateIKSolver<QuickIKSolver>(boneID);
-            }
+            CreateIKSolver<QuickIKSolver>(HumanBodyBones.Head);
+            CreateIKSolver<QuickIKSolverHand_v1>(HumanBodyBones.LeftHand);
+            CreateIKSolver<QuickIKSolverHand_v1>(HumanBodyBones.RightHand);
+            CreateIKSolver<QuickIKSolver>(HumanBodyBones.LeftFoot);
+            CreateIKSolver<QuickIKSolver>(HumanBodyBones.RightFoot);
         }
 
         //protected override void CreateIKSolversHand(HumanBodyBones boneHandID)
@@ -87,6 +86,10 @@ namespace QuickVR {
         public override void ResetIKSolver(HumanBodyBones boneID)
         {
             QuickIKSolver ikSolver = GetIKSolver<QuickIKSolver>(boneID);
+            if (ikSolver == null)
+            {
+                Debug.Log(boneID);
+            }
             if ((_ikMaskBody & (1 << (int)boneID)) != 0)
             {
                 ikSolver.ResetIKChain();
@@ -126,12 +129,12 @@ namespace QuickVR {
                 ikSolverHead.UpdateIK();
             }
 
-            //if (IsTrackedIKLimbBone(IKLimbBones.Hips))
-            //{
-            //    QuickIKSolver ikSolverHips = GetIKSolver<QuickIKSolver>(HumanBodyBones.Hips);
-            //    ikSolverHips._targetLimb.position += GetIKTargetHipsOffset();
-            //    ikSolverHips.UpdateIK();
-            //}
+            if (IsTrackedIKLimbBone(IKLimbBones.Hips))
+            {
+                QuickIKSolver ikSolverHips = GetIKSolver<QuickIKSolver>(HumanBodyBones.Hips);
+                ikSolverHips._targetLimb.position += GetIKTargetHipsOffset();
+                ikSolverHips.UpdateIK();
+            }
 
             List<HumanBodyBones> ikLimbBones = GetIKLimbBones();
             for (int i = (int)IKLimbBones.LeftHand; i <= (int)IKLimbBones.RightFoot; i++)
@@ -141,10 +144,9 @@ namespace QuickVR {
                 {
                     //ikSolver.ResetIKChain();
                     //Correct the rotations of the limb bones by accounting for human body constraints
+                    ikSolver.UpdateIK();
                     if (i == (int)IKLimbBones.LeftHand || i == (int)IKLimbBones.RightHand)
                     {
-                        ikSolver.UpdateIK();
-
                         Vector3 localEuler = ikSolver._targetLimb.localEulerAngles;
                         float rotAngle = localEuler.z;
                         Vector3 rotAxis = (ikSolver._boneLimb.position - ikSolver._boneMid.position).normalized;
@@ -152,10 +154,6 @@ namespace QuickVR {
                         float boneMidWeight = 0.5f;
                         CorrectRotation(ikSolver._boneMid, rotAxis, rotAngle * boneMidWeight);
                         CorrectRotation(ikSolver._boneLimb, rotAxis, -rotAngle * (1.0f - boneMidWeight));
-                    }
-                    else
-                    {
-                        ikSolver.UpdateIK();
                     }
                 }
             }
