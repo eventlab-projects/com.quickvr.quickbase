@@ -109,7 +109,7 @@ namespace QuickVR
 
         #region PRIVATE ATTRIBUTES
 
-        private static Dictionary<QuickHumanBodyBones, QuickHumanBodyBones> _parentBone = new Dictionary<QuickHumanBodyBones, QuickHumanBodyBones>();
+        private static Dictionary<QuickHumanBodyBones, QuickHumanBodyBones> _parentBone = null;
         private static Dictionary<int, List<int>> _childBones = null;
         private static List<int> _bonesHierarchy = null;
 
@@ -139,7 +139,6 @@ namespace QuickVR
             InitMuscleNames();
             InitLookAtBones();
             InitChildBones();
-            InitParentBones();
             InitBonesHierarchy();
             InitHandBoneTips();
         }
@@ -262,6 +261,7 @@ namespace QuickVR
 
         private static void InitParentBones()
         {
+            _parentBone = new Dictionary<QuickHumanBodyBones, QuickHumanBodyBones>();
             _parentBone[QuickHumanBodyBones.LeftThumbTip] = QuickHumanBodyBones.LeftThumbDistal;
             _parentBone[QuickHumanBodyBones.LeftIndexTip] = QuickHumanBodyBones.LeftIndexDistal;
             _parentBone[QuickHumanBodyBones.LeftMiddleTip] = QuickHumanBodyBones.LeftMiddleDistal;
@@ -419,6 +419,11 @@ namespace QuickVR
             if ((int)boneID < (int)HumanBodyBones.LastBone)
             {
                 return (QuickHumanBodyBones)GetParentBone((int)boneID);
+            }
+
+            if (_parentBone == null)
+            {
+                InitParentBones();
             }
 
             return _parentBone[boneID];
