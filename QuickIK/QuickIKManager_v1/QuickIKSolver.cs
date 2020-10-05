@@ -34,6 +34,11 @@ namespace QuickVR
             }
             set
             {
+                if (m_boneUpper == null)
+                {
+                    _initialLocalRotationUpper = value.localRotation;
+                }
+
                 m_boneUpper = value;
             }
         }
@@ -46,6 +51,11 @@ namespace QuickVR
             }
             set
             {
+                if (m_boneMid == null)
+                {
+                    _initialLocalRotationMid = value.localRotation;
+                }
+
                 m_boneMid = value;
             }
         }
@@ -58,6 +68,11 @@ namespace QuickVR
             }
             set
             {
+                if (_boneLimb == null)
+                {
+                    _initialLocalRotationLimb = value.localRotation;
+                }
+
                 m_boneLimb = value;
             }
         }
@@ -139,22 +154,38 @@ namespace QuickVR
         #region PROTECTED PARAMETERS
 
         //The bone chain hierarchy
+        [SerializeField, ReadOnly]
         protected Transform m_boneUpper = null;
+
+        [SerializeField, ReadOnly]
         protected Transform m_boneMid = null;
+
+        [SerializeField, ReadOnly]
         protected Transform m_boneLimb = null;
 
         //The IK parameters
+        [SerializeField, ReadOnly]
         protected Transform m_targetLimb = null;
+
+        [SerializeField, ReadOnly]
         protected Transform m_targetHint = null;
 
-        protected bool _initialized = false;
-
+        [SerializeField, HideInInspector]
         protected Quaternion _initialLocalRotationUpper = Quaternion.identity;
+        
+        [SerializeField, HideInInspector]
         protected Quaternion _initialLocalRotationMid = Quaternion.identity;
+        
+        [SerializeField, HideInInspector]
         protected Quaternion _initialLocalRotationLimb = Quaternion.identity;
+
+        [SerializeField, HideInInspector]
         protected float _lengthUpper = 0;
+
+        [SerializeField, HideInInspector]
         protected float _lengthMid = 0;
 
+        [SerializeField, HideInInspector]
         protected HumanBodyBones m_boneID = HumanBodyBones.LastBone;
 
         [SerializeField, Range(0.0f, 1.0f)]
@@ -165,36 +196,25 @@ namespace QuickVR
 
         #endregion
 
-        #region CREATION AND DESTRUCTION
-
-        protected virtual void Start()
-        {
-            Calibrate();
-
-            _initialized = true;
-        }
-
-        #endregion
-
         #region GET AND SET
-
-        public virtual void Calibrate()
-        {
-            _initialLocalRotationUpper = _boneUpper.localRotation;
-            _initialLocalRotationMid = _boneMid.localRotation;
-            _initialLocalRotationLimb = _boneLimb.localRotation;
-
-            _lengthUpper = Vector3.Distance(_boneUpper.position, _boneMid.position);
-            _lengthMid = Vector3.Distance(_boneMid.position, _boneLimb.position);
-        }
 
         public virtual float GetUpperLength()
         {
+            if (_lengthUpper == 0)
+            {
+                _lengthUpper = Vector3.Distance(_boneUpper.position, _boneMid.position);
+            }
+
             return _lengthUpper;
         }
 
         public virtual float GetMidLength()
         {
+            if (_lengthMid == 0)
+            {
+                _lengthMid = Vector3.Distance(_boneMid.position, _boneLimb.position);
+            }
+
             return _lengthMid;
         }
 
@@ -209,10 +229,13 @@ namespace QuickVR
             return _boneUpper.position + (v.normalized * Mathf.Min(v.magnitude, GetChainLength()));
         }
 
+        protected virtual Vector3 GetIKTargetHintPosition()
+        {
+            return _targetHint.position;
+        }
+
         public virtual void ResetIKChain()
         {
-            if (!_initialized) return;
-
             _boneUpper.localRotation = _initialLocalRotationUpper;
             _boneMid.localRotation = _initialLocalRotationMid;
             //_boneLimb.localRotation = _initialLocalRotationLimb;
@@ -271,7 +294,7 @@ namespace QuickVR
                 float cos = (Mathf.Pow(midLength, 2) - Mathf.Pow(upperLength, 2) - Mathf.Pow(targetDistance, 2)) / (-2 * upperLength * targetDistance);
                 float ikAngle = Mathf.Acos(cos) * Mathf.Rad2Deg;
                 v = _boneMid.position - _boneUpper.position;
-                Vector3 w = _targetHint.position - _boneUpper.position;
+                Vector3 w = GetIKTargetHintPosition() - _boneUpper.position;
                 _boneUpper.Rotate(Vector3.Cross(v, w).normalized, ikAngle, Space.World);
             }
 
@@ -294,13 +317,29 @@ namespace QuickVR
 
         #region DEBUG
 
-        protected virtual void OnDrawGizmos()
-        {
-            if (_boneUpper && _boneMid) Debug.DrawLine(_boneUpper.position, _boneMid.position, Color.magenta);
-            if (_boneMid && _boneLimb) Debug.DrawLine(_boneMid.position, _boneLimb.position, Color.magenta);
-            if (_boneMid && _targetHint) Debug.DrawLine(_boneMid.position, _targetHint.position, Color.yellow);
-            if (_boneUpper && _targetLimb) Debug.DrawLine(_boneUpper.position, GetIKTargetLimbPosition(), Color.cyan);
-        }
+        //protected virtual void OnDrawGizmos()
+        //{
+        //    if (_boneUpper && _boneMid)
+        //    {
+        //        Gizmos.color = Color.magenta;
+        //        Gizmos.DrawLine(_boneUpper.position, _boneMid.position);
+        //    }
+        //    if (_boneMid && _boneLimb)
+        //    {
+        //        Gizmos.color = Color.magenta;
+        //        Gizmos.DrawLine(_boneMid.position, _boneLimb.position);
+        //    }
+        //    if (_boneMid && _targetHint)
+        //    {
+        //        Gizmos.color = Color.yellow;
+        //        Gizmos.DrawLine(_boneMid.position, _targetHint.position);
+        //    }
+        //    if (_boneUpper && _targetLimb)
+        //    {
+        //        Gizmos.color = Color.cyan;
+        //        Gizmos.DrawLine(_boneUpper.position, GetIKTargetLimbPosition());
+        //    }
+        //}
 
         #endregion
 

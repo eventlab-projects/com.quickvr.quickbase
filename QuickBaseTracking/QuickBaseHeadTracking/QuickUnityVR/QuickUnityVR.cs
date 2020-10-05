@@ -60,42 +60,52 @@ namespace QuickVR {
 
         protected override void OnEnable()
         {
-            base.OnEnable();
+            if (Application.isPlaying)
+            {
+                base.OnEnable();
 
-            QuickVRNode.OnCalibrateVRNodeHead += OnCalibrateVRNodeHead;
-            QuickVRNode.OnCalibrateVRNodeHips += OnCalibrateVRNodeHips;
-            QuickVRNode.OnCalibrateVRNodeLeftHand += OnCalibrateVRNodeLeftHand;
-            QuickVRNode.OnCalibrateVRNodeRightHand += OnCalibrateVRNodeRightHand;
-            QuickVRNode.OnCalibrateVRNodeLeftFoot += OnCalibrateVRNodeFoot;
-            QuickVRNode.OnCalibrateVRNodeRightFoot += OnCalibrateVRNodeFoot;
+                QuickVRNode.OnCalibrateVRNodeHead += OnCalibrateVRNodeHead;
+                QuickVRNode.OnCalibrateVRNodeHips += OnCalibrateVRNodeHips;
+                QuickVRNode.OnCalibrateVRNodeLeftHand += OnCalibrateVRNodeLeftHand;
+                QuickVRNode.OnCalibrateVRNodeRightHand += OnCalibrateVRNodeRightHand;
+                QuickVRNode.OnCalibrateVRNodeLeftFoot += OnCalibrateVRNodeFoot;
+                QuickVRNode.OnCalibrateVRNodeRightFoot += OnCalibrateVRNodeFoot;
+            }
         }
 
         protected virtual void OnDisable()
         {
-            QuickVRNode.OnCalibrateVRNodeHead -= OnCalibrateVRNodeHead;
-            QuickVRNode.OnCalibrateVRNodeHips -= OnCalibrateVRNodeHips;
-            QuickVRNode.OnCalibrateVRNodeLeftHand -= OnCalibrateVRNodeLeftHand;
-            QuickVRNode.OnCalibrateVRNodeRightHand -= OnCalibrateVRNodeRightHand;
-            QuickVRNode.OnCalibrateVRNodeLeftFoot -= OnCalibrateVRNodeFoot;
-            QuickVRNode.OnCalibrateVRNodeRightFoot -= OnCalibrateVRNodeFoot;
+            if (Application.isPlaying)
+            {
+                QuickVRNode.OnCalibrateVRNodeHead -= OnCalibrateVRNodeHead;
+                QuickVRNode.OnCalibrateVRNodeHips -= OnCalibrateVRNodeHips;
+                QuickVRNode.OnCalibrateVRNodeLeftHand -= OnCalibrateVRNodeLeftHand;
+                QuickVRNode.OnCalibrateVRNodeRightHand -= OnCalibrateVRNodeRightHand;
+                QuickVRNode.OnCalibrateVRNodeLeftFoot -= OnCalibrateVRNodeFoot;
+                QuickVRNode.OnCalibrateVRNodeRightFoot -= OnCalibrateVRNodeFoot;
+            }
         }
 
         protected override void Awake()
         {
             base.Awake();
 
-            _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
-            _vrPlayArea.transform.parent = transform;
+            if (Application.isPlaying)
+            {
 
-            CreateVRHands();
-            CreateVRCursors();
-            CreateFootPrints();
+                _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
+                _vrPlayArea.transform.parent = transform;
 
-            _calibrationPose = new GameObject("__CalibrationPose__").transform;
-            _calibrationPose.position = transform.position;
-            _calibrationPose.rotation = transform.rotation;
+                CreateVRHands();
+                CreateVRCursors();
+                CreateFootPrints();
 
-            _headOffset = Quaternion.Inverse(transform.rotation) * (_animator.GetBoneTransform(HumanBodyBones.Head).position - _animator.GetEyeCenterPosition());
+                _calibrationPose = new GameObject("__CalibrationPose__").transform;
+                _calibrationPose.position = transform.position;
+                _calibrationPose.rotation = transform.rotation;
+
+                _headOffset = Quaternion.Inverse(transform.rotation) * (_animator.GetBoneTransform(HumanBodyBones.Head).position - _animator.GetEyeCenterPosition());
+            }
         }
 
         protected override void RegisterTrackingManager()
@@ -105,9 +115,12 @@ namespace QuickVR {
 
         protected virtual void Start()
         {
-            if (!QuickUtils.IsHandTrackingSupported())
+            if (Application.isPlaying)
             {
-                _handTrackingMode = HandTrackingMode.Controllers;
+                if (!QuickUtils.IsHandTrackingSupported())
+                {
+                    _handTrackingMode = HandTrackingMode.Controllers;
+                }
             }
         }
 
@@ -311,7 +324,12 @@ namespace QuickVR {
 
         protected override Vector3 GetIKTargetHipsOffset()
         {
-            return _vrPlayArea.GetVRNode(HumanBodyBones.Head).transform.position - _animator.GetEyeCenterPosition();
+            if (Application.isPlaying)
+            {
+                return _vrPlayArea.GetVRNode(HumanBodyBones.Head).transform.position - _animator.GetEyeCenterPosition();
+            }
+
+            return Vector3.zero;
         }
 
         #endregion
@@ -322,12 +340,15 @@ namespace QuickVR {
         {
             base.UpdateTrackingEarly();
 
-            UpdateTransformRoot();
-            UpdateTransformNodes();
+            if (Application.isPlaying)
+            {
+                UpdateTransformRoot();
+                UpdateTransformNodes();
 
-            UpdateVRCursors();
+                UpdateVRCursors();
 
-            _footprints.gameObject.SetActive(_useFootprints);
+                _footprints.gameObject.SetActive(_useFootprints);
+            }
         }
 
         protected virtual void UpdateTransformRoot()

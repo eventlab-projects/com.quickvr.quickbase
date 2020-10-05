@@ -138,7 +138,6 @@ namespace QuickVR
         {
             InitMuscleNames();
             InitLookAtBones();
-            InitChildBones();
             InitBonesHierarchy();
             InitHandBoneTips();
         }
@@ -245,18 +244,6 @@ namespace QuickVR
             _lookAtBone[HumanBodyBones.RightRingIntermediate] = HumanBodyBones.RightRingDistal;
             _lookAtBone[HumanBodyBones.RightLittleProximal] = HumanBodyBones.RightLittleIntermediate;
             _lookAtBone[HumanBodyBones.RightLittleIntermediate] = HumanBodyBones.RightLittleDistal;
-        }
-
-        private static void InitChildBones()
-        {
-            _childBones = new Dictionary<int, List<int>>();
-            for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
-            {
-                int parentID = HumanTrait.GetParentBone(i);
-                if (!_childBones.ContainsKey(parentID)) _childBones[parentID] = new List<int>();
-
-                _childBones[parentID].Add(i);
-            }
         }
 
         private static void InitParentBones()
@@ -429,8 +416,33 @@ namespace QuickVR
             return _parentBone[boneID];
         }
 
+        public static List<HumanBodyBones> GetChildBones(HumanBodyBones boneID)
+        {
+            List<int> tmp = GetChildBones((int)boneID);
+
+            List<HumanBodyBones> result = new List<HumanBodyBones>();
+            foreach (int i in tmp)
+            {
+                result.Add((HumanBodyBones)i);
+            }
+
+            return result;
+        }
+
         public static List<int> GetChildBones(int boneID)
         {
+            if (_childBones == null)
+            {
+                _childBones = new Dictionary<int, List<int>>();
+                for (int i = 0; i < (int)HumanBodyBones.LastBone; i++)
+                {
+                    int parentID = HumanTrait.GetParentBone(i);
+                    if (!_childBones.ContainsKey(parentID)) _childBones[parentID] = new List<int>();
+
+                    _childBones[parentID].Add(i);
+                }
+            }
+
             return _childBones.ContainsKey(boneID) ? _childBones[boneID] : new List<int>();
         }
 

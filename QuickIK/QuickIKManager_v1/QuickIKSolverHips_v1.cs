@@ -5,12 +5,25 @@ using UnityEngine;
 namespace QuickVR
 {
 
+    [System.Serializable]
     public class QuickIKSolverHips_v1 : QuickIKSolver
     {
 
         #region PUBLIC PARAMETERS
 
-        public Transform _hips = null;
+        public Transform _hips
+        {
+            get
+            {
+                if (!m_Hips)
+                {
+                    m_Hips = GetComponentInParent<Animator>().GetBoneTransform(HumanBodyBones.Hips);
+                    _hipsInitialLocalPos = m_Hips.localPosition;
+                }
+
+                return m_Hips;
+            }
+        }
         
         public override HumanBodyBones _boneID
         {
@@ -134,28 +147,30 @@ namespace QuickVR
 
         #endregion
 
-        #region PROTECTED PARAMETERS
+        #region PROTECTED ATTRIBUTES
 
+        [SerializeField]
         protected Vector3 _hipsInitialLocalPos = Vector3.zero;
-        
+
+        #endregion
+
+        #region PRIVATE ATTRIBUTES
+
+        [SerializeField]
+        private Transform m_Hips = null;
+
         #endregion
 
         #region CREATION AND DESTRUCTION
 
         protected virtual void Awake()
         {
-            _hips = GetComponentInParent<Animator>().GetBoneTransform(HumanBodyBones.Hips);
-            _hipsInitialLocalPos = _hips.localPosition;
+            
         }
 
         #endregion
 
         #region GET AND SET
-
-        public override void Calibrate()
-        {
-            ResetIKChain();
-        }
 
         public override void ResetIKChain()
         {

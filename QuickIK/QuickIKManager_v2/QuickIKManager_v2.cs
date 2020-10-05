@@ -129,6 +129,8 @@ namespace QuickVR {
 
         public override void UpdateTrackingEarly()
         {
+            base.UpdateTrackingEarly();
+
             for (int i = 0; i < _ikLimbBones.Count; i++)
             {
                 IQuickIKSolver ikSolver = GetIKSolver(_ikLimbBones[i]);
