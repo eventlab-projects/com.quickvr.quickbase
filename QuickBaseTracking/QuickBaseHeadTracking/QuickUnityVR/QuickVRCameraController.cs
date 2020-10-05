@@ -59,7 +59,7 @@ namespace QuickVR
             {
                 Camera camera = Camera.main;
 
-#if UNITY_2020_OR_NEWER
+#if UNITY_2020_1_OR_NEWER
                 camera.transform.rotation = QuickSingletonManager.GetInstance<QuickVRPlayArea>().GetVRNode(HumanBodyBones.Head).transform.rotation;
 #endif
 
