@@ -43,14 +43,7 @@ namespace QuickVR
         {
             while (!Camera.main) yield return null;
 
-            ConstraintSource source = new ConstraintSource();
-            source.sourceTransform = Camera.main.transform;
-            source.weight = 1.0f;
-
-            _constraint = gameObject.GetOrCreateComponent<ParentConstraint>();
-            _constraint.AddSource(source);
-            _constraint.constraintActive = true;
-            _constraint.SetTranslationOffset(0, new Vector3(0, 0, 3.0f));
+            CreateParentConstraint();
         }
 
         protected virtual Canvas CreateCanvas()
@@ -88,9 +81,26 @@ namespace QuickVR
             return result;
         }
 
+        protected virtual void CreateParentConstraint()
+        {
+            ConstraintSource source = new ConstraintSource();
+            source.sourceTransform = Camera.main.transform;
+            source.weight = 1.0f;
+
+            _constraint = gameObject.GetOrCreateComponent<ParentConstraint>();
+            _constraint.AddSource(source);
+            _constraint.constraintActive = true;
+            _constraint.SetTranslationOffset(0, new Vector3(0, 0, 3.0f));
+        }
+
         #endregion
 
         #region GET AND SET
+
+        protected virtual Transform GetParentConstraintSource()
+        {
+            return Camera.main.transform;
+        }
 
         public virtual void SetTextInstructions(string text)
         {
