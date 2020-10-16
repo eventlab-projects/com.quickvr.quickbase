@@ -19,7 +19,7 @@ namespace VRKeys {
 	public class BackspaceKey : Key {
 
 		public override void HandleTriggerEnter (Collider other) {
-			keyboard.Backspace ();
+			_keyboard.Backspace();
 		}
 
 		public override void UpdateLayout (Layout translation) {

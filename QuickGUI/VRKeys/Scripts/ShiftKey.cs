@@ -20,7 +20,7 @@ namespace VRKeys {
 		private bool shifted = false;
 
 		public override void HandleTriggerEnter (Collider other) {
-			keyboard.ToggleShift ();
+			_keyboard.ToggleShift ();
 		}
 
 		public void Toggle (bool shift) {

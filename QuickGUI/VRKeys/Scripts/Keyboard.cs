@@ -61,9 +61,6 @@ namespace VRKeys
 
 		public Color caretColor = Color.gray;
 
-		[Space(15)]
-		public GameObject keyPrefab;
-
 		#endregion
 
 		[Space (15)]
@@ -422,18 +419,16 @@ namespace VRKeys
         {
             for (int i = 0; i < rowKeys.Length; i++)
             {
-                GameObject obj = (GameObject)Instantiate(keyPrefab, transform.GetChild(1));
-                obj.transform.localPosition = (Vector3.right * ((keyWidth * i) + rowOffset));
-				obj.transform.localPosition += (Vector3.down * keyHeight * rowNum);
+                LetterKey key = Instantiate<LetterKey>(Resources.Load<LetterKey>("Prefabs/pf_QuickVRKeyboardButton"), transform.GetChild(1));
+                key.transform.localPosition = (Vector3.right * ((keyWidth * i) + rowOffset));
+				key.transform.localPosition += (Vector3.down * keyHeight * rowNum);
 
-				LetterKey key = obj.GetComponent<LetterKey>();
                 key.character = rowKeys[i];
                 key.shiftedChar = rowKeysShift[i];
                 key.shifted = false;
-                key.Init(obj.transform.localPosition);
 
-                obj.name = "Key: " + rowKeys[i];
-                obj.SetActive(true);
+                key.name = "Key: " + rowKeys[i];
+                key.gameObject.SetActive(true);
 
 				_keys.Add(key);
 			}

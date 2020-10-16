@@ -19,7 +19,7 @@ namespace VRKeys {
 	public class ClearKey : Key {
 
 		public override void HandleTriggerEnter (Collider other) {
-			keyboard.SetText ("");
+			_keyboard.SetText("");
 		}
 
 		public override void UpdateLayout (Layout translation) {

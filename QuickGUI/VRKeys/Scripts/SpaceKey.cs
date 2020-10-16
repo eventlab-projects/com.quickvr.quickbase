@@ -19,7 +19,7 @@ namespace VRKeys {
 	public class SpaceKey : Key {
 
 		public override void HandleTriggerEnter (Collider other) {
-			keyboard.AddCharacter (" ");
+			_keyboard.AddCharacter(" ");
 		}
 
 		public override void UpdateLayout (Layout translation) {
