@@ -18,29 +18,44 @@ namespace VRKeys {
 	/// An individual letter key.
 	/// </summary>
 	public class LetterKey : Key {
-		public TextMeshProUGUI shiftedLabel;
+
+		#region PROTECTED ATTRIBUTES
+
+		protected TextMeshProUGUI _shiftedLabel;
+
+		#endregion
 
 		public string character = "";
 
 		public string shiftedChar = "";
 
-		private bool _shifted = false;
-
-		public bool shifted {
-			get { return _shifted; }
-			set {
-				_shifted = value;
-				label.text = _shifted ? shiftedChar : character;
-				shiftedLabel.text = _shifted ? character : shiftedChar;
+		protected override void Awake()
+        {
+			base.Awake();
+			
+			if (transform.childCount > 1)
+            {
+				_shiftedLabel = transform.GetChild(1).GetComponent<TextMeshProUGUI>();
 			}
+        }
+
+		public override void SetShifted(bool shifted)
+        {
+            base.SetShifted(shifted);
+
+			_label.text = shifted ? shiftedChar : character;
+			if (_shiftedLabel)
+			{
+				_shiftedLabel.text = shifted ? character : shiftedChar;
+			}
+        }
+
+        public string GetCharacter () {
+			return IsShifted()? shiftedChar : character;
 		}
 
-		public string GetCharacter () {
-			return _shifted ? shiftedChar : character;
-		}
-
-		public override void HandleTriggerEnter (Collider other) 
-		{
+        public override void DoAction()
+        {
 			_keyboard.AddCharacter(GetCharacter());
 		}
 	}

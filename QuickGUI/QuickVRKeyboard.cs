@@ -33,6 +33,28 @@ namespace QuickVR
             _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
         }
 
+        protected virtual IEnumerator Start()
+        {
+            while (!_vrKeyboard.IsInitialized())
+            {
+                yield return null;
+            }
+
+            foreach (Key k in _vrKeyboard.GetKeys())
+            {
+                QuickUIButton button = k.GetOrCreateComponent<QuickUIButton>();
+                button.OnDown += k.DoAction;
+
+                RectTransform t = k.GetComponent<RectTransform>();
+                BoxCollider collider = k.GetOrCreateComponent<BoxCollider>();
+                collider.size = new Vector3(t.rect.width, t.rect.height, 0);
+                collider.center = new Vector3(t.rect.width / 2, -t.rect.height / 2, 0);
+                
+                Rigidbody rBody = k.GetOrCreateComponent<Rigidbody>();
+                rBody.isKinematic = true;
+            }
+        }
+
         #endregion
 
         #region GET AND SET

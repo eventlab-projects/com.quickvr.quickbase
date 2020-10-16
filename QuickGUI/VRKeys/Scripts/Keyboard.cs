@@ -37,24 +37,7 @@ namespace VRKeys
 
 		public KeyboardLayout keyboardLayout = KeyboardLayout.Qwerty;
 
-		[Space(15)]
-		public TextMeshProUGUI placeholder;
-
-		public string placeholderMessage = "Tap the keys to begin typing";
-
 		public TextMeshProUGUI displayText;
-
-		public GameObject validationNotice;
-
-		public TextMeshProUGUI validationMessage;
-
-		public GameObject infoNotice;
-
-		public TextMeshProUGUI infoMessage;
-
-		public GameObject successNotice;
-
-		public TextMeshProUGUI successMessage;
 
 		[Space(15)]
 		public Color displayTextColor = Color.black;
@@ -63,20 +46,16 @@ namespace VRKeys
 
 		#endregion
 
-		[Space (15)]
+		#region PROTECTED ATTRIBUTES
+
+		protected ShiftKey _shiftKey = null;
+
+        #endregion
+
+        [Space (15)]
 		public string text = "";
 
-		[Space (15)]
-		public ShiftKey shiftKey;
-
-		public Key[] extraKeys;
-
-		[Space (15)]
-		public bool leftPressing = false;
-
-		public bool rightPressing = false;
-
-		public bool initialized = false;
+		protected bool _isInitialized = false;
 
 		public bool disabled = true;
 
@@ -103,9 +82,7 @@ namespace VRKeys
 		/// </summary>
 		public UnityEvent OnCancel = new UnityEvent ();
 
-		private GameObject playerSpace;
-
-		private List<LetterKey> _keys = new List<LetterKey>();
+		protected Key[] _keys = null;
 
 		private bool shifted = false;
 
@@ -123,21 +100,22 @@ namespace VRKeys
         /// </summary>
         protected virtual void Start () 
 		{
-			playerSpace = new GameObject ("Play Space");
-			//playerSpace.transform.localPosition = InputTracking.GetLocalPosition (XRNode.TrackingReference);
-			//playerSpace.transform.localRotation = InputTracking.GetLocalRotation (XRNode.TrackingReference);
-
 			SetLayout(keyboardLayout);
-
-			validationNotice.SetActive (false);
-			infoNotice.SetActive (false);
-			successNotice.SetActive (false);
 
 			UpdateDisplayText ();
 			PlaceholderVisibility ();
 
-			initialized = true;
+			_shiftKey = GetComponentInChildren<ShiftKey>();
+
+			StartCoroutine(CoUpdate());
+
+			_isInitialized = true;
 		}
+
+		public virtual bool IsInitialized()
+        {
+			return _isInitialized;
+        }
 
 		/// <summary>
 		/// Make sure mallets don't stay attached if VRKeys is disabled without
@@ -151,26 +129,12 @@ namespace VRKeys
 		/// Enable the keyboard.
 		/// </summary>
 		public void Enable () {
-			if (!initialized) {
-				// Make sure we're initialized first.
-				StartCoroutine (EnableWhenInitialized ());
-				return;
-			}
-
 			disabled = false;
 
 			foreach (Transform t in transform)
             {
 				t.gameObject.SetActive(true);
             }
-
-			EnableInput ();
-		}
-
-		private IEnumerator EnableWhenInitialized () {
-			yield return new WaitUntil (() => initialized);
-
-			Enable ();
 		}
 
 		/// <summary>
@@ -184,6 +148,11 @@ namespace VRKeys
 				t.gameObject.SetActive(false);
 			}
 		}
+
+		public Key[] GetKeys()
+        {
+			return _keys;
+        }
 
 		/// <summary>
 		/// Set the text value all at once.
@@ -221,11 +190,11 @@ namespace VRKeys
 		public bool ToggleShift () {
 			shifted = !shifted;
 
-			foreach (LetterKey key in _keys) {
-				key.shifted = shifted;
+			foreach (Key key in _keys) {
+				key.SetShifted(shifted);
 			}
 
-			shiftKey.Toggle (shifted);
+			_shiftKey.Toggle(shifted);
 
 			return shifted;
 		}
@@ -234,43 +203,6 @@ namespace VRKeys
 			yield return new WaitForSeconds (0.1f);
 
 			ToggleShift ();
-		}
-
-		/// <summary>
-		/// Disable keyboard input.
-		/// </summary>
-		public void DisableInput () {
-			leftPressing = false;
-			rightPressing = false;
-
-			
-			foreach (LetterKey key in _keys) {
-				if (key != null) {
-					key.Disable ();
-				}
-			}
-
-			foreach (Key key in extraKeys) {
-				key.Disable ();
-			}
-		}
-
-		/// <summary>
-		/// Re-enable keyboard input.
-		/// </summary>
-		public void EnableInput () {
-			leftPressing = false;
-			rightPressing = false;
-
-			foreach (LetterKey key in _keys) {
-				if (key != null) {
-					key.Enable ();
-				}
-			}
-
-			foreach (Key key in extraKeys) {
-				key.Enable ();
-			}
 		}
 
 		/// <summary>
@@ -310,109 +242,35 @@ namespace VRKeys
 			keyboardLayout = layout;
 			_layout = LayoutList.GetLayout(keyboardLayout);
 
-			placeholderMessage = _layout.placeholderMessage;
-
 			SetupKeys();
 
 			// Update extra keys
-			foreach (Key key in extraKeys)
+			foreach (Key key in _keys)
 			{
 				key.UpdateLayout(_layout);
 			}
 		}
 
 		/// <summary>
-		/// Set a custom placeholder message.
-		/// </summary>
-		/// <param name="msg">Message.</param>
-		public void SetPlaceholderMessage (string msg) {
-			StartCoroutine (DoSetPlaceholderMessage (msg));
-		}
-
-		private IEnumerator DoSetPlaceholderMessage (string msg) {
-			if (!initialized) {
-				yield return new WaitUntil (() => initialized);
-			}
-
-			placeholder.text = placeholderMessage = msg;
-
-			yield break;
-		}
-
-		/// <summary>
-		/// Show the specified validation notice.
-		/// </summary>
-		/// <param name="message">Message to show.</param>
-		public void ShowValidationMessage (string message) {
-			validationMessage.text = message;
-			validationNotice.SetActive (true);
-			infoNotice.SetActive (false);
-			successNotice.SetActive (false);
-		}
-
-		/// <summary>
-		/// Show the specified input notice.
-		/// </summary>
-		/// <param name="message">Message to show.</param>
-		public void ShowInfoMessage (string message) {
-			infoMessage.text = message;
-			validationNotice.SetActive (false);
-			infoNotice.SetActive (true);
-			successNotice.SetActive (false);
-		}
-
-		/// <summary>
-		/// Show the specified success notice.
-		/// </summary>
-		/// <param name="message">Message to show.</param>
-		public void ShowSuccessMessage (string message) {
-			successMessage.text = message;
-			validationNotice.SetActive (false);
-			infoNotice.SetActive (false);
-			successNotice.SetActive (true);
-		}
-
-		/// <summary>
-		/// Hide the validation notice.
-		/// </summary>
-		public void HideValidationMessage () {
-			validationNotice.SetActive (false);
-		}
-
-		/// <summary>
-		/// Hide the info notice.
-		/// </summary>
-		public void HideInfoMessage () {
-			infoNotice.SetActive (false);
-		}
-
-		/// <summary>
-		/// Hide the success notice.
-		/// </summary>
-		public void HideSuccessMessage () {
-			successNotice.SetActive (false);
-		}
-
-		/// <summary>
 		/// Setup the keys.
 		/// </summary>
-		protected virtual void SetupKeys () 
+		protected virtual void SetupKeys()
 		{
 			// Remove previous keys
-			foreach (Key k in _keys)
-			{
-				if (k != null)
+			if (_keys != null)
+			{ 
+				foreach (Key k in _keys)
 				{
-					Destroy(k.gameObject);
+					if (!k.IsProtected()) Destroy(k.gameObject);
 				}
 			}
-
-			_keys.Clear();
 
 			CreateRowKeys(_layout.row1Keys, _layout.row1Shift, 1, _layout.row1Offset);	//Numbers row
 			CreateRowKeys(_layout.row2Keys, _layout.row2Shift, 2, _layout.row2Offset);	//QWERTY row
 			CreateRowKeys(_layout.row3Keys, _layout.row3Shift, 3, _layout.row3Offset);	//ASDF row
 			CreateRowKeys(_layout.row4Keys, _layout.row4Shift, 4, _layout.row4Offset); //ZXCV row
+
+			_keys = GetComponentsInChildren<Key>();
 		}
 
         protected virtual void CreateRowKeys(string[] rowKeys, string[] rowKeysShift, int rowNum, float rowOffset)
@@ -425,12 +283,9 @@ namespace VRKeys
 
                 key.character = rowKeys[i];
                 key.shiftedChar = rowKeysShift[i];
-                key.shifted = false;
 
                 key.name = "Key: " + rowKeys[i];
                 key.gameObject.SetActive(true);
-
-				_keys.Add(key);
 			}
         }
 
@@ -452,12 +307,31 @@ namespace VRKeys
 		/// Show/hide placeholder text.
 		/// </summary>
 		private void PlaceholderVisibility () {
-			if (text == "") {
-				placeholder.text = placeholderMessage;
-				placeholder.gameObject.SetActive (true);
-			} else {
-				placeholder.gameObject.SetActive (false);
+			if (text == "") 
+			{
+				displayText.color = new Color32(37, 37, 37, 255);
+			} 
+			else 
+			{
+				displayText.color = new Color32(170, 170, 170, 255);
 			}
 		}
+
+		protected virtual IEnumerator CoUpdate()
+        {
+			const float blinkTime = 0.5f;
+			while (true)
+            {
+				displayText.text = text + "|";
+
+				yield return new WaitForSeconds(blinkTime);
+
+				displayText.text = text;
+
+				yield return new WaitForSeconds(blinkTime);
+            }
+
+        }
+
 	}
 }

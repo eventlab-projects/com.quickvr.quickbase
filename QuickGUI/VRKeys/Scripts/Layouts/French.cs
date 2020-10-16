@@ -17,8 +17,6 @@ namespace VRKeys.Layouts {
 	public class French : Layout {
 
 		public French () {
-			placeholderMessage = "Appuyez sur les touches pour commencer à taper";
-
 			spaceButtonLabel = "ESPACE";
 
 			enterButtonLabel = "ENTRÉE";

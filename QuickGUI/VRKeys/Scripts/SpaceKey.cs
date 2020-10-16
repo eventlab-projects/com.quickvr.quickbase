@@ -11,19 +11,24 @@
 using UnityEngine;
 using System.Collections;
 
-namespace VRKeys {
+namespace VRKeys 
+{
 
 	/// <summary>
 	/// Space key.
 	/// </summary>
-	public class SpaceKey : Key {
+	public class SpaceKey : Key 
+	{
 
-		public override void HandleTriggerEnter (Collider other) {
+        public override void DoAction()
+        {
 			_keyboard.AddCharacter(" ");
 		}
 
-		public override void UpdateLayout (Layout translation) {
-			label.text = translation.spaceButtonLabel;
+		public override void UpdateLayout (Layout translation) 
+		{
+			_label.text = translation.spaceButtonLabel;
 		}
+
 	}
 }

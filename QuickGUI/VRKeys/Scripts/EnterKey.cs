@@ -11,19 +11,23 @@
 using UnityEngine;
 using System.Collections;
 
-namespace VRKeys {
+namespace VRKeys 
+{
 
 	/// <summary>
 	/// Enter key that calls Submit() on the keyboard.
 	/// </summary>
-	public class EnterKey : Key {
+	public class EnterKey : Key 
+	{
 
-		public override void HandleTriggerEnter (Collider other) {
+		public override void DoAction()
+		{
 			_keyboard.Submit();
 		}
 
-		public override void UpdateLayout (Layout translation) {
-			label.text = translation.enterButtonLabel;
+		public override void UpdateLayout (Layout translation) 
+		{
+			_label.text = translation.enterButtonLabel;
 		}
 	}
 }

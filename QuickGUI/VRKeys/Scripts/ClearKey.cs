@@ -11,19 +11,23 @@
 using UnityEngine;
 using System.Collections;
 
-namespace VRKeys {
+namespace VRKeys 
+{
 
 	/// <summary>
 	/// Clears all the text.
 	/// </summary>
-	public class ClearKey : Key {
+	public class ClearKey : Key 
+	{
 
-		public override void HandleTriggerEnter (Collider other) {
+		public override void DoAction()
+		{
 			_keyboard.SetText("");
 		}
 
-		public override void UpdateLayout (Layout translation) {
-			label.text = translation.clearButtonLabel;
+		public override void UpdateLayout (Layout translation) 
+		{
+			_label.text = translation.clearButtonLabel;
 		}
 	}
 }

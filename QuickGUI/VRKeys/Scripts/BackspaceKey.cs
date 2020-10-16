@@ -11,19 +11,24 @@
 using UnityEngine;
 using System.Collections;
 
-namespace VRKeys {
+namespace VRKeys 
+{
 
 	/// <summary>
 	/// Backspace key.
 	/// </summary>
-	public class BackspaceKey : Key {
+	public class BackspaceKey : Key 
+	{
 
-		public override void HandleTriggerEnter (Collider other) {
+		public override void DoAction() 
+		{
 			_keyboard.Backspace();
 		}
 
-		public override void UpdateLayout (Layout translation) {
-			label.text = translation.backspaceButtonLabel;
+		public override void UpdateLayout (Layout translation) 
+		{
+			_label.text = translation.backspaceButtonLabel;
 		}
+
 	}
 }

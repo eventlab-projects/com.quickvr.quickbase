@@ -20,32 +20,35 @@ namespace VRKeys {
 	public class Key : MonoBehaviour 
 	{
 
-		public TextMeshProUGUI label;
-
 		private bool isPressing = false;
-
-		private bool disabled = false;
 
 		private IEnumerator _Press;
 
 		#region PROTECTED ATTRIBUTES
 
 		protected Keyboard _keyboard = null;
+		protected TextMeshProUGUI _label = null;
+		protected bool _isShifted = false;
 
-        #endregion
+		#endregion
 
-        #region CREATION AND DESTRUCTION
+		#region CREATION AND DESTRUCTION
 
 		protected virtual void Awake()
         {
 			_keyboard = GetComponentInParent<Keyboard>();
+			_label = transform.GetChild(0).GetComponent<TextMeshProUGUI>();
         }
+
+		protected virtual void Start()
+        {
+			SetShifted(false);
+		}
 
         #endregion
 
         private void OnEnable () {
 			isPressing = false;
-			disabled = false;
 
 			OnEnableExtras ();
 		}
@@ -57,28 +60,9 @@ namespace VRKeys {
 			// Override me!
 		}
 
-		/// <summary>
-		/// Override this to handle trigger events. Only fires when
-		/// a downward trigger event occurred from the collider
-		/// matching _keyboard.colliderName.
-		/// </summary>
-		/// <param name="other">Collider.</param>
-		public virtual void HandleTriggerEnter (Collider other) {
-			// Override me!
-		}
-
-		/// <summary>
-		/// Disable the key.
-		/// </summary>
-		public virtual void Disable () {
-			disabled = true;
-		}
-
-		/// <summary>
-		/// Re-enable a disabled key.
-		/// </summary>
-		public virtual void Enable () {
-			disabled = false;
+		public virtual void DoAction() 
+		{
+			
 		}
 
 		/// <summary>
@@ -88,5 +72,25 @@ namespace VRKeys {
 		public virtual void UpdateLayout (Layout translation) {
 			// Override me!
 		}
-	}
+
+        #region GET AND SET
+
+		public virtual bool IsProtected()
+        {
+			return name[0] == '$';
+        }
+
+		public virtual void SetShifted(bool shifted)
+        {
+			_isShifted = shifted;
+        }
+
+		public virtual bool IsShifted()
+        {
+			return _isShifted;
+        }
+
+        #endregion
+
+    }
 }
