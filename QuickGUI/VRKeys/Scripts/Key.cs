@@ -20,13 +20,7 @@ namespace VRKeys {
 	public class Key : MonoBehaviour {
 		public Keyboard keyboard;
 
-		public TextMeshPro label;
-
-		public Material inactiveMat;
-
-		public Material activeMat;
-
-		public Material disabledMat;
+		public TextMeshProUGUI label;
 
 		public Vector3 defaultPosition;
 
@@ -42,15 +36,9 @@ namespace VRKeys {
 
 		private bool disabled = false;
 
-		protected MeshRenderer meshRenderer;
-
-		private IEnumerator _ActivateFor;
-
 		private IEnumerator _Press;
 
 		private void Awake () {
-			meshRenderer = GetComponent<MeshRenderer> ();
-
 			if (autoInit) {
 				Init (transform.localPosition);
 			}
@@ -69,7 +57,6 @@ namespace VRKeys {
 			isPressing = false;
 			disabled = false;
 			transform.localPosition = defaultPosition;
-			meshRenderer.material = inactiveMat;
 
 			OnEnableExtras ();
 		}
@@ -143,34 +130,10 @@ namespace VRKeys {
 		}
 
 		/// <summary>
-		/// Show the active material for the specified length of time.
-		/// </summary>
-		/// <param name="seconds">Seconds.</param>
-		public void ActivateFor (float seconds) {
-			if (_ActivateFor != null && _ActivateFor.MoveNext ()) {
-				StopCoroutine (_ActivateFor);
-			}
-			_ActivateFor = DoActivateFor (seconds);
-			StartCoroutine (_ActivateFor);
-		}
-
-		private IEnumerator DoActivateFor (float seconds) {
-			meshRenderer.material = activeMat;
-
-			yield return new WaitForSeconds (seconds);
-
-			meshRenderer.material = inactiveMat;
-		}
-
-		/// <summary>
 		/// Disable the key.
 		/// </summary>
 		public virtual void Disable () {
 			disabled = true;
-
-			if (meshRenderer != null) {
-				meshRenderer.material = disabledMat;
-			}
 		}
 
 		/// <summary>
@@ -178,10 +141,6 @@ namespace VRKeys {
 		/// </summary>
 		public virtual void Enable () {
 			disabled = false;
-
-			if (meshRenderer != null) {
-				meshRenderer.material = inactiveMat;
-			}
 		}
 
 		/// <summary>

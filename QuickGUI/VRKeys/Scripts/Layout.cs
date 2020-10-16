@@ -49,13 +49,13 @@ namespace VRKeys {
 
 		public string[] row4Shift = { "Z", "X", "C", "V", "B", "N", "M", "<", ">", "/" };
 
-		public float row1Offset = 0.16f;
+		public float row1Offset = 0f;
 
-		public float row2Offset = 0.08f;
+		public float row2Offset = 0.24f;
 
-		public float row3Offset = 0f;
+		public float row3Offset = 0.32f; //0f;
 
-		public float row4Offset = -0.08f;
+		public float row4Offset = 0.40f;
 
 		/// <summary>
 		/// Get the total number of keys in all four rows.

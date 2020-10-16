@@ -18,7 +18,7 @@ namespace VRKeys {
 	/// An individual letter key.
 	/// </summary>
 	public class LetterKey : Key {
-		public TextMeshPro shiftedLabel;
+		public TextMeshProUGUI shiftedLabel;
 
 		public string character = "";
 
@@ -41,8 +41,6 @@ namespace VRKeys {
 
 		public override void HandleTriggerEnter (Collider other) {
 			keyboard.AddCharacter (GetCharacter ());
-
-			ActivateFor (0.3f);
 		}
 	}
 }
