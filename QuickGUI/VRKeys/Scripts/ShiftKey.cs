@@ -20,15 +20,9 @@ namespace VRKeys
 	public class ShiftKey : Key 
 	{
 
-		private bool shifted = false;
-
         public override void DoAction()
         {
 	        _keyboard.ToggleShift();
-		}
-
-		public void Toggle (bool shift) {
-			shifted = shift;
 		}
 
 		public override void UpdateLayout (Layout translation) 

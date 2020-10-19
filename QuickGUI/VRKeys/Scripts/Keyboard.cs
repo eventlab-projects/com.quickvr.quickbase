@@ -39,21 +39,20 @@ namespace VRKeys
 
 		public TextMeshProUGUI displayText;
 
-		[Space(15)]
-		public Color displayTextColor = Color.black;
-
-		public Color caretColor = Color.gray;
+		public float _blinkTime = 0.5f;
+		public string text = "";
 
 		#endregion
 
 		#region PROTECTED ATTRIBUTES
 
 		protected ShiftKey _shiftKey = null;
+		protected float _timeBlinking = 0;
 
         #endregion
 
         [Space (15)]
-		public string text = "";
+		
 
 		protected bool _isInitialized = false;
 
@@ -102,12 +101,8 @@ namespace VRKeys
 		{
 			SetLayout(keyboardLayout);
 
-			UpdateDisplayText ();
-			PlaceholderVisibility ();
-
+			displayText.text = text;
 			_shiftKey = GetComponentInChildren<ShiftKey>();
-
-			StartCoroutine(CoUpdate());
 
 			_isInitialized = true;
 		}
@@ -158,80 +153,55 @@ namespace VRKeys
 		/// Set the text value all at once.
 		/// </summary>
 		/// <param name="txt">New text value.</param>
-		public void SetText (string txt) {
+		public void SetText (string txt) 
+		{
 			text = txt;
-
-			UpdateDisplayText ();
-			PlaceholderVisibility ();
-
-			OnUpdate.Invoke (text);
+			UpdateDisplayText();
 		}
 
 		/// <summary>
 		/// Add a character to the input text.
 		/// </summary>
 		/// <param name="character">Character.</param>
-		public void AddCharacter (string character) {
+		public void AddCharacter (string character) 
+		{
 			text += character;
-
-			UpdateDisplayText ();
-			PlaceholderVisibility ();
-
-			OnUpdate.Invoke (text);
-
-			if (shifted && character != "" && character != " ") {
-				StartCoroutine (DelayToggleShift ());
-			}
+			UpdateDisplayText();
 		}
 
 		/// <summary>
 		/// Toggle whether the characters are shifted (caps).
 		/// </summary>
-		public bool ToggleShift () {
+		public bool ToggleShift () 
+		{
 			shifted = !shifted;
 
 			foreach (Key key in _keys) {
 				key.SetShifted(shifted);
 			}
 
-			_shiftKey.Toggle(shifted);
-
 			return shifted;
-		}
-
-		private IEnumerator DelayToggleShift () {
-			yield return new WaitForSeconds (0.1f);
-
-			ToggleShift ();
 		}
 
 		/// <summary>
 		/// Backspace one character.
 		/// </summary>
-		public void Backspace () {
-			if (text.Length > 0) {
+		public void Backspace() 
+		{
+			if (text.Length > 0) 
+			{
 				text = text.Substring (0, text.Length - 1);
 			}
 
-			UpdateDisplayText ();
-			PlaceholderVisibility ();
-
-			OnUpdate.Invoke (text);
+			UpdateDisplayText();
 		}
 
 		/// <summary>
 		/// Submit and close the keyboard.
 		/// </summary>
-		public void Submit () {
-			OnSubmit.Invoke (text);
-		}
-
-		/// <summary>
-		/// Cancel input and close the keyboard.
-		/// </summary>
-		public void Cancel () {
-			OnCancel.Invoke ();
-			Disable ();
+		public void Submit() 
+		{
+			OnSubmit.Invoke(text);
 		}
 
 		/// <summary>
@@ -289,49 +259,30 @@ namespace VRKeys
 			}
         }
 
-        /// <summary>
-        /// Update the display text, including trailing caret.
-        /// </summary>
-        private void UpdateDisplayText () {
-			string display = (text.Length > 37) ? text.Substring (text.Length - 37) : text;
+		#region UPDATE
 
-			displayText.text = string.Format (
-				"<#{0}>{1}</color><#{2}>_</color>",
-				ColorUtility.ToHtmlStringRGB (displayTextColor),
-				display,
-				ColorUtility.ToHtmlStringRGB (caretColor)
-			);
-		}
-
-		/// <summary>
-		/// Show/hide placeholder text.
-		/// </summary>
-		private void PlaceholderVisibility () {
-			if (text == "") 
-			{
-				displayText.color = new Color32(37, 37, 37, 255);
-			} 
-			else 
-			{
-				displayText.color = new Color32(170, 170, 170, 255);
-			}
-		}
-
-		protected virtual IEnumerator CoUpdate()
+		protected virtual void UpdateDisplayText()
         {
-			const float blinkTime = 0.5f;
-			while (true)
+			_timeBlinking = 0;
+			OnUpdate.Invoke(text);
+		}
+
+		protected virtual void Update()
+        {
+			displayText.text = text;
+			if (_timeBlinking < _blinkTime)
             {
-				displayText.text = text + "|";
+				displayText.text += "|";
+			}
 
-				yield return new WaitForSeconds(blinkTime);
-
-				displayText.text = text;
-
-				yield return new WaitForSeconds(blinkTime);
+			_timeBlinking += Time.deltaTime;
+			if (_timeBlinking > _blinkTime * 2)
+            {
+				_timeBlinking = 0;
             }
-
         }
+
+		#endregion
 
 	}
 }
