@@ -36,14 +36,14 @@ namespace VRKeys
 		protected string text = "";
 		protected ShiftKey _shiftKey = null;
 		protected float _timeBlinking = 0;
-		protected bool _isInitialized = false;
 		protected Key[] _keys = null;
-		protected bool shifted = false;
 		protected Layout _layout;
 
+		protected bool _isInitialized = false;
+		protected bool _isEnabled = true;
+		protected bool shifted = false;
+		
 		#endregion
-
-		public bool disabled = true;
 
 		/// <summary>
 		/// Listen for events whenever the text changes.
@@ -113,90 +113,8 @@ namespace VRKeys
 
 		#region GET AND SET
 
-		public virtual bool IsInitialized()
-        {
-			return _isInitialized;
-        }
-
-		public void Enable () {
-			disabled = false;
-
-			foreach (Transform t in transform)
-            {
-				t.gameObject.SetActive(true);
-            }
-		}
-
-		public void Disable () {
-			disabled = true;
-
-			foreach (Transform t in transform)
-			{
-				t.gameObject.SetActive(false);
-			}
-		}
-
-		public Key[] GetKeys()
-        {
-			return _keys;
-        }
-
-		public void SetText (string txt) 
+		public virtual void SetLayout(KeyboardLayout layout)
 		{
-			text = txt;
-			UpdateDisplayText();
-		}
-
-		/// <summary>
-		/// Add a character to the input text.
-		/// </summary>
-		/// <param name="character">Character.</param>
-		public void AddCharacter (string character) 
-		{
-			text += character;
-			UpdateDisplayText();
-		}
-
-		/// <summary>
-		/// Toggle whether the characters are shifted (caps).
-		/// </summary>
-		public bool ToggleShift () 
-		{
-			shifted = !shifted;
-
-			foreach (Key key in _keys) {
-				key.SetShifted(shifted);
-			}
-
-			return shifted;
-		}
-
-		/// <summary>
-		/// Backspace one character.
-		/// </summary>
-		public void Backspace() 
-		{
-			if (text.Length > 0) 
-			{
-				text = text.Substring (0, text.Length - 1);
-			}
-
-			UpdateDisplayText();
-		}
-
-		/// <summary>
-		/// Submit and close the keyboard.
-		/// </summary>
-		public void Submit() 
-		{
-			OnSubmit.Invoke(text);
-		}
-
-		/// <summary>
-		/// Set the language of the keyboard.
-		/// </summary>
-		/// <param name="layout">New language.</param>
-		public void SetLayout (KeyboardLayout layout) {
 			keyboardLayout = layout;
 			_layout = LayoutList.GetLayout(keyboardLayout);
 
@@ -209,7 +127,69 @@ namespace VRKeys
 			}
 		}
 
-        #endregion
+		public virtual bool IsInitialized()
+        {
+			return _isInitialized;
+        }
+
+		public virtual void Enable(bool enabled) 
+		{
+			foreach (Transform t in transform)
+            {
+				t.gameObject.SetActive(enabled);
+            }
+			_isEnabled = enabled;
+		}
+
+		public virtual bool IsEnabled()
+		{
+			return _isEnabled;
+		}
+
+		public virtual Key[] GetKeys()
+        {
+			return _keys;
+        }
+
+		public virtual void SetText (string txt) 
+		{
+			text = txt;
+			UpdateDisplayText();
+		}
+
+		public virtual void AddCharacter (string character) 
+		{
+			text += character;
+			UpdateDisplayText();
+		}
+
+		public virtual void Backspace()
+		{
+			if (text.Length > 0)
+			{
+				text = text.Substring(0, text.Length - 1);
+			}
+
+			UpdateDisplayText();
+		}
+
+		public virtual bool ToggleShift () 
+		{
+			shifted = !shifted;
+
+			foreach (Key key in _keys) {
+				key.SetShifted(shifted);
+			}
+
+			return shifted;
+		}
+
+		public virtual void Submit() 
+		{
+			OnSubmit.Invoke(text);
+		}
+
+		#endregion
 
         #region UPDATE
 

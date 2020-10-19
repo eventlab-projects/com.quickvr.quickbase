@@ -71,17 +71,15 @@ namespace QuickVR
                     _vrKeyboard.transform.position = tHead.position;
                     _vrKeyboard.transform.position += animator.transform.forward * 2;
                 }
-                _vrKeyboard.Enable();
+                
             }
-            else
-            {
-                _vrKeyboard.Disable();
-            }
+
+            _vrKeyboard.Enable(enable);
         }
 
         public virtual bool IsEnabled()
         {
-            return !_vrKeyboard.disabled;
+            return !_vrKeyboard.IsEnabled();
         }
 
         #endregion
