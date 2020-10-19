@@ -64,7 +64,7 @@ namespace VRKeys
 
         #region CREATION AND DESTRUCTION
 
-        protected virtual void Start () 
+        protected virtual void Awake() 
 		{
 			SetLayout(keyboardLayout);
 

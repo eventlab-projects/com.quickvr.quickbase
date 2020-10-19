@@ -21,23 +21,19 @@ namespace VRKeys {
 
 		#region PROTECTED ATTRIBUTES
 
-		protected TextMeshProUGUI _shiftedLabel;
+		protected TextMeshProUGUI _shiftedLabel
+        {
+			get
+            {
+				return transform.childCount > 1 ? transform.GetChild(1).GetComponent<TextMeshProUGUI>() : null;
+			}
+        }
 
 		#endregion
 
 		public string character = "";
 
 		public string shiftedChar = "";
-
-		protected override void Awake()
-        {
-			base.Awake();
-			
-			if (transform.childCount > 1)
-            {
-				_shiftedLabel = transform.GetChild(1).GetComponent<TextMeshProUGUI>();
-			}
-        }
 
 		public override void SetShifted(bool shifted)
         {
@@ -50,7 +46,8 @@ namespace VRKeys {
 			}
         }
 
-        public string GetCharacter () {
+        public string GetCharacter () 
+		{
 			return IsShifted()? shiftedChar : character;
 		}
 

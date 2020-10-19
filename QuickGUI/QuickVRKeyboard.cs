@@ -26,20 +26,15 @@ namespace QuickVR
             if (!_vrKeyboard)
             {
                 _vrKeyboard = Instantiate<Keyboard>(Resources.Load<Keyboard>("Prefabs/pf_QuickVRKeyboard"));
-                _vrKeyboard.transform.parent = transform;
+                _vrKeyboard.transform.SetParent(transform, false);
                 _vrKeyboard.transform.ResetTransformation();
             }
 
             _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
         }
 
-        protected virtual IEnumerator Start()
+        protected virtual void Start()
         {
-            while (!_vrKeyboard.IsInitialized())
-            {
-                yield return null;
-            }
-
             foreach (Key k in _vrKeyboard.GetKeys())
             {
                 QuickUIButton button = k.GetOrCreateComponent<QuickUIButton>();

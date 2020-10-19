@@ -20,25 +20,29 @@ namespace VRKeys {
 	public class Key : MonoBehaviour 
 	{
 
-		private bool isPressing = false;
-
-		private IEnumerator _Press;
-
 		#region PROTECTED ATTRIBUTES
 
-		protected Keyboard _keyboard = null;
-		protected TextMeshProUGUI _label = null;
+		protected Keyboard _keyboard
+        {
+			get
+            {
+				return GetComponentInParent<Keyboard>();
+            }
+        }
+
+		protected TextMeshProUGUI _label
+		{
+			get
+            {
+				return transform.GetChild(0).GetComponent<TextMeshProUGUI>();
+			}
+		}
+			
 		protected bool _isShifted = false;
 
 		#endregion
 
 		#region CREATION AND DESTRUCTION
-
-		protected virtual void Awake()
-        {
-			_keyboard = GetComponentInParent<Keyboard>();
-			_label = transform.GetChild(0).GetComponent<TextMeshProUGUI>();
-        }
 
 		protected virtual void Start()
         {
@@ -47,29 +51,13 @@ namespace VRKeys {
 
         #endregion
 
-        private void OnEnable () {
-			isPressing = false;
-
-			OnEnableExtras ();
-		}
-
-		/// <summary>
-		/// Override this to add custom logic on enable.
-		/// </summary>
-		protected virtual void OnEnableExtras () {
-			// Override me!
-		}
-
-		public virtual void DoAction() 
+        public virtual void DoAction() 
 		{
 			
 		}
 
-		/// <summary>
-		/// Update the key's label from a new language.
-		/// </summary>
-		/// <param name="translation">Translation object.</param>
-		public virtual void UpdateLayout (Layout translation) {
+		public virtual void UpdateLayout (Layout translation) 
+		{
 			// Override me!
 		}
 
