@@ -636,11 +636,23 @@ namespace QuickVR
         {
             Transform lEye = animator.GetBoneTransform(HumanBodyBones.LeftEye);
             Transform rEye = animator.GetBoneTransform(HumanBodyBones.RightEye);
-            if (lEye && rEye) return Vector3.Lerp(lEye.position, rEye.position, 0.5f);
-            if (lEye) return lEye.position;
-            if (rEye) return rEye.position;
+            if (lEye && rEye)
+            {
+                return Vector3.Lerp(lEye.position, rEye.position, 0.5f);
+            }
 
-            return animator.GetBoneTransform(HumanBodyBones.Head).position;
+            //At this point, the animator is missing the left or the right eye (or both). 
+            //Approximate the head to eyes distance. 
+
+            Vector3 result = animator.GetBoneTransform(HumanBodyBones.Head).position;
+            QuickIKManager ikManager = animator.GetComponent<QuickIKManager>();
+            if (ikManager)
+            {
+                Transform targetLimbHead = ikManager.GetIKSolver(HumanBodyBones.Head)._targetLimb;
+                result += targetLimbHead.forward * 0.15f + targetLimbHead.up * 0.13f;
+            }
+
+            return result;
         }
 
         public static Transform GetLookAtBone(this Animator animator, HumanBodyBones boneID)

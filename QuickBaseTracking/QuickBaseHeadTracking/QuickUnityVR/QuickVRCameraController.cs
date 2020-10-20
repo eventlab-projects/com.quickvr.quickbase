@@ -64,11 +64,13 @@ namespace QuickVR
 #endif
 
                 //Apply the correct rotation to the cameracontrollerroot:
+                QuickIKManager ikManager = animator.GetComponent<QuickIKManager>();
                 Vector3 up = animator.transform.up;
-                Vector3 rightCam = Vector3.ProjectOnPlane(camera.transform.right, up).normalized;
-                Vector3 r = animator.GetBoneTransform(HumanBodyBones.RightEye).position - animator.GetBoneTransform(HumanBodyBones.LeftEye).position;
-                Vector3 rightHead = Vector3.ProjectOnPlane(r, up).normalized;
-                float rotOffset = Vector3.SignedAngle(rightCam, rightHead, up);
+
+                Vector3 forwardCam = Vector3.ProjectOnPlane(camera.transform.forward, up).normalized;
+                Vector3 forwardHead = Vector3.ProjectOnPlane(ikManager.GetIKSolver(HumanBodyBones.Head)._targetLimb.forward, up);
+
+                float rotOffset = Vector3.SignedAngle(forwardCam, forwardHead, up);
                 transform.Rotate(up, rotOffset, Space.World);
 
                 //This forces the camera to be in the Avatar's eye center. 
