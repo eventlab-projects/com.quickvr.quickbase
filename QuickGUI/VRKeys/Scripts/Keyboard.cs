@@ -25,8 +25,6 @@ namespace VRKeys
 
 		public KeyboardLayout keyboardLayout = KeyboardLayout.Qwerty;
 
-		public TextMeshProUGUI displayText;
-
 		public float _blinkTime = 0.5f;
 
 		#endregion
@@ -35,6 +33,8 @@ namespace VRKeys
 
 		protected string text = "";
 		protected ShiftKey _shiftKey = null;
+		protected TextMeshProUGUI _displaytext;
+
 		protected float _timeBlinking = 0;
 		protected Key[] _keys = null;
 		protected Layout _layout;
@@ -68,7 +68,7 @@ namespace VRKeys
 		{
 			SetLayout(keyboardLayout);
 
-			displayText.text = text;
+			_displaytext = transform.GetChild(0).GetComponentInChildren<TextMeshProUGUI>();
 			_shiftKey = GetComponentInChildren<ShiftKey>();
 
 			_isInitialized = true;
@@ -98,8 +98,8 @@ namespace VRKeys
 			for (int i = 0; i < rowKeys.Length; i++)
 			{
 				LetterKey key = Instantiate<LetterKey>(Resources.Load<LetterKey>("Prefabs/pf_QuickVRKeyboardButton"), transform.GetChild(1));
-				key.transform.localPosition = (Vector3.right * ((KEY_WIDTH * i) + rowOffset));
-				key.transform.localPosition += (Vector3.down * KEY_HEIGHT * rowNum);
+				key.transform.localPosition = Vector3.right * ((KEY_WIDTH * i) + rowOffset);
+				key.transform.localPosition += Vector3.down * ((KEY_HEIGHT * 0.5f) + (KEY_HEIGHT * rowNum));
 
 				key.character = rowKeys[i];
 				key.shiftedChar = rowKeysShift[i];
@@ -132,13 +132,18 @@ namespace VRKeys
 			return _isInitialized;
         }
 
-		public virtual void Enable(bool enabled) 
+		public virtual void Enable(bool enabled, bool clearTextOnEnable = true) 
 		{
 			foreach (Transform t in transform)
             {
 				t.gameObject.SetActive(enabled);
             }
 			_isEnabled = enabled;
+			
+			if (enabled && clearTextOnEnable)
+            {
+				SetText("");
+            }
 		}
 
 		public virtual bool IsEnabled()
@@ -151,13 +156,18 @@ namespace VRKeys
 			return _keys;
         }
 
-		public virtual void SetText (string txt) 
+		public virtual string GetText()
+        {
+			return text;
+        }
+
+		public virtual void SetText(string txt) 
 		{
 			text = txt;
 			UpdateDisplayText();
 		}
 
-		public virtual void AddCharacter (string character) 
+		public virtual void AddCharacter(string character) 
 		{
 			text += character;
 			UpdateDisplayText();
@@ -201,10 +211,10 @@ namespace VRKeys
 
 		protected virtual void Update()
         {
-			displayText.text = text;
+			_displaytext.text = text;
 			if (_timeBlinking < _blinkTime)
             {
-				displayText.text += "|";
+				_displaytext.text += "|";
 			}
 
 			_timeBlinking += Time.deltaTime;

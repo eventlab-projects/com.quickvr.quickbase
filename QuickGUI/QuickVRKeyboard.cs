@@ -1,4 +1,5 @@
 ﻿using QuickVR;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,6 +20,12 @@ namespace QuickVR
 
         #endregion
 
+        #region ACTIONS
+
+        public Action OnSubmit;
+
+        #endregion
+
         #region CREATION AND DESTRUCTION
 
         protected virtual void Awake()
@@ -29,6 +36,7 @@ namespace QuickVR
                 _vrKeyboard.transform.SetParent(transform, false);
                 _vrKeyboard.transform.ResetTransformation();
             }
+            _vrKeyboard.OnSubmit.AddListener(ActionSubmit);
 
             _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
         }
@@ -39,15 +47,9 @@ namespace QuickVR
             {
                 QuickUIButton button = k.GetOrCreateComponent<QuickUIButton>();
                 button.OnDown += k.DoAction;
-
-                RectTransform t = k.GetComponent<RectTransform>();
-                BoxCollider collider = k.GetOrCreateComponent<BoxCollider>();
-                collider.size = new Vector3(t.rect.width, t.rect.height, 0);
-                collider.center = new Vector3(t.rect.width / 2, -t.rect.height / 2, 0);
-                
-                Rigidbody rBody = k.GetOrCreateComponent<Rigidbody>();
-                rBody.isKinematic = true;
             }
+
+            Enable(false);
         }
 
         #endregion
@@ -74,7 +76,20 @@ namespace QuickVR
 
         public virtual bool IsEnabled()
         {
-            return !_vrKeyboard.IsEnabled();
+            return _vrKeyboard.IsEnabled();
+        }
+
+        public virtual string GetText()
+        {
+            return _vrKeyboard.GetText();
+        }
+
+        protected virtual void ActionSubmit(string text)
+        {
+            if (OnSubmit != null)
+            {
+                OnSubmit();
+            }
         }
 
         #endregion
