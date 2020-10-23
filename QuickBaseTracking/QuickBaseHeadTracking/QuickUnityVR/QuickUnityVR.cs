@@ -86,6 +86,13 @@ namespace QuickVR {
             }
         }
 
+        protected override void Reset()
+        {
+            base.Reset();
+
+            _animator.CreateEyes();
+        }
+
         protected override void Awake()
         {
             base.Awake();

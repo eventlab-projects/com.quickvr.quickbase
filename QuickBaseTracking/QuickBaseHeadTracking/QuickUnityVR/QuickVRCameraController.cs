@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Dynamic;
 using UnityEngine;
 
 namespace QuickVR
@@ -15,6 +16,18 @@ namespace QuickVR
         public Camera _pfCamera = null;
         public float _cameraNearPlane = DEFAULT_NEAR_CLIP_PLANE;
         public float _cameraFarPlane = DEFAULT_FAR_CLIP_PLANE;
+
+        #endregion
+
+        #region PROTECTED ATTRIBUTES
+
+        protected Animator _animatorSource 
+        {
+            get
+            {
+                return QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource();
+            }
+        }
 
         #endregion
 
@@ -64,13 +77,11 @@ namespace QuickVR
 #endif
 
                 //Apply the correct rotation to the cameracontrollerroot:
-                QuickIKManager ikManager = animator.GetComponent<QuickIKManager>();
                 Vector3 up = animator.transform.up;
-
-                Vector3 forwardCam = Vector3.ProjectOnPlane(camera.transform.forward, up).normalized;
-                Vector3 forwardHead = Vector3.ProjectOnPlane(ikManager.GetIKSolver(HumanBodyBones.Head)._targetLimb.forward, up);
-
-                float rotOffset = Vector3.SignedAngle(forwardCam, forwardHead, up);
+                Vector3 rightCam = Vector3.ProjectOnPlane(camera.transform.right, up).normalized;
+                Vector3 r = animator.GetEye(false).position - animator.GetEye(true).position;
+                Vector3 rightHead = Vector3.ProjectOnPlane(r, up).normalized;
+                float rotOffset = Vector3.SignedAngle(rightCam, rightHead, up);
                 transform.Rotate(up, rotOffset, Space.World);
 
                 //This forces the camera to be in the Avatar's eye center. 

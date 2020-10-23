@@ -12,19 +12,17 @@ namespace QuickVR {
 
         #region PROTECTED PARAMETERS
 
-        [SerializeField, HideInInspector]
-        protected Transform _boneRotator = null;
+        protected Transform _boneRotator 
+        {
+            get
+            {
+                return transform.CreateChild("__BoneRotator__");
+            }
+        }
 
         #endregion
 
         #region CREATION AND DESTRUCTION
-
-        protected override void Reset()
-        {
-            _boneRotator = transform.CreateChild("__BoneRotator__");
-
-            base.Reset();
-        }
 
         protected override void CreateIKSolversBody()
         {
@@ -152,29 +150,26 @@ namespace QuickVR {
                         Vector3 rotAxis = (ikSolver._boneLimb.position - ikSolver._boneMid.position).normalized;
 
                         float boneMidWeight = 0.5f;
+                        Quaternion limbRot = ikSolver._boneLimb.rotation;
                         CorrectRotation(ikSolver._boneMid, rotAxis, rotAngle * boneMidWeight);
-                        CorrectRotation(ikSolver._boneLimb, rotAxis, -rotAngle * (1.0f - boneMidWeight));
+                        ikSolver._boneLimb.rotation = limbRot;
                     }
                 }
             }
-
-            _boneRotator.parent = transform;
 
             base.UpdateTrackingLate();
         }
 
         protected virtual void CorrectRotation(Transform tBone, Vector3 rotAxis, float rotAngle)
         {
-            _boneRotator.parent = tBone;
-            _boneRotator.localPosition = Vector3.zero;
             _boneRotator.forward = rotAxis;
             Vector3 upBefore = _boneRotator.up;
-            tBone.Rotate(rotAxis, rotAngle, Space.World);
-
+            _boneRotator.Rotate(rotAxis, rotAngle, Space.World);
             if (Vector3.Dot(upBefore, _boneRotator.up) < 0)
             {
-                tBone.Rotate(rotAxis, 180.0f, Space.World);
+                rotAngle += 180.0f;
             }
+            tBone.Rotate(rotAxis, rotAngle, Space.World);
         }
 
         #endregion

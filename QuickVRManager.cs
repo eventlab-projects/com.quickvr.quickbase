@@ -104,6 +104,8 @@ namespace QuickVR
         public virtual void SetAnimatorTarget(Animator animator)
         {
             _animatorTarget = animator;
+            _animatorTarget.CreateEyes();
+
             _copyPose.SetAnimatorDest(_animatorTarget);
         }
 
@@ -115,8 +117,9 @@ namespace QuickVR
         protected virtual void SetAnimatorSource(Animator animator)
         {
             _animatorSource = animator;
-            _copyPose.SetAnimatorSource(_animatorSource);
+            _animatorSource.CreateEyes();
 
+            _copyPose.SetAnimatorSource(_animatorSource);
             if (OnSourceAnimatorSet != null) OnSourceAnimatorSet();
         }
 

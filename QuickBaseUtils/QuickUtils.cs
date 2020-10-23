@@ -632,27 +632,54 @@ namespace QuickVR
             }
         }
 
+        public static void CreateEyes(this Animator animator)
+        {
+            CreateEye(animator, true);
+            CreateEye(animator, false);
+        }
+
+        private static void CreateEye(this Animator animator, bool eyeLeft)
+        {
+            if (!animator.GetEye(eyeLeft))
+            {
+                HumanBodyBones eyeBoneID = eyeLeft ? HumanBodyBones.LeftEye : HumanBodyBones.RightEye;
+                if (!animator.GetBoneTransform(eyeBoneID))
+                {
+                    Transform tHead = animator.GetBoneTransform(HumanBodyBones.Head);
+                    Transform tEye = tHead.CreateChild(eyeBoneID.ToString());
+
+                    //The eye center position
+                    tEye.position = tHead.position + animator.transform.forward * 0.15f + animator.transform.up * 0.13f;
+
+                    //Account for the Eye Separation
+                    float sign = eyeLeft ? -1.0f : 1.0f;
+                    tEye.position += sign * animator.transform.right * 0.032f;
+                }
+            }
+        }
+
+        public static Transform GetEye(this Animator animator, bool eyeLeft)
+        {
+            HumanBodyBones eyeBoneID = eyeLeft ? HumanBodyBones.LeftEye : HumanBodyBones.RightEye;
+            Transform eye = animator.GetBoneTransform(eyeBoneID);
+            if (!eye)
+            {
+                eye = animator.GetBoneTransform(HumanBodyBones.Head).Find(eyeBoneID.ToString());
+            }
+
+            return eye;
+        }
+
         public static Vector3 GetEyeCenterPosition(this Animator animator)
         {
-            Transform lEye = animator.GetBoneTransform(HumanBodyBones.LeftEye);
-            Transform rEye = animator.GetBoneTransform(HumanBodyBones.RightEye);
+            Transform lEye = animator.GetEye(true);
+            Transform rEye = animator.GetEye(false);
             if (lEye && rEye)
             {
                 return Vector3.Lerp(lEye.position, rEye.position, 0.5f);
             }
 
-            //At this point, the animator is missing the left or the right eye (or both). 
-            //Approximate the head to eyes distance. 
-
-            Vector3 result = animator.GetBoneTransform(HumanBodyBones.Head).position;
-            QuickIKManager ikManager = animator.GetComponent<QuickIKManager>();
-            if (ikManager)
-            {
-                Transform targetLimbHead = ikManager.GetIKSolver(HumanBodyBones.Head)._targetLimb;
-                result += targetLimbHead.forward * 0.15f + targetLimbHead.up * 0.13f;
-            }
-
-            return result;
+            return animator.transform.position;
         }
 
         public static Transform GetLookAtBone(this Animator animator, HumanBodyBones boneID)
