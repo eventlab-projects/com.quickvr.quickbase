@@ -6,7 +6,7 @@ namespace QuickVR
 {
 
     [System.Serializable]
-    public class QuickIKSolverHips_v1 : QuickIKSolver
+    public class QuickIKSolverHips : QuickIKSolver
     {
 
         #region PUBLIC PARAMETERS

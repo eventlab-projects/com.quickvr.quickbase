@@ -258,10 +258,10 @@ namespace QuickVR {
 
         protected virtual void CreateIKSolversBody()
         {
-            CreateIKSolver<QuickIKSolverHips_v1>(HumanBodyBones.Hips);
+            CreateIKSolver<QuickIKSolverHips>(HumanBodyBones.Hips);
             CreateIKSolver<QuickIKSolver>(HumanBodyBones.Head);
-            CreateIKSolver<QuickIKSolverHand_v1>(HumanBodyBones.LeftHand);
-            CreateIKSolver<QuickIKSolverHand_v1>(HumanBodyBones.RightHand);
+            CreateIKSolver<QuickIKSolverHand>(HumanBodyBones.LeftHand);
+            CreateIKSolver<QuickIKSolverHand>(HumanBodyBones.RightHand);
             CreateIKSolver<QuickIKSolver>(HumanBodyBones.LeftFoot);
             CreateIKSolver<QuickIKSolver>(HumanBodyBones.RightFoot);
         }

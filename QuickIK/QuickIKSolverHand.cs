@@ -5,7 +5,7 @@ using UnityEngine;
 namespace QuickVR
 {
 
-    public class QuickIKSolverHand_v1 : QuickIKSolver
+    public class QuickIKSolverHand : QuickIKSolver
     {
 
         protected Animator _animator
