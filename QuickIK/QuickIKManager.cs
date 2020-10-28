@@ -21,7 +21,7 @@ namespace QuickVR {
     };
 
     [ExecuteInEditMode]
-    public abstract class QuickIKManager : QuickBaseTrackingManager 
+    public class QuickIKManager : QuickBaseTrackingManager 
     {
 
         #region PUBLIC PARAMETERS
