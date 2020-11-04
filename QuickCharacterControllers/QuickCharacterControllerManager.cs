@@ -81,7 +81,7 @@ namespace QuickVR
             _rigidBody.useGravity = true;
             _rigidBody.drag = 0.0f;
 
-            _rigidBody.isKinematic = true;
+           // _rigidBody.isKinematic = true;
         }
 
         #endregion
@@ -168,7 +168,7 @@ namespace QuickVR
         protected virtual IEnumerator CoUpdateStepping(Vector3 stepOffset)
         {
             _stepping = true;
-            _rigidBody.isKinematic = true;
+          //  _rigidBody.isKinematic = true;
 
             Vector3 totalLinearVelocity = GetTotalLinearVelocity();
             float speed = totalLinearVelocity.magnitude; //0.5f;
