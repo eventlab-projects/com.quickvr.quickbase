@@ -109,8 +109,9 @@ namespace QuickVR
         {
             if (_model) DestroyImmediate(_model.gameObject);
 
-            string modelName = InputDevices.GetDeviceAtXRNode(XRNode.Head).name.ToLower();
+            string modelName = QuickUtils.GetHMDName();
             string pfName = "";
+
             if (_role == HumanBodyBones.Head) pfName = PF_GENERIC_HMD;
             else if (_role == HumanBodyBones.LeftHand)
             {

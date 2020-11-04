@@ -467,10 +467,17 @@ namespace QuickVR
 #endif
         }
 
+        public static string GetHMDName()
+        {
+            List<InputDevice> devices = new List<InputDevice>();
+            InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.HeadMounted, devices);
+
+            return devices.Count > 0 ? devices[0].name.ToLower() : "";
+        }
+
         public static bool IsOculusQuest()
         {
-            InputDevice hmd = InputDevices.GetDeviceAtXRNode(XRNode.Head);
-            return hmd != null? hmd.name.ToLower().Contains("quest") : false;
+            return GetHMDName().Contains("quest");
         }
 
         public static bool IsHandTrackingSupported()
