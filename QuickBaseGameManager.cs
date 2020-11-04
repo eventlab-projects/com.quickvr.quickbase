@@ -123,6 +123,7 @@ namespace QuickVR {
             if (_hTracking)
             {
                 _cameraFade.SetColor(Color.black);
+                _hTracking.CheckHandtrackingMode();
                 StartCoroutine(CoUpdate());
             }
             else

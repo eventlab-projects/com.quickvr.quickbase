@@ -124,10 +124,7 @@ namespace QuickVR {
         {
             if (Application.isPlaying)
             {
-                if (!QuickUtils.IsHandTrackingSupported())
-                {
-                    _handTrackingMode = HandTrackingMode.Controllers;
-                }
+                CheckHandtrackingMode();
             }
         }
 
@@ -189,6 +186,14 @@ namespace QuickVR {
         #endregion
 
         #region GET AND SET
+
+        public virtual void CheckHandtrackingMode()
+        {
+            if (_handTrackingMode == HandTrackingMode.Hands && !QuickUtils.IsHandTrackingSupported())
+            {
+                _handTrackingMode = HandTrackingMode.Controllers;
+            }
+        }
 
         public virtual QuickUICursor GetVRCursor(VRCursorType cType)
         {
