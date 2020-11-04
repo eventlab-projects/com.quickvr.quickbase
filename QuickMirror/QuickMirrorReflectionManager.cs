@@ -17,7 +17,7 @@ namespace QuickVR
         #region PRIVATE ATTRIBUTES
 
         private static HashSet<QuickMirrorReflectionBase> _mirrors = new HashSet<QuickMirrorReflectionBase>();
-        private static float _timeLastRender = 0;
+        //private static float _timeLastRender = 0;
 
         #endregion
 

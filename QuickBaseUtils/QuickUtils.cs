@@ -6,6 +6,7 @@ using System.Reflection;
 using System.IO;
 using System.Net;
 using System.Globalization;
+using UnityEngine.XR;
 
 namespace QuickVR
 {
@@ -466,10 +467,17 @@ namespace QuickVR
 #endif
         }
 
+        public static string GetHMDName()
+        {
+            List<InputDevice> devices = new List<InputDevice>();
+            InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.HeadMounted, devices);
+
+            return devices.Count > 0 ? devices[0].name.ToLower() : "";
+        }
+
         public static bool IsOculusQuest()
         {
-            //return UnityEngine.XR.InputDevices.GetDeviceAtXRNode(UnityEngine.XR.XRNode.Head).name.ToLower().Contains("quest");
-            return UnityEngine.XR.XRDevice.model.ToLower().Contains("quest");
+            return GetHMDName().Contains("quest");
         }
 
         public static bool IsHandTrackingSupported()
