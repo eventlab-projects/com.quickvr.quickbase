@@ -25,6 +25,7 @@ namespace QuickVR
 
         public override void Init()
         {
+            _stages.Clear();
             foreach (Transform t in transform)
             {
                 QuickStageBase s = t.GetComponent<QuickStageBase>();
