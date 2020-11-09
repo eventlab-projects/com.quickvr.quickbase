@@ -23,11 +23,27 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
+        protected Animator _animatorSrc
+        {
+            get
+            {
+                return QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource();
+            }
+        }
+
         protected QuickOVRHandsInitializer _ovrHands
         {
             get
             {
-                return QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource().GetComponent<QuickOVRHandsInitializer>();
+                return _animatorSrc ? _animatorSrc.GetComponent<QuickOVRHandsInitializer>() : null;
+            }
+        }
+
+        protected QuickUnityVR _unityVR
+        {
+            get
+            {
+                return _animatorSrc ? _animatorSrc.GetComponent<QuickUnityVR>() : null;
             }
         }
 
@@ -35,12 +51,20 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        protected override void Awake()
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        protected static void InitAfterSceneLoad()
         {
-            base.Awake();
-#if !UNITY_ANDROID
-            gameObject.SetActive(false);
-#endif
+            //Automatically add this implementation. 
+            QuickSingletonManager.GetInstance<InputManager>().CreateDefaultImplementation<InputManagerOVRHands>();
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+
+            //Configure the default buttons
+            ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CONTINUE, ButtonCodes.ThumbUp + "Right", ButtonCodes.ThumbUp + "Left");
+            ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CANCEL, ButtonCodes.ThumbDown + "Right", ButtonCodes.ThumbDown + "Left");
         }
 
         #endregion
@@ -98,6 +122,17 @@ namespace QuickVR
 
         #endregion
 
+        #region UPDATE
+
+        protected virtual void Update()
+        {
+            if (_unityVR)
+            {
+                _active = _unityVR._handTrackingMode == QuickUnityVR.HandTrackingMode.Hands;
+            }
+        }
+
+        #endregion
 
     }
 

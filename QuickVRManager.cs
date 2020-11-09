@@ -13,6 +13,13 @@ namespace QuickVR
 
         public bool _showFPS = false;
 
+        public enum XRMode
+        {
+            LegacyXRSettings,
+            XRPlugin
+        }
+        public XRMode _XRMode = XRMode.LegacyXRSettings;
+
         #endregion
 
         #region PROTECTED PARAMETERS
@@ -90,6 +97,12 @@ namespace QuickVR
             _copyPose.enabled = false;
             _cameraController = QuickSingletonManager.GetInstance<QuickVRCameraController>();
             _fpsCounter._showFPS = _showFPS;
+
+            //Legacy XR Mode is deprecated on 2020 onwards. 
+#if UNITY_2020_1_OR_NEWER
+            _XRMode = XRMode.XRPlugin;
+#endif
+
         }
 
         #endregion

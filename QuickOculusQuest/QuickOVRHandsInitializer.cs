@@ -11,7 +11,7 @@ namespace QuickVR
 
         #region PUBLIC ATTRIBUTES
 
-        public bool _debug = false;
+        public bool _debug = true;
 
         #endregion
 

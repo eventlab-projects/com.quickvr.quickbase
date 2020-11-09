@@ -477,7 +477,14 @@ namespace QuickVR
 
         public static bool IsOculusQuest()
         {
-            return GetHMDName().Contains("quest");
+            string hmdName = GetHMDName();
+            bool isQuest = hmdName.Contains("quest");
+
+#if UNITY_ANDROID
+            isQuest = isQuest || hmdName.Contains("oculus");
+#endif
+
+            return isQuest;
         }
 
         public static bool IsHandTrackingSupported()

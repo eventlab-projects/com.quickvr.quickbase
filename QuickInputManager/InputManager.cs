@@ -103,7 +103,7 @@ public class InputManager : MonoBehaviour
         _virtualAxes[_virtualAxes.Count - 1] = virtualAxisName;
     }
 
-    protected virtual T CreateDefaultImplementation<T>() where T : BaseInputManager
+    public virtual T CreateDefaultImplementation<T>() where T : BaseInputManager
     {
         T iManager = GetComponentInChildren<T>();
         if (!iManager)

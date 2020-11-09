@@ -72,10 +72,11 @@ namespace QuickVR
             {
                 Camera camera = Camera.main;
 
-#if UNITY_2020_1_OR_NEWER
-                camera.transform.rotation = QuickSingletonManager.GetInstance<QuickVRPlayArea>().GetVRNode(HumanBodyBones.Head).transform.rotation;
-#endif
-
+                if (QuickSingletonManager.GetInstance<QuickVRManager>()._XRMode == QuickVRManager.XRMode.XRPlugin)
+                {
+                    camera.transform.rotation = QuickSingletonManager.GetInstance<QuickVRPlayArea>().GetVRNode(HumanBodyBones.Head).transform.rotation;
+                }
+                
                 //Apply the correct rotation to the cameracontrollerroot:
                 Vector3 up = animator.transform.up;
                 Vector3 rightCam = Vector3.ProjectOnPlane(camera.transform.right, up).normalized;
