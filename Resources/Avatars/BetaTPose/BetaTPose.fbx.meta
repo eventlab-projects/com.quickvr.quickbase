@@ -1,158 +1,458 @@
 fileFormatVersion: 2
 guid: a8fa42a1e4ee46c41a524e2d6d558cfa
 ModelImporter:
-  serializedVersion: 23
-  fileIDToRecycleName:
-    100000: Beta_HighJointsGeo
-    100002: Beta_HighLimbsGeo
-    100004: Beta_HighTorsoGeo
-    100006: BetaHighResMeshes
-    100008: //RootNode
-    100010: Head
-    100012: HeadTop_End
-    100014: Hips
-    100016: LeftArm
-    100018: LeftFoot
-    100020: LeftFootToeBase_End
-    100022: LeftForeArm
-    100024: LeftHand
-    100026: LeftHandIndex1
-    100028: LeftHandIndex2
-    100030: LeftHandIndex3
-    100032: LeftHandIndex4
-    100034: LeftHandMiddle1
-    100036: LeftHandMiddle2
-    100038: LeftHandMiddle3
-    100040: LeftHandMiddle4
-    100042: LeftHandPinky1
-    100044: LeftHandPinky2
-    100046: LeftHandPinky3
-    100048: LeftHandPinky4
-    100050: LeftHandRing1
-    100052: LeftHandRing2
-    100054: LeftHandRing3
-    100056: LeftHandRing4
-    100058: LeftHandThumb1
-    100060: LeftHandThumb2
-    100062: LeftHandThumb3
-    100064: LeftHandThumb4
-    100066: LeftLeg
-    100068: LeftShoulder
-    100070: LeftToeBase
-    100072: LeftUpLeg
-    100074: Neck
-    100076: Neck1
-    100078: RightArm
-    100080: RightFoot
-    100082: RightFootToeBase_End
-    100084: RightForeArm
-    100086: RightHand
-    100088: RightHandIndex1
-    100090: RightHandIndex2
-    100092: RightHandIndex3
-    100094: RightHandIndex4
-    100096: RightHandMiddle1
-    100098: RightHandMiddle2
-    100100: RightHandMiddle3
-    100102: RightHandMiddle4
-    100104: RightHandPinky1
-    100106: RightHandPinky2
-    100108: RightHandPinky3
-    100110: RightHandPinky4
-    100112: RightHandRing1
-    100114: RightHandRing2
-    100116: RightHandRing3
-    100118: RightHandRing4
-    100120: RightHandThumb1
-    100122: RightHandThumb2
-    100124: RightHandThumb3
-    100126: RightHandThumb4
-    100128: RightLeg
-    100130: RightShoulder
-    100132: RightToeBase
-    100134: RightUpLeg
-    100136: Spine
-    100138: Spine1
-    100140: Spine2
-    400000: Beta_HighJointsGeo
-    400002: Beta_HighLimbsGeo
-    400004: Beta_HighTorsoGeo
-    400006: BetaHighResMeshes
-    400008: //RootNode
-    400010: Head
-    400012: HeadTop_End
-    400014: Hips
-    400016: LeftArm
-    400018: LeftFoot
-    400020: LeftFootToeBase_End
-    400022: LeftForeArm
-    400024: LeftHand
-    400026: LeftHandIndex1
-    400028: LeftHandIndex2
-    400030: LeftHandIndex3
-    400032: LeftHandIndex4
-    400034: LeftHandMiddle1
-    400036: LeftHandMiddle2
-    400038: LeftHandMiddle3
-    400040: LeftHandMiddle4
-    400042: LeftHandPinky1
-    400044: LeftHandPinky2
-    400046: LeftHandPinky3
-    400048: LeftHandPinky4
-    400050: LeftHandRing1
-    400052: LeftHandRing2
-    400054: LeftHandRing3
-    400056: LeftHandRing4
-    400058: LeftHandThumb1
-    400060: LeftHandThumb2
-    400062: LeftHandThumb3
-    400064: LeftHandThumb4
-    400066: LeftLeg
-    400068: LeftShoulder
-    400070: LeftToeBase
-    400072: LeftUpLeg
-    400074: Neck
-    400076: Neck1
-    400078: RightArm
-    400080: RightFoot
-    400082: RightFootToeBase_End
-    400084: RightForeArm
-    400086: RightHand
-    400088: RightHandIndex1
-    400090: RightHandIndex2
-    400092: RightHandIndex3
-    400094: RightHandIndex4
-    400096: RightHandMiddle1
-    400098: RightHandMiddle2
-    400100: RightHandMiddle3
-    400102: RightHandMiddle4
-    400104: RightHandPinky1
-    400106: RightHandPinky2
-    400108: RightHandPinky3
-    400110: RightHandPinky4
-    400112: RightHandRing1
-    400114: RightHandRing2
-    400116: RightHandRing3
-    400118: RightHandRing4
-    400120: RightHandThumb1
-    400122: RightHandThumb2
-    400124: RightHandThumb3
-    400126: RightHandThumb4
-    400128: RightLeg
-    400130: RightShoulder
-    400132: RightToeBase
-    400134: RightUpLeg
-    400136: Spine
-    400138: Spine1
-    400140: Spine2
-    4300000: Beta_HighLimbsGeo
-    4300002: Beta_HighTorsoGeo
-    4300004: Beta_HighJointsGeo
-    7400000: mixamo.com
-    9500000: //RootNode
-    13700000: Beta_HighJointsGeo
-    13700002: Beta_HighLimbsGeo
-    13700004: Beta_HighTorsoGeo
+  serializedVersion: 20101
+  internalIDToNameTable:
+  - first:
+      1: 100000
+    second: Beta_HighJointsGeo
+  - first:
+      1: 100002
+    second: Beta_HighLimbsGeo
+  - first:
+      1: 100004
+    second: Beta_HighTorsoGeo
+  - first:
+      1: 100006
+    second: BetaHighResMeshes
+  - first:
+      1: 100008
+    second: //RootNode
+  - first:
+      1: 100010
+    second: Head
+  - first:
+      1: 100012
+    second: HeadTop_End
+  - first:
+      1: 100014
+    second: Hips
+  - first:
+      1: 100016
+    second: LeftArm
+  - first:
+      1: 100018
+    second: LeftFoot
+  - first:
+      1: 100020
+    second: LeftFootToeBase_End
+  - first:
+      1: 100022
+    second: LeftForeArm
+  - first:
+      1: 100024
+    second: LeftHand
+  - first:
+      1: 100026
+    second: LeftHandIndex1
+  - first:
+      1: 100028
+    second: LeftHandIndex2
+  - first:
+      1: 100030
+    second: LeftHandIndex3
+  - first:
+      1: 100032
+    second: LeftHandIndex4
+  - first:
+      1: 100034
+    second: LeftHandMiddle1
+  - first:
+      1: 100036
+    second: LeftHandMiddle2
+  - first:
+      1: 100038
+    second: LeftHandMiddle3
+  - first:
+      1: 100040
+    second: LeftHandMiddle4
+  - first:
+      1: 100042
+    second: LeftHandPinky1
+  - first:
+      1: 100044
+    second: LeftHandPinky2
+  - first:
+      1: 100046
+    second: LeftHandPinky3
+  - first:
+      1: 100048
+    second: LeftHandPinky4
+  - first:
+      1: 100050
+    second: LeftHandRing1
+  - first:
+      1: 100052
+    second: LeftHandRing2
+  - first:
+      1: 100054
+    second: LeftHandRing3
+  - first:
+      1: 100056
+    second: LeftHandRing4
+  - first:
+      1: 100058
+    second: LeftHandThumb1
+  - first:
+      1: 100060
+    second: LeftHandThumb2
+  - first:
+      1: 100062
+    second: LeftHandThumb3
+  - first:
+      1: 100064
+    second: LeftHandThumb4
+  - first:
+      1: 100066
+    second: LeftLeg
+  - first:
+      1: 100068
+    second: LeftShoulder
+  - first:
+      1: 100070
+    second: LeftToeBase
+  - first:
+      1: 100072
+    second: LeftUpLeg
+  - first:
+      1: 100074
+    second: Neck
+  - first:
+      1: 100076
+    second: Neck1
+  - first:
+      1: 100078
+    second: RightArm
+  - first:
+      1: 100080
+    second: RightFoot
+  - first:
+      1: 100082
+    second: RightFootToeBase_End
+  - first:
+      1: 100084
+    second: RightForeArm
+  - first:
+      1: 100086
+    second: RightHand
+  - first:
+      1: 100088
+    second: RightHandIndex1
+  - first:
+      1: 100090
+    second: RightHandIndex2
+  - first:
+      1: 100092
+    second: RightHandIndex3
+  - first:
+      1: 100094
+    second: RightHandIndex4
+  - first:
+      1: 100096
+    second: RightHandMiddle1
+  - first:
+      1: 100098
+    second: RightHandMiddle2
+  - first:
+      1: 100100
+    second: RightHandMiddle3
+  - first:
+      1: 100102
+    second: RightHandMiddle4
+  - first:
+      1: 100104
+    second: RightHandPinky1
+  - first:
+      1: 100106
+    second: RightHandPinky2
+  - first:
+      1: 100108
+    second: RightHandPinky3
+  - first:
+      1: 100110
+    second: RightHandPinky4
+  - first:
+      1: 100112
+    second: RightHandRing1
+  - first:
+      1: 100114
+    second: RightHandRing2
+  - first:
+      1: 100116
+    second: RightHandRing3
+  - first:
+      1: 100118
+    second: RightHandRing4
+  - first:
+      1: 100120
+    second: RightHandThumb1
+  - first:
+      1: 100122
+    second: RightHandThumb2
+  - first:
+      1: 100124
+    second: RightHandThumb3
+  - first:
+      1: 100126
+    second: RightHandThumb4
+  - first:
+      1: 100128
+    second: RightLeg
+  - first:
+      1: 100130
+    second: RightShoulder
+  - first:
+      1: 100132
+    second: RightToeBase
+  - first:
+      1: 100134
+    second: RightUpLeg
+  - first:
+      1: 100136
+    second: Spine
+  - first:
+      1: 100138
+    second: Spine1
+  - first:
+      1: 100140
+    second: Spine2
+  - first:
+      4: 400000
+    second: Beta_HighJointsGeo
+  - first:
+      4: 400002
+    second: Beta_HighLimbsGeo
+  - first:
+      4: 400004
+    second: Beta_HighTorsoGeo
+  - first:
+      4: 400006
+    second: BetaHighResMeshes
+  - first:
+      4: 400008
+    second: //RootNode
+  - first:
+      4: 400010
+    second: Head
+  - first:
+      4: 400012
+    second: HeadTop_End
+  - first:
+      4: 400014
+    second: Hips
+  - first:
+      4: 400016
+    second: LeftArm
+  - first:
+      4: 400018
+    second: LeftFoot
+  - first:
+      4: 400020
+    second: LeftFootToeBase_End
+  - first:
+      4: 400022
+    second: LeftForeArm
+  - first:
+      4: 400024
+    second: LeftHand
+  - first:
+      4: 400026
+    second: LeftHandIndex1
+  - first:
+      4: 400028
+    second: LeftHandIndex2
+  - first:
+      4: 400030
+    second: LeftHandIndex3
+  - first:
+      4: 400032
+    second: LeftHandIndex4
+  - first:
+      4: 400034
+    second: LeftHandMiddle1
+  - first:
+      4: 400036
+    second: LeftHandMiddle2
+  - first:
+      4: 400038
+    second: LeftHandMiddle3
+  - first:
+      4: 400040
+    second: LeftHandMiddle4
+  - first:
+      4: 400042
+    second: LeftHandPinky1
+  - first:
+      4: 400044
+    second: LeftHandPinky2
+  - first:
+      4: 400046
+    second: LeftHandPinky3
+  - first:
+      4: 400048
+    second: LeftHandPinky4
+  - first:
+      4: 400050
+    second: LeftHandRing1
+  - first:
+      4: 400052
+    second: LeftHandRing2
+  - first:
+      4: 400054
+    second: LeftHandRing3
+  - first:
+      4: 400056
+    second: LeftHandRing4
+  - first:
+      4: 400058
+    second: LeftHandThumb1
+  - first:
+      4: 400060
+    second: LeftHandThumb2
+  - first:
+      4: 400062
+    second: LeftHandThumb3
+  - first:
+      4: 400064
+    second: LeftHandThumb4
+  - first:
+      4: 400066
+    second: LeftLeg
+  - first:
+      4: 400068
+    second: LeftShoulder
+  - first:
+      4: 400070
+    second: LeftToeBase
+  - first:
+      4: 400072
+    second: LeftUpLeg
+  - first:
+      4: 400074
+    second: Neck
+  - first:
+      4: 400076
+    second: Neck1
+  - first:
+      4: 400078
+    second: RightArm
+  - first:
+      4: 400080
+    second: RightFoot
+  - first:
+      4: 400082
+    second: RightFootToeBase_End
+  - first:
+      4: 400084
+    second: RightForeArm
+  - first:
+      4: 400086
+    second: RightHand
+  - first:
+      4: 400088
+    second: RightHandIndex1
+  - first:
+      4: 400090
+    second: RightHandIndex2
+  - first:
+      4: 400092
+    second: RightHandIndex3
+  - first:
+      4: 400094
+    second: RightHandIndex4
+  - first:
+      4: 400096
+    second: RightHandMiddle1
+  - first:
+      4: 400098
+    second: RightHandMiddle2
+  - first:
+      4: 400100
+    second: RightHandMiddle3
+  - first:
+      4: 400102
+    second: RightHandMiddle4
+  - first:
+      4: 400104
+    second: RightHandPinky1
+  - first:
+      4: 400106
+    second: RightHandPinky2
+  - first:
+      4: 400108
+    second: RightHandPinky3
+  - first:
+      4: 400110
+    second: RightHandPinky4
+  - first:
+      4: 400112
+    second: RightHandRing1
+  - first:
+      4: 400114
+    second: RightHandRing2
+  - first:
+      4: 400116
+    second: RightHandRing3
+  - first:
+      4: 400118
+    second: RightHandRing4
+  - first:
+      4: 400120
+    second: RightHandThumb1
+  - first:
+      4: 400122
+    second: RightHandThumb2
+  - first:
+      4: 400124
+    second: RightHandThumb3
+  - first:
+      4: 400126
+    second: RightHandThumb4
+  - first:
+      4: 400128
+    second: RightLeg
+  - first:
+      4: 400130
+    second: RightShoulder
+  - first:
+      4: 400132
+    second: RightToeBase
+  - first:
+      4: 400134
+    second: RightUpLeg
+  - first:
+      4: 400136
+    second: Spine
+  - first:
+      4: 400138
+    second: Spine1
+  - first:
+      4: 400140
+    second: Spine2
+  - first:
+      43: 4300000
+    second: Beta_HighLimbsGeo
+  - first:
+      43: 4300002
+    second: Beta_HighTorsoGeo
+  - first:
+      43: 4300004
+    second: Beta_HighJointsGeo
+  - first:
+      74: 7400000
+    second: mixamo.com
+  - first:
+      95: 9500000
+    second: //RootNode
+  - first:
+      137: 13700000
+    second: Beta_HighJointsGeo
+  - first:
+      137: 13700002
+    second: Beta_HighLimbsGeo
+  - first:
+      137: 13700004
+    second: Beta_HighTorsoGeo
   externalObjects:
   - first:
       type: UnityEngine:Material
@@ -165,10 +465,10 @@ ModelImporter:
       name: Beta_Joints_MAT
     second: {fileID: 2100000, guid: 565ca5ae679798a439dd47b62f97e781, type: 2}
   materials:
-    importMaterials: 1
+    materialImportMode: 1
     materialName: 0
     materialSearch: 1
-    materialLocation: 0
+    materialLocation: 1
   animations:
     legacyGenerateAnimations: 4
     bakeSimulation: 0
@@ -194,6 +494,7 @@ ModelImporter:
     - serializedVersion: 16
       name: mixamo.com
       takeName: mixamo.com
+      internalID: 0
       firstFrame: 0
       lastFrame: 1
       wrapMode: 0
@@ -367,34 +668,45 @@ ModelImporter:
     globalScale: 1
     meshCompression: 0
     addColliders: 0
+    useSRGBMaterialColor: 1
+    sortHierarchyByName: 1
     importVisibility: 0
     importBlendShapes: 1
     importCameras: 0
     importLights: 0
+    fileIdsGeneration: 1
     swapUVChannels: 0
     generateSecondaryUV: 0
     useFileUnits: 1
-    optimizeMeshForGPU: 1
     keepQuads: 0
     weldVertices: 1
+    bakeAxisConversion: 0
     preserveHierarchy: 0
+    skinWeightsMode: 0
+    maxBonesPerVertex: 4
+    minBoneWeight: 0.001
+    meshOptimizationFlags: -1
     indexFormat: 1
     secondaryUVAngleDistortion: 8
     secondaryUVAreaDistortion: 15.000001
     secondaryUVHardAngle: 88
+    secondaryUVMarginMethod: 0
+    secondaryUVMinLightmapResolution: 40
+    secondaryUVMinObjectScale: 1
     secondaryUVPackMargin: 4
     useFileScale: 1
-    previousCalculatedGlobalScale: 0.01
-    hasPreviousCalculatedGlobalScale: 1
   tangentSpace:
     normalSmoothAngle: 60
     normalImportMode: 0
     tangentImportMode: 3
     normalCalculationMode: 0
+    legacyComputeAllNormalsFromSmoothingGroupsWhenMeshHasBlendShapes: 0
+    blendShapeNormalImportMode: 1
+    normalSmoothingSource: 0
+  referencedClips: []
   importAnimation: 1
-  copyAvatar: 0
   humanDescription:
-    serializedVersion: 2
+    serializedVersion: 3
     human:
     - boneName: Hips
       humanName: Hips
@@ -918,8 +1230,7 @@ ModelImporter:
     - name: RightHand
       parentName: RightForeArm
       position: {x: 0.278738, y: 0, z: 0}
-      rotation: {x: -0.0000000029103826, y: 4.2351647e-18, z: -0.0000000014551915,
-        w: 1}
+      rotation: {x: -0.0000000029103826, y: 4.2351647e-18, z: -0.0000000014551915, w: 1}
       scale: {x: 1, y: 1.0000002, z: 1}
     - name: RightHandPinky1
       parentName: RightHand
@@ -1168,14 +1479,16 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
+    globalScale: 1
     rootMotionBoneName: 
-    rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
     hasTranslationDoF: 0
     hasExtraRoot: 1
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
+  autoGenerateAvatarMappingIfUnspecified: 1
   animationType: 3
   humanoidOversampling: 1
+  avatarSetup: 1
   additionalBone: 0
   userData: 
   assetBundleName: 
