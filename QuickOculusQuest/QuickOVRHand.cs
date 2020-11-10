@@ -9,12 +9,6 @@ namespace QuickVR
     public class QuickOVRHand : OVRHand
     {
 
-        #region PUBLIC ATTRIBUTES
-
-        public bool _debug = true;
-
-        #endregion
-
         #region PROTECTED ATTRIBUTES
 
         public enum FingerPhalange
@@ -332,29 +326,23 @@ namespace QuickVR
                         }
                     }
 
-                    for (int i = 0; i < 3; i++)
+                    if (IsDataHighConfidenceFinger(f))
                     {
-                        UpdateTracking(fingerBones[i], fingerBones[i + 1]);
-                        _handFingerLastRotation[f][i] = _animator.GetBoneTransform(fingerBones[i]).localRotation;
+                        //The finger is tracked.
+                        for (int i = 0; i < 3; i++)
+                        {
+                            UpdateTracking(fingerBones[i], fingerBones[i + 1]);
+                            _handFingerLastRotation[f][i] = _animator.GetBoneTransform(fingerBones[i]).localRotation;
+                        }
                     }
-
-                    //if (IsDataHighConfidenceFinger(f))
-                    //{
-                    //    //The finger is tracked.
-                    //    for (int i = 0; i < 3; i++)
-                    //    {
-                    //        UpdateTracking(fingerBones[i], fingerBones[i+1]);
-                    //        _handFingerLastRotation[f][i] = _animator.GetBoneTransform(fingerBones[i]).localRotation;
-                    //    }
-                    //}
-                    //else
-                    //{
-                    //    //The finger is not tracked. Restore the last valid local rotation. 
-                    //    for (int i = 0; i < 3; i++)
-                    //    {
-                    //        _animator.GetBoneTransform(fingerBones[i]).localRotation = _handFingerLastRotation[f][i];
-                    //    }
-                    //}
+                    else
+                    {
+                        //The finger is not tracked. Restore the last valid local rotation. 
+                        for (int i = 0; i < 3; i++)
+                        {
+                            _animator.GetBoneTransform(fingerBones[i]).localRotation = _handFingerLastRotation[f][i];
+                        }
+                    }
                 }
             }
         }
