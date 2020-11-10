@@ -106,6 +106,7 @@ namespace QuickVR
         {
             if (_hTracking && _hTracking._handTrackingMode == QuickUnityVR.HandTrackingMode.Hands)
             {
+                OVRInput.Update();
                 if (_leftHand) _leftHand.UpdateTracking();
                 if (_rightHand) _rightHand.UpdateTracking();
             }

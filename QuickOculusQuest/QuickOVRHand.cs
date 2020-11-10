@@ -70,7 +70,6 @@ namespace QuickVR
             _renderer = transform.GetOrCreateComponent<SkinnedMeshRenderer>();
             //_renderer.material = Resources.Load<Material>("Materials/QuickDiffuseCyan");
             _renderer.material = Resources.Load<Material>("Materials/QuickOVRHandMaterial");
-
             _headTracking = GetComponentInParent<QuickUnityVR>();
             _playArea = GetComponentInParent<QuickVRPlayArea>();
             _animator = _headTracking.GetComponent<Animator>();
@@ -299,15 +298,15 @@ namespace QuickVR
 
         #region UPDATE
 
-        protected virtual void Update()
-        {
-            _renderer.enabled = _debug;
+        //protected virtual void Update()
+        //{
+        //    _renderer.enabled = _debug;
 
-            foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
-            {
-                _handFingerConfidence[f] = IsDataHighConfidence ? Mathf.Min(_handFingerConfidence[f] + 1, NUM_FRAMES_CONFIDENCE) : 0;
-            }
-        }
+        //    foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
+        //    {
+        //        _handFingerConfidence[f] = IsDataHighConfidence ? Mathf.Min(_handFingerConfidence[f] + 1, NUM_FRAMES_CONFIDENCE) : 0;
+        //    }
+        //}
 
         public virtual void UpdateTracking()
         {
@@ -333,23 +332,29 @@ namespace QuickVR
                         }
                     }
 
-                    if (IsDataHighConfidenceFinger(f))
+                    for (int i = 0; i < 3; i++)
                     {
-                        //The finger is tracked.
-                        for (int i = 0; i < 3; i++)
-                        {
-                            UpdateTracking(fingerBones[i], fingerBones[i+1]);
-                            _handFingerLastRotation[f][i] = _animator.GetBoneTransform(fingerBones[i]).localRotation;
-                        }
+                        UpdateTracking(fingerBones[i], fingerBones[i + 1]);
+                        _handFingerLastRotation[f][i] = _animator.GetBoneTransform(fingerBones[i]).localRotation;
                     }
-                    else
-                    {
-                        //The finger is not tracked. Restore the last valid local rotation. 
-                        for (int i = 0; i < 3; i++)
-                        {
-                            _animator.GetBoneTransform(fingerBones[i]).localRotation = _handFingerLastRotation[f][i];
-                        }
-                    }
+
+                    //if (IsDataHighConfidenceFinger(f))
+                    //{
+                    //    //The finger is tracked.
+                    //    for (int i = 0; i < 3; i++)
+                    //    {
+                    //        UpdateTracking(fingerBones[i], fingerBones[i+1]);
+                    //        _handFingerLastRotation[f][i] = _animator.GetBoneTransform(fingerBones[i]).localRotation;
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    //The finger is not tracked. Restore the last valid local rotation. 
+                    //    for (int i = 0; i < 3; i++)
+                    //    {
+                    //        _animator.GetBoneTransform(fingerBones[i]).localRotation = _handFingerLastRotation[f][i];
+                    //    }
+                    //}
                 }
             }
         }
