@@ -359,7 +359,21 @@ namespace QuickVR
             if (_headTracking._handTrackingMode == QuickUnityVR.HandTrackingMode.Hands)
             {
                 QuickVRNode vrNode = _playArea.GetVRNode(IsLeft() ? HumanBodyBones.LeftHand : HumanBodyBones.RightHand);
-                vrNode.SetTracked(IsDataHighConfidence);
+                OVRPlugin.Node ovrNode = IsLeft() ? OVRPlugin.Node.HandLeft : OVRPlugin.Node.HandRight;
+
+                bool isTrackedPos = OVRPlugin.GetNodePositionTracked(ovrNode);
+                if (isTrackedPos)
+                {
+                    vrNode.transform.localPosition = OVRPlugin.GetNodePose(ovrNode, OVRPlugin.Step.Render).ToOVRPose().position;
+                }
+
+                bool isTrackedRot = OVRPlugin.GetNodeOrientationTracked(ovrNode);
+                if (isTrackedRot)
+                {
+                    vrNode.transform.localRotation = OVRPlugin.GetNodePose(ovrNode, OVRPlugin.Step.Render).ToOVRPose().orientation;
+                }
+
+                vrNode.SetTracked(isTrackedPos || isTrackedRot);
             }
         }
 
