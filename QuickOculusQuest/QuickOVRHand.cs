@@ -292,16 +292,6 @@ namespace QuickVR
 
         #region UPDATE
 
-        //protected virtual void Update()
-        //{
-        //    _renderer.enabled = _debug;
-
-        //    foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
-        //    {
-        //        _handFingerConfidence[f] = IsDataHighConfidence ? Mathf.Min(_handFingerConfidence[f] + 1, NUM_FRAMES_CONFIDENCE) : 0;
-        //    }
-        //}
-
         public virtual void UpdateTracking()
         {
             if (IsInitialized()) 
@@ -314,6 +304,7 @@ namespace QuickVR
 
                 foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
                 {
+                    _handFingerConfidence[f] = IsDataHighConfidence ? Mathf.Min(_handFingerConfidence[f] + 1, NUM_FRAMES_CONFIDENCE) : 0;
                     List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, IsLeft());
                     if (_handFingerLastRotation[f] == null)
                     {
