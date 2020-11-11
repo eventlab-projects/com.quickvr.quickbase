@@ -96,7 +96,6 @@ namespace QuickVR
         {
             _copyPose.enabled = false;
             _cameraController = QuickSingletonManager.GetInstance<QuickVRCameraController>();
-            _fpsCounter._showFPS = _showFPS;
 
             //Legacy XR Mode is deprecated on 2020 onwards. 
 #if UNITY_2020_1_OR_NEWER
@@ -203,7 +202,7 @@ namespace QuickVR
 
         protected virtual void Update()
         {
-            _showFPS = _fpsCounter._showFPS;
+            _fpsCounter._showFPS = _showFPS;
 
             //Calibrate the TrackingManagers that needs to be calibrated. 
             if (InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CALIBRATE) || _isCalibrationRequired)
