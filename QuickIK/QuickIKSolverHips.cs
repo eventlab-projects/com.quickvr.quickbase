@@ -172,6 +172,15 @@ namespace QuickVR
 
         #region GET AND SET
 
+        public override void SetCurrentPoseAsBase()
+        {
+            //Debug.Log("BEFORE = " + _hips.localPosition.ToString("f3"));
+            base.SetCurrentPoseAsBase();
+            //Debug.Log("AFTER = " + _hips.localPosition.ToString("f3"));
+
+            _hipsInitialLocalPos = _hips.localPosition;
+        }
+
         public override void ResetIKChain()
         {
             _hips.localPosition = _hipsInitialLocalPos;

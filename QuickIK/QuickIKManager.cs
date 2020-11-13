@@ -190,14 +190,7 @@ namespace QuickVR {
         {
             Reset();
 
-            foreach (IQuickIKSolver ikSolver in GetIKSolvers())
-            {
-                QuickIKData ikData = new QuickIKData();
-                ikData._targetLimbLocalPosition = ikSolver._targetLimb.localPosition;
-                ikData._targetLimbLocalRotation = ikSolver._targetLimb.localRotation;
-                if (ikSolver._targetHint) ikData._targetHintLocalPosition = ikSolver._targetHint.localPosition;
-                _initialIKPose[ikSolver._boneID] = ikData;
-            }
+            SetCurrentPoseAsBase();
         }
 
         protected virtual void Reset()
@@ -383,6 +376,20 @@ namespace QuickVR {
         #endregion
 
         #region GET AND SET
+
+        public virtual void SetCurrentPoseAsBase()
+        {
+            foreach (QuickIKSolver ikSolver in GetIKSolvers())
+            {
+                ikSolver.SetCurrentPoseAsBase();
+
+                QuickIKData ikData = new QuickIKData();
+                ikData._targetLimbLocalPosition = ikSolver._targetLimb.localPosition;
+                ikData._targetLimbLocalRotation = ikSolver._targetLimb.localRotation;
+                if (ikSolver._targetHint) ikData._targetHintLocalPosition = ikSolver._targetHint.localPosition;
+                _initialIKPose[ikSolver._boneID] = ikData;
+            }
+        }
 
         protected virtual void ResetInitialPose()
         {
