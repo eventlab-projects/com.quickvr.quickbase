@@ -39,8 +39,6 @@ namespace QuickVR {
 
         #region PROTECTED PARAMETERS
 
-        protected float _unscaledHeadHeight = 0.0f;
-
         protected QuickVRPlayArea _vrPlayArea = null;
 
         protected Transform _calibrationPose = null;
@@ -230,11 +228,6 @@ namespace QuickVR {
             _calibrationPose.rotation = initialRotation;
         }
 
-        protected virtual float GetHeadHeight()
-        {
-            return _unscaledHeadHeight * (1.0f / transform.lossyScale.y);
-        }
-
         public virtual Vector3 GetDisplacement()
         {
             //if (_isStanding)
@@ -261,7 +254,6 @@ namespace QuickVR {
             base.Calibrate();
 
             transform.localScale = Vector3.one;
-            _unscaledHeadHeight = GetIKSolver(HumanBodyBones.Head)._targetLimb.position.y - transform.position.y;
 
             transform.position = _calibrationPose.position;
             transform.rotation = _calibrationPose.rotation;
@@ -275,7 +267,7 @@ namespace QuickVR {
 
             //Set the offset of the TrackedObject of the head
             QuickVRNode node = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
-            Vector3 offset = GetIKTarget(HumanBodyBones.Head).position - node.GetTrackedObject().transform.position;
+            Vector3 offset = _animator.GetBoneTransform(HumanBodyBones.Head).position - node.GetTrackedObject().transform.position;
             _vrPlayArea.transform.position += offset;
         }
 

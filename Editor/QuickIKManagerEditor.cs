@@ -99,7 +99,7 @@ namespace QuickVR
 
         }
 
-        protected virtual void DrawIKSolverProperties(IQuickIKSolver ikSolver, string boneName)
+        protected virtual void DrawIKSolverProperties(QuickIKSolver ikSolver, string boneName)
         {
             if (ikSolver == null) return;
 
@@ -118,9 +118,9 @@ namespace QuickVR
             //DrawIKTargets(GetIKTargetsLimb(), Handles.CubeHandleCap);
             //DrawIKTargets(GetIKTargetsMid(), Handles.SphereHandleCap);
 
-            foreach (IQuickIKSolver s in _ikManager.GetIKSolversBody()) DrawIKSolver(s, false);
-            foreach (IQuickIKSolver s in _ikManager.GetIKSolversHand(true)) DrawIKSolver(s, true);
-            foreach (IQuickIKSolver s in _ikManager.GetIKSolversHand(false)) DrawIKSolver(s, true);
+            foreach (QuickIKSolver s in _ikManager.GetIKSolversBody()) DrawIKSolver(s, false);
+            foreach (QuickIKSolver s in _ikManager.GetIKSolversHand(true)) DrawIKSolver(s, true);
+            foreach (QuickIKSolver s in _ikManager.GetIKSolversHand(false)) DrawIKSolver(s, true);
         }
 
         protected virtual void DrawIKTarget(Transform t, Handles.CapFunction function, bool isSolverFinger)
@@ -141,7 +141,7 @@ namespace QuickVR
             }
         }
 
-        protected virtual void DrawIKSolver(IQuickIKSolver ikSolver, bool isSolverFinger)
+        protected virtual void DrawIKSolver(QuickIKSolver ikSolver, bool isSolverFinger)
         {
             Handles.color = Color.magenta;
             if (ikSolver._boneUpper && ikSolver._boneMid) Handles.DrawLine(ikSolver._boneUpper.position, ikSolver._boneMid.position);

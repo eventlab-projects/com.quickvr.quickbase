@@ -5,28 +5,7 @@ using UnityEngine;
 namespace QuickVR
 {
 
-    public interface IQuickIKSolver
-    {
-        HumanBodyBones _boneID { get; set; }
-
-        //The bone chain hierarchy
-        Transform _boneUpper { get; set; }
-        Transform _boneMid { get; set; }
-        Transform _boneLimb { get; set; }
-
-        //The IK parameters
-        Transform _targetLimb { get; set; }
-        Transform _targetHint { get; set; }
-
-        float _weight { get; set; }
-
-        float _weightIKPos { get; set; }
-        float _weightIKRot { get; set; }
-        float _weightIKHint { get; set; }
-
-    }
-
-    public class QuickIKSolver : MonoBehaviour, IQuickIKSolver
+    public class QuickIKSolver : MonoBehaviour
     {
 
         #region PUBLIC PARAMETERS
@@ -233,6 +212,8 @@ namespace QuickVR
             {
                 _initialLocalRotationLimb = _boneLimb.localRotation;
             }
+
+            _targetLimb.position = _boneLimb.position;
         }
 
         public virtual float GetUpperLength()
@@ -351,35 +332,6 @@ namespace QuickVR
         }
 
         #endregion
-
-        #region DEBUG
-
-        //protected virtual void OnDrawGizmos()
-        //{
-        //    if (_boneUpper && _boneMid)
-        //    {
-        //        Gizmos.color = Color.magenta;
-        //        Gizmos.DrawLine(_boneUpper.position, _boneMid.position);
-        //    }
-        //    if (_boneMid && _boneLimb)
-        //    {
-        //        Gizmos.color = Color.magenta;
-        //        Gizmos.DrawLine(_boneMid.position, _boneLimb.position);
-        //    }
-        //    if (_boneMid && _targetHint)
-        //    {
-        //        Gizmos.color = Color.yellow;
-        //        Gizmos.DrawLine(_boneMid.position, _targetHint.position);
-        //    }
-        //    if (_boneUpper && _targetLimb)
-        //    {
-        //        Gizmos.color = Color.cyan;
-        //        Gizmos.DrawLine(_boneUpper.position, GetIKTargetLimbPosition());
-        //    }
-        //}
-
-        #endregion
-
 
     }
 

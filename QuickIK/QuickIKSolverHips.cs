@@ -109,30 +109,6 @@ namespace QuickVR
             }
         }
 
-        public override float _weightIKPos
-        {
-            get
-            {
-                return m_weightIKPos;
-            }
-            set
-            {
-                m_weightIKPos = value;
-            }
-        }
-
-        public override float _weightIKRot
-        {
-            get
-            {
-                return m_weightIKRot;
-            }
-            set
-            {
-                m_weightIKRot = value;
-            }
-        }
-
         public override float _weightIKHint
         {
             get
@@ -161,23 +137,12 @@ namespace QuickVR
 
         #endregion
 
-        #region CREATION AND DESTRUCTION
-
-        protected virtual void Awake()
-        {
-            
-        }
-
-        #endregion
-
         #region GET AND SET
 
         public override void SetCurrentPoseAsBase()
         {
-            //Debug.Log("BEFORE = " + _hips.localPosition.ToString("f3"));
             base.SetCurrentPoseAsBase();
-            //Debug.Log("AFTER = " + _hips.localPosition.ToString("f3"));
-
+            
             _hipsInitialLocalPos = _hips.localPosition;
         }
 
