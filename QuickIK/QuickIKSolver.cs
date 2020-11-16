@@ -12,20 +12,6 @@ namespace QuickVR
 
         public bool _enableIK = true;
 
-        public Vector3 _offsetTargetLimbPos = Vector3.zero;
-
-        public virtual HumanBodyBones _boneID
-        {
-            get
-            {
-                return m_boneID;
-            }
-            set
-            {
-                m_boneID = value;
-            }
-        }
-
         public virtual Transform _boneUpper
         {
             get
@@ -170,19 +156,15 @@ namespace QuickVR
         [SerializeField, ReadOnly]
         protected Transform m_targetHint = null;
 
-        [SerializeField, HideInInspector]
         protected Quaternion _initialLocalRotationUpper = Quaternion.identity;
-        
-        [SerializeField, HideInInspector]
         protected Quaternion _initialLocalRotationMid = Quaternion.identity;
-        
-        [SerializeField, HideInInspector]
         protected Quaternion _initialLocalRotationLimb = Quaternion.identity;
 
-        [SerializeField, HideInInspector]
-        protected float _lengthUpper = 0;
+        protected Vector3 _initialLocalPositionTargetLimb = Vector3.zero;
+        protected Quaternion _initialLocalRotationTargetLimb = Quaternion.identity;
+        protected Vector3 _initialLocalPositionTargetHint = Vector3.zero;
 
-        [SerializeField, HideInInspector]
+        protected float _lengthUpper = 0;
         protected float _lengthMid = 0;
 
         [SerializeField, HideInInspector]
@@ -214,6 +196,10 @@ namespace QuickVR
             }
 
             _targetLimb.position = _boneLimb.position;
+
+            _initialLocalPositionTargetLimb = _targetLimb.localPosition;
+            _initialLocalRotationTargetLimb = _targetLimb.localRotation;
+            if (_targetHint) _initialLocalPositionTargetHint = _targetHint.localPosition;
         }
 
         public virtual float GetUpperLength()
@@ -243,7 +229,7 @@ namespace QuickVR
 
         protected virtual Vector3 GetIKTargetLimbPosition()
         {
-            Vector3 v = (_targetLimb.position + _offsetTargetLimbPos) - _boneUpper.position;
+            Vector3 v = _targetLimb.position - _boneUpper.position;
             return _boneUpper.position + (v.normalized * Mathf.Min(v.magnitude, GetChainLength()));
         }
 
@@ -257,6 +243,21 @@ namespace QuickVR
             _boneUpper.localRotation = _initialLocalRotationUpper;
             _boneMid.localRotation = _initialLocalRotationMid;
             //_boneLimb.localRotation = _initialLocalRotationLimb;
+        }
+
+        public virtual Vector3 GetInitialLocalPosTargetLimb()
+        {
+            return _initialLocalPositionTargetLimb;
+        }
+
+        public virtual Quaternion GetInitialLocalRotTargetLimb()
+        {
+            return _initialLocalRotationTargetLimb;
+        }
+
+        public virtual Vector3 GetInitialLocalPosTargetHint()
+        {
+            return _initialLocalPositionTargetHint;
         }
 
         #endregion

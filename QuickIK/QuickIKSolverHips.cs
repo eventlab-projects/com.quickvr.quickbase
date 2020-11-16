@@ -25,18 +25,6 @@ namespace QuickVR
             }
         }
         
-        public override HumanBodyBones _boneID
-        {
-            get
-            {
-                return HumanBodyBones.Hips;
-            }
-            set
-            {
-                
-            }
-        }
-
         public override Transform _boneUpper
         {
             get

@@ -404,7 +404,7 @@ namespace QuickVR {
             {
                 QuickVRNode vrNode = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
                 UpdateTransformNodePosFromCalibrationPose(vrNode, HumanBodyBones.Hips, Vector3.up);
-                float maxY = GetInitialIKDataLocalPos(HumanBodyBones.Hips).y;
+                float maxY = GetIKSolver(HumanBodyBones.Hips).GetInitialLocalPosTargetLimb().y; 
                 Transform targetHips = GetIKTarget(HumanBodyBones.Hips);
                 targetHips.localPosition = new Vector3(targetHips.localPosition.x, Mathf.Min(targetHips.localPosition.y, maxY), targetHips.localPosition.z);
             }
@@ -437,7 +437,7 @@ namespace QuickVR {
             Transform calibrationPose = node.GetCalibrationPose();
             if (!t || !calibrationPose) return;
 
-            t.localPosition = GetInitialIKDataLocalPos(boneID);
+            t.localPosition = GetIKSolver(boneID).GetInitialLocalPosTargetLimb();
             Vector3 offset = Vector3.Scale(node.GetTrackedObject().transform.position - calibrationPose.position, offsetScale);
             t.position += offset;
         }
@@ -448,7 +448,7 @@ namespace QuickVR {
             Transform calibrationPose = node.GetCalibrationPose();
             if (!t || !calibrationPose) return;
 
-            t.localRotation = GetInitialIKDataLocalRot(boneID);
+            t.localRotation = GetIKSolver(boneID).GetInitialLocalRotTargetLimb();
             Quaternion rotOffset = node.GetTrackedObject().transform.rotation * Quaternion.Inverse(calibrationPose.rotation);
             t.rotation = rotOffset * t.rotation;
         }
