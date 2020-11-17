@@ -178,9 +178,23 @@ namespace QuickVR {
                 CreateIKSolversHand(HumanBodyBones.LeftHand);
                 CreateIKSolversHand(HumanBodyBones.RightHand);
 
+                foreach (HumanBodyBones boneID in GetIKLimbBones())
+                {
+                    CreateConstraintHint(boneID);
+                }
+
                 ResetIKTargets();
 
                 _isInitialized = true;
+            }
+        }
+
+        protected virtual void CreateConstraintHint(HumanBodyBones boneID)
+        {
+            QuickIKSolver ikSolver = GetIKSolver(boneID);
+            if (ikSolver._targetHint)
+            {
+                ikSolver._targetHint.parent = ikSolver._boneUpper;
             }
         }
 
@@ -409,12 +423,7 @@ namespace QuickVR {
         {
             foreach (QuickIKSolver ikSolver in GetIKSolvers())
             {
-                ikSolver.ResetIKChain();
-
-                //QuickIKData initialIKData = _initialIKPose[boneID];
-                //ikSolver._targetLimb.localPosition = initialIKData._targetLimbLocalPosition;
-                //ikSolver._targetLimb.localRotation = initialIKData._targetLimbLocalRotation;
-                //if (ikSolver._targetHint) ikSolver._targetHint.localPosition = initialIKData._targetHintLocalPosition;
+                ikSolver.Calibrate();
             }
         }
 
