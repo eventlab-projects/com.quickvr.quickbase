@@ -96,15 +96,6 @@ namespace QuickVR {
             }
         }
 
-        protected Transform _boneRotator
-        {
-            get
-            {
-                if (!m_boneRotator) m_boneRotator = transform.CreateChild("__BoneRotator__");
-                return m_boneRotator;
-            }
-        }
-
         protected Dictionary<HumanBodyBones, HumanBodyBones> _hintToLimbBone
         {
             get
@@ -169,9 +160,6 @@ namespace QuickVR {
         [SerializeField, HideInInspector]
         private Transform m_ikSolversRightHand = null;
 
-        [SerializeField, HideInInspector]
-        private Transform m_boneRotator = null;
-
         private Dictionary<HumanBodyBones, HumanBodyBones> m_HintToLimbBone = null;
 
         #endregion
@@ -235,8 +223,6 @@ namespace QuickVR {
             QuickUtils.Destroy(m_ikSolversBody);
             QuickUtils.Destroy(m_ikSolversLeftHand);
             QuickUtils.Destroy(m_ikSolversRightHand);
-
-            QuickUtils.Destroy(m_boneRotator);
         }
 
         protected override void RegisterTrackingManager()
@@ -660,20 +646,7 @@ namespace QuickVR {
                 QuickIKSolver ikSolver = GetIKSolver<QuickIKSolver>(ikLimbBones[i]);
                 if (ikSolver && ((_ikMaskBody & (1 << i)) != 0))
                 {
-                    //ikSolver.ResetIKChain();
-                    //Correct the rotations of the limb bones by accounting for human body constraints
                     ikSolver.UpdateIK();
-                    if (i == (int)IKLimbBones.LeftHand || i == (int)IKLimbBones.RightHand)
-                    {
-                        Vector3 localEuler = ikSolver._targetLimb.localEulerAngles;
-                        float rotAngle = localEuler.z;
-                        Vector3 rotAxis = (ikSolver._boneLimb.position - ikSolver._boneMid.position).normalized;
-
-                        float boneMidWeight = 0.5f;
-                        Quaternion limbRot = ikSolver._boneLimb.rotation;
-                        CorrectRotation(ikSolver._boneMid, rotAxis, rotAngle * boneMidWeight);
-                        ikSolver._boneLimb.rotation = limbRot;
-                    }
                 }
             }
 
@@ -697,18 +670,6 @@ namespace QuickVR {
             //    QuickIKSolver ikSolver = GetIKSolver<QuickIKSolver>(ToUnity(boneID, false));
             //    if ((_ikMaskRightHand & (1 << (int)boneID)) != 0) ikSolver.UpdateIK();
             //}
-        }
-
-        protected virtual void CorrectRotation(Transform tBone, Vector3 rotAxis, float rotAngle)
-        {
-            _boneRotator.forward = rotAxis;
-            Vector3 upBefore = _boneRotator.up;
-            _boneRotator.Rotate(rotAxis, rotAngle, Space.World);
-            if (Vector3.Dot(upBefore, _boneRotator.up) < 0)
-            {
-                rotAngle += 180.0f;
-            }
-            tBone.Rotate(rotAxis, rotAngle, Space.World);
         }
 
         #endregion
