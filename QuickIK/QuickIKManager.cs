@@ -50,6 +50,7 @@ namespace QuickVR {
                 return m_ikTargetsRoot;
             }
         }
+        protected Transform m_ikTargetsRoot;
 
         protected Transform _ikTargetsLeftHand
         {
@@ -59,6 +60,7 @@ namespace QuickVR {
                 return m_ikTargetsLeftHand;
             }
         }
+        protected Transform m_ikTargetsLeftHand;
 
         protected Transform _ikTargetsRightHand
         {
@@ -68,6 +70,7 @@ namespace QuickVR {
                 return m_ikTargetsRightHand;
             }
         }
+        protected Transform m_ikTargetsRightHand;
 
         protected Transform _ikSolversBody
         {
@@ -77,6 +80,7 @@ namespace QuickVR {
                 return m_ikSolversBody;
             }
         }
+        protected Transform m_ikSolversBody;
 
         protected Transform _ikSolversLeftHand
         {
@@ -86,6 +90,7 @@ namespace QuickVR {
                 return m_ikSolversLeftHand;
             }
         }
+        protected Transform m_ikSolversLeftHand;
 
         protected Transform _ikSolversRightHand
         {
@@ -95,6 +100,7 @@ namespace QuickVR {
                 return m_ikSolversRightHand;
             }
         }
+        protected Transform m_ikSolversRightHand;
 
         protected Dictionary<HumanBodyBones, HumanBodyBones> _hintToLimbBone
         {
@@ -124,7 +130,8 @@ namespace QuickVR {
 
                 return m_HintToLimbBone;
             }
-        } 
+        }
+        protected Dictionary<HumanBodyBones, HumanBodyBones> m_HintToLimbBone = null;
 
         protected Dictionary<HumanBodyBones, QuickIKSolver> _ikSolvers = new Dictionary<HumanBodyBones, QuickIKSolver>();
         protected static List<HumanBodyBones> _ikLimbBones = null;
@@ -137,30 +144,6 @@ namespace QuickVR {
 
         [SerializeField, HideInInspector]
         protected bool _isInitialized = false;
-
-        #endregion
-
-        #region PRIVATE ATTRIBUTES
-
-        [SerializeField, HideInInspector]
-        private Transform m_ikTargetsRoot = null;
-
-        [SerializeField, HideInInspector]
-        private Transform m_ikTargetsLeftHand = null;
-
-        [SerializeField, HideInInspector]
-        private Transform m_ikTargetsRightHand = null;
-
-        [SerializeField, HideInInspector]
-        private Transform m_ikSolversBody = null;
-
-        [SerializeField, HideInInspector]
-        private Transform m_ikSolversLeftHand = null;
-
-        [SerializeField, HideInInspector]
-        private Transform m_ikSolversRightHand = null;
-
-        private Dictionary<HumanBodyBones, HumanBodyBones> m_HintToLimbBone = null;
 
         #endregion
 
