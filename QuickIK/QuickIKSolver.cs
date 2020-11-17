@@ -182,19 +182,10 @@ namespace QuickVR
 
         public virtual void SetCurrentPoseAsBase()
         {
-            if (_boneUpper)
-            {
-                _initialLocalRotationUpper = _boneUpper.localRotation;
-            }
-            if (_boneMid)
-            {
-                _initialLocalRotationMid = _boneMid.localRotation;
-            }
-            if (_boneLimb)
-            {
-                _initialLocalRotationLimb = _boneLimb.localRotation;
-            }
-
+            _initialLocalRotationUpper = _boneUpper.localRotation;
+            _initialLocalRotationMid = _boneMid.localRotation;
+            _initialLocalRotationLimb = _boneLimb.localRotation;
+            
             _targetLimb.position = _boneLimb.position;
 
             _initialLocalPositionTargetLimb = _targetLimb.localPosition;
@@ -242,7 +233,7 @@ namespace QuickVR
         {
             _boneUpper.localRotation = _initialLocalRotationUpper;
             _boneMid.localRotation = _initialLocalRotationMid;
-            //_boneLimb.localRotation = _initialLocalRotationLimb;
+            _boneLimb.localRotation = _initialLocalRotationLimb;
         }
 
         public virtual Vector3 GetInitialLocalPosTargetLimb()

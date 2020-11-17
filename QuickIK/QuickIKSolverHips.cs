@@ -11,25 +11,11 @@ namespace QuickVR
 
         #region PUBLIC PARAMETERS
 
-        public Transform _hips
-        {
-            get
-            {
-                if (!m_Hips)
-                {
-                    m_Hips = GetComponentInParent<Animator>().GetBoneTransform(HumanBodyBones.Hips);
-                    _hipsInitialLocalPos = m_Hips.localPosition;
-                }
-
-                return m_Hips;
-            }
-        }
-        
         public override Transform _boneUpper
         {
             get
             {
-                return _hips;
+                return _boneLimb;
             }
             set
             {
@@ -41,7 +27,7 @@ namespace QuickVR
         {
             get
             {
-                return _hips;
+                return _boneLimb;
             }
             set
             {
@@ -53,7 +39,13 @@ namespace QuickVR
         {
             get
             {
-                return _hips;
+                if (!m_boneLimb)
+                {
+                    m_boneLimb = GetComponentInParent<Animator>().GetBoneTransform(HumanBodyBones.Hips);
+                    _hipsInitialLocalPos = m_boneLimb.localPosition;
+                }
+
+                return m_boneLimb;
             }
             set
             {
@@ -118,25 +110,18 @@ namespace QuickVR
 
         #endregion
 
-        #region PRIVATE ATTRIBUTES
-
-        [SerializeField]
-        private Transform m_Hips = null;
-
-        #endregion
-
         #region GET AND SET
 
         public override void SetCurrentPoseAsBase()
         {
             base.SetCurrentPoseAsBase();
             
-            _hipsInitialLocalPos = _hips.localPosition;
+            _hipsInitialLocalPos = _boneLimb.localPosition;
         }
 
         public override void ResetIKChain()
         {
-            _hips.localPosition = _hipsInitialLocalPos;
+            _boneLimb.localPosition = _hipsInitialLocalPos;
         }
 
         #endregion
@@ -147,7 +132,7 @@ namespace QuickVR
         {
             if (!_enableIK) return;
 
-            _hips.position = _targetLimb.position;
+            _boneLimb.position = _targetLimb.position;
         }
 
         #endregion
