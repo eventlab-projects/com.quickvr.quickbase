@@ -268,6 +268,13 @@ namespace QuickVR
         {
             if (!_enableIK || !_boneUpper || !_boneMid || !_boneLimb || !_targetLimb) return;
 
+            Transform tmpParent = null;
+            if (_targetHint)
+            {
+                tmpParent = _targetHint.parent;
+                _targetHint.parent = _boneUpper;
+            }
+
             Quaternion animBoneUpperRot = _boneUpper.rotation;
             Quaternion animBoneMidRot = _boneMid.rotation;
             Quaternion animBoneLimbRot = _boneLimb.rotation;
@@ -282,6 +289,11 @@ namespace QuickVR
             _boneUpper.rotation = Quaternion.Lerp(animBoneUpperRot, ikBoneUpperRot, _weightIKPos);
             _boneMid.rotation = Quaternion.Lerp(animBoneMidRot, ikBoneMidRot, _weightIKPos);
             _boneLimb.rotation = Quaternion.Lerp(animBoneLimbRot, ikBoneLimbRot, _weightIKRot);
+
+            if (_targetHint)
+            {
+                _targetHint.parent = tmpParent;
+            }
         }
 
         protected virtual void ComputeIKPosition(out Quaternion boneUpperRot, out Quaternion boneMidRot)
