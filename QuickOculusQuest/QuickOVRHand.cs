@@ -357,7 +357,8 @@ namespace QuickVR
                     vrNode.transform.localRotation = OVRPlugin.GetNodePose(ovrNode, OVRPlugin.Step.Render).ToOVRPose().orientation;
                 }
 
-                vrNode.SetTracked(isTrackedPos || isTrackedRot);
+                //vrNode.SetTracked(isTrackedPos || isTrackedRot);
+                vrNode.SetTracked(IsDataHighConfidence);
             }
         }
 

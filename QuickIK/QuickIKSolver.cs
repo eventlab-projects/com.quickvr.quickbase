@@ -79,11 +79,22 @@ namespace QuickVR
         {
             get
             {
+                if (!m_targetHint)
+                {
+                    foreach (Transform t in _boneUpper)
+                    {
+                        if (t.name.Contains(QuickIKManager.IK_TARGET_PREFIX))
+                        {
+                            m_targetHint = t;
+                        }
+                    }
+                }
                 return m_targetHint;
             }
             set
             {
                 m_targetHint = value;
+                m_targetHint.parent = _boneUpper;
             }
         }
 
