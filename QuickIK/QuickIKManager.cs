@@ -180,23 +180,9 @@ namespace QuickVR {
                 CreateIKSolversHand(HumanBodyBones.LeftHand);
                 CreateIKSolversHand(HumanBodyBones.RightHand);
 
-                foreach (HumanBodyBones boneID in GetIKLimbBones())
-                {
-                    CreateConstraintHint(boneID);
-                }
-
                 ResetIKTargets();
 
                 _isInitialized = true;
-            }
-        }
-
-        protected virtual void CreateConstraintHint(HumanBodyBones boneID)
-        {
-            QuickIKSolver ikSolver = GetIKSolver(boneID);
-            if (ikSolver._targetHint)
-            {
-                ikSolver._targetHint.parent = ikSolver._boneUpper;
             }
         }
 
