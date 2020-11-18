@@ -389,6 +389,15 @@ namespace QuickVR {
         [ButtonMethod]
         public virtual void ResetIKTargets()
         {
+            //Restore the TPose
+            _ikTargetsRoot.ResetTransformation();
+            
+            _ikTargetsLeftHand.parent = _animator.GetBoneTransform(HumanBodyBones.LeftHand);
+            _ikTargetsLeftHand.ResetTransformation();
+
+            _ikTargetsRightHand.parent = _animator.GetBoneTransform(HumanBodyBones.RightHand);
+            _ikTargetsRightHand.ResetTransformation();
+
             ResetInitialPose();
 
             //Temporally set the parent of each ikTargetLimb to be the boneLimb. This way, the 
@@ -417,6 +426,9 @@ namespace QuickVR {
             {
                 ikSolver._targetLimb.parent = GetIKTargetParent(ikSolver._boneID);
             }
+
+            _ikTargetsLeftHand.parent = transform;
+            _ikTargetsRightHand.parent = transform;
         }
 
         protected virtual Transform GetIKTargetParent(HumanBodyBones boneID)
