@@ -112,9 +112,9 @@ namespace QuickVR
 
         #region GET AND SET
 
-        public override void SetCurrentPoseAsBase()
+        public override void SaveCurrentPose()
         {
-            base.SetCurrentPoseAsBase();
+            base.SaveCurrentPose();
             
             _hipsInitialLocalPos = _boneLimb.localPosition;
         }

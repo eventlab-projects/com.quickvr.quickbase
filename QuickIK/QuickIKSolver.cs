@@ -214,14 +214,8 @@ namespace QuickVR
 
         #region GET AND SET
 
-        public virtual void SetCurrentPoseAsBase()
+        public virtual void SaveCurrentPose()
         {
-            _initialLocalRotationUpper = _boneUpper.localRotation;
-            _initialLocalRotationMid = _boneMid.localRotation;
-            _initialLocalRotationLimb = _boneLimb.localRotation;
-            
-            _targetLimb.position = _boneLimb.position;
-
             _initialLocalPositionTargetLimb = _targetLimb.localPosition;
             _initialLocalRotationTargetLimb = _targetLimb.localRotation;
             if (_targetHint) _initialLocalPositionTargetHint = _targetHint.localPosition;

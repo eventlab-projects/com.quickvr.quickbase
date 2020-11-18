@@ -161,7 +161,7 @@ namespace QuickVR {
         {
             Reset();
 
-            SetCurrentPoseAsBase();
+            SaveCurrentPose();
         }
 
         protected virtual void Reset()
@@ -202,7 +202,7 @@ namespace QuickVR {
 
         protected virtual void OnDestroy()
         {
-            ResetInitialPose();
+            ResetTPose();
 
             foreach (QuickIKSolver ikSolver in GetIKSolvers())
             {
@@ -334,15 +334,15 @@ namespace QuickVR {
 
         #region GET AND SET
 
-        public virtual void SetCurrentPoseAsBase()
+        public virtual void SaveCurrentPose()
         {
             foreach (QuickIKSolver ikSolver in GetIKSolvers())
             {
-                ikSolver.SetCurrentPoseAsBase();
+                ikSolver.SaveCurrentPose();
             }
         }
 
-        protected virtual void ResetInitialPose()
+        protected virtual void ResetTPose()
         {
             _animator.GetBoneTransform(HumanBodyBones.Hips).localPosition = _initialHipsLocalPosition;
             foreach (HumanBodyBones b in QuickHumanTrait.GetHumanBodyBones())
@@ -398,7 +398,7 @@ namespace QuickVR {
             _ikTargetsRightHand.parent = _animator.GetBoneTransform(HumanBodyBones.RightHand);
             _ikTargetsRightHand.ResetTransformation();
 
-            ResetInitialPose();
+            ResetTPose();
 
             //Temporally set the parent of each ikTargetLimb to be the boneLimb. This way, the 
             //target is automatically moved to the bone position when the animation is applied. 
@@ -429,6 +429,8 @@ namespace QuickVR {
 
             _ikTargetsLeftHand.parent = transform;
             _ikTargetsRightHand.parent = transform;
+
+            SaveCurrentPose();
         }
 
         protected virtual Transform GetIKTargetParent(HumanBodyBones boneID)
