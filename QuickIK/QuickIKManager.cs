@@ -284,29 +284,8 @@ namespace QuickVR {
             if (!ikTargetLimb)
             {
                 ikTargetLimb = GetIKTargetParent(boneID).CreateChild(GetIKTargetName(boneID));
-                Transform bone = _animator.GetBoneTransform(boneID);
-                string boneName = boneID.ToString();
-
-                //Set the position of the IKTarget
-                ikTargetLimb.position = bone.position;
                 
-                //Set the rotation of the IKTarget
-                if (boneName.Contains("Distal"))
-                {
-                    ikTargetLimb.rotation = bone.rotation;
-                }
-                else
-                {
-                    ikTargetLimb.rotation = transform.rotation;
-                    if (boneID == HumanBodyBones.LeftHand)
-                    {
-                        ikTargetLimb.LookAt(ikTargetLimb.position - transform.right, transform.up);
-                    }
-                    else if (boneID == HumanBodyBones.RightHand)
-                    {
-                        ikTargetLimb.LookAt(ikTargetLimb.position + transform.right, transform.up);
-                    }
-                }
+                ResetIKTargetLimb(boneID, ikTargetLimb);
 
                 //Create a child that will contain the real rotation of the limb bone
                 ikTargetLimb.CreateChild("__BoneRotation__").rotation = _animator.GetBoneTransform(boneID).rotation;
@@ -376,9 +355,50 @@ namespace QuickVR {
             }
         }
 
+        protected virtual void ResetIKTargetLimb(HumanBodyBones boneID)
+        {
+            ResetIKTargetLimb(boneID, GetIKSolver(boneID)._targetLimb);
+        }
+
+        protected virtual void ResetIKTargetLimb(HumanBodyBones boneID, Transform ikTargetLimb)
+        {
+            Transform bone = _animator.GetBoneTransform(boneID);
+
+            //Set the position of the IKTarget
+            ikTargetLimb.position = bone.position;
+
+            //Set the rotation of the IKTarget
+            if (boneID.ToString().Contains("Distal"))
+            {
+                ikTargetLimb.rotation = bone.rotation;
+            }
+            else
+            {
+                ikTargetLimb.rotation = transform.rotation;
+                if (boneID == HumanBodyBones.LeftHand)
+                {
+                    ikTargetLimb.LookAt(ikTargetLimb.position - transform.right, transform.up);
+                }
+                else if (boneID == HumanBodyBones.RightHand)
+                {
+                    ikTargetLimb.LookAt(ikTargetLimb.position + transform.right, transform.up);
+                }
+            }
+        }
+
         [ButtonMethod]
         public virtual void ResetIKTargets()
         {
+            ResetInitialPose();
+
+            //Temporally set the parent of each ikTargetLimb to be the boneLimb. This way, the 
+            //target is automatically moved to the bone position when the animation is applied. 
+            foreach (QuickIKSolver iKSolver in GetIKSolvers())
+            {
+                ResetIKTargetLimb(iKSolver._boneID);
+                iKSolver._targetLimb.parent = iKSolver._boneLimb;
+            }
+
             //If we have an animatorcontroller defined, the targets are moved at the position of the 
             //initial frame of the current animation in such controller. 
             if (_animator.runtimeAnimatorController)
@@ -391,24 +411,11 @@ namespace QuickVR {
                     tJaw.localRotation = _initialLocalRotations[(int)HumanBodyBones.Jaw];
                 }
             }
-            else
+
+            //Restore the ikTargetLimb real parent. 
+            foreach (QuickIKSolver ikSolver in GetIKSolvers())
             {
-                ResetInitialPose();
-            }
-            
-            foreach (HumanBodyBones b in GetIKLimbBones())
-            {
-                QuickIKSolver ikSolver = GetIKSolver(b);
-                ikSolver._targetLimb.position = ikSolver._boneLimb.position;
-                ikSolver._targetLimb.rotation = transform.rotation;
-                if (b == HumanBodyBones.LeftHand)
-                {
-                    ikSolver._targetLimb.forward = -transform.right;
-                }
-                else if (b == HumanBodyBones.RightHand)
-                {
-                    ikSolver._targetLimb.forward = transform.right;
-                }
+                ikSolver._targetLimb.parent = GetIKTargetParent(ikSolver._boneID);
             }
         }
 

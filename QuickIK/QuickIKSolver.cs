@@ -12,6 +12,31 @@ namespace QuickVR
 
         public bool _enableIK = true;
 
+        public HumanBodyBones _boneID
+        {
+            get
+            {
+                if (m_BoneID == HumanBodyBones.LastBone)
+                {
+                    if (_boneLimb)
+                    {
+                        Animator animator = GetComponentInParent<Animator>();
+                        foreach (HumanBodyBones boneID in QuickHumanTrait.GetHumanBodyBones())
+                        {
+                            if (_boneLimb == animator.GetBoneTransform(boneID))
+                            {
+                                m_BoneID = boneID;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                return m_BoneID;
+            }
+        }
+        protected HumanBodyBones m_BoneID = HumanBodyBones.LastBone;
+
         public virtual Transform _boneUpper
         {
             get
@@ -86,6 +111,7 @@ namespace QuickVR
                         if (t.name.Contains(QuickIKManager.IK_TARGET_PREFIX))
                         {
                             m_targetHint = t;
+                            break;
                         }
                     }
                 }
@@ -177,9 +203,6 @@ namespace QuickVR
 
         protected float _lengthUpper = 0;
         protected float _lengthMid = 0;
-
-        [SerializeField, HideInInspector]
-        protected HumanBodyBones m_boneID = HumanBodyBones.LastBone;
 
         [SerializeField, Range(0.0f, 1.0f)]
         protected float m_weightIKPos = 1.0f;
