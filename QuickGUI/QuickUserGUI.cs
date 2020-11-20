@@ -20,13 +20,28 @@ namespace QuickVR
         protected Canvas _canvas = null;
         protected Text _instructions = null;
 
+        protected static HashSet<QuickUserGUI> _guis = new HashSet<QuickUserGUI>(); //All the GUIS present in the game. 
+
         #endregion
 
         #region CREATION AND DESTRUCTION
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        protected static void Init()
+        {
+            QuickVRManager.OnPreCameraUpdate += ActionPreCameraUpdate;
+        }
+
         protected virtual void Awake()
         {
+            RegisterGUI(this);
+
             Reset();
+        }
+
+        protected static void RegisterGUI(QuickUserGUI userGUI)
+        {
+            _guis.Add(userGUI);
         }
 
         protected virtual void OnEnable()
@@ -41,6 +56,7 @@ namespace QuickVR
 
         protected virtual void Reset()
         {
+            gameObject.layer = LayerMask.NameToLayer("UI");
             _canvas = CreateCanvas();
             _instructions = CreateInstructionsText();
         }
@@ -84,9 +100,9 @@ namespace QuickVR
 
         #region GET AND SET
 
-        protected virtual Transform GetParentConstraintSource()
+        public virtual bool IsBlockView()
         {
-            return Camera.main.transform;
+            return true;
         }
 
         public virtual void SetTextInstructions(string text)
@@ -115,6 +131,20 @@ namespace QuickVR
         #endregion
 
         #region UPDATE
+
+        protected static void ActionPreCameraUpdate()
+        {
+            if (!QuickVRManager.IsXREnabled())
+            {
+                bool blockCamera = false;
+                foreach (QuickUserGUI g in _guis)
+                {
+                    blockCamera |= g.gameObject.activeInHierarchy && g.IsBlockView(); 
+                }
+
+                QuickSingletonManager.GetInstance<QuickVRCameraController>()._rotateCamera = blockCamera ? false : true;
+            }
+        }
 
         protected virtual void ActionPostCameraUpdate()
         {

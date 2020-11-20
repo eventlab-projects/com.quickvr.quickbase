@@ -207,7 +207,7 @@ namespace QuickVR
 
         protected virtual void Update()
         {
-            _fpsCounter._showFPS = _showFPS;
+            _fpsCounter.gameObject.SetActive(_showFPS);
 
             //Calibrate the TrackingManagers that needs to be calibrated. 
             if (InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CALIBRATE) || _isCalibrationRequired)

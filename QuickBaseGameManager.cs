@@ -351,7 +351,7 @@ namespace QuickVR {
             //Start the calibration process
             if (OnCalibrating != null) OnCalibrating();
             yield return StartCoroutine(CoUpdateStateForwardDirection());    //Wait for the VR Devices Calibration
-            _guiCalibration.ClearAllText();
+            _guiCalibration.gameObject.SetActive(false);
             _vrManager.RequestCalibration();
             _debugManager.Clear();
         }

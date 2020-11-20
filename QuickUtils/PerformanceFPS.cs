@@ -22,7 +22,6 @@ namespace QuickVR
 
 		public float _updateInterval = 0.5f;
 		public KeyCode _showHideKey = KeyCode.F12;
-		public bool _showFPS = false;
 
 		#endregion
 
@@ -40,27 +39,31 @@ namespace QuickVR
 		{
 			base.Awake();
 
-			gameObject.layer = LayerMask.NameToLayer("UI");
-
 			_instructions.alignment = TextAnchor.MiddleCenter;
 			_timeLeft = _updateInterval;
 		}
 
 		#endregion
 
-		#region UPDATE
+		#region GET AND SET
 
-		protected virtual void Update() {
-			if (Input.GetKeyDown(_showHideKey)) _showFPS = !_showFPS;
+		public override bool IsBlockView()
+		{
+			return true;
+		}
 
-			EnableInstructions(_showFPS);
+        #endregion
 
+        #region UPDATE
+
+        protected virtual void Update() {
 			_timeLeft -= Time.deltaTime;
 			_accum += Time.timeScale * Time.deltaTime;
 			++_frames;
 
 			// Interval ended - update GUI text and start new interval
-			if (_timeLeft <= 0.0) {
+			if (_timeLeft <= 0.0) 
+			{
 				// display two fractional digits (f2 format)
 				float fps = (float)_frames / _accum;
 				SetTextInstructions(fps.ToString("f2") + " FPS");

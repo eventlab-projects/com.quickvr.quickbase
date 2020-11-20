@@ -18,6 +18,7 @@ namespace QuickVR
         public float _cameraFarPlane = DEFAULT_FAR_CLIP_PLANE;
 
         [Header("Camera Mono Options:")]
+        public bool _rotateCamera = true;
         public float _speedH = 2.0f;
         public float _speedV = 2.0f;
 
@@ -148,15 +149,16 @@ namespace QuickVR
 
         protected virtual void UpdateCameraRotationMono()
         {
-            float x = Input.GetAxis("Mouse X");
-            float y = Input.GetAxis("Mouse Y");
-            _offsetH += _speedH * x;
-            _offsetV -= _speedV * y;
+            if (_rotateCamera)
+            {
+                float x = Input.GetAxis("Mouse X");
+                float y = Input.GetAxis("Mouse Y");
+                _offsetH += _speedH * x;
+                _offsetV -= _speedV * y;
 
-            _offsetH = Mathf.Clamp(_offsetH, -MAX_HORIZONTAL_ANGLE, MAX_HORIZONTAL_ANGLE);
-            _offsetV = Mathf.Clamp(_offsetV, -MAX_VERTICAL_ANGLE, MAX_VERTICAL_ANGLE);
-
-            //Debug.Log("H: " + _offsetH + " V: " + _offsetV);
+                _offsetH = Mathf.Clamp(_offsetH, -MAX_HORIZONTAL_ANGLE, MAX_HORIZONTAL_ANGLE);
+                _offsetV = Mathf.Clamp(_offsetV, -MAX_VERTICAL_ANGLE, MAX_VERTICAL_ANGLE);
+            }
 
             //Reset the rotation of the head
             _head.localRotation = _initialLocalRotationHead;
