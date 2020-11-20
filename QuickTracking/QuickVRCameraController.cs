@@ -81,7 +81,12 @@ namespace QuickVR
                 camera.gameObject.GetOrCreateComponent<FlareLayer>();
             }
             
-            Camera.main.GetOrCreateComponent<AudioListener>();
+            _camera.GetOrCreateComponent<AudioListener>();
+
+            if (!QuickVRManager.IsXREnabled())
+            {
+                _camera.fieldOfView = 90.0f;
+            }
         }
 
         protected virtual void OnEnable()
@@ -138,7 +143,6 @@ namespace QuickVR
             }
             else
             {
-                _camera.fieldOfView = 90.0f;
                 UpdateCameraRotationMono();
             }
         }
