@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-using UnityEngine.Animations;
-
 namespace QuickVR
 {
 
@@ -22,8 +20,6 @@ namespace QuickVR
         protected Canvas _canvas = null;
         protected Text _instructions = null;
 
-        protected ParentConstraint _constraint = null;
-
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -33,17 +29,20 @@ namespace QuickVR
             Reset();
         }
 
+        protected virtual void OnEnable()
+        {
+            QuickVRManager.OnPostCameraUpdate += ActionPostCameraUpdate;
+        }
+
+        protected virtual void OnDisable()
+        {
+            QuickVRManager.OnPostCameraUpdate -= ActionPostCameraUpdate;
+        }
+
         protected virtual void Reset()
         {
             _canvas = CreateCanvas();
             _instructions = CreateInstructionsText();
-        }
-
-        protected virtual IEnumerator Start()
-        {
-            while (!Camera.main) yield return null;
-
-            CreateParentConstraint();
         }
 
         protected virtual Canvas CreateCanvas()
@@ -81,18 +80,6 @@ namespace QuickVR
             return result;
         }
 
-        protected virtual void CreateParentConstraint()
-        {
-            ConstraintSource source = new ConstraintSource();
-            source.sourceTransform = Camera.main.transform;
-            source.weight = 1.0f;
-
-            _constraint = gameObject.GetOrCreateComponent<ParentConstraint>();
-            _constraint.AddSource(source);
-            _constraint.constraintActive = true;
-            _constraint.SetTranslationOffset(0, new Vector3(0, 0, 3.0f));
-        }
-
         #endregion
 
         #region GET AND SET
@@ -123,6 +110,17 @@ namespace QuickVR
         public virtual bool IsEnabledInstructions()
         {
             return _instructions.gameObject.activeSelf;
+        }
+
+        #endregion
+
+        #region UPDATE
+
+        protected virtual void ActionPostCameraUpdate()
+        {
+            Camera cam = Camera.main;
+            transform.position = cam.transform.position + cam.transform.forward * 3;
+            transform.forward = cam.transform.forward;
         }
 
         #endregion
