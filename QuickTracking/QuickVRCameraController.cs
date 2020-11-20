@@ -87,11 +87,13 @@ namespace QuickVR
         protected virtual void OnEnable()
         {
             QuickVRManager.OnSourceAnimatorSet += ActionSourceAnimatorSet;
+            QuickVRManager.OnPreCopyPose += UpdateCameraRotation;
         }
 
         protected virtual void OnDisable()
         {
             QuickVRManager.OnSourceAnimatorSet -= ActionSourceAnimatorSet;
+            QuickVRManager.OnPreCopyPose -= UpdateCameraRotation;
         }
 
         protected virtual void ActionSourceAnimatorSet()
@@ -114,15 +116,6 @@ namespace QuickVR
             
             if (animator)
             {
-                if (QuickVRManager.IsXREnabled())
-                {
-                    UpdateCameraRotationXR();
-                }
-                else
-                {
-                    UpdateCameraRotationMono();
-                }
-                                
                 //Apply the correct rotation to the cameracontrollerroot:
                 Vector3 up = animator.transform.up;
                 Vector3 rightCam = Vector3.ProjectOnPlane(_camera.transform.right, up).normalized;
@@ -134,6 +127,19 @@ namespace QuickVR
                 //This forces the camera to be in the Avatar's eye center. 
                 Vector3 offset = animator.GetEyeCenterPosition() - _camera.transform.position;
                 transform.position += offset;
+            }
+        }
+
+        protected virtual void UpdateCameraRotation()
+        {
+            if (QuickVRManager.IsXREnabled())
+            {
+                UpdateCameraRotationXR();
+            }
+            else
+            {
+                _camera.fieldOfView = 90.0f;
+                UpdateCameraRotationMono();
             }
         }
 

@@ -83,6 +83,9 @@ namespace QuickVR
         public static event QuickVRManagerAction OnPreUpdateTracking;
         public static event QuickVRManagerAction OnPostUpdateTracking;
 
+        public static event QuickVRManagerAction OnPreCopyPose;
+        public static event QuickVRManagerAction OnPostCopyPose;
+
         public static event QuickVRManagerAction OnPreCameraUpdate;
         public static event QuickVRManagerAction OnPostCameraUpdate;
 
@@ -230,7 +233,10 @@ namespace QuickVR
             UpdateTracking(false);
             if (OnPostUpdateTracking != null) OnPostUpdateTracking();
 
+            //Copy the pose of the source avatar to the target avatar
+            if (OnPreCopyPose != null) OnPreCopyPose();
             _copyPose.CopyPose();
+            if (OnPostCopyPose != null) OnPostCopyPose();
 
             //Update the Camera position
             if (OnPreCameraUpdate != null) OnPreCameraUpdate();

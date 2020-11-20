@@ -49,7 +49,7 @@ namespace QuickVR
 
 		public override bool IsBlockView()
 		{
-			return true;
+			return false;
 		}
 
         #endregion
