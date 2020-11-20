@@ -342,15 +342,23 @@ namespace QuickVR {
             }
 #endif
 
-            //Adjust the HMD
-            yield return StartCoroutine(CoUpdateHMDAdjustment());
-
+            if (QuickVRManager.IsXREnabled())
+            {
+                //Adjust the HMD
+                yield return StartCoroutine(CoUpdateHMDAdjustment());
+            }
+            
             //Show the logos if any
             yield return StartCoroutine(CoShowLogos());
 
             //Start the calibration process
             if (OnCalibrating != null) OnCalibrating();
-            yield return StartCoroutine(CoUpdateStateForwardDirection());    //Wait for the VR Devices Calibration
+
+            if (QuickVRManager.IsXREnabled())
+            {
+                yield return StartCoroutine(CoUpdateStateForwardDirection());    //Wait for the VR Devices Calibration
+            }
+
             _guiCalibration.gameObject.SetActive(false);
             _vrManager.RequestCalibration();
             _debugManager.Clear();
