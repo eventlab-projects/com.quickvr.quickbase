@@ -108,6 +108,11 @@ namespace QuickVR
 
         #region GET AND SET
 
+        public static bool IsXREnabled()
+        {
+            return UnityEngine.XR.XRSettings.enabled;
+        }
+
         public virtual Animator GetAnimatorTarget()
         {
             return _animatorTarget;
