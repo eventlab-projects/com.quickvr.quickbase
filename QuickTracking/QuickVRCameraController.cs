@@ -87,6 +87,8 @@ namespace QuickVR
             {
                 _camera.fieldOfView = 90.0f;
             }
+
+            QuickUICursor.CreateVRCursor(QuickUICursor.Role.Head, _camera.transform);
         }
 
         protected virtual void OnEnable()

@@ -487,15 +487,14 @@ namespace QuickVR
         {
             Transform result = null;
 
-            if ((int)boneID < (int)HumanBodyBones.LastBone) result = animator.GetBoneTransform((HumanBodyBones)boneID);
+            if ((int)boneID < (int)HumanBodyBones.LastBone)
+            {
+                result = animator.GetBoneTransform((HumanBodyBones)boneID);
+            }
             else
             {
                 //At this point, boneID is a bone finger tip
-                Transform tBoneParent = animator.GetBoneTransform(GetParentBone(boneID));
-                if (tBoneParent)
-                {
-                    result = (tBoneParent.childCount > 0) ? tBoneParent.GetChild(0) : tBoneParent;
-                }
+                result = animator.GetBoneTransform(GetParentBone(boneID)).GetChild(0);
             }
 
             return result;
@@ -559,6 +558,97 @@ namespace QuickVR
         public static bool IsFingerBoneLeft(QuickHumanBodyBones bone)
         {
             return _fingerBonesLeft.Contains(bone);
+        }
+
+        #endregion
+
+        #region ANIMATOR EXTENSIONS
+
+        public static void CreateMissingBones(this Animator animator)
+        {
+            animator.CreateEyes();
+            animator.CreateFingerTips();
+        }
+
+        private static void CreateEyes(this Animator animator)
+        {
+            CreateEye(animator, true);
+            CreateEye(animator, false);
+        }
+
+        private static void CreateEye(this Animator animator, bool eyeLeft)
+        {
+            if (!animator.GetEye(eyeLeft))
+            {
+                HumanBodyBones eyeBoneID = eyeLeft ? HumanBodyBones.LeftEye : HumanBodyBones.RightEye;
+                if (!animator.GetBoneTransform(eyeBoneID))
+                {
+                    Transform tHead = animator.GetBoneTransform(HumanBodyBones.Head);
+                    Transform tEye = tHead.CreateChild(eyeBoneID.ToString());
+
+                    //The eye center position
+                    tEye.position = tHead.position + animator.transform.forward * 0.15f + animator.transform.up * 0.13f;
+
+                    //Account for the Eye Separation
+                    float sign = eyeLeft ? -1.0f : 1.0f;
+                    tEye.position += sign * animator.transform.right * 0.032f;
+                }
+            }
+        }
+
+        private static void CreateFingerTips(this Animator animator)
+        {
+            HumanBodyBones[] distalBones =
+            {
+                HumanBodyBones.LeftThumbDistal,
+                HumanBodyBones.LeftIndexDistal,
+                HumanBodyBones.LeftMiddleDistal,
+                HumanBodyBones.LeftRingDistal,
+                HumanBodyBones.LeftLittleDistal,
+
+                HumanBodyBones.RightThumbDistal,
+                HumanBodyBones.RightIndexDistal,
+                HumanBodyBones.RightMiddleDistal,
+                HumanBodyBones.RightRingDistal,
+                HumanBodyBones.RightLittleDistal
+            };
+
+            foreach (HumanBodyBones boneID in distalBones)
+            {
+                Transform tBoneDistal = animator.GetBoneTransform(boneID);
+                if (!tBoneDistal.GetChild(0))
+                {
+                    Transform tBoneIntermediate = animator.GetBoneTransform(GetParentBone(boneID));
+                    Vector3 v = tBoneDistal.position - tBoneIntermediate.position;
+
+                    Transform tBoneTip = tBoneDistal.CreateChild("__FingerTip__");
+                    tBoneTip.position = tBoneDistal.position + v;
+                }
+            }
+        }
+
+        public static Transform GetEye(this Animator animator, bool eyeLeft)
+        {
+            HumanBodyBones eyeBoneID = eyeLeft ? HumanBodyBones.LeftEye : HumanBodyBones.RightEye;
+            Transform eye = animator.GetBoneTransform(eyeBoneID);
+            if (!eye)
+            {
+                eye = animator.GetBoneTransform(HumanBodyBones.Head).Find(eyeBoneID.ToString());
+            }
+
+            return eye;
+        }
+
+        public static Vector3 GetEyeCenterPosition(this Animator animator)
+        {
+            Transform lEye = animator.GetEye(true);
+            Transform rEye = animator.GetEye(false);
+            if (lEye && rEye)
+            {
+                return Vector3.Lerp(lEye.position, rEye.position, 0.5f);
+            }
+
+            return animator.transform.position;
         }
 
         #endregion

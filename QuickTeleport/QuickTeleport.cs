@@ -12,7 +12,7 @@ namespace QuickVR
         public float _teleportTime = 0.3f;
         public Transform _pfTrajectoryTarget = null;
 
-        public VRCursorType _vrCursorType = VRCursorType.HEAD;
+        public QuickUICursor.Role _vrCursorType = QuickUICursor.Role.Head;
         public string _teleportKey = "Teleport";
 
         #endregion
@@ -21,8 +21,6 @@ namespace QuickVR
 
         protected Transform _trajectoryTarget = null;
         protected CameraFade _cameraFade = null;
-
-        protected QuickUnityVR _hTracking = null;
 
         #endregion
 
@@ -45,11 +43,6 @@ namespace QuickVR
             SetTrajectoryVisible(false);
         }
 
-        protected virtual void Start()
-        {
-            _hTracking = GetComponentInChildren<QuickUnityVR>();
-        }
-
         protected virtual void OnEnable()
         {
             StartCoroutine(CoUpdate());
@@ -67,7 +60,7 @@ namespace QuickVR
 
         protected virtual QuickUICursor GetCursor()
         {
-            return _hTracking.GetVRCursor(_vrCursorType);
+            return QuickUICursor.GetVRCursor(_vrCursorType);
         }
 
         public virtual void SetTrajectoryVisible(bool v)

@@ -47,8 +47,6 @@ namespace QuickVR {
 
         protected PositionConstraint _footprints = null;
 
-        protected Dictionary<VRCursorType, QuickUICursor> _vrCursors = new Dictionary<VRCursorType, QuickUICursor>();
-
         protected QuickVRHand _vrHandLeft = null;
         protected QuickVRHand _vrHandRight = null;
 
@@ -82,13 +80,6 @@ namespace QuickVR {
                 QuickVRNode.OnCalibrateVRNodeLeftFoot -= OnCalibrateVRNodeFoot;
                 QuickVRNode.OnCalibrateVRNodeRightFoot -= OnCalibrateVRNodeFoot;
             }
-        }
-
-        protected override void Reset()
-        {
-            base.Reset();
-
-            _animator.CreateEyes();
         }
 
         protected override void Awake()
@@ -139,12 +130,11 @@ namespace QuickVR {
 
         protected virtual void CreateVRCursors()
         {
-            //CreateVRCursor(VRCursorType.HEAD, Camera.main.transform);
-            CreateVRCursorHand(VRCursorType.LEFT, _vrHandLeft._handBone, _vrHandLeft._handBoneIndexDistal);
-            CreateVRCursorHand(VRCursorType.RIGHT, _vrHandRight._handBone, _vrHandRight._handBoneIndexDistal);
+            CreateVRCursorHand(QuickUICursor.Role.LeftHand, _vrHandLeft._handBone, _vrHandLeft._handBoneIndexDistal);
+            CreateVRCursorHand(QuickUICursor.Role.RightHand, _vrHandRight._handBone, _vrHandRight._handBoneIndexDistal);
         }
 
-        protected virtual void CreateVRCursorHand(VRCursorType cType, Transform tHand, Transform tDistal)
+        protected virtual void CreateVRCursorHand(QuickUICursor.Role cType, Transform tHand, Transform tDistal)
         {
             Transform tIntermediate = tDistal.parent;
             Transform tProximal = tIntermediate.parent;
@@ -154,7 +144,7 @@ namespace QuickVR {
             cursorOrigin.forward = (tIntermediate.position - tProximal.position).normalized;
             cursorOrigin.position = tProximal.position + cursorOrigin.forward * (l1 + l2 + (l2 - l1));
 
-            CreateVRCursor(cType, cursorOrigin);
+            QuickUICursor.CreateVRCursor(cType, cursorOrigin);
         }
 
         protected virtual void CreateVRHands()
@@ -171,16 +161,6 @@ namespace QuickVR {
             if (_vrHandRight._axisAnim == "") _vrHandRight._axisAnim = "RightTrigger";
         }
 
-        protected virtual void CreateVRCursor(VRCursorType cType, Transform cTransform)
-        {
-            QuickUICursor vrCursor = cTransform.gameObject.AddComponent<QuickUICursor>();
-            vrCursor._TriggerVirtualKey = InputManager.DEFAULT_BUTTON_CONTINUE;
-            vrCursor._drawRay = (cType == VRCursorType.LEFT || cType == VRCursorType.RIGHT);
-
-            _vrCursors[cType] = vrCursor;
-            SetVRCursorActive(cType, false);
-        }
-
         #endregion
 
         #region GET AND SET
@@ -191,26 +171,6 @@ namespace QuickVR {
             {
                 _handTrackingMode = HandTrackingMode.Controllers;
             }
-        }
-
-        public virtual QuickUICursor GetVRCursor(VRCursorType cType)
-        {
-            if (!_vrCursors.ContainsKey(cType)) return null;
-
-            return _vrCursors[cType];
-        }
-
-        public virtual bool IsVRCursorActive(VRCursorType cType)
-        {
-            QuickUICursor cursor = GetVRCursor(cType);
-            return cursor ? cursor.enabled : false;
-        }
-
-        public virtual void SetVRCursorActive(VRCursorType cType, bool active)
-        {
-            if (!_vrCursors.ContainsKey(cType)) return;
-
-            _vrCursors[cType].enabled = active;
         }
 
         public virtual int GetNumExtraTrackers()
@@ -455,8 +415,8 @@ namespace QuickVR {
 
         protected virtual void UpdateVRCursors()
         {
-            GetVRCursor(VRCursorType.LEFT).transform.position = _vrHandLeft._handBoneIndexDistal.position;
-            GetVRCursor(VRCursorType.RIGHT).transform.position = _vrHandRight._handBoneIndexDistal.position;
+            QuickUICursor.GetVRCursor(QuickUICursor.Role.LeftHand).transform.position = _vrHandLeft._handBoneIndexDistal.position;
+            QuickUICursor.GetVRCursor(QuickUICursor.Role.RightHand).transform.position = _vrHandRight._handBoneIndexDistal.position;
         }
 
         #endregion

@@ -245,7 +245,7 @@ namespace QuickVR {
 
                 if (!b)
                 {
-                    _hTracking.SetVRCursorActive(VRCursorType.RIGHT, false);
+                    QuickUICursor.GetVRCursor(QuickUICursor.Role.RightHand).enabled = false;
                     _teleport.SetTrajectoryVisible(false);
                 }
             }
@@ -433,10 +433,9 @@ namespace QuickVR {
             _teleport = GetPlayer().GetComponentInChildren<QuickTeleport>(true);
             if (_teleport != null)
             {
-                VRCursorType cType = VRCursorType.RIGHT;
-                QuickUnityVR hTracking = GetPlayer().GetComponent<QuickUnityVR>();
+                QuickUICursor.Role cType = QuickUICursor.Role.RightHand;
                 _teleport.enabled = true;
-                QuickUICursor cursor = hTracking.GetVRCursor(cType);
+                QuickUICursor cursor = QuickUICursor.GetVRCursor(cType);
 
                 cursor._RayCastMask &= ~(1 << LayerMask.NameToLayer("PeripheryVision"));
 
@@ -444,8 +443,8 @@ namespace QuickVR {
                 {
                     yield return null;
 
-                    bool isPointing = hTracking.GetVRHand(QuickVRNode.Type.RightHand).IsPointing();
-                    hTracking.SetVRCursorActive(cType, isPointing);
+                    bool isPointing = GetPlayer().GetComponent<QuickUnityVR>().GetVRHand(QuickVRNode.Type.RightHand).IsPointing();
+                    QuickUICursor.GetVRCursor(cType).enabled = isPointing;
                 }
             }
         }
