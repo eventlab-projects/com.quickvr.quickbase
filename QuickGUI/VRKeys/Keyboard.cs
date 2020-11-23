@@ -33,7 +33,8 @@ namespace VRKeys
 
 		protected string text = "";
 		protected ShiftKey _shiftKey = null;
-		protected TextMeshProUGUI _displaytext;
+		protected TextMeshProUGUI _textInput = null;
+		protected TextMeshProUGUI _textHint = null;
 
 		protected float _timeBlinking = 0;
 		protected Key[] _keys = null;
@@ -42,6 +43,14 @@ namespace VRKeys
 		protected bool _isInitialized = false;
 		protected bool _isEnabled = true;
 		protected bool shifted = false;
+
+		protected Transform _rootKeys
+        {
+			get
+            {
+				return transform.Find("__Keyboard__");
+            }
+        }
 		
 		#endregion
 
@@ -68,7 +77,7 @@ namespace VRKeys
 		{
 			SetLayout(keyboardLayout);
 
-			_displaytext = transform.GetChild(0).GetComponentInChildren<TextMeshProUGUI>();
+			_textInput = transform.Find("__TextInput__").GetComponentInChildren<TextMeshProUGUI>();
 			_shiftKey = GetComponentInChildren<ShiftKey>();
 
 			_isInitialized = true;
@@ -97,7 +106,7 @@ namespace VRKeys
 		{
 			for (int i = 0; i < rowKeys.Length; i++)
 			{
-				LetterKey key = Instantiate<LetterKey>(Resources.Load<LetterKey>("Prefabs/pf_QuickVRKeyboardButton"), transform.GetChild(1));
+				LetterKey key = Instantiate<LetterKey>(Resources.Load<LetterKey>("Prefabs/pf_QuickVRKeyboardButton"), _rootKeys);
 				key.transform.localPosition = Vector3.right * ((KEY_WIDTH * i) + rowOffset);
 				key.transform.localPosition += Vector3.down * ((KEY_HEIGHT * 0.5f) + (KEY_HEIGHT * rowNum));
 
@@ -211,10 +220,10 @@ namespace VRKeys
 
 		protected virtual void Update()
         {
-			_displaytext.text = text;
+			_textInput.text = text;
 			if (_timeBlinking < _blinkTime)
             {
-				_displaytext.text += "|";
+				_textInput.text += "|";
 			}
 
 			_timeBlinking += Time.deltaTime;

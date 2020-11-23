@@ -120,7 +120,12 @@ namespace QuickVR
                 return false;
             }
 #endif
-            return Input.GetKey(key);
+            bool result = Input.GetKey(key);
+            if (key == KeyCode.JoystickButton0)
+            {
+                result = result || Input.GetMouseButton(0);
+            }
+            return result;
         }
 
         #endregion

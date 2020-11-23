@@ -22,6 +22,14 @@ namespace QuickVR
 
         protected static HashSet<QuickUserGUI> _guis = new HashSet<QuickUserGUI>(); //All the GUIS present in the game. 
 
+        protected Camera _camera
+        {
+            get
+            {
+                return Camera.main;
+            }
+        }
+
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -148,9 +156,9 @@ namespace QuickVR
 
         protected virtual void ActionPostCameraUpdate()
         {
-            Camera cam = Camera.main;
-            transform.position = cam.transform.position + cam.transform.forward * 3;
-            transform.forward = cam.transform.forward;
+            Vector3 fwd = _camera.transform.forward;
+            transform.position = _camera.transform.position + fwd * 3;
+            transform.forward = fwd;
         }
 
         #endregion

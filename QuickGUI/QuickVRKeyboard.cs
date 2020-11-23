@@ -32,7 +32,7 @@ namespace QuickVR
         {
             if (!_vrKeyboard)
             {
-                _vrKeyboard = Instantiate<Keyboard>(Resources.Load<Keyboard>("Prefabs/pf_QuickVRKeyboard"));
+                _vrKeyboard = Instantiate(Resources.Load<Keyboard>("Prefabs/pf_QuickVRKeyboard"));
                 _vrKeyboard.transform.SetParent(transform, false);
                 _vrKeyboard.transform.ResetTransformation();
             }
@@ -63,10 +63,12 @@ namespace QuickVR
                 Animator animator = _vrManager.GetAnimatorTarget();
                 if (animator)
                 {
-                    Transform tHead = animator.GetBoneTransform(HumanBodyBones.Head);
-                    _vrKeyboard.transform.rotation = animator.transform.rotation;
-                    _vrKeyboard.transform.position = tHead.position;
-                    _vrKeyboard.transform.position += animator.transform.forward * 2;
+                    Vector2 hSize = _vrKeyboard.GetComponent<RectTransform>().GetSizeHalf();
+                    Transform t = QuickVRManager.IsXREnabled() ? animator.transform : Camera.main.transform;
+                    Vector3 pos = animator.GetBoneTransform(HumanBodyBones.Head).position;
+                    _vrKeyboard.transform.position = pos - (t.right * hSize.x) + (t.up * hSize.y) + t.forward * 2;
+                    _vrKeyboard.transform.rotation = t.rotation;
+                    
                 }
                 
             }

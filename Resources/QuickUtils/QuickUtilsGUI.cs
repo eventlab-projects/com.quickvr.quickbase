@@ -52,6 +52,26 @@ namespace QuickVR
         {
             GUILayout.Label(label);
         }
+
+        public static Vector2 GetSize(this RectTransform t)
+        {
+            return new Vector2(t.rect.width, t.rect.height);
+        }
+
+        public static Vector2 GetSizeHalf(this RectTransform t)
+        {
+            return Vector2.Scale(new Vector2(0.5f, 0.5f), t.GetSize());
+        }
+
+        public static float GetWidth(this RectTransform t)
+        {
+            return t.GetSize().x;
+        }
+
+        public static float GetHeight(this RectTransform t)
+        {
+            return t.GetSize().y;
+        }
     }
 }
 
