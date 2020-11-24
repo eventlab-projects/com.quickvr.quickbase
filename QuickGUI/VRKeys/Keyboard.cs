@@ -9,6 +9,8 @@ using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 
+using QuickVR;
+
 namespace VRKeys 
 {
 
@@ -23,8 +25,6 @@ namespace VRKeys
 
 		#region PUBLIC ATTRIBUTES
 
-		public KeyboardLayout keyboardLayout = KeyboardLayout.Qwerty;
-
 		public float _blinkTime = 0.5f;
 
 		#endregion
@@ -32,15 +32,13 @@ namespace VRKeys
 		#region PROTECTED ATTRIBUTES
 
 		protected string text = "";
-		protected ShiftKey _shiftKey = null;
 		protected TextMeshProUGUI _textInput = null;
 		protected TextMeshProUGUI _textHint = null;
 
 		protected float _timeBlinking = 0;
 		protected Key[] _keys = null;
-		protected Layout _layout;
+		protected Layout _layout = new Layout();
 
-		protected bool _isInitialized = false;
 		protected bool _isEnabled = true;
 		protected bool shifted = false;
 
@@ -75,71 +73,55 @@ namespace VRKeys
 
         protected virtual void Awake() 
 		{
-			SetLayout(keyboardLayout);
+			CreateRowKeys(_layout.row1Keys, 1);
+			CreateRowKeys(_layout.row2Keys, 2);
+			CreateRowKeys(_layout.row3Keys, 3);
+			_keys = GetComponentsInChildren<Key>();
 
 			_textInput = transform.Find("__TextInput__").GetComponentInChildren<TextMeshProUGUI>();
-			_shiftKey = GetComponentInChildren<ShiftKey>();
-
-			_isInitialized = true;
 		}
 
-		protected virtual void SetupKeys()
-		{
-			// Remove previous keys
-			if (_keys != null)
-			{
-				foreach (Key k in _keys)
-				{
-					if (!k.IsProtected()) Destroy(k.gameObject);
-				}
-			}
-
-			CreateRowKeys(_layout.row1Keys, _layout.row1Shift, 1, _layout.row1Offset);  //Numbers row
-			CreateRowKeys(_layout.row2Keys, _layout.row2Shift, 2, _layout.row2Offset);  //QWERTY row
-			CreateRowKeys(_layout.row3Keys, _layout.row3Shift, 3, _layout.row3Offset);  //ASDF row
-			CreateRowKeys(_layout.row4Keys, _layout.row4Shift, 4, _layout.row4Offset); //ZXCV row
-
-			_keys = GetComponentsInChildren<Key>();
-		}
-
-		protected virtual void CreateRowKeys(string[] rowKeys, string[] rowKeysShift, int rowNum, float rowOffset)
+		protected virtual void CreateRowKeys(KeyCode[] rowKeys, int rowNum)
 		{
 			for (int i = 0; i < rowKeys.Length; i++)
 			{
-				LetterKey key = Instantiate<LetterKey>(Resources.Load<LetterKey>("Prefabs/pf_QuickVRKeyboardButton"), _rootKeys);
-				key.transform.localPosition = Vector3.right * ((KEY_WIDTH * i) + rowOffset);
+				Key key = Instantiate(Resources.Load<Transform>("Prefabs/pf_QuickVRKeyboardButton"), _rootKeys).GetOrCreateComponent<Key>();
+				key.transform.localPosition = Vector3.right * (KEY_WIDTH * 0.5f + KEY_WIDTH * i);
 				key.transform.localPosition += Vector3.down * ((KEY_HEIGHT * 0.5f) + (KEY_HEIGHT * rowNum));
 
-				key.character = rowKeys[i];
-				key.shiftedChar = rowKeysShift[i];
+				KeyCode c = rowKeys[i];
+				key._keyCode = c;
+				key._hasShiftedValue = ((int)c >= (int)KeyCode.A) && ((int)c <= (int)KeyCode.Z); 
 
-				key.name = "Key: " + rowKeys[i];
-				key.gameObject.SetActive(true);
+				if (c == KeyCode.LeftShift)
+                {
+					key.SetLabel('\u25B2'.ToString());
+				}
+				else if (c == KeyCode.Colon)
+                {
+					key.SetLabel(":");
+				}
+				else if (c == KeyCode.Period)
+                {
+					key.SetLabel(".");
+				}
+				else if (c == KeyCode.Slash)
+                {
+					key.SetLabel("/");
+				}
+				else
+                {
+					//Letter key
+					key.SetLabel(c.ToString().ToLower());
+				}
+				
+				key.name = "Key: " + c.ToString();
 			}
 		}
 
 		#endregion
 
 		#region GET AND SET
-
-		public virtual void SetLayout(KeyboardLayout layout)
-		{
-			keyboardLayout = layout;
-			_layout = LayoutList.GetLayout(keyboardLayout);
-
-			SetupKeys();
-
-			// Update extra keys
-			foreach (Key key in _keys)
-			{
-				key.UpdateLayout(_layout);
-			}
-		}
-
-		public virtual bool IsInitialized()
-        {
-			return _isInitialized;
-        }
 
 		public virtual void Enable(bool enabled, bool clearTextOnEnable = true) 
 		{
@@ -176,9 +158,9 @@ namespace VRKeys
 			UpdateDisplayText();
 		}
 
-		public virtual void AddCharacter(string character) 
+		public virtual void AddText(string txt) 
 		{
-			text += character;
+			text += txt;
 			UpdateDisplayText();
 		}
 
@@ -220,6 +202,11 @@ namespace VRKeys
 
 		protected virtual void Update()
         {
+			if (!QuickVRManager.IsXREnabled())
+			{
+				UpdateKeyboardMono();
+			}
+
 			_textInput.text = text;
 			if (_timeBlinking < _blinkTime)
             {
@@ -230,6 +217,22 @@ namespace VRKeys
 			if (_timeBlinking > _blinkTime * 2)
             {
 				_timeBlinking = 0;
+            }
+        }
+
+		protected virtual void UpdateKeyboardMono()
+        {
+            if (Input.GetKeyUp(KeyCode.LeftShift))
+            {
+                ToggleShift();
+            }
+
+            foreach (Key k in _keys)
+            {
+				if (k._keyCode != KeyCode.None && Input.GetKeyDown(k._keyCode))
+                {
+					k.DoAction();
+                }
             }
         }
 

@@ -616,7 +616,7 @@ namespace QuickVR
             foreach (HumanBodyBones boneID in distalBones)
             {
                 Transform tBoneDistal = animator.GetBoneTransform(boneID);
-                if (!tBoneDistal.GetChild(0))
+                if (tBoneDistal.childCount == 0)
                 {
                     Transform tBoneIntermediate = animator.GetBoneTransform(GetParentBone(boneID));
                     Vector3 v = tBoneDistal.position - tBoneIntermediate.position;

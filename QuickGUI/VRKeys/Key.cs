@@ -12,17 +12,22 @@ using UnityEngine;
 using System.Collections;
 using TMPro;
 
-namespace VRKeys {
+namespace VRKeys 
+{
 
-	/// <summary>
-	/// An individual key in the VR _keyboard.
-	/// </summary>
 	public class Key : MonoBehaviour 
 	{
 
-		#region PROTECTED ATTRIBUTES
+        #region PUBLIC ATTRIBUTES
 
-		protected Keyboard _keyboard
+		public KeyCode _keyCode = KeyCode.None;
+		public bool _hasShiftedValue = false;
+
+        #endregion
+
+        #region PROTECTED ATTRIBUTES
+
+        protected Keyboard _keyboard
         {
 			get
             {
@@ -38,8 +43,6 @@ namespace VRKeys {
 			}
 		}
 			
-		protected bool _isShifted = false;
-
 		#endregion
 
 		#region CREATION AND DESTRUCTION
@@ -51,34 +54,58 @@ namespace VRKeys {
 
         #endregion
 
-        public virtual void DoAction() 
-		{
-			
-		}
-
-		public virtual void UpdateLayout (Layout translation) 
-		{
-			// Override me!
-		}
-
         #region GET AND SET
 
-		public virtual bool IsProtected()
-        {
-			return name[0] == '$';
-        }
-
 		public virtual void SetShifted(bool shifted)
-        {
-			_isShifted = shifted;
-        }
+		{
+			if (_hasShiftedValue)
+            {
+				string label = GetLabel();
+				SetLabel(shifted ? label.ToUpper() : label.ToLower());
+			}
+		}
 
-		public virtual bool IsShifted()
-        {
-			return _isShifted;
-        }
+		public string GetLabel()
+		{
+			return _label.text;
+		}
 
-        #endregion
+		public virtual void SetLabel(string text)
+		{
+			_label.text = text;
+		}
+
+		public virtual void DoAction()
+		{
+			if (_keyCode == KeyCode.Return)
+            {
+				_keyboard.Submit();
+            }
+			else if (_keyCode == KeyCode.LeftShift)
+            {
+				_keyboard.ToggleShift();
+            }
+			else if (_keyCode == KeyCode.Space)
+            {
+				_keyboard.AddText(" ");
+            }
+			else if (_keyCode == KeyCode.Backspace)
+            {
+				_keyboard.Backspace();
+            }
+			else if (_keyCode == KeyCode.Delete)
+            {
+				_keyboard.SetText("");
+            }
+			else
+            {
+				//A general key
+				_keyboard.AddText(GetLabel());
+			}
+		}
+
+		#endregion
 
     }
+		
 }

@@ -8,6 +8,8 @@
  * Website: https://www.campfireunion.com
  */
 
+using UnityEngine;
+
 namespace VRKeys {
 
 	/// <summary>
@@ -20,29 +22,8 @@ namespace VRKeys {
 	/// </summary>
 	public class Layout 
 	{
-		public string spaceButtonLabel = "Space";
-		public string enterButtonLabel = "OK";
-		public string cancelButtonLabel = "Cancel";
-		public string shiftButtonLabel = "Shift";
-		public string backspaceButtonLabel = "<<";
-		public string clearButtonLabel = "Clear";
-
-		public string[] row1Keys = { "`", "1", "2", "3", "4", "5", "6", "7", "8", "9", "0", "-", "=" };
-		public string[] row1Shift = { "~", "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "_", "+" };
-
-		public string[] row2Keys = { "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", "[", "]", "\\" };
-		public string[] row2Shift = { "Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P", "{", "}", "|" };
-
-		public string[] row3Keys = { "a", "s", "d", "f", "g", "h", "j", "k", "l", ";", "'" };
-		public string[] row3Shift = { "A", "S", "D", "F", "G", "H", "J", "K", "L", ":", "\"" };
-
-		public string[] row4Keys = { "z", "x", "c", "v", "b", "n", "m", ",", ".", "?" };
-		public string[] row4Shift = { "Z", "X", "C", "V", "B", "N", "M", "<", ">", "/" };
-
-		public float row1Offset = 0f;
-		public float row2Offset = 0.24f;
-		public float row3Offset = 0.32f;
-		public float row4Offset = 0.40f;
-
+		public KeyCode[] row1Keys = { KeyCode.Q, KeyCode.W, KeyCode.E, KeyCode.R, KeyCode.T, KeyCode.Y, KeyCode.U, KeyCode.I, KeyCode.O, KeyCode.P};
+		public KeyCode[] row2Keys = { KeyCode.A, KeyCode.S, KeyCode.D, KeyCode.F, KeyCode.G, KeyCode.H, KeyCode.J, KeyCode.K, KeyCode.L, KeyCode.Colon};
+		public KeyCode[] row3Keys = { KeyCode.LeftShift, KeyCode.Z, KeyCode.X, KeyCode.C, KeyCode.V, KeyCode.B, KeyCode.N, KeyCode.M, KeyCode.Slash, KeyCode.Period};
 	}
 }
