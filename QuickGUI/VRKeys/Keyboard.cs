@@ -129,12 +129,19 @@ namespace VRKeys
             {
 				t.gameObject.SetActive(enabled);
             }
-			_isEnabled = enabled;
 			
 			if (enabled && clearTextOnEnable)
             {
 				SetText("");
             }
+
+			if (!QuickVRManager.IsXREnabled())
+            {
+				InputManagerUnity iManager = QuickSingletonManager.GetInstance<InputManager>().GetComponentInChildren<InputManagerUnity>();
+				iManager._active = !enabled;
+            }
+
+			_isEnabled = enabled;
 		}
 
 		public virtual bool IsEnabled()
