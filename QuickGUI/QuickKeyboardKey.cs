@@ -1,21 +1,12 @@
-﻿/**
- * Copyright (c) 2017 The Campfire Union Inc - All Rights Reserved.
- *
- * Licensed under the MIT license. See LICENSE file in the project root for
- * full license information.
- *
- * Email:   info@campfireunion.com
- * Website: https://www.campfireunion.com
- */
-
-using UnityEngine;
-using System.Collections;
+﻿using UnityEngine;
 using TMPro;
 
-namespace VRKeys 
+using VRKeys;
+
+namespace QuickVR 
 {
 
-	public class Key : MonoBehaviour 
+	public class QuickKeyboardKey : MonoBehaviour 
 	{
 
         #region PUBLIC ATTRIBUTES
@@ -45,16 +36,7 @@ namespace VRKeys
 			
 		#endregion
 
-		#region CREATION AND DESTRUCTION
-
-		protected virtual void Start()
-        {
-			SetShifted(false);
-		}
-
-        #endregion
-
-        #region GET AND SET
+		#region GET AND SET
 
 		public virtual void SetShifted(bool shifted)
 		{

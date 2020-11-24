@@ -43,7 +43,7 @@ namespace QuickVR
 
         protected virtual void Start()
         {
-            foreach (Key k in _vrKeyboard.GetKeys())
+            foreach (QuickKeyboardKey k in _vrKeyboard.GetKeys())
             {
                 QuickUIButton button = k.GetOrCreateComponent<QuickUIButton>();
                 button.OnDown += k.DoAction;

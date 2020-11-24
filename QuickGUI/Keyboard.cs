@@ -17,9 +17,6 @@ namespace VRKeys
 	public class Keyboard : MonoBehaviour 
 	{
 		[Serializable]
-		public class KeyboardUpdateEvent : UnityEvent<string> { }
-
-		[Serializable]
 		public class KeyboardSubmitEvent : UnityEvent<string> { }
 
 
@@ -31,13 +28,12 @@ namespace VRKeys
 
 		#region PROTECTED ATTRIBUTES
 
-		protected string text = "";
+		protected string _text = "";
 		protected TextMeshProUGUI _textInput = null;
 		protected TextMeshProUGUI _textHint = null;
 
 		protected float _timeBlinking = 0;
-		protected Key[] _keys = null;
-		protected Layout _layout = new Layout();
+		protected QuickKeyboardKey[] _keys = null;
 
 		protected bool _isEnabled = true;
 		protected bool shifted = false;
@@ -49,13 +45,16 @@ namespace VRKeys
 				return transform.Find("__Keyboard__");
             }
         }
-		
+
 		#endregion
 
-		/// <summary>
-		/// Listen for events whenever the text changes.
-		/// </summary>
-		public KeyboardUpdateEvent OnUpdate = new KeyboardUpdateEvent ();
+		#region CONSTATS
+
+		protected KeyCode[] _keysRow1 = { KeyCode.Q, KeyCode.W, KeyCode.E, KeyCode.R, KeyCode.T, KeyCode.Y, KeyCode.U, KeyCode.I, KeyCode.O, KeyCode.P };
+		protected KeyCode[] _keysRow2 = { KeyCode.A, KeyCode.S, KeyCode.D, KeyCode.F, KeyCode.G, KeyCode.H, KeyCode.J, KeyCode.K, KeyCode.L, KeyCode.Colon };
+		protected KeyCode[] _keysRow3 = { KeyCode.LeftShift, KeyCode.Z, KeyCode.X, KeyCode.C, KeyCode.V, KeyCode.B, KeyCode.N, KeyCode.M, KeyCode.Slash, KeyCode.Period };
+
+		#endregion
 
 		/// <summary>
 		/// Listen for events when Submit() is called.
@@ -73,10 +72,10 @@ namespace VRKeys
 
         protected virtual void Awake() 
 		{
-			CreateRowKeys(_layout.row1Keys, 1);
-			CreateRowKeys(_layout.row2Keys, 2);
-			CreateRowKeys(_layout.row3Keys, 3);
-			_keys = GetComponentsInChildren<Key>();
+			CreateRowKeys(_keysRow1, 1);
+			CreateRowKeys(_keysRow2, 2);
+			CreateRowKeys(_keysRow3, 3);
+			_keys = GetComponentsInChildren<QuickKeyboardKey>();
 
 			_textInput = transform.Find("__TextInput__").GetComponentInChildren<TextMeshProUGUI>();
 		}
@@ -85,7 +84,7 @@ namespace VRKeys
 		{
 			for (int i = 0; i < rowKeys.Length; i++)
 			{
-				Key key = Instantiate(Resources.Load<Transform>("Prefabs/pf_QuickVRKeyboardButton"), _rootKeys).GetOrCreateComponent<Key>();
+				QuickKeyboardKey key = Instantiate(Resources.Load<Transform>("Prefabs/pf_QuickVRKeyboardButton"), _rootKeys).GetOrCreateComponent<QuickKeyboardKey>();
 				key.transform.localPosition = Vector3.right * (KEY_WIDTH * 0.5f + KEY_WIDTH * i);
 				key.transform.localPosition += Vector3.down * ((KEY_HEIGHT * 0.5f) + (KEY_HEIGHT * rowNum));
 
@@ -138,7 +137,8 @@ namespace VRKeys
 			if (!QuickVRManager.IsXREnabled())
             {
 				InputManagerUnity iManager = QuickSingletonManager.GetInstance<InputManager>().GetComponentInChildren<InputManagerUnity>();
-				iManager._active = !enabled;
+                //iManager._active = !enabled;
+                //_rootKeys.gameObject.SetActive(false);
             }
 
 			_isEnabled = enabled;
@@ -149,43 +149,43 @@ namespace VRKeys
 			return _isEnabled;
 		}
 
-		public virtual Key[] GetKeys()
+		public virtual QuickKeyboardKey[] GetKeys()
         {
 			return _keys;
         }
 
 		public virtual string GetText()
         {
-			return text;
+			return _text;
         }
 
 		public virtual void SetText(string txt) 
 		{
-			text = txt;
-			UpdateDisplayText();
+			_text = txt;
+			_timeBlinking = 0;
 		}
 
 		public virtual void AddText(string txt) 
 		{
-			text += txt;
-			UpdateDisplayText();
+			SetText(_text + txt);
 		}
 
 		public virtual void Backspace()
 		{
+			string text = _text;
 			if (text.Length > 0)
 			{
 				text = text.Substring(0, text.Length - 1);
 			}
 
-			UpdateDisplayText();
+			SetText(text);
 		}
 
 		public virtual bool ToggleShift () 
 		{
 			shifted = !shifted;
 
-			foreach (Key key in _keys) {
+			foreach (QuickKeyboardKey key in _keys) {
 				key.SetShifted(shifted);
 			}
 
@@ -194,18 +194,12 @@ namespace VRKeys
 
 		public virtual void Submit() 
 		{
-			OnSubmit.Invoke(text);
+			OnSubmit.Invoke(_text);
 		}
 
 		#endregion
 
         #region UPDATE
-
-		protected virtual void UpdateDisplayText()
-        {
-			_timeBlinking = 0;
-			OnUpdate.Invoke(text);
-		}
 
 		protected virtual void Update()
         {
@@ -214,7 +208,7 @@ namespace VRKeys
 				UpdateKeyboardMono();
 			}
 
-			_textInput.text = text;
+			_textInput.text = _text;
 			if (_timeBlinking < _blinkTime)
             {
 				_textInput.text += "|";
@@ -234,7 +228,7 @@ namespace VRKeys
                 ToggleShift();
             }
 
-            foreach (Key k in _keys)
+            foreach (QuickKeyboardKey k in _keys)
             {
 				if (k._keyCode != KeyCode.None && Input.GetKeyDown(k._keyCode))
                 {
