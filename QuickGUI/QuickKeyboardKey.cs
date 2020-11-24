@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using TMPro;
 
-using VRKeys;
-
 namespace QuickVR 
 {
 
@@ -18,11 +16,11 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected Keyboard _keyboard
+        protected QuickKeyboard _keyboard
         {
 			get
             {
-				return GetComponentInParent<Keyboard>();
+				return GetComponentInParent<QuickKeyboard>();
             }
         }
 

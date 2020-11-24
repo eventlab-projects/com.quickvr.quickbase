@@ -9,9 +9,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5702421308360925321}
-  - component: {fileID: 114000011813929276}
   - component: {fileID: 5702421308360925326}
   - component: {fileID: 478231626674104024}
+  - component: {fileID: 2088364641738848652}
   m_Layer: 0
   m_Name: pf_QuickVRKeyboard
   m_TagString: Untagged
@@ -41,25 +41,6 @@ RectTransform:
   m_AnchoredPosition: {x: -2.5, y: 3}
   m_SizeDelta: {x: 2.32, y: 1.12}
   m_Pivot: {x: 0, y: 1}
---- !u!114 &114000011813929276
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1000010614386324}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: fb08f495a9bc93a46b97e507bf9be1b3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _blinkTime: 0.5
-  OnUpdate:
-    m_PersistentCalls:
-      m_Calls: []
-  OnSubmit:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!223 &5702421308360925326
 Canvas:
   m_ObjectHideFlags: 0
@@ -103,6 +84,19 @@ MonoBehaviour:
   m_FallbackScreenDPI: 96
   m_DefaultSpriteDPI: 96
   m_DynamicPixelsPerUnit: 1
+--- !u!114 &2088364641738848652
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1000010614386324}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f028483a530c06047ac8147d0b2adea7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  _blinkTime: 0.5
 --- !u!1 &1000011303481704
 GameObject:
   m_ObjectHideFlags: 0
