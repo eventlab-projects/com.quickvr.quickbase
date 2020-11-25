@@ -34,12 +34,6 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        protected static void Init()
-        {
-            QuickVRManager.OnPreCameraUpdate += ActionPreCameraUpdate;
-        }
-
         protected virtual void Awake()
         {
             RegisterGUI(this);
@@ -108,11 +102,6 @@ namespace QuickVR
 
         #region GET AND SET
 
-        public virtual bool IsBlockView()
-        {
-            return true;
-        }
-
         public virtual void SetTextInstructions(string text)
         {
             _instructions.text = text;
@@ -136,23 +125,17 @@ namespace QuickVR
             return _instructions.gameObject.activeSelf;
         }
 
-        #endregion
-
-        #region UPDATE
-
-        protected static void ActionPreCameraUpdate()
+        public virtual void ShowAll(bool show)
         {
-            if (!QuickVRManager.IsXREnabled())
+            foreach (Transform t in transform)
             {
-                bool blockCamera = false;
-                foreach (QuickUserGUI g in _guis)
-                {
-                    blockCamera |= g.gameObject.activeInHierarchy && g.IsBlockView(); 
-                }
-
-                QuickSingletonManager.GetInstance<QuickVRCameraController>()._rotateCamera = blockCamera ? false : true;
+                t.gameObject.SetActive(show);
             }
         }
+
+		#endregion
+
+        #region UPDATE
 
         protected virtual void ActionPostCameraUpdate()
         {

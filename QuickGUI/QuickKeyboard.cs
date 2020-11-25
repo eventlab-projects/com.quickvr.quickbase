@@ -51,6 +51,9 @@ namespace QuickVR
         protected const float KEY_WIDTH = 0.16f;
         protected const float KEY_HEIGHT = 0.16f;
 
+        protected const string TEXT_INPUT_NAME = "__TextInput__";
+        protected const string TEXT_HINT_NAME = "__TextInputHint__";
+
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -68,7 +71,8 @@ namespace QuickVR
 
         protected virtual void Awake()
         {
-            _textInput = transform.CreateChild("__TextInput__").GetComponentInChildren<TextMeshProUGUI>();
+            _textInput = transform.Find(TEXT_INPUT_NAME).GetComponentInChildren<TextMeshProUGUI>();
+            _textHint = transform.Find(TEXT_HINT_NAME).GetComponentInChildren<TextMeshProUGUI>();
 
             CreateRowKeys(_keysRow1, 1);
             CreateRowKeys(_keysRow2, 2);
@@ -81,6 +85,9 @@ namespace QuickVR
                 button.OnDown += k.DoAction;
             }
 
+            SetTextHint("");
+            SetText("");
+            
             Enable(false);
         }
 
@@ -140,7 +147,6 @@ namespace QuickVR
                     transform.rotation = t.rotation;
 
                 }
-
             }
 
             foreach (Transform t in transform)
@@ -166,6 +172,11 @@ namespace QuickVR
         public virtual bool IsEnabled()
         {
             return _isEnabled;
+        }
+
+        public virtual void SetTextHint(string txt)
+        {
+            _textHint.text = txt;
         }
 
         public virtual void SetText(string txt)

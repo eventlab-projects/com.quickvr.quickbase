@@ -45,16 +45,7 @@ namespace QuickVR
 
 		#endregion
 
-		#region GET AND SET
-
-		public override bool IsBlockView()
-		{
-			return false;
-		}
-
-        #endregion
-
-        #region UPDATE
+		#region UPDATE
 
         protected virtual void Update() {
 			_timeLeft -= Time.deltaTime;
