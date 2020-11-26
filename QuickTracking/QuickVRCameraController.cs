@@ -85,7 +85,7 @@ namespace QuickVR
 
             if (!QuickVRManager.IsXREnabled())
             {
-                _camera.fieldOfView = 90.0f;
+                _camera.fieldOfView = 70.0f;//90.0f;
             }
 
             QuickUICursor.CreateVRCursor(QuickUICursor.Role.Head, _camera.transform);
