@@ -87,7 +87,7 @@ namespace QuickVR
 
         protected virtual void Awake()
         {
-            if (!_vrGUICursor) _vrGUICursor = Resources.Load<Transform>("Prefabs/pf_GUICUrsor");
+            if (!_vrGUICursor) _vrGUICursor = Resources.Load<Transform>("Prefabs/pf_GUICursor");
             CreateCanvasCursors();
             CreateVRGUICursor();
 
