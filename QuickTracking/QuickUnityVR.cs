@@ -227,7 +227,7 @@ namespace QuickVR {
 
             //Set the offset of the TrackedObject of the head
             QuickVRNode node = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
-            Vector3 offset = _animator.GetBoneTransform(HumanBodyBones.Head).position - node.GetTrackedObject().transform.position;
+            Vector3 offset = GetIKSolver(HumanBodyBones.Head)._targetLimb.position - node.GetTrackedObject().transform.position;
             _vrPlayArea.transform.position += offset;
         }
 

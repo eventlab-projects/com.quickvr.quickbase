@@ -26,13 +26,18 @@ namespace QuickVR {
             return _currentIteration;
         }
 
+        protected virtual void IncreaseCurrentIteration()
+        {
+            _currentIteration++;
+        }
+
         #endregion
 
         #region UPDATE
 
         protected override IEnumerator CoUpdate()
         {
-            for (_currentIteration = 0; _currentIteration < _numIterations; _currentIteration++)
+            for (_currentIteration = 0; _currentIteration < _numIterations; IncreaseCurrentIteration())
             {
                 yield return StartCoroutine(base.CoUpdate());
             }
