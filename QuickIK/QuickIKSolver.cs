@@ -193,12 +193,22 @@ namespace QuickVR
         [SerializeField, ReadOnly]
         protected Transform m_targetHint = null;
 
+        [SerializeField, ReadOnly]
         protected Quaternion _initialLocalRotationUpper = Quaternion.identity;
+
+        [SerializeField, ReadOnly]
         protected Quaternion _initialLocalRotationMid = Quaternion.identity;
+
+        [SerializeField, ReadOnly]
         protected Quaternion _initialLocalRotationLimb = Quaternion.identity;
 
+        [SerializeField, ReadOnly]
         protected Vector3 _initialLocalPositionTargetLimb = Vector3.zero;
+
+        [SerializeField, ReadOnly]
         protected Quaternion _initialLocalRotationTargetLimb = Quaternion.identity;
+
+        [SerializeField, ReadOnly]
         protected Vector3 _initialLocalPositionTargetHint = Vector3.zero;
 
         protected float _lengthUpper = 0;
@@ -209,6 +219,24 @@ namespace QuickVR
 
         [SerializeField, Range(0.0f, 1.0f)]
         protected float m_weightIKRot = 1.0f;
+
+        #endregion
+
+        #region CREATION AND DESTRUCTION
+
+        protected virtual void Awake()
+        {
+            if (_boneUpper) _initialLocalRotationUpper = _boneUpper.localRotation;
+            if (_boneMid) _initialLocalRotationMid = _boneMid.localRotation;
+            if (_boneLimb) _initialLocalRotationLimb = _boneLimb.localRotation;
+
+            if (_targetLimb)
+            {
+                _initialLocalPositionTargetLimb = _targetLimb.localPosition;
+                _initialLocalRotationTargetLimb = _targetLimb.localRotation;
+            }
+            if (_targetHint) _initialLocalPositionTargetHint = _targetHint.localPosition;
+        }
 
         #endregion
 

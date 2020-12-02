@@ -121,7 +121,7 @@ namespace QuickVR
                 cam.cullingMask = _visibleLayers.value;
             }
             
-            if (animator)
+            if (animator && _animatorSource)
             {
                 //Apply the correct rotation to the cameracontrollerroot:
                 Vector3 up = animator.transform.up;
@@ -139,13 +139,16 @@ namespace QuickVR
 
         protected virtual void UpdateCameraRotation()
         {
-            if (QuickVRManager.IsXREnabled())
+            if (_animatorSource) 
             {
-                UpdateCameraRotationXR();
-            }
-            else
-            {
-                UpdateCameraRotationMono();
+                if (QuickVRManager.IsXREnabled())
+                {
+                    UpdateCameraRotationXR();
+                }
+                else
+                {
+                    UpdateCameraRotationMono();
+                }
             }
         }
 
