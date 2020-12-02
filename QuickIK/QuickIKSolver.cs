@@ -104,7 +104,7 @@ namespace QuickVR
         {
             get
             {
-                if (!m_targetHint)
+                if (!m_targetHint && _boneUpper)
                 {
                     foreach (Transform t in _boneUpper)
                     {
