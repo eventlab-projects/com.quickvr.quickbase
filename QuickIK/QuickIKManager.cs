@@ -157,8 +157,10 @@ namespace QuickVR {
 
         #region CREATION AND DESTRUCTION
 
-        protected virtual void Awake()
+        protected override void Awake()
         {
+            base.Awake();
+
             Reset();
 
             SaveCurrentPose();

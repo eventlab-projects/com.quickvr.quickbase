@@ -99,8 +99,6 @@ namespace QuickVR {
                 _calibrationPose = new GameObject("__CalibrationPose__").transform;
                 _calibrationPose.position = transform.position;
                 _calibrationPose.rotation = transform.rotation;
-
-                _headOffset = Quaternion.Inverse(transform.rotation) * (_animator.GetBoneTransform(HumanBodyBones.Head).position - _animator.GetEyeCenterPosition());
             }
         }
 
@@ -111,6 +109,8 @@ namespace QuickVR {
 
         protected virtual void Start()
         {
+            _headOffset = Quaternion.Inverse(transform.rotation) * (_animator.GetBoneTransform(HumanBodyBones.Head).position - _animator.GetEyeCenterPosition());
+
             if (Application.isPlaying)
             {
                 CheckHandtrackingMode();

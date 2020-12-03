@@ -69,7 +69,10 @@ namespace QuickVR {
 
 		#region CREATION AND DESTRUCTION
 
-		protected virtual void Awake() {
+		protected override void Awake() 
+		{
+			base.Awake();
+
 			CreateSkeleton();
             _initialRootRotation = transform.rotation;
             _initialForward = ComputeRootForward();

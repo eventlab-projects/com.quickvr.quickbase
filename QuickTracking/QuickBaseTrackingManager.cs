@@ -41,6 +41,11 @@ namespace QuickVR {
 
         #region CREATION AND DESTRUCTION
 
+        protected virtual void Awake()
+        {
+            _animator.CreateMissingBones();
+        }
+
         protected virtual void OnEnable()
         {
             SkinnedMeshRenderer[] smRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
