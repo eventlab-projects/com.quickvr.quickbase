@@ -133,7 +133,12 @@ namespace QuickVR
             }
         }
 
-		#endregion
+        public virtual QuickUIButton GetButton(string buttonName)
+        {
+            return transform.Find(buttonName).GetOrCreateComponent<QuickUIButton>();
+        }
+
+        #endregion
 
         #region UPDATE
 
