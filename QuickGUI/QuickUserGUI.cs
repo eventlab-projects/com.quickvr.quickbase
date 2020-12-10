@@ -15,6 +15,12 @@ namespace QuickVR
 
         #endregion
 
+        #region PUBLIC ATTRIBUTES
+
+        public bool _followCamera = true;
+
+        #endregion
+
         #region PROTECTED ATTRIBUTES
 
         protected Canvas _canvas = null;
@@ -144,9 +150,12 @@ namespace QuickVR
 
         protected virtual void ActionPostCameraUpdate()
         {
-            Vector3 fwd = _camera.transform.forward;
-            transform.position = _camera.transform.position + fwd * 3;
-            transform.forward = fwd;
+            if (_followCamera)
+            {
+                Vector3 fwd = _camera.transform.forward;
+                transform.position = _camera.transform.position + fwd * 3;
+                transform.forward = fwd;
+            }
         }
 
         #endregion
