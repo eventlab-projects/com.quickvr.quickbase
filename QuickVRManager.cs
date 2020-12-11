@@ -124,6 +124,12 @@ namespace QuickVR
         public virtual void SetAnimatorTarget(Animator animator)
         {
             _animatorTarget = animator;
+            
+            QuickCameraZNearDefiner zNearDefiner = _animatorTarget.GetComponent<QuickCameraZNearDefiner>();
+            if (zNearDefiner)
+            {
+                _cameraController._cameraNearPlane = zNearDefiner._zNear;
+            }
 
             _copyPose.SetAnimatorDest(_animatorTarget);
         }

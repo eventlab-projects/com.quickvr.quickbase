@@ -58,8 +58,8 @@ namespace QuickVR
 
         #region CONSTANTS
 
-        protected const float DEFAULT_NEAR_CLIP_PLANE = 0.05f;
-        protected const float DEFAULT_FAR_CLIP_PLANE = 500.0f;
+        public const float DEFAULT_NEAR_CLIP_PLANE = 0.05f;
+        public const float DEFAULT_FAR_CLIP_PLANE = 500.0f;
 
         //Rotation limits for CameraMono
         const float MAX_HORIZONTAL_ANGLE = 80;
