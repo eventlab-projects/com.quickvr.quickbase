@@ -35,6 +35,46 @@ namespace QuickVR
             RightUpperLeg,
             RightLowerLeg,
             RightFoot,
+
+            LeftThumbProximal,
+            LeftThumbIntermediate,
+            LeftThumbDistal,
+
+            LeftIndexProximal,
+            LeftIndexIntermediate,
+            LeftIndexDistal,
+            
+            LeftMiddleProximal,
+            LeftMiddleIntermediate,
+            LeftMiddleDistal,
+            
+            LeftRingProximal,
+            LeftRingIntermediate,
+            LeftRingDistal,
+            
+            LeftLittleProximal,
+            LeftLittleIntermediate,
+            LeftLittleDistal,
+
+            RightThumbProximal,
+            RightThumbIntermediate,
+            RightThumbDistal,
+
+            RightIndexProximal,
+            RightIndexIntermediate,
+            RightIndexDistal,
+
+            RightMiddleProximal,
+            RightMiddleIntermediate,
+            RightMiddleDistal,
+
+            RightRingProximal,
+            RightRingIntermediate,
+            RightRingDistal,
+
+            RightLittleProximal,
+            RightLittleIntermediate,
+            RightLittleDistal,
         };
 
         public bool _showModel = false;

@@ -317,21 +317,24 @@ namespace QuickVR
                         }
                     }
 
-                    if (IsDataHighConfidenceFinger(f))
+                    for (int i = 0; i < 3; i++)
                     {
-                        //The finger is tracked.
-                        for (int i = 0; i < 3; i++)
+                        QuickVRNode nFinger = _playArea.GetVRNode((HumanBodyBones)fingerBones[i]);
+
+                        if (IsDataHighConfidenceFinger(f))
                         {
+                            //The finger is tracked.
                             UpdateTracking(fingerBones[i], fingerBones[i + 1]);
                             _handFingerLastRotation[f][i] = _animator.GetBoneTransform(fingerBones[i]).localRotation;
+
+                            nFinger.transform.position = GetOVRBoneTransform(QuickOVRHandsInitializer.ToOVR(fingerBones[i])).position;
+                            nFinger.SetTracked(true);
                         }
-                    }
-                    else
-                    {
-                        //The finger is not tracked. Restore the last valid local rotation. 
-                        for (int i = 0; i < 3; i++)
+                        else
                         {
+                            //The finger is not tracked. Restore the last valid local rotation. 
                             _animator.GetBoneTransform(fingerBones[i]).localRotation = _handFingerLastRotation[f][i];
+                            nFinger.SetTracked(false);
                         }
                     }
                 }

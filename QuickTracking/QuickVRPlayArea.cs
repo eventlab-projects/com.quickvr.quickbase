@@ -343,27 +343,29 @@ namespace QuickVR
 
         protected virtual void OnDrawGizmos()
         {
-            foreach (var pair in _vrNodes)
+            Gizmos.color = Color.green;
+            foreach (var pair in _vrNodeRoles)
             {
                 QuickVRNode n = pair.Value;
-                HumanBodyBones role = n.GetRole();
-
-                DebugExtension.DrawCoordinatesSystem(n.transform.position, n.transform.right, n.transform.up, n.transform.forward, 0.1f);
-
-                float s = 0.05f;
-                Vector3 cSize = Vector3.one * s;
-                if (role == HumanBodyBones.Head) Gizmos.color = Color.grey;
-                else if (role == HumanBodyBones.LeftHand) Gizmos.color = Color.blue;
-                else if (role == HumanBodyBones.RightHand) Gizmos.color = Color.red;
-
-                Gizmos.matrix = n.transform.localToWorldMatrix;
-                Gizmos.DrawCube(Vector3.zero, cSize);
-                QuickTrackedObject tObject = n.GetTrackedObject();
-                if (tObject.transform.localPosition != Vector3.zero)
+                if (n.IsTracked())
                 {
-                    Gizmos.DrawSphere(tObject.transform.localPosition, s * 0.5f);
+                    HumanBodyBones role = pair.Key;
+
+                    DebugExtension.DrawCoordinatesSystem(n.transform.position, n.transform.right, n.transform.up, n.transform.forward, 0.05f);
+
+                    float s = 0.0125f;
+                    Vector3 cSize = Vector3.one * s;
+                    
+                    Gizmos.matrix = n.transform.localToWorldMatrix;
+                    Gizmos.DrawCube(Vector3.zero, cSize);
+                    QuickTrackedObject tObject = n.GetTrackedObject();
+                    if (tObject.transform.localPosition != Vector3.zero)
+                    {
+                        Gizmos.DrawSphere(tObject.transform.localPosition, s * 0.5f);
+                        Gizmos.DrawLine(Vector3.zero, tObject.transform.localPosition);
+                    }
+                    Gizmos.matrix = Matrix4x4.identity;
                 }
-                Gizmos.matrix = Matrix4x4.identity;
             }
         }
 
