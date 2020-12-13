@@ -349,8 +349,6 @@ namespace QuickVR
                 QuickVRNode n = pair.Value;
                 if (n.IsTracked())
                 {
-                    HumanBodyBones role = pair.Key;
-
                     DebugExtension.DrawCoordinatesSystem(n.transform.position, n.transform.right, n.transform.up, n.transform.forward, 0.05f);
 
                     float s = 0.0125f;
