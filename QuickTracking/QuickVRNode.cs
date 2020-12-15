@@ -331,7 +331,10 @@ namespace QuickVR
             //SetModelVisible(IsTracked() && Application.isEditor && _showModel);
 
             //SetModelVisible(Application.isEditor && _showModel);
-            SetModelVisible(_showModel);
+            if (_model && (_showModel != _model.gameObject.activeSelf))
+            {
+                SetModelVisible(_showModel);
+            }
         }
 
         public virtual void Update(XRNodeState s)

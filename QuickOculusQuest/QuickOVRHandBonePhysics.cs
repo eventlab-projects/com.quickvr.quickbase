@@ -53,12 +53,14 @@ namespace QuickVR
 
         #region UPDATE
 
+#if UNITY_EDITOR
         protected virtual void Update()
         {
             _debugger.gameObject.SetActive(QuickSingletonManager.GetInstance<QuickOVRHandsInitializer>()._debug);
         }
+#endif
 
-        #endregion
+#endregion
 
     }
 }
