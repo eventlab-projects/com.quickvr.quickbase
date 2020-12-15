@@ -323,12 +323,12 @@ namespace QuickVR
 
                         if (IsDataHighConfidenceFinger(f))
                         {
+                            nFinger.transform.position = GetOVRBoneTransform(QuickOVRHandsInitializer.ToOVR(fingerBones[i])).position;
+                            nFinger.SetTracked(true);
+
                             //The finger is tracked.
                             UpdateTracking(fingerBones[i], fingerBones[i + 1]);
                             _handFingerLastRotation[f][i] = _animator.GetBoneTransform(fingerBones[i]).localRotation;
-
-                            nFinger.transform.position = GetOVRBoneTransform(QuickOVRHandsInitializer.ToOVR(fingerBones[i])).position;
-                            nFinger.SetTracked(true);
                         }
                         else
                         {

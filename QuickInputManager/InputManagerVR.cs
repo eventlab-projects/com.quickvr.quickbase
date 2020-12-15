@@ -133,21 +133,22 @@ namespace QuickVR
             button = GetRealCode(button);
 
             //Axis based buttons
-            if (button == ButtonCodes.TriggerIndexPressLeft.ToString())
+            ButtonCodes bCode = _toButton[button];
+            if (bCode == ButtonCodes.TriggerIndexPressLeft)
             {
-                return ImpGetAxis(AxisCodes.TriggerIndexLeft.ToString()) > AXIS_PRESSED_THRESHOLD;
+                return ImpGetAxis("TriggerIndexLeft") > AXIS_PRESSED_THRESHOLD;
             }
-            if (button == ButtonCodes.TriggerHandPressLeft.ToString())
+            if (bCode == ButtonCodes.TriggerHandPressLeft)
             {
-                return ImpGetAxis(AxisCodes.TriggerHandLeft.ToString()) > AXIS_PRESSED_THRESHOLD;
+                return ImpGetAxis("TriggerHandLeft") > AXIS_PRESSED_THRESHOLD;
             }
-            if (button == ButtonCodes.TriggerIndexPressRight.ToString())
+            if (bCode == ButtonCodes.TriggerIndexPressRight)
             {
-                return ImpGetAxis(AxisCodes.TriggerIndexRight.ToString()) > AXIS_PRESSED_THRESHOLD;
+                return ImpGetAxis("TriggerIndexRight") > AXIS_PRESSED_THRESHOLD;
             }
-            if (button == ButtonCodes.TriggerHandPressRight.ToString())
+            if (bCode == ButtonCodes.TriggerHandPressRight)
             {
-                return ImpGetAxis(AxisCodes.TriggerHandRight.ToString()) > AXIS_PRESSED_THRESHOLD;
+                return ImpGetAxis("TriggerHandRight") > AXIS_PRESSED_THRESHOLD;
             }
 
             //Key based buttons
