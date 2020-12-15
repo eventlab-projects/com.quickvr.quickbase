@@ -119,15 +119,10 @@ namespace QuickVR
 
         private static List<HumanBodyBones> _humanBodyBones = null;
         private static List<QuickHumanFingers> _fingers = null;
-        private static List<QuickHumanBodyBones> _handBoneTips = null;
-        private static List<QuickHumanBodyBones> _handBoneTipsLeft = null;
-        private static List<QuickHumanBodyBones> _HandBoneTipsRight = null;
-
+        
         private static Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> _bonesFromFingerLeft = null;
         private static Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> _bonesFromFingerRight = null;
         private static Dictionary<QuickHumanBodyBones, QuickHumanFingers> _fingerFromBone = new Dictionary<QuickHumanBodyBones, QuickHumanFingers>();
-        private static HashSet<QuickHumanBodyBones> _fingerBonesLeft = new HashSet<QuickHumanBodyBones>();
-        private static HashSet<QuickHumanBodyBones> _fingerBonesRight = new HashSet<QuickHumanBodyBones>();
 
         #endregion
 
@@ -139,7 +134,6 @@ namespace QuickVR
             InitMuscleNames();
             InitLookAtBones();
             InitBonesHierarchy();
-            InitHandBoneTips();
         }
 
         private static Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> InitHumanFingers(bool isLeft)
@@ -155,8 +149,6 @@ namespace QuickVR
                     QuickHumanBodyBones fingerBone = QuickUtils.ParseEnum<QuickHumanBodyBones>(prefix + f.ToString() + p);
                     result[f].Add(fingerBone);
                     _fingerFromBone[fingerBone] = f;
-                    if (isLeft) _fingerBonesLeft.Add(fingerBone);
-                    else _fingerBonesRight.Add(fingerBone);
                 }
             }
 
@@ -280,30 +272,6 @@ namespace QuickVR
             {
                 InitBonesHierarchy(c);
             }
-        }
-
-        private static void InitHandBoneTips()
-        {
-            _handBoneTipsLeft = InitHandBoneTips(true);
-            _HandBoneTipsRight = InitHandBoneTips(false);
-
-            _handBoneTips = new List<QuickHumanBodyBones>();
-            _handBoneTips.AddRange(_handBoneTipsLeft);
-            _handBoneTips.AddRange(_HandBoneTipsRight);
-        }
-
-        private static List<QuickHumanBodyBones> InitHandBoneTips(bool isLeft)
-        {
-            List<QuickHumanBodyBones> result = new List<QuickHumanBodyBones>();
-            int initialBoneID = isLeft ? (int)QuickHumanBodyBones.LeftThumbTip : (int)QuickHumanBodyBones.LeftLittleTip;
-            int finalBoneID = isLeft ? (int)QuickHumanBodyBones.RightThumbTip : (int)QuickHumanBodyBones.RightLittleTip;
-            
-            for (int i = initialBoneID; i <= finalBoneID; i++)
-            {
-                result.Add((QuickHumanBodyBones)i);
-            }
-
-            return result;
         }
 
         #endregion
@@ -473,16 +441,6 @@ namespace QuickVR
             return Vector3.zero;
         }
 
-        public static List<QuickHumanBodyBones> GetHandBoneTips()
-        {
-            return _handBoneTips;
-        }
-
-        public static List<QuickHumanBodyBones> GetHandBoneTips(bool isLeft)
-        {
-            return isLeft ? _handBoneTipsLeft : _HandBoneTipsRight;
-        }
-
         public static Transform GetBoneTransform(this Animator animator, QuickHumanBodyBones boneID)
         {
             Transform result = null;
@@ -537,7 +495,13 @@ namespace QuickVR
 
         public static bool IsBoneFingerLeft(QuickHumanBodyBones boneID)
         {
-            return _fingerBonesLeft.Contains(boneID);
+            int i = (int)boneID;
+
+            return 
+                (
+                (i >= (int)QuickHumanBodyBones.LeftThumbProximal && i <= (int)QuickHumanBodyBones.LeftLittleDistal) ||
+                (i >= (int)QuickHumanBodyBones.LeftThumbTip && i <= (int)QuickHumanBodyBones.LeftLittleTip) 
+                );
         }
 
         public static bool IsBoneFingerLeft(HumanBodyBones boneID)
@@ -547,17 +511,18 @@ namespace QuickVR
 
         public static bool IsBoneFingerRight(QuickHumanBodyBones boneID)
         {
-            return _fingerBonesRight.Contains(boneID);
+            int i = (int)boneID;
+
+            return
+                (
+                (i >= (int)QuickHumanBodyBones.RightThumbProximal && i <= (int)QuickHumanBodyBones.RightLittleDistal) ||
+                (i >= (int)QuickHumanBodyBones.RightThumbTip && i <= (int)QuickHumanBodyBones.RightLittleTip)
+                );
         }
 
         public static bool IsBoneFingerRight(HumanBodyBones boneID)
         {
             return IsBoneFingerRight((QuickHumanBodyBones)boneID);
-        }
-
-        public static bool IsFingerBoneLeft(QuickHumanBodyBones bone)
-        {
-            return _fingerBonesLeft.Contains(bone);
         }
 
         #endregion
@@ -679,7 +644,6 @@ namespace QuickVR
         public static void GetHumanPose(Animator animator, ref HumanPose result)
         {
             //Save the current transform properties
-            Transform tmpParent = animator.transform.parent;
             Vector3 tmpPos = animator.transform.position;
             Quaternion tmpRot = animator.transform.rotation;
 
@@ -692,7 +656,6 @@ namespace QuickVR
             GetHumanPoseHandler(animator).GetHumanPose(ref result);
 
             //Restore the transform properties
-            animator.transform.parent = tmpParent;
             animator.transform.position = tmpPos;
             animator.transform.rotation = tmpRot;
 
