@@ -229,8 +229,6 @@ namespace QuickVR
             if (resetUpdateMode) ResetUpdateMode();
 
             _trackedObject.Reset();
-
-            Update();
         }
 
         protected virtual void ResetUpdateMode()
@@ -326,18 +324,7 @@ namespace QuickVR
 
         #region UPDATE
 
-        protected virtual void Update()
-        {
-            //SetModelVisible(IsTracked() && Application.isEditor && _showModel);
-
-            //SetModelVisible(Application.isEditor && _showModel);
-            if (_model && (_showModel != _model.gameObject.activeSelf))
-            {
-                SetModelVisible(_showModel);
-            }
-        }
-
-        public virtual void Update(XRNodeState s)
+        public virtual void UpdateState(XRNodeState s)
         {
             Vector3 pos;
             Quaternion rot;
@@ -351,6 +338,21 @@ namespace QuickVR
             }
 
             _isTracked = s.tracked;
+        }
+
+        #endregion
+
+        #region DEBUG
+
+        protected virtual void OnDrawGizmos()
+        {
+            //SetModelVisible(IsTracked() && Application.isEditor && _showModel);
+
+            //SetModelVisible(Application.isEditor && _showModel);
+            if (_model && (_showModel != _model.gameObject.activeSelf))
+            {
+                SetModelVisible(_showModel);
+            }
         }
 
         #endregion

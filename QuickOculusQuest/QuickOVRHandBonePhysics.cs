@@ -14,12 +14,16 @@ namespace QuickVR
 
         protected Transform _debugger = null;
 
+        protected QuickOVRHandsInitializer _ovrHandsInitializer = null;
+
         #endregion
 
         #region CREATION AND DESTRUCTION
 
         protected virtual void Awake()
         {
+            _ovrHandsInitializer = QuickSingletonManager.GetInstance<QuickOVRHandsInitializer>();
+
             _collider = transform.GetOrCreateComponent<SphereCollider>();
             _collider.radius = 0.5f;
             _collider.isTrigger = true;
@@ -30,6 +34,7 @@ namespace QuickVR
             _debugger = transform.CreateChild("__Debugger__");
             _debugger.GetOrCreateComponent<MeshRenderer>().material = Resources.Load<Material>("Materials/QuickDiffuseRed");
             _debugger.GetOrCreateComponent<MeshFilter>().mesh = QuickUtils.GetUnityPrimitiveMesh(PrimitiveType.Sphere);
+            _debugger.gameObject.SetActive(false);
         }
 
         #endregion
@@ -51,16 +56,17 @@ namespace QuickVR
 
         #endregion
 
-        #region UPDATE
+        #region DEBUG
 
-#if UNITY_EDITOR
-        protected virtual void Update()
+        protected virtual void OnDrawGizmos()
         {
-            _debugger.gameObject.SetActive(QuickSingletonManager.GetInstance<QuickOVRHandsInitializer>()._debug);
+            if (_debugger.gameObject.activeSelf != _ovrHandsInitializer._debug)
+            {
+                _debugger.gameObject.SetActive(_ovrHandsInitializer._debug);
+            }
         }
-#endif
 
-#endregion
+        #endregion
 
     }
 }

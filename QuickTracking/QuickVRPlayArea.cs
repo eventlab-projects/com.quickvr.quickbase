@@ -270,7 +270,7 @@ namespace QuickVR
         {
             QuickVRNode node = GetVRNode(nodeType);
             _vrNodes[initialState.uniqueID] = node;
-            node.Update(initialState);
+            node.UpdateState(initialState);
         }
 
         public virtual bool IsVRNodesSwaped(HumanBodyBones typeNodeLeft, HumanBodyBones typeNodeRight, bool doSwaping = true)
@@ -331,7 +331,7 @@ namespace QuickVR
                 QuickVRNode n = GetVRNode(s.uniqueID);
                 if (n)
                 {
-                    n.Update(s);
+                    n.UpdateState(s);
                 }
             }
             
