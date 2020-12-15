@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using UnityEngine.XR;
+
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.Design;
@@ -19,6 +21,13 @@ namespace QuickVR
             XRPlugin
         }
         public XRMode _XRMode = XRMode.LegacyXRSettings;
+
+        public enum HMDModel
+        {
+            Generic, 
+            OculusQuest
+        }
+        public static HMDModel _hmdModel = HMDModel.Generic;
 
         #endregion
 
@@ -67,6 +76,8 @@ namespace QuickVR
         protected QuickVRCameraController _cameraController = null;
 
         protected bool _isCalibrationRequired = false;
+
+        protected static string _hmdName = "";
         
         #endregion
 
@@ -110,6 +121,40 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
+
+        public static string GetHMDName()
+        {
+            if (_hmdName.Length == 0 && IsXREnabled())
+            {
+                List<InputDevice> devices = new List<InputDevice>();
+                InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.HeadMounted, devices);
+
+                _hmdName = devices.Count > 0 ? devices[0].name.ToLower() : "";
+            }
+
+            return _hmdName;
+        }
+
+        public static bool IsOculusQuest()
+        {
+            string hmdName = GetHMDName();
+            bool isQuest = hmdName.Contains("quest");
+
+#if UNITY_ANDROID
+            isQuest = isQuest || hmdName.Contains("oculus");
+#endif
+
+            return isQuest;
+        }
+
+        public static bool IsHandTrackingSupported()
+        {
+#if UNITY_WEBGL
+            return false;
+#else
+            return IsOculusQuest();
+#endif
+        }
 
         public static bool IsXREnabled()
         {

@@ -149,7 +149,7 @@ namespace QuickVR
         {
             if (_model) DestroyImmediate(_model.gameObject);
 
-            string modelName = QuickUtils.GetHMDName();
+            string modelName = QuickVRManager.GetHMDName();
             string pfName = "";
 
             if (_role == HumanBodyBones.Head) pfName = PF_GENERIC_HMD;

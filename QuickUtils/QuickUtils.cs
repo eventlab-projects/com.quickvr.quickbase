@@ -467,36 +467,7 @@ namespace QuickVR
 #endif
         }
 
-        public static string GetHMDName()
-        {
-            List<InputDevice> devices = new List<InputDevice>();
-            InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.HeadMounted, devices);
-
-            return devices.Count > 0 ? devices[0].name.ToLower() : "";
-        }
-
-        public static bool IsOculusQuest()
-        {
-            string hmdName = GetHMDName();
-            bool isQuest = hmdName.Contains("quest");
-
-#if UNITY_ANDROID
-            isQuest = isQuest || hmdName.Contains("oculus");
-#endif
-
-            return isQuest;
-        }
-
-        public static bool IsHandTrackingSupported()
-        {
-#if UNITY_WEBGL
-            return false;
-#else
-            return IsOculusQuest();
-#endif
-        }
-
-#region EXTENSION METHODS
+        #region EXTENSION METHODS
 
         public static int GetNumSiblings(this Component c)
         {
@@ -676,7 +647,7 @@ namespace QuickVR
             return watch.ElapsedMilliseconds / 1000.0f;
         }
 
-#endregion
+        #endregion
 
     }
 }

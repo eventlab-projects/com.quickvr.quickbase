@@ -167,7 +167,7 @@ namespace QuickVR {
 
         public virtual void CheckHandtrackingMode()
         {
-            if (_handTrackingMode == HandTrackingMode.Hands && !QuickUtils.IsHandTrackingSupported())
+            if (_handTrackingMode == HandTrackingMode.Hands && !QuickVRManager.IsHandTrackingSupported())
             {
                 _handTrackingMode = HandTrackingMode.Controllers;
             }

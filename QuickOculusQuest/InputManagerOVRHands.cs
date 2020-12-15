@@ -23,29 +23,25 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected Animator _animatorSrc
-        {
-            get
-            {
-                return QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource();
-            }
-        }
+        protected QuickUnityVR _unityVR = null;
 
         protected QuickOVRHandsInitializer _ovrHands
         {
             get
             {
-                return _animatorSrc ? _animatorSrc.GetComponent<QuickOVRHandsInitializer>() : null;
+                if (_unityVR && !m_OvrHandsInitializer)
+                {
+                    m_OvrHandsInitializer = _unityVR.GetComponent<QuickOVRHandsInitializer>();
+                }
+                return m_OvrHandsInitializer;
             }
         }
 
-        protected QuickUnityVR _unityVR
-        {
-            get
-            {
-                return _animatorSrc ? _animatorSrc.GetComponent<QuickUnityVR>() : null;
-            }
-        }
+        #endregion
+
+        #region PRIVATE ATTRIBUTES
+
+        protected QuickOVRHandsInitializer m_OvrHandsInitializer;
 
         #endregion
 
@@ -67,9 +63,25 @@ namespace QuickVR
             ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CANCEL, ButtonCodes.ThumbDown + "Right", ButtonCodes.ThumbDown + "Left");
         }
 
+        protected virtual void OnEnable()
+        {
+            QuickVRManager.OnSourceAnimatorSet += ActionSourceAnimatorSet;
+        }
+
+        protected virtual void OnDisable()
+        {
+            QuickVRManager.OnSourceAnimatorSet += ActionSourceAnimatorSet;
+        }
+
         #endregion
 
         #region GET AND SET
+
+        protected virtual void ActionSourceAnimatorSet()
+        {
+            Animator animatorSrc = QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource();
+            _unityVR = animatorSrc.GetComponent<QuickUnityVR>();
+        }
 
         public override string[] GetButtonCodes()
         {
@@ -98,7 +110,7 @@ namespace QuickVR
 
         protected override bool ImpGetButton(string button)
         {
-            if (QuickUtils.IsHandTrackingSupported() && _ovrHands)
+            if (QuickVRManager.IsHandTrackingSupported() && _ovrHands)
             {
                 QuickOVRHand h = GetOVRhand(button);
                 if (h.IsInitialized())
