@@ -273,7 +273,7 @@ namespace QuickVR {
 
         protected virtual void OnCalibrateVRNodeFoot(QuickVRNode node)
         {
-            Transform ikTarget = GetIKTarget(node.GetRole());
+            Transform ikTarget = GetIKSolver((HumanBodyBones)node.GetRole())._targetLimb;
             QuickTrackedObject tObject = node.GetTrackedObject();
             tObject.transform.rotation = ikTarget.rotation;
         }
@@ -317,32 +317,33 @@ namespace QuickVR {
 
         protected virtual void UpdateTransformRoot()
         {
-            _vrPlayArea.transform.parent = null;
+            //_vrPlayArea.transform.parent = null;
 
-            if (_updateRotation)
-            {
-                //Update the rotation
-                float rotOffset = GetRotationOffset();
-                transform.Rotate(transform.up, rotOffset, Space.World);
-            }
+            //if (_updateRotation)
+            //{
+            //    //Update the rotation
+            //    float rotOffset = GetRotationOffset();
+            //    transform.Rotate(transform.up, rotOffset, Space.World);
+            //}
 
-            if (_updatePosition)
-            {
-                //Update the position
-                Vector3 disp = GetDisplacement();
-                transform.Translate(disp, Space.World);
-                _vrPlayArea.GetCalibrationPoseRoot().Translate(disp, Space.World);
+            //if (_updatePosition)
+            //{
+            //    //Update the position
+            //    Vector3 disp = GetDisplacement();
+            //    transform.Translate(disp, Space.World);
+            //    _vrPlayArea.GetCalibrationPoseRoot().Translate(disp, Space.World);
 
-                _footprints.translationOffset -= disp;
-            }
+            //    _footprints.translationOffset -= disp;
+            //}
 
-            _vrPlayArea.transform.parent = transform;
+            //_vrPlayArea.transform.parent = transform;
         }
 
         protected virtual void UpdateTransformNodes()
         {
             //1) Update all the nodes but the hips, which has to be treated differently. 
-            foreach (HumanBodyBones boneID in QuickVRNode.GetTypeList())
+            //foreach (HumanBodyBones boneID in QuickVRNode.GetTypeList())
+            foreach (HumanBodyBones boneID in GetIKLimbBones())
             {
                 QuickVRNode node = _vrPlayArea.GetVRNode(boneID);
                 if (!node.IsTracked()) continue;
@@ -365,25 +366,19 @@ namespace QuickVR {
                 QuickVRNode vrNode = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
                 UpdateTransformNodePosFromCalibrationPose(vrNode, HumanBodyBones.Hips, Vector3.up);
                 float maxY = GetIKSolver(HumanBodyBones.Hips).GetInitialLocalPosTargetLimb().y; 
-                Transform targetHips = GetIKTarget(HumanBodyBones.Hips);
+                Transform targetHips = GetIKSolver(HumanBodyBones.Hips)._targetLimb;
                 targetHips.localPosition = new Vector3(targetHips.localPosition.x, Mathf.Min(targetHips.localPosition.y, maxY), targetHips.localPosition.z);
             }
         }
 
         protected virtual void UpdateTransformNodePosFromUser(QuickVRNode node, HumanBodyBones boneID)
         {
-            Transform t = GetIKTarget(boneID);
-            if (!t) return;
-
-            t.position = node.GetTrackedObject().transform.position;
+            GetIKSolver(boneID)._targetLimb.position = node.GetTrackedObject().transform.position;
         }
 
         protected virtual void UpdateTransformNodeRotFromUser(QuickVRNode node, HumanBodyBones boneID)
         {
-            Transform t = GetIKTarget(boneID);
-            if (!t) return;
-
-            t.rotation = node.GetTrackedObject().transform.rotation;
+            GetIKSolver(boneID)._targetLimb.rotation = node.GetTrackedObject().transform.rotation;
         }
 
         protected virtual void UpdateTransformNodePosFromCalibrationPose(QuickVRNode node, HumanBodyBones boneID)
@@ -393,7 +388,7 @@ namespace QuickVR {
 
         protected virtual void UpdateTransformNodePosFromCalibrationPose(QuickVRNode node, HumanBodyBones boneID, Vector3 offsetScale)
         {
-            Transform t = GetIKTarget(boneID);
+            Transform t = GetIKSolver(boneID)._targetLimb;
             Transform calibrationPose = node.GetCalibrationPose();
             if (!t || !calibrationPose) return;
 
@@ -404,7 +399,7 @@ namespace QuickVR {
 
         protected virtual void UpdateTransformNodeRotFromCalibrationPose(QuickVRNode node, HumanBodyBones boneID)
         {
-            Transform t = GetIKTarget(boneID);
+            Transform t = GetIKSolver(boneID)._targetLimb;
             Transform calibrationPose = node.GetCalibrationPose();
             if (!t || !calibrationPose) return;
 

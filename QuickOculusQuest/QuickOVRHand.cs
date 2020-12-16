@@ -31,7 +31,6 @@ namespace QuickVR
         protected QuickUnityVR _headTracking = null;
         protected QuickVRPlayArea _playArea = null;
 
-        protected static Dictionary<QuickHumanFingers, HandFinger> _toOVRHandFinger = new Dictionary<QuickHumanFingers, HandFinger>();
         protected Dictionary<QuickHumanFingers, int> _handFingerConfidence = new Dictionary<QuickHumanFingers, int>();
         protected Dictionary<QuickHumanFingers, Quaternion[]> _handFingerLastRotation = new Dictionary<QuickHumanFingers, Quaternion[]>();
 
@@ -42,19 +41,37 @@ namespace QuickVR
         protected const int NUM_FRAMES_CONFIDENCE = 5;
         protected const float BONE_RADIUS = 0.0075f;
 
+        protected static OVRSkeleton.BoneId[] _ovrFingerBones = new OVRSkeleton.BoneId[]
+        {
+            OVRSkeleton.BoneId.Hand_Thumb1,
+            OVRSkeleton.BoneId.Hand_Thumb2,
+            OVRSkeleton.BoneId.Hand_Thumb3,
+            OVRSkeleton.BoneId.Hand_ThumbTip,
+
+            OVRSkeleton.BoneId.Hand_Index1,
+            OVRSkeleton.BoneId.Hand_Index2,
+            OVRSkeleton.BoneId.Hand_Index3,
+            OVRSkeleton.BoneId.Hand_IndexTip,
+
+            OVRSkeleton.BoneId.Hand_Middle1,
+            OVRSkeleton.BoneId.Hand_Middle2,
+            OVRSkeleton.BoneId.Hand_Middle3,
+            OVRSkeleton.BoneId.Hand_MiddleTip,
+
+            OVRSkeleton.BoneId.Hand_Ring1,
+            OVRSkeleton.BoneId.Hand_Ring2,
+            OVRSkeleton.BoneId.Hand_Ring3,
+            OVRSkeleton.BoneId.Hand_RingTip,
+
+            OVRSkeleton.BoneId.Hand_Pinky1,
+            OVRSkeleton.BoneId.Hand_Pinky2,
+            OVRSkeleton.BoneId.Hand_Pinky3,
+            OVRSkeleton.BoneId.Hand_PinkyTip,
+        };
+
         #endregion
 
         #region CREATION AND DESTRUCTION
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        protected static void Init()
-        {
-            _toOVRHandFinger[QuickHumanFingers.Thumb] = HandFinger.Thumb;
-            _toOVRHandFinger[QuickHumanFingers.Index] = HandFinger.Index;
-            _toOVRHandFinger[QuickHumanFingers.Middle] = HandFinger.Middle;
-            _toOVRHandFinger[QuickHumanFingers.Ring] = HandFinger.Ring;
-            _toOVRHandFinger[QuickHumanFingers.Little] = HandFinger.Pinky;
-        }
 
         protected virtual void Start()
         {
@@ -292,55 +309,6 @@ namespace QuickVR
 
         #region UPDATE
 
-        public virtual void UpdateTracking()
-        {
-            if (IsInitialized()) 
-            {
-                if (!_physicsInitialized)
-                {
-                    CreatePhysics();
-                    _physicsInitialized = true;
-                }
-
-                foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
-                {
-                    _handFingerConfidence[f] = IsDataHighConfidence ? Mathf.Min(_handFingerConfidence[f] + 1, NUM_FRAMES_CONFIDENCE) : 0;
-                    List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, IsLeft());
-                    if (_handFingerLastRotation[f] == null)
-                    {
-                        //The last rotation of this finger has not been initialized yet. Initialize it with the current local rotation
-                        //of the bone fingers. 
-                        _handFingerLastRotation[f] = new Quaternion[3];
-                        for (int i = 0; i < 3; i++)
-                        {
-                            _handFingerLastRotation[f][i] = _animator.GetBoneTransform(fingerBones[i]).localRotation;
-                        }
-                    }
-
-                    for (int i = 0; i < 3; i++)
-                    {
-                        QuickVRNode nFinger = _playArea.GetVRNode((HumanBodyBones)fingerBones[i]);
-
-                        if (IsDataHighConfidenceFinger(f))
-                        {
-                            nFinger.transform.position = GetOVRBoneTransform(QuickOVRHandsInitializer.ToOVR(fingerBones[i])).position;
-                            nFinger.SetTracked(true);
-
-                            //The finger is tracked.
-                            UpdateTracking(fingerBones[i], fingerBones[i + 1]);
-                            _handFingerLastRotation[f][i] = _animator.GetBoneTransform(fingerBones[i]).localRotation;
-                        }
-                        else
-                        {
-                            //The finger is not tracked. Restore the last valid local rotation. 
-                            _animator.GetBoneTransform(fingerBones[i]).localRotation = _handFingerLastRotation[f][i];
-                            nFinger.SetTracked(false);
-                        }
-                    }
-                }
-            }
-        }
-
         protected virtual void UpdateVRNodeTracked()
         {
             if (_headTracking._handTrackingMode == QuickUnityVR.HandTrackingMode.Hands)
@@ -365,12 +333,68 @@ namespace QuickVR
             }
         }
 
+        public virtual void UpdateTracking()
+        {
+            if (IsInitialized()) 
+            {
+                if (!_physicsInitialized)
+                {
+                    CreatePhysics();
+                    _physicsInitialized = true;
+                }
+
+                foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
+                {
+                    _handFingerConfidence[f] = IsDataHighConfidence ? Mathf.Min(_handFingerConfidence[f] + 1, NUM_FRAMES_CONFIDENCE) : 0;
+                    List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, IsLeft());
+                    int numBones = fingerBones.Count;
+                    if (_handFingerLastRotation[f] == null)
+                    {
+                        //The last rotation of this finger has not been initialized yet. Initialize it with the current local rotation
+                        //of the bone fingers. 
+
+                        _handFingerLastRotation[f] = new Quaternion[numBones];
+                        for (int i = 0; i < numBones; i++)
+                        {
+                            _handFingerLastRotation[f][i] = _animator.GetBoneTransform(fingerBones[i]).localRotation;
+                        }
+                    }
+
+                    for (int i = 0; i < numBones; i++)
+                    {
+                        QuickVRNode nFinger = _playArea.GetVRNode(fingerBones[i]);
+
+                        if (IsDataHighConfidenceFinger(f))
+                        {
+                            //The finger is tracked.
+                            OVRSkeleton.BoneId ovrBoneID = _ovrFingerBones[((int)f) * numBones + i];
+                            nFinger.transform.position = GetOVRBoneTransform(ovrBoneID).position;
+                            nFinger.SetTracked(true);
+
+                            if (i < numBones - 1)
+                            {
+                                UpdateTracking(fingerBones[i], fingerBones[i + 1]);
+                            }
+                            _handFingerLastRotation[f][i] = _animator.GetBoneTransform(fingerBones[i]).localRotation;
+                        }
+                        else
+                        {
+                            //The finger is not tracked. Restore the last valid local rotation. 
+                            nFinger.SetTracked(false);
+
+                            _animator.GetBoneTransform(fingerBones[i]).localRotation = _handFingerLastRotation[f][i];
+                        }
+                    }
+                }
+            }
+        }
+
         protected virtual void UpdateTracking(QuickHumanBodyBones boneID0, QuickHumanBodyBones boneID1)
         {
             Transform bone0 = _animator.GetBoneTransform(boneID0);
             Transform bone1 = _animator.GetBoneTransform(boneID1);
-            Transform ovrBone0 = GetOVRBoneTransform(QuickOVRHandsInitializer.ToOVR(boneID0));
-            Transform ovrBone1 = GetOVRBoneTransform(QuickOVRHandsInitializer.ToOVR(boneID1));
+            Transform ovrBone0 = _playArea.GetVRNode(boneID0).transform;
+            Transform ovrBone1 = _playArea.GetVRNode(boneID1).transform;
 
             Vector3 currentDir = bone1.position - bone0.position;
             Vector3 targetDir = ovrBone1.position - ovrBone0.position;

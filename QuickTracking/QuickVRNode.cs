@@ -39,42 +39,52 @@ namespace QuickVR
             LeftThumbProximal,
             LeftThumbIntermediate,
             LeftThumbDistal,
+            LeftThumbTip,
 
             LeftIndexProximal,
             LeftIndexIntermediate,
             LeftIndexDistal,
+            LeftIndexTip,
             
             LeftMiddleProximal,
             LeftMiddleIntermediate,
             LeftMiddleDistal,
+            LeftMiddleTip,
             
             LeftRingProximal,
             LeftRingIntermediate,
             LeftRingDistal,
+            LeftRingTip,
             
             LeftLittleProximal,
             LeftLittleIntermediate,
             LeftLittleDistal,
+            LeftLittleTip,
 
             RightThumbProximal,
             RightThumbIntermediate,
             RightThumbDistal,
+            RightThumbTip,
 
             RightIndexProximal,
             RightIndexIntermediate,
             RightIndexDistal,
+            RightIndexTip,
 
             RightMiddleProximal,
             RightMiddleIntermediate,
             RightMiddleDistal,
+            RightMiddleTip,
 
             RightRingProximal,
             RightRingIntermediate,
             RightRingDistal,
+            RightRingTip,
 
             RightLittleProximal,
             RightLittleIntermediate,
             RightLittleDistal,
+            RightLittleTip,
         };
 
         public bool _showModel = false;
@@ -94,13 +104,13 @@ namespace QuickVR
 
         protected QuickTrackedObject _trackedObject = null;
 
-        protected static List<HumanBodyBones> _typeList = new List<HumanBodyBones>();
+        protected static List<QuickHumanBodyBones> _typeList = new List<QuickHumanBodyBones>();
 
         protected static List<XRNodeState> _vrNodesStates = new List<XRNodeState>();
 
         protected Transform _model = null;
 
-        protected HumanBodyBones _role = HumanBodyBones.Head;
+        protected QuickHumanBodyBones _role = QuickHumanBodyBones.Head;
 
         protected Transform _calibrationPose = null;
 
@@ -137,7 +147,7 @@ namespace QuickVR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         protected static void Init()
         {
-            _typeList = QuickUtils.ParseEnum<HumanBodyBones, Type>(QuickUtils.GetEnumValues<Type>());
+            _typeList = QuickUtils.ParseEnum<QuickHumanBodyBones, Type>(QuickUtils.GetEnumValues<Type>());
         }
 
         protected virtual void Awake()
@@ -152,13 +162,13 @@ namespace QuickVR
             string modelName = QuickVRManager.GetHMDName();
             string pfName = "";
 
-            if (_role == HumanBodyBones.Head) pfName = PF_GENERIC_HMD;
-            else if (_role == HumanBodyBones.LeftHand)
+            if (_role == QuickHumanBodyBones.Head) pfName = PF_GENERIC_HMD;
+            else if (_role == QuickHumanBodyBones.LeftHand)
             {
                 if (modelName.Contains("vive")) pfName = PF_VIVE_CONTROLLER;
                 else if (modelName.Contains("oculus")) pfName = PF_OCULUS_CV1_CONTROLLER_LEFT;
             }
-            else if (_role == HumanBodyBones.RightHand)
+            else if (_role == QuickHumanBodyBones.RightHand)
             {
                 if (modelName.Contains("vive")) pfName = PF_VIVE_CONTROLLER;
                 else if (modelName.Contains("oculus")) pfName = PF_OCULUS_CV1_CONTROLLER_RIGHT;
@@ -213,12 +223,12 @@ namespace QuickVR
             _model.gameObject.SetActive(v);
         }
 
-        public virtual HumanBodyBones GetRole()
+        public virtual QuickHumanBodyBones GetRole()
         {
             return _role;
         }
 
-        public virtual void SetRole(HumanBodyBones role, bool resetUpdateMode = true)
+        public virtual void SetRole(QuickHumanBodyBones role, bool resetUpdateMode = true)
         {
             _role = role;
             name = ("VRNode" + role.ToString());
@@ -233,22 +243,22 @@ namespace QuickVR
 
         protected virtual void ResetUpdateMode()
         {
-            if (_role == HumanBodyBones.Head)
+            if (_role == QuickHumanBodyBones.Head)
             {
                 _updateModePos = UpdateMode.FromCalibrationPose;
                 _updateModeRot = UpdateMode.FromUser;
             }
-            else if (_role == HumanBodyBones.Hips)
+            else if (_role == QuickHumanBodyBones.Hips)
             {
                 _updateModePos = UpdateMode.FromCalibrationPose;
                 _updateModeRot = UpdateMode.FromCalibrationPose;
             }
-            else if (_role == HumanBodyBones.LeftHand || _role == HumanBodyBones.RightHand)
+            else if (_role == QuickHumanBodyBones.LeftHand || _role == QuickHumanBodyBones.RightHand)
             {
                 _updateModePos = UpdateMode.FromUser;
                 _updateModeRot = UpdateMode.FromUser;
             }
-            else if (_role == HumanBodyBones.LeftFoot || _role == HumanBodyBones.RightFoot)
+            else if (_role == QuickHumanBodyBones.LeftFoot || _role == QuickHumanBodyBones.RightFoot)
             {
                 _updateModePos = UpdateMode.FromCalibrationPose;
                 _updateModeRot = UpdateMode.FromUser;
@@ -260,7 +270,7 @@ namespace QuickVR
             return _trackedObject;
         }
 
-        public static List<HumanBodyBones> GetTypeList()
+        public static List<QuickHumanBodyBones> GetTypeList()
         {
             return _typeList;
         }
@@ -269,15 +279,15 @@ namespace QuickVR
         {
             _trackedObject.transform.ResetTransformation();
 
-            if (_role == HumanBodyBones.Head)
+            if (_role == QuickHumanBodyBones.Head)
             {
                 if (OnCalibrateVRNodeHead != null) OnCalibrateVRNodeHead(this);
             }
-            else if (_role == HumanBodyBones.Hips)
+            else if (_role == QuickHumanBodyBones.Hips)
             {
                 if (OnCalibrateVRNodeHips != null) OnCalibrateVRNodeHips(this);
             }
-            else if (_role == HumanBodyBones.LeftHand)
+            else if (_role == QuickHumanBodyBones.LeftHand)
             {
                 if (OnCalibrateVRNodeLeftHand != null) OnCalibrateVRNodeLeftHand(this);
                 //if (IsExtraTracker(node.GetID()))
@@ -301,15 +311,15 @@ namespace QuickVR
                     //tObject.transform.LookAt(tObject.transform.position + node.transform.right, -node.transform.up);
                 }
             }
-            else if (_role == HumanBodyBones.RightHand)
+            else if (_role == QuickHumanBodyBones.RightHand)
             {
                 if (OnCalibrateVRNodeRightHand != null) OnCalibrateVRNodeRightHand(this);
             }
-            else if (_role == HumanBodyBones.LeftFoot)
+            else if (_role == QuickHumanBodyBones.LeftFoot)
             {
                 if (OnCalibrateVRNodeLeftFoot != null) OnCalibrateVRNodeLeftFoot(this);
             }
-            else if (_role == HumanBodyBones.RightFoot)
+            else if (_role == QuickHumanBodyBones.RightFoot)
             {
                 if (OnCalibrateVRNodeRightFoot != null) OnCalibrateVRNodeRightFoot(this);
             }

@@ -460,17 +460,6 @@ namespace QuickVR {
             return _ikSolversBody;
         }
 
-        public virtual Transform GetIKTarget(HumanBodyBones boneID)
-        {
-            QuickIKSolver ikSolver = GetIKSolver(boneID);
-            if (ikSolver != null)
-            {
-                return IsBoneMid(boneID) ? ikSolver._targetHint : ikSolver._targetLimb;
-            }
-
-            return null;
-        }
-
         protected virtual string GetIKTargetName(HumanBodyBones boneID)
         {
             return IK_TARGET_PREFIX + boneID.ToString();

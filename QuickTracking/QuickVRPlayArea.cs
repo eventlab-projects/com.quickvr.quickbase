@@ -12,7 +12,7 @@ namespace QuickVR
 
         protected static Dictionary<XRNode, HumanBodyBones> _essentialNodes = new Dictionary<XRNode, HumanBodyBones>();
         protected Dictionary<ulong, QuickVRNode> _vrNodes = new Dictionary<ulong, QuickVRNode>();
-        protected Dictionary<HumanBodyBones, QuickVRNode> _vrNodeRoles = new Dictionary<HumanBodyBones, QuickVRNode>();
+        protected Dictionary<QuickHumanBodyBones, QuickVRNode> _vrNodeRoles = new Dictionary<QuickHumanBodyBones, QuickVRNode>();
         protected List<XRNodeState> _vrNodeStates = new List<XRNodeState>();
 
         protected Transform _calibrationPoseRoot = null;
@@ -38,13 +38,13 @@ namespace QuickVR
         protected virtual void Awake()
         {
             _calibrationPoseRoot = transform.CreateChild("__CalibrationPoseRoot__");
-            foreach (HumanBodyBones role in QuickVRNode.GetTypeList())
+            foreach (QuickHumanBodyBones role in QuickVRNode.GetTypeList())
             {
                 CreateVRNode(role);
             }
         }
 
-        protected virtual QuickVRNode CreateVRNode(HumanBodyBones role)
+        protected virtual QuickVRNode CreateVRNode(QuickHumanBodyBones role)
         {
             _vrNodeRoles[role] = transform.CreateChild("VRNode").gameObject.GetOrCreateComponent<QuickVRNode>();
             _vrNodeRoles[role].SetCalibrationPose(_calibrationPoseRoot.CreateChild(QuickVRNode.CALIBRATION_POSE_PREFIX, false));
@@ -94,9 +94,14 @@ namespace QuickVR
             return _vrNodes.ContainsKey(id) ? _vrNodes[id] : null;
         }
 
-        public virtual QuickVRNode GetVRNode(HumanBodyBones role)
+        public virtual QuickVRNode GetVRNode(QuickHumanBodyBones role)
         {
             return _vrNodeRoles[role];
+        }
+
+        public virtual QuickVRNode GetVRNode(HumanBodyBones role)
+        {
+            return GetVRNode((QuickHumanBodyBones)role);
         }
 
         public virtual float GetEyeStereoSeparation()
