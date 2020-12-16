@@ -35,6 +35,19 @@ public class InputManager : MonoBehaviour
 
     protected List<BaseInputManager> _inputManagers = new List<BaseInputManager>();
 
+    protected static InputManager _inputManager
+    {
+        get
+        {
+            if (!m_InputManager)
+            {
+                m_InputManager = QuickSingletonManager.GetInstance<InputManager>();
+            }
+            return m_InputManager;
+        }
+    }
+    protected static InputManager m_InputManager = null;
+
     #endregion
 
     #region CONSTANTS
@@ -261,10 +274,9 @@ public class InputManager : MonoBehaviour
     public static float GetAxis(string axis)
     {
         float value = 0.0f;
-        if (QuickSingletonManager.GetInstance<InputManager>().IsActiveVirtualAxis(axis))
+        if (_inputManager.IsActiveVirtualAxis(axis))
         {
-            List<BaseInputManager> inputManagers = QuickSingletonManager.GetInstance<InputManager>().GetInputManagers();
-            foreach (BaseInputManager iManager in inputManagers)
+            foreach (BaseInputManager iManager in _inputManager.GetInputManagers())
             {
                 if (!iManager.IsActive()) continue;
 
@@ -282,9 +294,9 @@ public class InputManager : MonoBehaviour
     protected static bool IsButtonState(string button, VirtualButtonState state)
     {
         bool inState = false;
-        if (QuickSingletonManager.GetInstance<InputManager>().IsActiveVirtualButton(button))
+        if (_inputManager.IsActiveVirtualButton(button))
         {
-            List<BaseInputManager> inputManagers = QuickSingletonManager.GetInstance<InputManager>().GetInputManagers();
+            List<BaseInputManager> inputManagers = _inputManager.GetInputManagers();
             for (int i = 0; !inState && (i < inputManagers.Count); i++)
             {
                 BaseInputManager iManager = inputManagers[i];

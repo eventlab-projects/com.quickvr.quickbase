@@ -35,6 +35,8 @@ public abstract class BaseInputManager : MonoBehaviour {
 	}
 	protected static InputManager m_InputManager = null;
 
+	protected Dictionary<string, ButtonMapping> _buttonMapping = null;
+
 	#endregion
 
 	#region CONSTANTS
@@ -75,6 +77,13 @@ public abstract class BaseInputManager : MonoBehaviour {
 
         int numVirtualButtons = _inputManager.GetVirtualButtons().Count;
         while (_buttonMappingRoot.childCount != numVirtualButtons) AddButtonMapping();
+
+		_buttonMapping = new Dictionary<string, ButtonMapping>();
+		List<string> virtualButtons = _inputManager.GetVirtualButtons();
+		for (int i = 0; i < virtualButtons.Count; i++)
+		{
+			_buttonMapping[virtualButtons[i]] = _buttonMappingRoot.GetChild(i).GetComponent<ButtonMapping>();
+		}
 	}
 
     protected virtual void OnDestroy() {
@@ -135,18 +144,14 @@ public abstract class BaseInputManager : MonoBehaviour {
         return null;
 	}
 
-	public ButtonMapping GetButtonMapping(int buttonID) {
+	public ButtonMapping GetButtonMapping(int buttonID) 
+	{
         return (buttonID >= _buttonMappingRoot.childCount) ? null : _buttonMappingRoot.GetChild(buttonID).GetComponent<ButtonMapping>();
 	}
 
-	public ButtonMapping GetButtonMapping(string virtualButton) {
-        List<string> virtualButtons = _inputManager.GetVirtualButtons();
-        for (int i = 0; i < virtualButtons.Count; i++)
-        {
-            if (virtualButtons[i] == virtualButton) return _buttonMappingRoot.GetChild(i).GetComponent<ButtonMapping>();
-        }
-
-        return null;
+	public ButtonMapping GetButtonMapping(string virtualButton) 
+	{
+		return _buttonMapping.ContainsKey(virtualButton) ? _buttonMapping[virtualButton] : null;
 	}
 
 	public virtual void AddAxisMapping() {

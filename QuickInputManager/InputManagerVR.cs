@@ -51,6 +51,8 @@ namespace QuickVR
         protected static Dictionary<string, AxisCodes> _toAxis = new Dictionary<string, AxisCodes>();
         protected static Dictionary<string, ButtonCodes> _toButton = new Dictionary<string, ButtonCodes>();
 
+        protected static Dictionary<AxisCodes, string> _toQuickVRAxis = new Dictionary<AxisCodes, string>();
+
         #endregion
 
         #region CONSTANTS
@@ -66,7 +68,9 @@ namespace QuickVR
         {
             foreach (AxisCodes axis in QuickUtils.GetEnumValues<AxisCodes>())
             {
-                _toAxis[axis.ToString()] = axis;
+                string aName = axis.ToString();
+                _toAxis[aName] = axis;
+                _toQuickVRAxis[axis] = "QuickVR_" + aName;
             }
 
             foreach (ButtonCodes button in QuickUtils.GetEnumValues<ButtonCodes>())
@@ -108,6 +112,24 @@ namespace QuickVR
             return GetCodes<ButtonCodes>();
         }
 
+        public AxisCodes GetRealCodeAxis(AxisCodes aCode)
+        {
+            if (QuickUnityVR._handsSwaped)
+            {
+                if (aCode == AxisCodes.TriggerIndexLeft) return AxisCodes.TriggerIndexRight;
+                if (aCode == AxisCodes.TriggerHandLeft) return AxisCodes.TriggerHandRight;
+                if (aCode == AxisCodes.PadLeftX) return AxisCodes.PadRightX;
+                if (aCode == AxisCodes.PadLeftY) return AxisCodes.PadRightY;
+
+                if (aCode == AxisCodes.TriggerIndexRight) return AxisCodes.TriggerIndexLeft;
+                if (aCode == AxisCodes.TriggerHandRight) return AxisCodes.TriggerHandLeft;
+                if (aCode == AxisCodes.PadRightX) return AxisCodes.PadLeftX;
+                if (aCode == AxisCodes.PadRightY) return AxisCodes.PadLeftY;
+            }
+
+            return aCode;
+        }
+
         public string GetRealCode(string code)
         {
             if (QuickUnityVR._handsSwaped)
@@ -125,7 +147,8 @@ namespace QuickVR
 
         protected override float ImpGetAxis(string axis)
         {
-            return Input.GetAxis("QuickVR_" + GetRealCode(axis));
+            AxisCodes aCode = GetRealCodeAxis(ToAxis(axis));
+            return Input.GetAxis(_toQuickVRAxis[aCode]);
         }
 
         protected override bool ImpGetButton(string button)
