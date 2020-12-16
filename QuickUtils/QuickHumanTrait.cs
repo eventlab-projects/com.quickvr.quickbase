@@ -117,7 +117,7 @@ namespace QuickVR
 
         private static List<string> _muscleNames = null;
 
-        private static List<HumanBodyBones> _humanBodyBones = null;
+        private static HumanBodyBones[] _humanBodyBones = null;
         private static QuickHumanFingers[] _fingers = null;
         
         private static Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> _bonesFromFingerLeft = null;
@@ -348,12 +348,13 @@ namespace QuickVR
             return HumanTrait.GetMuscleDefaultMax(muscleID);
         }
 
-        public static List<HumanBodyBones> GetHumanBodyBones()
+        public static HumanBodyBones[] GetHumanBodyBones()
         {
             if (_humanBodyBones == null)
             {
-                _humanBodyBones = QuickUtils.GetEnumValues<HumanBodyBones>();
-                _humanBodyBones.RemoveAt(_humanBodyBones.Count - 1);  //Remove the LastBone, which is not a valid HumanBodyBone ID
+                List<HumanBodyBones> tmp = QuickUtils.GetEnumValues<HumanBodyBones>();
+                tmp.RemoveAt(tmp.Count - 1);  //Remove the LastBone, which is not a valid HumanBodyBone ID
+                _humanBodyBones = tmp.ToArray();
             }
 
             return _humanBodyBones;
