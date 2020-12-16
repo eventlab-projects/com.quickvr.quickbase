@@ -618,17 +618,6 @@ namespace QuickVR
             }
         }
 
-        public static Transform GetLookAtBone(this Animator animator, HumanBodyBones boneID)
-        {
-            HumanBodyBones? lookAtBone = QuickHumanTrait.GetLookAtBone(boneID);
-            if (!lookAtBone.HasValue) return null;
-
-            Transform tLookAt = animator.GetBoneTransform(lookAtBone.Value);
-            if (tLookAt) return tLookAt;
-
-            return animator.GetLookAtBone(lookAtBone.Value);
-        }
-
         public static void Shuffle<T>(this IList<T> ts)
         {
             var count = ts.Count;

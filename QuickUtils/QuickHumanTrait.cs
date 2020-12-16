@@ -111,11 +111,8 @@ namespace QuickVR
 
         private static Dictionary<QuickHumanBodyBones, QuickHumanBodyBones> _parentBone = null;
         private static Dictionary<int, List<int>> _childBones = null;
-        private static List<int> _bonesHierarchy = null;
 
-        private static Dictionary<HumanBodyBones, HumanBodyBones> _lookAtBone = null;
-
-        private static List<string> _muscleNames = null;
+        private static string[] _muscleNames = null;
 
         private static HumanBodyBones[] _humanBodyBones = null;
         private static QuickHumanFingers[] _fingers = null;
@@ -127,14 +124,6 @@ namespace QuickVR
         #endregion
 
         #region CREATION AND DESTRUCTION
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterAssembliesLoaded)]
-        private static void Init()
-        {
-            InitMuscleNames();
-            InitLookAtBones();
-            InitBonesHierarchy();
-        }
 
         private static Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> InitHumanFingers(bool isLeft)
         {
@@ -157,7 +146,7 @@ namespace QuickVR
 
         private static void InitMuscleNames()
         {
-            _muscleNames = new List<string>();
+            _muscleNames = new string[HumanTrait.MuscleCount];
 
             for (int muscleID = 0; muscleID < HumanTrait.MuscleCount; muscleID++)
             {
@@ -178,64 +167,8 @@ namespace QuickVR
                     }
                 }
 
-                _muscleNames.Add(name);
+                _muscleNames[muscleID] = name;
             }
-        }
-
-        private static void InitLookAtBones()
-        {
-            _lookAtBone = new Dictionary<HumanBodyBones, HumanBodyBones>();
-
-            //Spine
-            _lookAtBone[HumanBodyBones.Hips] = HumanBodyBones.Spine;
-            _lookAtBone[HumanBodyBones.Spine] = HumanBodyBones.Chest;
-            _lookAtBone[HumanBodyBones.Chest] = HumanBodyBones.UpperChest;
-            _lookAtBone[HumanBodyBones.UpperChest] = HumanBodyBones.Neck;
-            _lookAtBone[HumanBodyBones.Neck] = HumanBodyBones.Head;
-
-            //LeftArm
-            _lookAtBone[HumanBodyBones.LeftShoulder] = HumanBodyBones.LeftUpperArm;
-            _lookAtBone[HumanBodyBones.LeftUpperArm] = HumanBodyBones.LeftLowerArm;
-            _lookAtBone[HumanBodyBones.LeftLowerArm] = HumanBodyBones.LeftHand;
-
-            //RightArm
-            _lookAtBone[HumanBodyBones.RightShoulder] = HumanBodyBones.RightUpperArm;
-            _lookAtBone[HumanBodyBones.RightUpperArm] = HumanBodyBones.RightLowerArm;
-            _lookAtBone[HumanBodyBones.RightLowerArm] = HumanBodyBones.RightHand;
-
-            //LeftLeg
-            _lookAtBone[HumanBodyBones.LeftUpperLeg] = HumanBodyBones.LeftLowerLeg;
-            _lookAtBone[HumanBodyBones.LeftLowerLeg] = HumanBodyBones.LeftFoot;
-            _lookAtBone[HumanBodyBones.LeftFoot] = HumanBodyBones.LeftToes;
-
-            //RightLeg
-            _lookAtBone[HumanBodyBones.RightUpperLeg] = HumanBodyBones.RightLowerLeg;
-            _lookAtBone[HumanBodyBones.RightLowerLeg] = HumanBodyBones.RightFoot;
-            _lookAtBone[HumanBodyBones.RightFoot] = HumanBodyBones.RightToes;
-
-            //LeftHand
-            _lookAtBone[HumanBodyBones.LeftThumbProximal] = HumanBodyBones.LeftThumbIntermediate;
-            _lookAtBone[HumanBodyBones.LeftThumbIntermediate] = HumanBodyBones.LeftThumbDistal;
-            _lookAtBone[HumanBodyBones.LeftIndexProximal] = HumanBodyBones.LeftIndexIntermediate;
-            _lookAtBone[HumanBodyBones.LeftIndexIntermediate] = HumanBodyBones.LeftIndexDistal;
-            _lookAtBone[HumanBodyBones.LeftMiddleProximal] = HumanBodyBones.LeftMiddleIntermediate;
-            _lookAtBone[HumanBodyBones.LeftMiddleIntermediate] = HumanBodyBones.LeftMiddleDistal;
-            _lookAtBone[HumanBodyBones.LeftRingProximal] = HumanBodyBones.LeftRingIntermediate;
-            _lookAtBone[HumanBodyBones.LeftRingIntermediate] = HumanBodyBones.LeftRingDistal;
-            _lookAtBone[HumanBodyBones.LeftLittleProximal] = HumanBodyBones.LeftLittleIntermediate;
-            _lookAtBone[HumanBodyBones.LeftLittleIntermediate] = HumanBodyBones.LeftLittleDistal;
-
-            //RightHand
-            _lookAtBone[HumanBodyBones.RightThumbProximal] = HumanBodyBones.RightThumbIntermediate;
-            _lookAtBone[HumanBodyBones.RightThumbIntermediate] = HumanBodyBones.RightThumbDistal;
-            _lookAtBone[HumanBodyBones.RightIndexProximal] = HumanBodyBones.RightIndexIntermediate;
-            _lookAtBone[HumanBodyBones.RightIndexIntermediate] = HumanBodyBones.RightIndexDistal;
-            _lookAtBone[HumanBodyBones.RightMiddleProximal] = HumanBodyBones.RightMiddleIntermediate;
-            _lookAtBone[HumanBodyBones.RightMiddleIntermediate] = HumanBodyBones.RightMiddleDistal;
-            _lookAtBone[HumanBodyBones.RightRingProximal] = HumanBodyBones.RightRingIntermediate;
-            _lookAtBone[HumanBodyBones.RightRingIntermediate] = HumanBodyBones.RightRingDistal;
-            _lookAtBone[HumanBodyBones.RightLittleProximal] = HumanBodyBones.RightLittleIntermediate;
-            _lookAtBone[HumanBodyBones.RightLittleIntermediate] = HumanBodyBones.RightLittleDistal;
         }
 
         private static void InitParentBones()
@@ -254,34 +187,9 @@ namespace QuickVR
             _parentBone[QuickHumanBodyBones.RightLittleTip] = QuickHumanBodyBones.RightLittleDistal;
         }
 
-        private static void InitBonesHierarchy()
-        {
-            _bonesHierarchy = new List<int>();
-
-            int initialBone = (int)HumanBodyBones.Hips;
-            _bonesHierarchy.Add(initialBone);
-            InitBonesHierarchy(initialBone);
-        }
-    
-        private static void InitBonesHierarchy(int boneID)
-        {
-            List<int> childBones = GetChildBones(boneID);
-            _bonesHierarchy.AddRange(childBones);
-
-            foreach (int c in childBones)
-            {
-                InitBonesHierarchy(c);
-            }
-        }
-
         #endregion
 
         #region GET AND SET
-
-        public static List<int> GetBonesHierarchy()
-        {
-            return _bonesHierarchy;
-        }
 
         public static int GetNumBones()
         {
@@ -303,8 +211,12 @@ namespace QuickVR
             return HumanTrait.MuscleCount;
         }
 
-        public static List<string> GetMuscleNames()
+        public static string[] GetMuscleNames()
         {
+            if (_muscleNames == null)
+            {
+                InitMuscleNames();
+            }
             return _muscleNames;
         }
 
@@ -418,14 +330,6 @@ namespace QuickVR
         public static bool IsRequiredBone(int boneID)
         {
             return HumanTrait.RequiredBone(boneID);
-        }
-
-        public static HumanBodyBones? GetLookAtBone(HumanBodyBones boneID)
-        {
-            HumanBodyBones? result = null;
-            if (_lookAtBone.ContainsKey(boneID)) result = _lookAtBone[boneID];
-
-            return result;
         }
 
         public static Vector3 GetDefaultLookAtDirection(HumanBodyBones boneID)
