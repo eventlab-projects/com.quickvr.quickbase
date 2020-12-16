@@ -26,9 +26,14 @@ public abstract class BaseInputManager : MonoBehaviour {
 	{
 		get
 		{
-			return QuickSingletonManager.GetInstance<InputManager>();
+			if (!m_InputManager)
+            {
+				m_InputManager = QuickSingletonManager.GetInstance<InputManager>();
+			}
+			return m_InputManager;
 		}
 	}
+	protected static InputManager m_InputManager = null;
 
 	#endregion
 

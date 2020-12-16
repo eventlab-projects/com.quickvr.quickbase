@@ -33,6 +33,8 @@ public class InputManager : MonoBehaviour
         PRESSED,
     }
 
+    protected List<BaseInputManager> _inputManagers = new List<BaseInputManager>();
+
     #endregion
 
     #region CONSTANTS
@@ -112,6 +114,11 @@ public class InputManager : MonoBehaviour
             iManager.Reset();
         }
 
+        if (!_inputManagers.Contains(iManager))
+        {
+            _inputManagers.Add(iManager);
+        }
+
         return iManager;
     }
 
@@ -119,9 +126,14 @@ public class InputManager : MonoBehaviour
 
     #region GET AND SET
 
-    public BaseInputManager[] GetInputManagers()
+    public List<BaseInputManager> GetInputManagers()
     {
-        return GetComponentsInChildren<BaseInputManager>();
+        if (_inputManagers.Count != transform.childCount)
+        {
+            _inputManagers = new List<BaseInputManager>(GetComponentsInChildren<BaseInputManager>());
+        }
+
+        return _inputManagers;
     }
 
     public virtual bool IsActiveVirtualAxis(string aName)
@@ -181,8 +193,7 @@ public class InputManager : MonoBehaviour
     {
         _virtualAxes.Add("New Axis");
 
-        BaseInputManager[] inputManagers = GetInputManagers();
-        foreach (BaseInputManager manager in inputManagers)
+        foreach (BaseInputManager manager in GetInputManagers())
         {
             manager.AddAxisMapping();
         }
@@ -194,8 +205,7 @@ public class InputManager : MonoBehaviour
         if (_virtualAxes.Count == 0) return;
         _virtualAxes.RemoveAt(_virtualAxes.Count - 1);
 
-        BaseInputManager[] inputManagers = GetInputManagers();
-        foreach (BaseInputManager manager in inputManagers)
+        foreach (BaseInputManager manager in GetInputManagers())
         {
             manager.RemoveLastAxisMapping();
         }
@@ -206,8 +216,7 @@ public class InputManager : MonoBehaviour
     {
         _virtualButtons.Add("New Button");
 
-        BaseInputManager[] inputManagers = GetInputManagers();
-        foreach (BaseInputManager manager in inputManagers)
+        foreach (BaseInputManager manager in GetInputManagers())
         {
             manager.AddButtonMapping();
         }
@@ -219,8 +228,7 @@ public class InputManager : MonoBehaviour
         if (_virtualButtons.Count == 0) return;
         _virtualButtons.RemoveAt(_virtualButtons.Count - 1);
 
-        BaseInputManager[] inputManagers = GetInputManagers();
-        foreach (BaseInputManager manager in inputManagers)
+        foreach (BaseInputManager manager in GetInputManagers())
         {
             manager.RemoveLastButtonMapping();
         }
@@ -255,7 +263,7 @@ public class InputManager : MonoBehaviour
         float value = 0.0f;
         if (QuickSingletonManager.GetInstance<InputManager>().IsActiveVirtualAxis(axis))
         {
-            BaseInputManager[] inputManagers = QuickSingletonManager.GetInstance<InputManager>().GetInputManagers();
+            List<BaseInputManager> inputManagers = QuickSingletonManager.GetInstance<InputManager>().GetInputManagers();
             foreach (BaseInputManager iManager in inputManagers)
             {
                 if (!iManager.IsActive()) continue;
@@ -276,8 +284,8 @@ public class InputManager : MonoBehaviour
         bool inState = false;
         if (QuickSingletonManager.GetInstance<InputManager>().IsActiveVirtualButton(button))
         {
-            BaseInputManager[] inputManagers = QuickSingletonManager.GetInstance<InputManager>().GetInputManagers();
-            for (int i = 0; !inState && (i < inputManagers.Length); i++)
+            List<BaseInputManager> inputManagers = QuickSingletonManager.GetInstance<InputManager>().GetInputManagers();
+            for (int i = 0; !inState && (i < inputManagers.Count); i++)
             {
                 BaseInputManager iManager = inputManagers[i];
                 if (!iManager._active) continue;
@@ -312,8 +320,7 @@ public class InputManager : MonoBehaviour
 
     public virtual void UpdateState()
     {
-        BaseInputManager[] inputManagers = GetInputManagers();
-        foreach (BaseInputManager iManager in inputManagers)
+        foreach (BaseInputManager iManager in GetInputManagers())
         {
             iManager.UpdateMappingState();
         }

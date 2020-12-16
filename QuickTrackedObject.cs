@@ -8,6 +8,12 @@ namespace QuickVR
     public class QuickTrackedObject : MonoBehaviour
     {
 
+        #region PUBLIC ATTRIBUTES
+
+        public bool _trackData = false;
+
+        #endregion
+
         #region PROTECTED ATTRIBUTES
 
         protected Vector3 _lastPosition = Vector3.zero;
@@ -98,27 +104,30 @@ namespace QuickVR
 
         public virtual void UpdateTrackedData()
         {
-            float dt = Time.deltaTime;
-            if (!Mathf.Approximately(dt, 0))
+            if (_trackData)
             {
-                _velocity = GetDisplacement() / dt;
-                _speed = _velocity.magnitude;
+                float dt = Time.deltaTime;
+                if (!Mathf.Approximately(dt, 0))
+                {
+                    _velocity = GetDisplacement() / dt;
+                    _speed = _velocity.magnitude;
 
-                //_accelerationFull.x = _velocity.x - _lastVelocity.x;
-                //_accelerationFull.y = _velocity.y - _lastVelocity.y;
-                //_accelerationFull.z = _velocity.z - _lastVelocity.z;
-                //_accelerationFull.w = _speed - _lastVelocity.magnitude;
-                //_accelerationFull /= dt;
+                    //_accelerationFull.x = _velocity.x - _lastVelocity.x;
+                    //_accelerationFull.y = _velocity.y - _lastVelocity.y;
+                    //_accelerationFull.z = _velocity.z - _lastVelocity.z;
+                    //_accelerationFull.w = _speed - _lastVelocity.magnitude;
+                    //_accelerationFull /= dt;
 
-                //_acceleration = _accelerationFull.w;
-                ////_acceleration = _accelerationFull.y;
+                    //_acceleration = _accelerationFull.w;
+                    ////_acceleration = _accelerationFull.y;
+                }
+
+                _rotationOffset = Quaternion.Inverse(_lastRotation) * transform.rotation;
+
+                _lastRotation = transform.rotation;
+                _lastPosition = transform.position;
+                _lastVelocity = _velocity;
             }
-
-            _rotationOffset = Quaternion.Inverse(_lastRotation) * transform.rotation;
-            
-            _lastRotation = transform.rotation;
-            _lastPosition = transform.position;
-            _lastVelocity = _velocity;
         }
 
         protected virtual IEnumerator CoUpdateAcceleration()
