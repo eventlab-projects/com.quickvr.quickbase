@@ -118,7 +118,7 @@ namespace QuickVR
         private static List<string> _muscleNames = null;
 
         private static List<HumanBodyBones> _humanBodyBones = null;
-        private static List<QuickHumanFingers> _fingers = null;
+        private static QuickHumanFingers[] _fingers = null;
         
         private static Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> _bonesFromFingerLeft = null;
         private static Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> _bonesFromFingerRight = null;
@@ -458,11 +458,11 @@ namespace QuickVR
             return result;
         }
 
-        public static List<QuickHumanFingers> GetHumanFingers()
+        public static QuickHumanFingers[] GetHumanFingers()
         {
             if (_fingers == null)
             {
-                _fingers = QuickUtils.GetEnumValues<QuickHumanFingers>();
+                _fingers = QuickUtils.GetEnumValues<QuickHumanFingers>().ToArray();
             }
 
             return _fingers;
