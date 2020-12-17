@@ -154,7 +154,8 @@ namespace QuickVR
             {
                 Vector3 fwd = _camera.transform.forward;
                 transform.position = _camera.transform.position + fwd * 3;
-                transform.forward = fwd;
+                //transform.forward = fwd;
+                transform.rotation = _camera.transform.rotation;
             }
         }
 
