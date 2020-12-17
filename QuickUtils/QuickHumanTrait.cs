@@ -549,10 +549,12 @@ namespace QuickVR
         public static void GetHumanPose(Animator animator, ref HumanPose result)
         {
             //Save the current transform properties
+            Transform tmpParent = animator.transform.parent;
             Vector3 tmpPos = animator.transform.position;
             Quaternion tmpRot = animator.transform.rotation;
 
             //Set the transform to the world origin
+            animator.transform.parent = null;
             animator.transform.position = Vector3.zero;
             animator.transform.rotation = Quaternion.identity;
 
@@ -560,6 +562,7 @@ namespace QuickVR
             GetHumanPoseHandler(animator).GetHumanPose(ref result);
 
             //Restore the transform properties
+            animator.transform.parent = tmpParent;
             animator.transform.position = tmpPos;
             animator.transform.rotation = tmpRot;
 
