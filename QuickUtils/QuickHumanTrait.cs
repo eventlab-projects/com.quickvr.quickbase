@@ -553,7 +553,6 @@ namespace QuickVR
             Quaternion tmpRot = animator.transform.rotation;
 
             //Set the transform to the world origin
-            animator.transform.parent = null;
             animator.transform.position = Vector3.zero;
             animator.transform.rotation = Quaternion.identity;
 
