@@ -119,7 +119,7 @@ namespace WebXR
 
         private void SetTrackingSpaceType()
         {
-            if (XRDevice.isPresent)
+            //if (XRDevice.isPresent)
             {
                 XRDevice.SetTrackingSpaceType(TrackingSpace);
                 Debug.Log("Tracking Space: " + XRDevice.GetTrackingSpaceType());
