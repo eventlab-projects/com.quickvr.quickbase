@@ -24,34 +24,37 @@ namespace QuickVR
         #region PROTECTED ATTRIBUTES
 
         protected QuickUnityVR _unityVR = null;
-
-        protected QuickOVRHandsInitializer _ovrHands
-        {
-            get
-            {
-                if (_unityVR && !m_OvrHandsInitializer)
-                {
-                    m_OvrHandsInitializer = _unityVR.GetComponent<QuickOVRHandsInitializer>();
-                }
-                return m_OvrHandsInitializer;
-            }
-        }
-
-        #endregion
-
-        #region PRIVATE ATTRIBUTES
-
-        protected QuickOVRHandsInitializer m_OvrHandsInitializer;
-
+        protected QuickOVRHandsInitializer _ovrHands = null;
+        
         #endregion
 
         #region CREATION AND DESTRUCTION
 
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        protected static void InitAfterSceneLoad()
+        protected static void Init()
         {
             //Automatically add this implementation. 
             QuickSingletonManager.GetInstance<InputManager>().CreateDefaultImplementation<InputManagerOVRHands>();
+        }
+
+        protected virtual IEnumerator Start()
+        {
+            //Wait for the Animator Source to be defined
+            QuickVRManager vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
+            Animator animatorSrc = null;
+            do
+            {
+                animatorSrc = vrManager.GetAnimatorSource();
+                yield return null;
+            } while (!animatorSrc);
+
+
+            //Get the QuickUnityVR and QuickOVRHandsInitializer components
+            _unityVR = animatorSrc.GetComponent<QuickUnityVR>();
+            while (!_ovrHands)
+            {
+                _ovrHands = _unityVR.GetComponent<QuickOVRHandsInitializer>();
+            }
         }
 
         public override void Reset()
@@ -81,6 +84,9 @@ namespace QuickVR
         {
             Animator animatorSrc = QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource();
             _unityVR = animatorSrc.GetComponent<QuickUnityVR>();
+
+            Debug.Log(animatorSrc.name);
+            Debug.Log(_unityVR);
         }
 
         public override string[] GetButtonCodes()
