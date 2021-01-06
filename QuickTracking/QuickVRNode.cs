@@ -185,6 +185,8 @@ namespace QuickVR
                 _model.ResetTransformation();
                 _model.name = "Model";
             }
+
+            SetModelVisible(_showModel);
         }
 
         #endregion
@@ -218,9 +220,10 @@ namespace QuickVR
 
         protected virtual void SetModelVisible(bool v)
         {
-            if (!_model) return;
-
-            _model.gameObject.SetActive(v);
+            if (_model && (_showModel != _model.gameObject.activeSelf))
+            {
+                _model.gameObject.SetActive(v);
+            }
         }
 
         public virtual QuickHumanBodyBones GetRole()
@@ -356,13 +359,7 @@ namespace QuickVR
 
         protected virtual void OnDrawGizmos()
         {
-            //SetModelVisible(IsTracked() && Application.isEditor && _showModel);
-
-            //SetModelVisible(Application.isEditor && _showModel);
-            if (_model && (_showModel != _model.gameObject.activeSelf))
-            {
-                SetModelVisible(_showModel);
-            }
+            SetModelVisible(_showModel);
         }
 
         #endregion
