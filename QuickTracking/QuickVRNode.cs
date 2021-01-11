@@ -178,13 +178,13 @@ namespace QuickVR
                 pfName = PF_VIVE_TRACKER;
             }
 
-            if (pfName.Length != 0)
-            {
-                _model = Instantiate<Transform>(Resources.Load<Transform>("Prefabs/" + pfName));
-                _model.parent = transform;
-                _model.ResetTransformation();
-                _model.name = "Model";
-            }
+            //if (pfName.Length != 0)
+            //{
+            //    _model = Instantiate<Transform>(Resources.Load<Transform>("Prefabs/" + pfName));
+            //    _model.parent = transform;
+            //    _model.ResetTransformation();
+            //    _model.name = "Model";
+            //}
 
             SetModelVisible(_showModel);
         }
