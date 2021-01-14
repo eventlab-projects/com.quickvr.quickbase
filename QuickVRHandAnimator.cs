@@ -177,7 +177,7 @@ namespace QuickVR
             Vector3 targetDir = _axisHand.forward;
             if (fPose._finger == QuickHumanFingers.Thumb)
             {
-                targetDir = Vector3.Lerp(_axisHand.right, _axisHand.forward, 0.5f);
+                targetDir = Vector3.Lerp((_isLeftHand? 1 : -1) * _axisHand.right, _axisHand.forward, 0.5f);
             }
 
             for (int i = 0; i < 3; i++)
@@ -200,6 +200,10 @@ namespace QuickVR
         protected virtual void UpdateFingerClose(FingerPose fPose)
         {
             Vector3 rotAxis = fPose.GetRotAxisClose();
+            if (!_isLeftHand && fPose._finger == QuickHumanFingers.Thumb)
+            {
+                rotAxis *= -1;
+            }
             float maxAngle = GetMaxAngleClose(fPose._finger);
             
             List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(fPose._finger, _isLeftHand);
