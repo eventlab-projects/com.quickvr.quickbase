@@ -82,16 +82,6 @@ namespace QuickVR {
             }
         }
 
-        protected virtual void OnEnable()
-        {
-            QuickVRManager.OnPreCameraUpdate += CopyPose;
-        }
-
-        protected virtual void OnDisable()
-        {
-            QuickVRManager.OnPreCameraUpdate -= CopyPose;
-        }
-
         protected virtual void Awake()
         {
             _destOrigin = transform.CreateChild("__DestOrigin__");
