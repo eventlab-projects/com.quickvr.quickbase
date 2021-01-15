@@ -178,13 +178,15 @@ namespace QuickVR
                 pfName = PF_VIVE_TRACKER;
             }
 
-            if (pfName.Length != 0)
-            {
-                _model = Instantiate<Transform>(Resources.Load<Transform>("Prefabs/" + pfName));
-                _model.parent = transform;
-                _model.ResetTransformation();
-                _model.name = "Model";
-            }
+            //if (pfName.Length != 0)
+            //{
+            //    _model = Instantiate<Transform>(Resources.Load<Transform>("Prefabs/" + pfName));
+            //    _model.parent = transform;
+            //    _model.ResetTransformation();
+            //    _model.name = "Model";
+            //}
+
+            SetModelVisible(_showModel);
         }
 
         #endregion
@@ -218,9 +220,10 @@ namespace QuickVR
 
         protected virtual void SetModelVisible(bool v)
         {
-            if (!_model) return;
-
-            _model.gameObject.SetActive(v);
+            if (_model && (_showModel != _model.gameObject.activeSelf))
+            {
+                _model.gameObject.SetActive(v);
+            }
         }
 
         public virtual QuickHumanBodyBones GetRole()
@@ -356,13 +359,7 @@ namespace QuickVR
 
         protected virtual void OnDrawGizmos()
         {
-            //SetModelVisible(IsTracked() && Application.isEditor && _showModel);
-
-            //SetModelVisible(Application.isEditor && _showModel);
-            if (_model && (_showModel != _model.gameObject.activeSelf))
-            {
-                SetModelVisible(_showModel);
-            }
+            SetModelVisible(_showModel);
         }
 
         #endregion
