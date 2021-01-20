@@ -68,6 +68,7 @@ namespace QuickVR
                                     loadOperation.allowSceneActivation = true;
                                     while (!loadOperation.isDone) yield return null;
                                     _loadingScenes.Remove(sceneToLoad);
+                                    LightProbes.Tetrahedralize();
                                 }
                             }
                         }
@@ -82,6 +83,7 @@ namespace QuickVR
                                 AsyncOperation loadOperation = SceneManager.LoadSceneAsync(sceneToLoad, LoadSceneMode.Additive);
                                 loadOperation.allowSceneActivation = true;
                                 while (!loadOperation.isDone) yield return null;
+                                LightProbes.Tetrahedralize();
                             }
                         }
                         break;
