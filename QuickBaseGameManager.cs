@@ -25,7 +25,11 @@ namespace QuickVR {
         public AudioClip _headTrackingCalibrationInstructions = null;
 		
 		public float _timeOut = -1;	//Number of seconds to wait until automatic finishing the game
-		public QuickStageBase _initialStage = null;
+
+
+
+		protected QuickStageBase _initialStageMain = null;
+        protected QuickStageBase _finalStageMain = null;
 
         [HideInInspector] 
         public bool _useExpirationDate = false;
@@ -65,6 +69,23 @@ namespace QuickVR {
         [SerializeField, HideInInspector]
         protected int _expirationYear = 0;
 
+        [SerializeField, HideInInspector]
+        protected Transform _rootStagesPre = null;
+
+        [SerializeField, HideInInspector]
+        protected Transform _rootStagesMain = null;
+
+        [SerializeField, HideInInspector]
+        protected Transform _rootStagesPost = null;
+
+        #endregion
+
+        #region CONSTANTS 
+
+        protected const string ROOT_STAGES_PRE_NAME = "__StagesPre__";
+        protected const string ROOT_STAGES_MAIN_NAME = "__StagesMain__";
+        protected const string ROOT_STAGES_POST_NAME = "__StagesPost__";
+
         #endregion
 
         #region EVENTS
@@ -77,6 +98,13 @@ namespace QuickVR {
         #endregion
 
         #region CREATION AND DESTRUCTION
+
+        protected virtual void Reset()
+        {
+            _rootStagesPre = transform.CreateChild(ROOT_STAGES_PRE_NAME);
+            _rootStagesMain = transform.CreateChild(ROOT_STAGES_MAIN_NAME);
+            _rootStagesPost = transform.CreateChild(ROOT_STAGES_POST_NAME);
+        }
 
         protected virtual void OnEnable()
         {            
@@ -111,7 +139,7 @@ namespace QuickVR {
             float tOut = SettingsBase.GetTimeOutMinutes();
             if (tOut >= 0) _timeOut = tOut * 60.0f;
 
-			InitGameConfiguration();
+            InitGameConfiguration();
 			
             AwakePlayer();
         }
@@ -313,10 +341,40 @@ namespace QuickVR {
                 _timeRunning = 0.0f;
 
                 if (OnRunning != null) OnRunning();
-                if (!_initialStage) _initialStage = GetComponentInChildren<QuickStageBase>();
-                if (_initialStage && _initialStage.gameObject.activeInHierarchy) _initialStage.Init();
+
+                GetInitialAndFinalStages(_rootStagesMain, out _initialStageMain, out _finalStageMain);
+                if (_initialStageMain)
+                {
+                    _initialStageMain.Init();
+                }
+
+                //Debug.Log("INITIAL STAGE = " + _initialStageMain);
+                //Debug.Log("FINAL STAGE = " + _finalStageMain);
             }
 		}
+
+        protected virtual void GetInitialAndFinalStages(Transform rootStages, out QuickStageBase initialStage, out QuickStageBase finalStage)
+        {
+            initialStage = null;
+            finalStage = null;
+
+            for (int i = 0; i < rootStages.childCount; i++)
+            {
+                Transform tChild = rootStages.GetChild(i);
+                if (tChild.gameObject.activeInHierarchy)
+                {
+                    QuickStageBase s = tChild.GetComponent<QuickStageBase>();
+                    if (s)
+                    {
+                        if (!initialStage)
+                        {
+                            initialStage = s;
+                        }
+                        finalStage = s;
+                    }
+                }
+            }
+        }
 
 		protected virtual void LateUpdate() {
 			if (InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_EXIT)) Finish();
