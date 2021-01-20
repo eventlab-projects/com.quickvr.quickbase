@@ -11,7 +11,7 @@ Shader "QuickVR/CalibrationScreen" {
     
     	Tags 
 	    { 
-	    	"Queue" = "Overlay+1"
+	    	"Queue" = "Overlay-1"
 	    }
 
 		Pass {
