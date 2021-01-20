@@ -43,7 +43,6 @@ namespace QuickVR {
         protected DebugManager _debugManager = null;
         protected QuickSceneManager _sceneManager = null;
 
-		protected CameraFade _cameraFade = null;					//A pointer to the object used to control the fade-in and fade-out
 		protected bool _running = false;
 		protected bool _finishing = false;
 
@@ -124,7 +123,6 @@ namespace QuickVR {
             _instructionsManager = QuickSingletonManager.GetInstance<QuickInstructionsManager>();
 			_debugManager = QuickSingletonManager.GetInstance<DebugManager>();
             _sceneManager = QuickSingletonManager.GetInstance<QuickSceneManager>();
-            _cameraFade = QuickSingletonManager.GetInstance<CameraFade>();
             
             InitGameConfiguration();
 			
@@ -137,7 +135,7 @@ namespace QuickVR {
 
             if (_hTracking)
             {
-                _cameraFade.SetColor(Color.black);
+                QuickSingletonManager.GetInstance<CameraFade>().SetColor(Color.black);
                 _hTracking.CheckHandtrackingMode();
                 StartCoroutine(CoUpdate());
             }
