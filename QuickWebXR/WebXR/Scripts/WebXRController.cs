@@ -72,7 +72,7 @@ namespace WebXR
                 WebXRControllerInput input = inputMap.inputs[i];
                 if (action == input.actionName)
                 {
-                    if (XRDevice.isPresent && !input.unityInputIsButton)
+                    //if (XRDevice.isPresent && !input.unityInputIsButton)
                     {
                         return Input.GetAxis(input.unityInputName);
                     }
@@ -91,7 +91,7 @@ namespace WebXR
 
         public bool GetButton(string action)
         {
-            if (XRDevice.isPresent)
+            //if (XRDevice.isPresent)
             {
                 foreach (WebXRControllerInput input in inputMap.inputs)
                 {
@@ -129,7 +129,7 @@ namespace WebXR
         public bool GetButtonDown(string action)
         {
             // Use Unity Input Manager when XR is enabled and WebXR is not being used (eg: standalone or from within editor).
-            if (XRDevice.isPresent)
+            //if (XRDevice.isPresent)
             {
                 foreach (WebXRControllerInput input in inputMap.inputs)
                 {
@@ -150,7 +150,7 @@ namespace WebXR
         public bool GetButtonUp(string action)
         {
             // Use Unity Input Manager when XR is enabled and WebXR is not being used (eg: standalone or from within editor).
-            if (XRDevice.isPresent)
+            //if (XRDevice.isPresent)
             {
                 foreach (WebXRControllerInput input in inputMap.inputs)
                 {

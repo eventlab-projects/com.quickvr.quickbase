@@ -19,16 +19,8 @@ namespace QuickVR
 
         protected QuickOVRHand _leftHand = null;
         protected QuickOVRHand _rightHand = null;
-        protected QuickUnityVR _hTracking
-        {
-            get
-            {
-                return QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource().GetComponent<QuickUnityVR>();
-            }
-        }
-
-        private static Dictionary<QuickHumanBodyBones, OVRSkeleton.BoneId> _toOVR = new Dictionary<QuickHumanBodyBones, OVRSkeleton.BoneId>();
-
+        protected QuickUnityVR _hTracking = null;
+        
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -36,24 +28,6 @@ namespace QuickVR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         private static void Init()
         {
-            List<QuickHumanFingers> fingers = QuickHumanTrait.GetHumanFingers();
-            foreach (bool isLeft in new bool[]{ true, false}) 
-            {
-                for (int i = 0; i < fingers.Count; i++)
-                {
-                    QuickHumanFingers f = fingers[i];
-                    string infix = i < 4 ? f.ToString() : "Pinky";
-                    List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, isLeft);
-                    for (int j = 0; j < fingerBones.Count; j++)
-                    {
-                        string sufix = j < 3 ? (j + 1).ToString() : "Tip";
-                        QuickHumanBodyBones b = fingerBones[j];
-                        OVRSkeleton.BoneId ovrBoneID = QuickUtils.ParseEnum<OVRSkeleton.BoneId>("Hand_" + infix + sufix);
-                        _toOVR[b] = ovrBoneID;
-                    }
-                }
-            }
-
 #if UNITY_ANDROID
             QuickVRManager.OnSourceAnimatorSet += OnSourceAnimatorSet;
 #endif
@@ -66,6 +40,8 @@ namespace QuickVR
 
         protected virtual void Start()
         {
+            _hTracking = QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource().GetComponent<QuickUnityVR>();
+
             QuickVRPlayArea vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
             _leftHand = Instantiate<QuickOVRHand>(Resources.Load<QuickOVRHand>("Prefabs/pf_QuickOVRHandLeft"), vrPlayArea.GetVRNode(HumanBodyBones.LeftHand).transform);
             _leftHand.transform.ResetTransformation();
@@ -81,12 +57,7 @@ namespace QuickVR
         
 #endregion
 
-#region GET AND SET
-
-        public static OVRSkeleton.BoneId ToOVR(QuickHumanBodyBones boneID)
-        {
-            return _toOVR[boneID];
-        }
+        #region GET AND SET
 
         public override void Calibrate()
         {
@@ -98,20 +69,21 @@ namespace QuickVR
             return left ? _leftHand : _rightHand;
         }
 
-#endregion
+        #endregion
 
-#region UPDATE
+        #region UPDATE
 
         public override void UpdateTrackingLate()
         {
             if (_hTracking && _hTracking._handTrackingMode == QuickUnityVR.HandTrackingMode.Hands)
             {
+                OVRInput.Update();
                 if (_leftHand) _leftHand.UpdateTracking();
                 if (_rightHand) _rightHand.UpdateTracking();
             }
         }
 
-#endregion
+        #endregion
 
     }
 }

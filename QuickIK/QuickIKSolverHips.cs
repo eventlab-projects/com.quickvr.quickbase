@@ -11,37 +11,11 @@ namespace QuickVR
 
         #region PUBLIC PARAMETERS
 
-        public Transform _hips
-        {
-            get
-            {
-                if (!m_Hips)
-                {
-                    m_Hips = GetComponentInParent<Animator>().GetBoneTransform(HumanBodyBones.Hips);
-                    _hipsInitialLocalPos = m_Hips.localPosition;
-                }
-
-                return m_Hips;
-            }
-        }
-        
-        public override HumanBodyBones _boneID
-        {
-            get
-            {
-                return HumanBodyBones.Hips;
-            }
-            set
-            {
-                
-            }
-        }
-
         public override Transform _boneUpper
         {
             get
             {
-                return _hips;
+                return _boneLimb;
             }
             set
             {
@@ -53,7 +27,7 @@ namespace QuickVR
         {
             get
             {
-                return _hips;
+                return _boneLimb;
             }
             set
             {
@@ -65,7 +39,13 @@ namespace QuickVR
         {
             get
             {
-                return _hips;
+                if (!m_boneLimb)
+                {
+                    m_boneLimb = GetComponentInParent<Animator>().GetBoneTransform(HumanBodyBones.Hips);
+                    _hipsInitialLocalPos = m_boneLimb.localPosition;
+                }
+
+                return m_boneLimb;
             }
             set
             {
@@ -109,30 +89,6 @@ namespace QuickVR
             }
         }
 
-        public override float _weightIKPos
-        {
-            get
-            {
-                return m_weightIKPos;
-            }
-            set
-            {
-                m_weightIKPos = value;
-            }
-        }
-
-        public override float _weightIKRot
-        {
-            get
-            {
-                return m_weightIKRot;
-            }
-            set
-            {
-                m_weightIKRot = value;
-            }
-        }
-
         public override float _weightIKHint
         {
             get
@@ -154,27 +110,18 @@ namespace QuickVR
 
         #endregion
 
-        #region PRIVATE ATTRIBUTES
-
-        [SerializeField]
-        private Transform m_Hips = null;
-
-        #endregion
-
-        #region CREATION AND DESTRUCTION
-
-        protected virtual void Awake()
-        {
-            
-        }
-
-        #endregion
-
         #region GET AND SET
+
+        public override void SaveCurrentPose()
+        {
+            base.SaveCurrentPose();
+            
+            _hipsInitialLocalPos = _boneLimb.localPosition;
+        }
 
         public override void ResetIKChain()
         {
-            _hips.localPosition = _hipsInitialLocalPos;
+            _boneLimb.localPosition = _hipsInitialLocalPos;
         }
 
         #endregion
@@ -185,7 +132,7 @@ namespace QuickVR
         {
             if (!_enableIK) return;
 
-            _hips.position = _targetLimb.position;
+            _boneLimb.position = _targetLimb.position;
         }
 
         #endregion

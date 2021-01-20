@@ -54,12 +54,12 @@ public static class SettingsBase
 
     #region GET AND SET
     
-    public static int GetSubjectID()
+    public static string GetSubjectID()
     {
-        return QuickPlayerPrefs.GetInt("SubjectID");
+        return QuickPlayerPrefs.GetString("SubjectID");
     }
     
-    public static void SetSubjectID(int value)
+    public static void SetSubjectID(string value)
     {
         QuickPlayerPrefs.SetValue("SubjectID", value);
     }

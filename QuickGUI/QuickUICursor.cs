@@ -2,16 +2,10 @@ using UnityEngine;
 using UnityEngine.UI;
 
 using System;
+using System.Collections.Generic;
 
 namespace QuickVR
 {
-
-    public enum VRCursorType
-    {
-        HEAD,
-        LEFT,
-        RIGHT,
-    };
 
     // The Cursor is a small point at the centre of the screen.
     // It is used as a visual aid for aiming. The position of the
@@ -35,15 +29,24 @@ namespace QuickVR
 
         public Transform _vrGUICursor = null;
 
+        public enum Role
+        {
+            Head,
+            LeftHand,
+            RightHand,
+        };
+
         #endregion
 
         #region CONSTANTS
 
         protected const string DEFAULT_RAY_SHADER = "QuickVR/UIOpaque";
-        
+
         #endregion
 
         #region PROTECTED PARAMETERS
+
+        protected static Dictionary<Role, QuickUICursor> _vrCursors = new Dictionary<Role, QuickUICursor>();
 
         protected static Canvas _canvasCursors = null;
 
@@ -70,9 +73,21 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
+        public static QuickUICursor CreateVRCursor(Role cType, Transform cTransform)
+        {
+            QuickUICursor vrCursor = cTransform.gameObject.GetOrCreateComponent<QuickUICursor>();
+            vrCursor._TriggerVirtualKey = InputManager.DEFAULT_BUTTON_CONTINUE;
+            vrCursor._drawRay = (cType == Role.LeftHand || cType == Role.RightHand);
+
+            _vrCursors[cType] = vrCursor;
+            vrCursor.enabled = false;
+
+            return vrCursor;
+        }
+
         protected virtual void Awake()
         {
-            if (!_vrGUICursor) _vrGUICursor = Resources.Load<Transform>("Prefabs/pf_GUICUrsor");
+            if (!_vrGUICursor) _vrGUICursor = Resources.Load<Transform>("Prefabs/pf_GUICursor");
             CreateCanvasCursors();
             CreateVRGUICursor();
 
@@ -120,6 +135,18 @@ namespace QuickVR
 
         #region GET AND SET
 
+        public static QuickUICursor GetVRCursorMain()
+        {
+            return GetVRCursor(QuickVRManager.IsXREnabled() ? Role.RightHand : Role.Head);
+        }
+
+        public static QuickUICursor GetVRCursor(Role cType)
+        {
+            if (!_vrCursors.ContainsKey(cType)) return null;
+
+            return _vrCursors[cType];
+        }
+
         public virtual Image GetImage()
         {
             return _CursorTransform.GetComponentInChildren<Image>();
@@ -146,6 +173,16 @@ namespace QuickVR
         public virtual Ray GetRay()
         {
             return _ray;
+        }
+
+        protected virtual Ray ComputeRay()
+        {
+            if ( !QuickVRManager.IsXREnabled() && GetVRCursor(Role.Head) == this)
+            {
+                return Camera.main.ScreenPointToRay(Input.mousePosition);
+            }
+
+            return new Ray(transform.position, _CursorTransform.position - transform.position);
         }
 
         public virtual void SetColor(Color c)
@@ -184,7 +221,7 @@ namespace QuickVR
             SetPosition(transform.position + transform.forward * _DefaultDistance, _DefaultDistance);
 
             // Create a ray that points forwards from the camera.
-            _ray = new Ray(transform.position, _CursorTransform.position - transform.position);
+            _ray = ComputeRay();
             float rLength = _RayLength;
 
             // Do the raycast forweards to see if we hit an interactive item

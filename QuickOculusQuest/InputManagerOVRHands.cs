@@ -23,29 +23,71 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected QuickOVRHandsInitializer _ovrHands
-        {
-            get
-            {
-                return QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource().GetComponent<QuickOVRHandsInitializer>();
-            }
-        }
-
+        protected QuickUnityVR _unityVR = null;
+        protected QuickOVRHandsInitializer _ovrHands = null;
+        
         #endregion
 
         #region CREATION AND DESTRUCTION
 
-        protected override void Awake()
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        protected static void Init()
         {
-            base.Awake();
-#if !UNITY_ANDROID
-            gameObject.SetActive(false);
-#endif
+            //Automatically add this implementation. 
+            QuickSingletonManager.GetInstance<InputManager>().CreateDefaultImplementation<InputManagerOVRHands>();
+        }
+
+        protected virtual IEnumerator Start()
+        {
+            //Wait for the Animator Source to be defined
+            QuickVRManager vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
+            Animator animatorSrc = null;
+            do
+            {
+                animatorSrc = vrManager.GetAnimatorSource();
+                yield return null;
+            } while (!animatorSrc);
+
+
+            //Get the QuickUnityVR and QuickOVRHandsInitializer components
+            _unityVR = animatorSrc.GetComponent<QuickUnityVR>();
+            while (!_ovrHands)
+            {
+                _ovrHands = _unityVR.GetComponent<QuickOVRHandsInitializer>();
+            }
+        }
+
+        public override void Reset()
+        {
+            base.Reset();
+
+            //Configure the default buttons
+            ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CONTINUE, ButtonCodes.ThumbUp + "Right", ButtonCodes.ThumbUp + "Left");
+            ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CANCEL, ButtonCodes.ThumbDown + "Right", ButtonCodes.ThumbDown + "Left");
+        }
+
+        protected virtual void OnEnable()
+        {
+            QuickVRManager.OnSourceAnimatorSet += ActionSourceAnimatorSet;
+        }
+
+        protected virtual void OnDisable()
+        {
+            QuickVRManager.OnSourceAnimatorSet += ActionSourceAnimatorSet;
         }
 
         #endregion
 
         #region GET AND SET
+
+        protected virtual void ActionSourceAnimatorSet()
+        {
+            Animator animatorSrc = QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource();
+            _unityVR = animatorSrc.GetComponent<QuickUnityVR>();
+
+            Debug.Log(animatorSrc.name);
+            Debug.Log(_unityVR);
+        }
 
         public override string[] GetButtonCodes()
         {
@@ -74,7 +116,7 @@ namespace QuickVR
 
         protected override bool ImpGetButton(string button)
         {
-            if (QuickUtils.IsHandTrackingSupported() && _ovrHands)
+            if (QuickVRManager.IsHandTrackingSupported() && _ovrHands)
             {
                 QuickOVRHand h = GetOVRhand(button);
                 if (h.IsInitialized())
@@ -98,6 +140,17 @@ namespace QuickVR
 
         #endregion
 
+        #region UPDATE
+
+        protected virtual void Update()
+        {
+            if (_unityVR)
+            {
+                _active = _unityVR._handTrackingMode == QuickUnityVR.HandTrackingMode.Hands;
+            }
+        }
+
+        #endregion
 
     }
 

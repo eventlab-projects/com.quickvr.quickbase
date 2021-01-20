@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-using UnityEngine.Animations;
-
 namespace QuickVR
 {
 
@@ -17,12 +15,26 @@ namespace QuickVR
 
         #endregion
 
+        #region PUBLIC ATTRIBUTES
+
+        public bool _followCamera = true;
+
+        #endregion
+
         #region PROTECTED ATTRIBUTES
 
         protected Canvas _canvas = null;
         protected Text _instructions = null;
 
-        protected ParentConstraint _constraint = null;
+        protected static HashSet<QuickUserGUI> _guis = new HashSet<QuickUserGUI>(); //All the GUIS present in the game. 
+
+        protected Camera _camera
+        {
+            get
+            {
+                return Camera.main;
+            }
+        }
 
         #endregion
 
@@ -30,20 +42,31 @@ namespace QuickVR
 
         protected virtual void Awake()
         {
+            RegisterGUI(this);
+
             Reset();
+        }
+
+        protected static void RegisterGUI(QuickUserGUI userGUI)
+        {
+            _guis.Add(userGUI);
+        }
+
+        protected virtual void OnEnable()
+        {
+            QuickVRManager.OnPostCameraUpdate += ActionPostCameraUpdate;
+        }
+
+        protected virtual void OnDisable()
+        {
+            QuickVRManager.OnPostCameraUpdate -= ActionPostCameraUpdate;
         }
 
         protected virtual void Reset()
         {
+            gameObject.layer = LayerMask.NameToLayer("UI");
             _canvas = CreateCanvas();
             _instructions = CreateInstructionsText();
-        }
-
-        protected virtual IEnumerator Start()
-        {
-            while (!Camera.main) yield return null;
-
-            CreateParentConstraint();
         }
 
         protected virtual Canvas CreateCanvas()
@@ -81,26 +104,9 @@ namespace QuickVR
             return result;
         }
 
-        protected virtual void CreateParentConstraint()
-        {
-            ConstraintSource source = new ConstraintSource();
-            source.sourceTransform = Camera.main.transform;
-            source.weight = 1.0f;
-
-            _constraint = gameObject.GetOrCreateComponent<ParentConstraint>();
-            _constraint.AddSource(source);
-            _constraint.constraintActive = true;
-            _constraint.SetTranslationOffset(0, new Vector3(0, 0, 3.0f));
-        }
-
         #endregion
 
         #region GET AND SET
-
-        protected virtual Transform GetParentConstraintSource()
-        {
-            return Camera.main.transform;
-        }
 
         public virtual void SetTextInstructions(string text)
         {
@@ -123,6 +129,34 @@ namespace QuickVR
         public virtual bool IsEnabledInstructions()
         {
             return _instructions.gameObject.activeSelf;
+        }
+
+        public virtual void ShowAll(bool show)
+        {
+            foreach (Transform t in transform)
+            {
+                t.gameObject.SetActive(show);
+            }
+        }
+
+        public virtual QuickUIButton GetButton(string buttonName)
+        {
+            return transform.Find(buttonName).GetOrCreateComponent<QuickUIButton>();
+        }
+
+        #endregion
+
+        #region UPDATE
+
+        protected virtual void ActionPostCameraUpdate()
+        {
+            if (_followCamera)
+            {
+                Vector3 fwd = _camera.transform.forward;
+                transform.position = _camera.transform.position + fwd * 3;
+                //transform.forward = fwd;
+                transform.rotation = _camera.transform.rotation;
+            }
         }
 
         #endregion

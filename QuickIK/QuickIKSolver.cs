@@ -5,47 +5,37 @@ using UnityEngine;
 namespace QuickVR
 {
 
-    public interface IQuickIKSolver
-    {
-        HumanBodyBones _boneID { get; set; }
-
-        //The bone chain hierarchy
-        Transform _boneUpper { get; set; }
-        Transform _boneMid { get; set; }
-        Transform _boneLimb { get; set; }
-
-        //The IK parameters
-        Transform _targetLimb { get; set; }
-        Transform _targetHint { get; set; }
-
-        float _weight { get; set; }
-
-        float _weightIKPos { get; set; }
-        float _weightIKRot { get; set; }
-        float _weightIKHint { get; set; }
-
-    }
-
-    public class QuickIKSolver : MonoBehaviour, IQuickIKSolver
+    public class QuickIKSolver : MonoBehaviour
     {
 
         #region PUBLIC PARAMETERS
 
         public bool _enableIK = true;
 
-        public Vector3 _offsetTargetLimbPos = Vector3.zero;
-
-        public virtual HumanBodyBones _boneID
+        public HumanBodyBones _boneID
         {
             get
             {
-                return m_boneID;
-            }
-            set
-            {
-                m_boneID = value;
+                if (m_BoneID == HumanBodyBones.LastBone)
+                {
+                    if (_boneLimb)
+                    {
+                        Animator animator = GetComponentInParent<Animator>();
+                        foreach (HumanBodyBones boneID in QuickHumanTrait.GetHumanBodyBones())
+                        {
+                            if (_boneLimb == animator.GetBoneTransform(boneID))
+                            {
+                                m_BoneID = boneID;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                return m_BoneID;
             }
         }
+        protected HumanBodyBones m_BoneID = HumanBodyBones.LastBone;
 
         public virtual Transform _boneUpper
         {
@@ -114,11 +104,23 @@ namespace QuickVR
         {
             get
             {
+                if (!m_targetHint && _boneUpper)
+                {
+                    foreach (Transform t in _boneUpper)
+                    {
+                        if (t.name.Contains(QuickIKManager.IK_TARGET_PREFIX))
+                        {
+                            m_targetHint = t;
+                            break;
+                        }
+                    }
+                }
                 return m_targetHint;
             }
             set
             {
                 m_targetHint = value;
+                m_targetHint.parent = _boneUpper;
             }
         }
 
@@ -191,23 +193,26 @@ namespace QuickVR
         [SerializeField, ReadOnly]
         protected Transform m_targetHint = null;
 
-        [SerializeField, HideInInspector]
+        [SerializeField, ReadOnly]
         protected Quaternion _initialLocalRotationUpper = Quaternion.identity;
-        
-        [SerializeField, HideInInspector]
+
+        [SerializeField, ReadOnly]
         protected Quaternion _initialLocalRotationMid = Quaternion.identity;
-        
-        [SerializeField, HideInInspector]
+
+        [SerializeField, ReadOnly]
         protected Quaternion _initialLocalRotationLimb = Quaternion.identity;
 
-        [SerializeField, HideInInspector]
+        [SerializeField, ReadOnly]
+        protected Vector3 _initialLocalPositionTargetLimb = Vector3.zero;
+
+        [SerializeField, ReadOnly]
+        protected Quaternion _initialLocalRotationTargetLimb = Quaternion.identity;
+
+        [SerializeField, ReadOnly]
+        protected Vector3 _initialLocalPositionTargetHint = Vector3.zero;
+
         protected float _lengthUpper = 0;
-
-        [SerializeField, HideInInspector]
         protected float _lengthMid = 0;
-
-        [SerializeField, HideInInspector]
-        protected HumanBodyBones m_boneID = HumanBodyBones.LastBone;
 
         [SerializeField, Range(0.0f, 1.0f)]
         protected float m_weightIKPos = 1.0f;
@@ -217,7 +222,32 @@ namespace QuickVR
 
         #endregion
 
+        #region CREATION AND DESTRUCTION
+
+        protected virtual void Awake()
+        {
+            if (_boneUpper) _initialLocalRotationUpper = _boneUpper.localRotation;
+            if (_boneMid) _initialLocalRotationMid = _boneMid.localRotation;
+            if (_boneLimb) _initialLocalRotationLimb = _boneLimb.localRotation;
+
+            if (_targetLimb)
+            {
+                _initialLocalPositionTargetLimb = _targetLimb.localPosition;
+                _initialLocalRotationTargetLimb = _targetLimb.localRotation;
+            }
+            if (_targetHint) _initialLocalPositionTargetHint = _targetHint.localPosition;
+        }
+
+        #endregion
+
         #region GET AND SET
+
+        public virtual void SaveCurrentPose()
+        {
+            _initialLocalPositionTargetLimb = _targetLimb.localPosition;
+            _initialLocalRotationTargetLimb = _targetLimb.localRotation;
+            if (_targetHint) _initialLocalPositionTargetHint = _targetHint.localPosition;
+        }
 
         public virtual float GetUpperLength()
         {
@@ -246,7 +276,7 @@ namespace QuickVR
 
         protected virtual Vector3 GetIKTargetLimbPosition()
         {
-            Vector3 v = (_targetLimb.position + _offsetTargetLimbPos) - _boneUpper.position;
+            Vector3 v = _targetLimb.position - _boneUpper.position;
             return _boneUpper.position + (v.normalized * Mathf.Min(v.magnitude, GetChainLength()));
         }
 
@@ -259,7 +289,31 @@ namespace QuickVR
         {
             _boneUpper.localRotation = _initialLocalRotationUpper;
             _boneMid.localRotation = _initialLocalRotationMid;
-            //_boneLimb.localRotation = _initialLocalRotationLimb;
+            _boneLimb.localRotation = _initialLocalRotationLimb;
+        }
+
+        public virtual void Calibrate()
+        {
+            ResetIKChain();
+
+            _targetLimb.localPosition = _initialLocalPositionTargetLimb;
+            _targetLimb.localRotation = _initialLocalRotationTargetLimb;
+            if (_targetHint) _targetHint.localPosition = _initialLocalPositionTargetHint;
+        }
+
+        public virtual Vector3 GetInitialLocalPosTargetLimb()
+        {
+            return _initialLocalPositionTargetLimb;
+        }
+
+        public virtual Quaternion GetInitialLocalRotTargetLimb()
+        {
+            return _initialLocalRotationTargetLimb;
+        }
+
+        public virtual Vector3 GetInitialLocalPosTargetHint()
+        {
+            return _initialLocalPositionTargetHint;
         }
 
         #endregion
@@ -335,35 +389,6 @@ namespace QuickVR
         }
 
         #endregion
-
-        #region DEBUG
-
-        //protected virtual void OnDrawGizmos()
-        //{
-        //    if (_boneUpper && _boneMid)
-        //    {
-        //        Gizmos.color = Color.magenta;
-        //        Gizmos.DrawLine(_boneUpper.position, _boneMid.position);
-        //    }
-        //    if (_boneMid && _boneLimb)
-        //    {
-        //        Gizmos.color = Color.magenta;
-        //        Gizmos.DrawLine(_boneMid.position, _boneLimb.position);
-        //    }
-        //    if (_boneMid && _targetHint)
-        //    {
-        //        Gizmos.color = Color.yellow;
-        //        Gizmos.DrawLine(_boneMid.position, _targetHint.position);
-        //    }
-        //    if (_boneUpper && _targetLimb)
-        //    {
-        //        Gizmos.color = Color.cyan;
-        //        Gizmos.DrawLine(_boneUpper.position, GetIKTargetLimbPosition());
-        //    }
-        //}
-
-        #endregion
-
 
     }
 
