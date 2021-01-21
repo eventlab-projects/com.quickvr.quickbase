@@ -23,7 +23,7 @@ Shader "UI/Overlay"
 
 		Tags
 		{
-			"Queue" = "Overlay"
+			"Queue" = "Overlay+1"
 			"IgnoreProjector" = "True"
 			"RenderType" = "Transparent"
 			"PreviewType"="Plane"

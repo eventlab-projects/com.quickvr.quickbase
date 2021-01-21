@@ -8,13 +8,14 @@
     
     	Tags 
 	    { 
-	    	"Queue" = "Overlay"
+	    	"Queue" = "Overlay+1"
 	    }
 
 		Pass {
 	    	Lighting Off
 	        Cull Off
 	        Blend SrcAlpha OneMinusSrcAlpha // Alpha blending
+			ZTest Always
 	            
 			CGPROGRAM
 				#pragma vertex vert

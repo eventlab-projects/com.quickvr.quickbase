@@ -5,7 +5,7 @@ using UnityEngine;
 namespace QuickVR
 {
 
-    public class QuickStageCalibration : QuickStageBase
+    public class QuickStageCalibration : QuickStagePreBase
     {
 
         #region PUBLIC ATTRIBUTES
@@ -18,34 +18,16 @@ namespace QuickVR
 
         #endregion
 
-        #region PROTECTED ATTRIBUTES
-
-        protected QuickUserGUICalibration _guiCalibration = null;
-        protected QuickUnityVR _hTracking = null;
-        protected QuickVRManager _vrManager = null;
-
-        #endregion
-
         #region CREATION AND DESTRUCTION
 
         protected override void Awake()
         {
-            _guiCalibration = QuickSingletonManager.GetInstance<QuickUserGUICalibration>();
-            _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
-
             if (!_headTrackingCalibrationInstructions)
             {
                 _headTrackingCalibrationInstructions = Resources.Load<AudioClip>(GetDefaultHMDCalibrationInstructions());
             }
 
             base.Awake();
-        }
-
-        public override void Init()
-        {
-            _hTracking = _gameManager.GetPlayer().GetComponent<QuickUnityVR>();
-
-            base.Init();
         }
 
         #endregion
@@ -66,18 +48,7 @@ namespace QuickVR
 
         protected override IEnumerator CoUpdate()
         {
-#if UNITY_ANDROID
-            if (_hTracking._handTrackingMode == QuickUnityVR.HandTrackingMode.Hands)
-            {
-                yield return StartCoroutine(CoUpdateHandTrackingMode());
-            }
-#endif
-
-            if (QuickVRManager.IsXREnabled())
-            {
-                //Adjust the HMD
-                yield return StartCoroutine(CoUpdateHMDAdjustment());
-            }
+            _guiCalibration.gameObject.SetActive(true);
 
             //Show the logos if any
             yield return StartCoroutine(CoShowLogos());
@@ -90,27 +61,6 @@ namespace QuickVR
             _guiCalibration.gameObject.SetActive(false);
             _vrManager.RequestCalibration();
             _debugManager.Clear();
-        }
-
-        protected virtual IEnumerator CoUpdateHandTrackingMode()
-        {
-            _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.HandTrackingMode, _hTracking._handTrackingMode);
-
-            //HMD Adjustment
-            while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
-
-            yield return null;
-        }
-
-        protected virtual IEnumerator CoUpdateHMDAdjustment()
-        {
-            _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.HMDAdjustment, _hTracking._handTrackingMode);
-
-            //HMD Adjustment
-            _debugManager.Log("Adjusting HMD. Press CONTINUE when ready.");
-            while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
-
-            yield return null;
         }
 
         protected virtual IEnumerator CoShowLogos()
