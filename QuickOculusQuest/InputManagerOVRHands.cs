@@ -33,8 +33,10 @@ namespace QuickVR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         protected static void Init()
         {
+#if UNITY_ANDROID
             //Automatically add this implementation. 
             QuickSingletonManager.GetInstance<InputManager>().CreateDefaultImplementation<InputManagerOVRHands>();
+#endif
         }
 
         protected virtual IEnumerator Start()
@@ -54,6 +56,7 @@ namespace QuickVR
             while (!_ovrHands)
             {
                 _ovrHands = _unityVR.GetComponent<QuickOVRHandsInitializer>();
+                yield return null;
             }
         }
 
@@ -76,7 +79,7 @@ namespace QuickVR
             QuickVRManager.OnSourceAnimatorSet += ActionSourceAnimatorSet;
         }
 
-        #endregion
+#endregion
 
         #region GET AND SET
 
@@ -140,17 +143,17 @@ namespace QuickVR
 
         #endregion
 
-        #region UPDATE
+//#region UPDATE
 
-        protected virtual void Update()
-        {
-            if (_unityVR)
-            {
-                _active = _unityVR._handTrackingMode == QuickUnityVR.HandTrackingMode.Hands;
-            }
-        }
+//        protected virtual void Update()
+//        {
+//            if (_unityVR)
+//            {
+//                _active = _unityVR._handTrackingMode == QuickUnityVR.HandTrackingMode.Hands;
+//            }
+//        }
 
-        #endregion
+//#endregion
 
     }
 
