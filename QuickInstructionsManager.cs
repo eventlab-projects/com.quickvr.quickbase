@@ -74,11 +74,21 @@ namespace QuickVR
         protected virtual IEnumerator CoPlayInstructions(List<AudioClip> instructions)
         {
             _isPlaying = true;
-            foreach (AudioClip clip in instructions)
+            
+            int numInstructions = instructions.Count;
+            for (int i = 0; i < numInstructions; i++)
             {
-                yield return StartCoroutine(CoPlayInstruction(clip));
-                if (clip) yield return new WaitForSeconds(_timePauseBetweenInstructions);
+                AudioClip clip = instructions[i];
+                if (clip)
+                {
+                    yield return StartCoroutine(CoPlayInstruction(clip));
+                    if (i < numInstructions - 1)
+                    {
+                        yield return new WaitForSeconds(_timePauseBetweenInstructions);
+                    }
+                }
             }
+                        
             _isPlaying = false;
         }
 
