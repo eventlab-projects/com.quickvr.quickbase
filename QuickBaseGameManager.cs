@@ -422,6 +422,8 @@ namespace QuickVR {
                 _finishing = true;
 
                 _rootStagesMain.gameObject.SetActive(false);    //Kill all the Main stages
+                _running = false;
+                Debug.Log("Elapsed Time = " + _timeRunning.ToString("f3") + " seconds");
 
                 GetInitialAndFinalStages(_rootStagesPost, out _initialStagePost, out _finalStagePost);
                 if (_initialStagePost)
@@ -432,8 +434,6 @@ namespace QuickVR {
                 {
                     yield return null;
                 }
-
-                Debug.Log("Elapsed Time = " + _timeRunning.ToString("f3") + " seconds");
 
                 QuickUtils.CloseApplication();
             }
