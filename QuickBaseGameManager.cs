@@ -421,6 +421,8 @@ namespace QuickVR {
             {
                 _finishing = true;
 
+                _rootStagesMain.gameObject.SetActive(false);    //Kill all the Main stages
+
                 GetInitialAndFinalStages(_rootStagesPost, out _initialStagePost, out _finalStagePost);
                 if (_initialStagePost)
                 {

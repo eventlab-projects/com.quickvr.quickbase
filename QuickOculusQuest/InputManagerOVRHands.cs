@@ -87,9 +87,6 @@ namespace QuickVR
         {
             Animator animatorSrc = QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource();
             _unityVR = animatorSrc.GetComponent<QuickUnityVR>();
-
-            Debug.Log(animatorSrc.name);
-            Debug.Log(_unityVR);
         }
 
         public override string[] GetButtonCodes()

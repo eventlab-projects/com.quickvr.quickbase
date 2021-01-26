@@ -92,8 +92,6 @@ namespace QuickVR
             _renderer = gameObject.GetOrCreateComponent<MeshRenderer>();
             _renderer.receiveShadows = false;
 
-            gameObject.GetOrCreateComponent<BoxCollider>();
-
             //Ensure that the renderer has the reflection material. 
             string shaderName = GetShaderName();
             if (!_renderer.sharedMaterial || _renderer.sharedMaterial.shader.name != shaderName)
