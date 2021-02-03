@@ -560,7 +560,8 @@ namespace QuickVR
             Transform t = name.Length != 0? transform.Find(name) : null;
             if (!t || !checkName)
             {
-                t = new GameObject(name).transform;
+                t = UnityEngine.Object.Instantiate(Resources.Load<GameObject>("GameObject")).transform;
+                t.name = name;
                 t.parent = transform;
                 t.ResetTransformation();
             }
