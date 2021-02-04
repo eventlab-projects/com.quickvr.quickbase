@@ -8,7 +8,7 @@ namespace QuickVR {
 
 		#region PUBLIC PARAMETERS
 
-		public float _maxTimeOut = 0.0f;
+		public float _maxTimeOut = 0;
 		public bool _pressKeyToFinish = false;		//The test is finished if RETURN is pressed
 		public bool _avoidable = true;				//We can force this test to finish by pressing BACKSPACE
 
@@ -28,7 +28,6 @@ namespace QuickVR {
         {
             Nothing,
             ExecuteNext,
-            GameOver,
         }
         public FinishPolicy _finishPolicy = FinishPolicy.ExecuteNext;
 
@@ -125,11 +124,7 @@ namespace QuickVR {
                     nextStage.Init();
                 }
             }
-            else if (_finishPolicy == FinishPolicy.GameOver)
-            {
-                _gameManager.Finish();
-            }
-
+            
 			enabled = false;
             
             if (OnFinished != null) OnFinished(this);
@@ -186,6 +181,13 @@ namespace QuickVR {
             {
                 yield return new WaitForSeconds(_maxTimeOut);
                 Finish();
+            }
+            else if (_maxTimeOut < 0)
+            {
+                while (true)
+                {
+                    yield return null;
+                }
             }
         }
 

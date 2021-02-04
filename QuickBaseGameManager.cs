@@ -18,15 +18,6 @@ namespace QuickVR {
         //public Transform _footprints = null;
         public float _minDistToFootPrints = 0.5f;        
 
-        protected QuickStageBase _initialStagePre = null;
-        protected QuickStageBase _finalStagePre = null;
-
-        protected QuickStageBase _initialStageMain = null;
-        protected QuickStageBase _finalStageMain = null;
-
-        protected QuickStageBase _initialStagePost = null;
-        protected QuickStageBase _finalStagePost = null;
-
         [HideInInspector] 
         public bool _useExpirationDate = false;
 
@@ -43,8 +34,14 @@ namespace QuickVR {
         protected DebugManager _debugManager = null;
         protected QuickSceneManager _sceneManager = null;
 
-		protected bool _running = false;
-		protected bool _finishing = false;
+        protected enum State
+        {
+            Idle,
+            StagesPre, 
+            StagesMain,
+            StagesPost,
+        }
+        protected State _state = State.Idle;
 
 		protected float _timeRunning = 0.0f;    //The time elapsed since the application entered in Running state. 
 
@@ -64,14 +61,9 @@ namespace QuickVR {
         [SerializeField, HideInInspector]
         protected int _expirationYear = 0;
 
-        [SerializeField, HideInInspector]
-        protected Transform _rootStagesPre = null;
-
-        [SerializeField, HideInInspector]
-        protected Transform _rootStagesMain = null;
-
-        [SerializeField, HideInInspector]
-        protected Transform _rootStagesPost = null;
+        protected QuickStageGroup _stagesPre = null;    //Stages executed BEFORE the main logic
+        protected QuickStageGroup _stagesMain = null;   //Main logic of the application
+        protected QuickStageGroup _stagesPost = null;   //Stages executed AFTER the main logic and BEFORE closing the application
 
         #endregion
 
@@ -94,10 +86,60 @@ namespace QuickVR {
 
         protected virtual void Reset()
         {
-            _rootStagesPre = transform.CreateChild(ROOT_STAGES_PRE_NAME);
-            _rootStagesMain = transform.CreateChild(ROOT_STAGES_MAIN_NAME);
-            _rootStagesPost = transform.CreateChild(ROOT_STAGES_POST_NAME);
+            CreateStagesPre();
+            CreateStagesMain();
+            CreateStagesPost();
         }
+
+        protected virtual void CreateStagesPre()
+        {
+            Transform tStages = transform.CreateChild(ROOT_STAGES_PRE_NAME);
+            _stagesPre = tStages.GetComponent<QuickStageGroup>();
+            
+            if (!_stagesPre)
+            {
+                //Init the default Stages Pre
+                _stagesPre = tStages.gameObject.AddComponent<QuickStageGroup>();
+                _stagesPre.transform.CreateChild("HMDAdjustment").GetOrCreateComponent<QuickStageHMDAdjustment>();
+                _stagesPre.transform.CreateChild("Calibration").GetOrCreateComponent<QuickStageCalibration>();
+                _stagesPre.transform.CreateChild("FadeIn").GetOrCreateComponent<QuickStageFade>();
+            }
+
+            _stagesPre._finishPolicy = QuickStageBase.FinishPolicy.Nothing;
+        }
+
+        protected virtual void CreateStagesMain()
+        {
+            Transform tStages = transform.CreateChild(ROOT_STAGES_MAIN_NAME);
+            _stagesMain = tStages.GetComponent<QuickStageGroup>();
+
+            if (!_stagesMain)
+            {
+                //Init the default Stages Main
+                _stagesMain = tStages.gameObject.AddComponent<QuickStageGroup>();
+                QuickStageBase dummy = _stagesMain.transform.CreateChild("DeleteMe").GetOrCreateComponent<QuickStageBase>();
+                dummy._maxTimeOut = -1;
+            }
+
+            _stagesMain._finishPolicy = QuickStageBase.FinishPolicy.Nothing;
+        }
+
+        protected virtual void CreateStagesPost()
+        {
+            Transform tStages = transform.CreateChild(ROOT_STAGES_POST_NAME);
+            _stagesPost = tStages.GetComponent<QuickStageGroup>();
+
+            if (!_stagesPost)
+            {
+                //Init the default Stages Post
+                _stagesPost = tStages.gameObject.AddComponent<QuickStageGroup>();
+                QuickStageFade fade = _stagesPost.transform.CreateChild("FadeOut").GetOrCreateComponent<QuickStageFade>();
+                fade._fadeType = QuickStageFade.FadeType.FadeOut;
+            }
+
+            _stagesPost._finishPolicy = QuickStageBase.FinishPolicy.Nothing;
+        }
+
 
         protected virtual void OnEnable()
         {            
@@ -116,7 +158,10 @@ namespace QuickVR {
             StartCoroutine(CoUpdateTeleport());
         }
 
-        protected virtual void Awake() {
+        protected virtual void Awake() 
+        {
+            Reset();
+
             _guiCalibration = QuickSingletonManager.GetInstance<QuickUserGUICalibration>();
             _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
             //_calibrationAssisted = !QuickUtils.IsMobileTarget();
@@ -182,7 +227,7 @@ namespace QuickVR {
 
         public virtual bool IsRunning()
         {
-            return _running;
+            return _state == State.StagesMain;
         }
 
         public virtual float GetTimeRunning()
@@ -192,9 +237,11 @@ namespace QuickVR {
 
 		public virtual void Finish() 
         {
-            if (_finishing) return;
-
-			StartCoroutine(CoFinish());
+            if (_state != State.StagesPost)
+            {
+                _state = State.StagesPost;
+                StartCoroutine(CoFinish());
+            }
 		}
 
         public virtual void SetInitialPositionAndRotation()
@@ -312,69 +359,43 @@ namespace QuickVR {
             }
             else
             {
-                //yield return StartCoroutine(CoUpdateStateCalibration());
-
-                GetInitialAndFinalStages(_rootStagesPre, out _initialStagePre, out _finalStagePre);
-                //Debug.Log("INITIAL STAGE PRE = " + _initialStagePre);
-                //Debug.Log("FINAL STAGE PRE = " + _finalStagePre);
-
-                if (_initialStagePre)
-                {
-                    _initialStagePre.Init();
-                }
-                while (_finalStagePre && !_finalStagePre.IsFinished())
+                //Execute the stagesPre
+                _state = State.StagesPre;
+                _stagesPre.Init();
+                while (!_stagesPre.IsFinished())
                 {
                     yield return null;
                 }
 
                 Debug.Log("APPLICATION READY");
                 Debug.Log("Time.time = " + Time.time);
-                _running = true;
-                _timeRunning = 0.0f;
-
+                
                 if (OnRunning != null) OnRunning();
 
-                GetInitialAndFinalStages(_rootStagesMain, out _initialStageMain, out _finalStageMain);
-                if (_initialStageMain)
+                //Execute the stagesMain
+                _timeRunning = 0.0f;
+                _state = State.StagesMain;
+                _stagesMain.Init();
+                while (!_stagesMain.IsFinished())
                 {
-                    _initialStageMain.Init();
+                    yield return null;
                 }
 
+                Finish();
+                
                 //Debug.Log("INITIAL STAGE = " + _initialStageMain);
                 //Debug.Log("FINAL STAGE = " + _finalStageMain);
             }
 		}
 
-        protected virtual void GetInitialAndFinalStages(Transform rootStages, out QuickStageBase initialStage, out QuickStageBase finalStage)
+        protected virtual void LateUpdate() 
         {
-            initialStage = null;
-            finalStage = null;
-
-            for (int i = 0; i < rootStages.childCount; i++)
-            {
-                Transform tChild = rootStages.GetChild(i);
-                if (tChild.gameObject.activeInHierarchy)
-                {
-                    QuickStageBase s = tChild.GetComponent<QuickStageBase>();
-                    if (s)
-                    {
-                        if (!initialStage)
-                        {
-                            initialStage = s;
-                        }
-                        finalStage = s;
-                    }
-                }
-            }
-        }
-
-		protected virtual void LateUpdate() {
             if (InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_EXIT))
             {
                 Finish();
             }
 
-			if (_running) 
+			if (_state == State.StagesMain) 
             {
 				_timeRunning += Time.deltaTime;
 				
@@ -417,26 +438,16 @@ namespace QuickVR {
 
         protected virtual IEnumerator CoFinish()
         {
-            if (!_finishing)
+            _stagesMain.gameObject.SetActive(false);    //Kill all the Main stages
+            Debug.Log("Elapsed Time = " + _timeRunning.ToString("f3") + " seconds");
+
+            _stagesPost.Init();
+            while (!_stagesPost.IsFinished())
             {
-                _finishing = true;
-
-                _rootStagesMain.gameObject.SetActive(false);    //Kill all the Main stages
-                _running = false;
-                Debug.Log("Elapsed Time = " + _timeRunning.ToString("f3") + " seconds");
-
-                GetInitialAndFinalStages(_rootStagesPost, out _initialStagePost, out _finalStagePost);
-                if (_initialStagePost)
-                {
-                    _initialStagePost.Init();
-                }
-                while (!_finalStagePost.IsFinished())
-                {
-                    yield return null;
-                }
-
-                QuickUtils.CloseApplication();
+                yield return null;
             }
+
+            QuickUtils.CloseApplication();
         }
 
         #endregion
