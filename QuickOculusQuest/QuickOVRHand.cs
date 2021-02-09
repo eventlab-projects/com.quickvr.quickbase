@@ -110,7 +110,11 @@ namespace QuickVR
                 {
                     int fingerBoneID = (i * NUM_BONES_PER_FINGER) + j;
                     Transform tBone = _animator.GetBoneTransform(fingerBones[j]);
-                    _handFingerLastRotation[fingerBoneID] = tBone.localRotation;
+                    if (tBone)
+                    {
+                        _handFingerLastRotation[fingerBoneID] = tBone.localRotation;
+                    }
+                    
                     _vrNodeFingers[fingerBoneID] = _playArea.GetVRNode(fingerBones[j]);
                     _tBoneFingers[fingerBoneID] = tBone;
                 }

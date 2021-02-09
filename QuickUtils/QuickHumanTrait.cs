@@ -357,7 +357,11 @@ namespace QuickVR
             else
             {
                 //At this point, boneID is a bone finger tip
-                result = animator.GetBoneTransform(GetParentBone(boneID)).GetChild(0);
+                Transform tBoneDistal = animator.GetBoneTransform(GetParentBone(boneID));
+                if (tBoneDistal)
+                {
+                    result = tBoneDistal.GetChild(0);
+                }
             }
 
             return result;
@@ -486,7 +490,7 @@ namespace QuickVR
             foreach (HumanBodyBones boneID in distalBones)
             {
                 Transform tBoneDistal = animator.GetBoneTransform(boneID);
-                if (tBoneDistal.childCount == 0)
+                if (tBoneDistal && tBoneDistal.childCount == 0)
                 {
                     Transform tBoneIntermediate = animator.GetBoneTransform(GetParentBone(boneID));
                     Vector3 v = tBoneDistal.position - tBoneIntermediate.position;
@@ -552,6 +556,7 @@ namespace QuickVR
             Transform tmpParent = animator.transform.parent;
             Vector3 tmpPos = animator.transform.position;
             Quaternion tmpRot = animator.transform.rotation;
+            Vector3 tmpScale = animator.transform.localScale;
 
             //Set the transform to the world origin
             animator.transform.parent = null;
@@ -565,8 +570,7 @@ namespace QuickVR
             animator.transform.parent = tmpParent;
             animator.transform.position = tmpPos;
             animator.transform.rotation = tmpRot;
-
-            animator.transform.localScale = Vector3.one;
+            animator.transform.localScale = tmpScale;
         }
 
         public static void SetHumanPose(Animator animator, ref HumanPose pose)

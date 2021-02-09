@@ -55,6 +55,12 @@ namespace QuickVR
         protected virtual void OnEnable()
         {
             QuickVRManager.OnPostCameraUpdate += ActionPostCameraUpdate;
+
+            Button[] buttons = GetComponentsInChildren<Button>(true);
+            foreach (Button b in buttons)
+            {
+                b.GetOrCreateComponent<QuickUIButton>();
+            }
         }
 
         protected virtual void OnDisable()
@@ -142,6 +148,15 @@ namespace QuickVR
         public virtual QuickUIButton GetButton(string buttonName)
         {
             return transform.Find(buttonName).GetOrCreateComponent<QuickUIButton>();
+        }
+
+        public virtual void ResetPosition()
+        {
+            Animator animator = QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorTarget();
+            //Vector3 fwd = animator.transform.forward;
+            Vector3 fwd = Vector3.ProjectOnPlane(Camera.main.transform.forward, animator.transform.up);
+            transform.position = animator.GetBoneTransform(HumanBodyBones.Head).position + fwd * 3;
+            transform.forward = fwd;
         }
 
         #endregion
