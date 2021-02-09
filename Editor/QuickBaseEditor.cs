@@ -9,7 +9,7 @@ namespace QuickVR {
 	public class QuickBaseEditor : Editor {
 
 		#region CONSTANTS
-        /*Dummycomment*/
+        
 		public static Color DEFAULT_BUTTON_COLOR = new Color(0.0f, 162.0f / 255.0f, 232.0f / 255.0f);
 
 		#endregion
