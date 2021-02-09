@@ -77,7 +77,6 @@ namespace QuickVR {
             enabled = true;
 
             _timeStart = Time.time;
-            Debug.Log("===============================");
             _debugManager.Log("RUNNING STAGE: " + GetName());
             if (_debugMessage.Length != 0)
             {
@@ -107,9 +106,7 @@ namespace QuickVR {
             _instructionsManager.Stop();
             _debugManager.Clear();
             float totalTime = Time.time - _timeStart;
-            Debug.Log("STAGE FINISHED: " + GetName());
-            Debug.Log("Total Time = " + totalTime);
-            Debug.Log("===============================");
+            Debug.Log("STAGE FINISHED: " + GetName() + " " + totalTime.ToString("f3"));
 
             _coManager.StopCoroutineSet(_coSet);
             StopAllCoroutines();

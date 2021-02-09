@@ -35,10 +35,9 @@ namespace QuickVR {
 		public override void Init() {
             _avoidable = false;
             _executedGroup = Condition() ? _ifGroup : _elseGroup;
-            
-            base.Init();
-
             _executedGroup.Init();
+
+            base.Init();
         }
 
         #endregion
