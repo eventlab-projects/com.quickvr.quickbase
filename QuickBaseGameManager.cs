@@ -317,6 +317,8 @@ namespace QuickVR {
                 //Kill the pre and main stages
                 _stagesPre.gameObject.SetActive(false);
                 _stagesMain.gameObject.SetActive(false);
+                QuickSingletonManager.GetInstance<QuickInstructionsManager>().Stop();
+
                 QuickStageBase.ClearStackStages();
 
                 Debug.Log("Elapsed Time = " + _timeRunning.ToString("f3") + " seconds");
