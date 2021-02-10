@@ -218,7 +218,7 @@ namespace QuickVR
             }
             else
             {
-                Debug.LogError("BAD NUMBER OF BODY TRACKERS!!!");
+                Debug.LogWarning("BAD NUMBER OF BODY TRACKERS!!!");
             }
 
             foreach (HumanBodyBones t in QuickVRNode.GetTypeList())
