@@ -25,10 +25,7 @@ namespace QuickVR {
         protected virtual void Reset()
         {
             _ifGroup = transform.CreateChild("__IF__").GetOrCreateComponent<QuickStageGroup>();
-            _ifGroup._finishPolicy = FinishPolicy.Nothing;
-
             _elseGroup = transform.CreateChild("__ELSE__").GetOrCreateComponent<QuickStageGroup>();
-            _elseGroup._finishPolicy = FinishPolicy.Nothing;
         }
 
 		public override void Init() 

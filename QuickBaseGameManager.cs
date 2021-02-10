@@ -104,7 +104,7 @@ namespace QuickVR {
                 _stagesPre.transform.CreateChild("FadeIn").GetOrCreateComponent<QuickStageFade>();
             }
 
-            _stagesPre._finishPolicy = QuickStageBase.FinishPolicy.Nothing;
+            _stagesPre.OnFinish += OnFinishStagesPre;
         }
 
         protected virtual void CreateStagesMain()
@@ -120,7 +120,7 @@ namespace QuickVR {
                 dummy._maxTimeOut = -1;
             }
 
-            _stagesMain._finishPolicy = QuickStageBase.FinishPolicy.Nothing;
+            _stagesMain.OnFinish += Finish;
         }
 
         protected virtual void CreateStagesPost()
@@ -136,7 +136,7 @@ namespace QuickVR {
                 fade._fadeType = QuickStageFade.FadeType.FadeOut;
             }
 
-            _stagesPost._finishPolicy = QuickStageBase.FinishPolicy.Nothing;
+            _stagesPost.OnFinish += QuickUtils.CloseApplication;
         }
 
 
@@ -233,16 +233,7 @@ namespace QuickVR {
             return _timeRunning;
         }
 
-		public virtual void Finish() 
-        {
-            if (_state != State.StagesPost)
-            {
-                _state = State.StagesPost;
-                StartCoroutine(CoFinish());
-            }
-		}
-
-        public virtual void SetInitialPositionAndRotation()
+		public virtual void SetInitialPositionAndRotation()
         {
             Transform target = GetPlayer().transform;
 
@@ -317,6 +308,22 @@ namespace QuickVR {
             _expirationYear = year;
         }
 
+        public virtual void Finish()
+        {
+            if (_state != State.StagesPost)
+            {
+                _state = State.StagesPost;
+
+                //Kill the pre and main stages
+                _stagesPre.gameObject.SetActive(false);
+                _stagesMain.gameObject.SetActive(false);
+                QuickStageBase.ClearStackStages();
+
+                Debug.Log("Elapsed Time = " + _timeRunning.ToString("f3") + " seconds");
+                _stagesPost.Init();
+            }
+        }
+
         #endregion
 
         #region UPDATE
@@ -360,31 +367,21 @@ namespace QuickVR {
                 //Execute the stagesPre
                 _state = State.StagesPre;
                 _stagesPre.Init();
-                while (QuickStageBase.GetTopStage() != null)
-                {
-                    yield return null;
-                }
-                
-                Debug.Log("APPLICATION READY");
-                Debug.Log("Time.time = " + Time.time);
-                
-                if (OnRunning != null) OnRunning();
-
-                //Execute the stagesMain
-                _timeRunning = 0.0f;
-                _state = State.StagesMain;
-                _stagesMain.Init();
-                while (QuickStageBase.GetTopStage() != null)
-                {
-                    yield return null;
-                }
-                
-                Finish();
-                
-                //Debug.Log("INITIAL STAGE = " + _initialStageMain);
-                //Debug.Log("FINAL STAGE = " + _finalStageMain);
             }
 		}
+
+        protected virtual void OnFinishStagesPre()
+        {
+            _state = State.StagesMain;
+
+            Debug.Log("APPLICATION READY");
+            Debug.Log("Time.time = " + Time.time);
+
+            if (OnRunning != null) OnRunning();
+
+            //Execute the stagesMain
+            _timeRunning = 0.0f;
+        }
 
         protected virtual void LateUpdate() 
         {
@@ -421,24 +418,6 @@ namespace QuickVR {
                     QuickUICursor.GetVRCursor(cType).enabled = isPointing;
                 }
             }
-        }
-
-        protected virtual IEnumerator CoFinish()
-        {
-            //Kill the pre and main stages
-            _stagesPre.gameObject.SetActive(false);
-            _stagesMain.gameObject.SetActive(false);    
-            QuickStageBase.ClearStackStages();
-
-            Debug.Log("Elapsed Time = " + _timeRunning.ToString("f3") + " seconds");
-
-            _stagesPost.Init();
-            while (QuickStageBase.GetTopStage() != null)
-            {
-                yield return null;
-            }
-            
-            QuickUtils.CloseApplication();
         }
 
         #endregion

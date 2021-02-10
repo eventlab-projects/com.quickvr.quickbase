@@ -21,13 +21,6 @@ namespace QuickVR {
         public float _instructionsVolume = 1.0f;
         public float _instructionsTimePause = 0.5f;
 
-        public enum FinishPolicy
-        {
-            Nothing,
-            ExecuteNext,
-        }
-        public FinishPolicy _finishPolicy = FinishPolicy.ExecuteNext;
-
         #endregion
 
         #region PROTECTED PARAMETERS
@@ -51,9 +44,9 @@ namespace QuickVR {
 
         #region EVENTS
 
-        public delegate void OnStageAction(QuickStageBase stageManager);
-        public static event OnStageAction OnInit;
-        public static event OnStageAction OnFinished;
+        public delegate void OnStageAction();
+        public event OnStageAction OnInit;
+        public event OnStageAction OnFinish;
         
         #endregion
 
@@ -78,8 +71,11 @@ namespace QuickVR {
 
             _timeStart = Time.time;
             Debug.Log("RUNNING STAGE: " + GetName());
-            
-            if (OnInit != null) OnInit(this);
+
+            if (OnInit != null)
+            {
+                OnInit();
+            }
 
             StartCoroutine(CoUpdateBase());
 		}
@@ -128,33 +124,27 @@ namespace QuickVR {
             _coManager.StopCoroutineSet(_coSet);
             StopAllCoroutines();
 
-            if (_finishPolicy == FinishPolicy.ExecuteNext)
+            if (OnFinish != null)
             {
-                QuickStageBase nextStage = null;
-                for (int i = transform.GetSiblingIndex() + 1; !nextStage && i < transform.parent.childCount; i++)
+                OnFinish();
+            }
+
+            //Look for the nextStage to be executed
+            QuickStageBase nextStage = null;
+            for (int i = transform.GetSiblingIndex() + 1; !nextStage && i < transform.parent.childCount; i++)
+            {
+                Transform t = transform.parent.GetChild(i);
+                if (t.gameObject.activeInHierarchy)
                 {
-                    Transform t = transform.parent.GetChild(i);
-                    if (t.gameObject.activeInHierarchy)
-                    {
-                        nextStage = transform.parent.GetChild(i).GetComponent<QuickStageBase>();
-                    }
+                    nextStage = transform.parent.GetChild(i).GetComponent<QuickStageBase>();
                 }
-                if (nextStage)
-                {
-                    nextStage.Init();
-                }
-                //QuickStageBase nextStage = QuickUtils.GetNextSibling<QuickStageBase>(this);
-                //if (nextStage)
-                //{
-                //    //Debug.Log("currentStage = " + name);
-                //    //Debug.Log("nextStage = " + nextStage.name);
-                //    nextStage.Init();
-                //}
+            }
+            if (nextStage)
+            {
+                nextStage.Init();
             }
             
 			enabled = false;
-            
-            if (OnFinished != null) OnFinished(this);
 		}
 
 		#endregion
