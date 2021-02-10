@@ -30,15 +30,6 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        protected static void Init()
-        {
-#if UNITY_ANDROID
-            //Automatically add this implementation. 
-            QuickSingletonManager.GetInstance<InputManager>().CreateDefaultImplementation<InputManagerOVRHands>();
-#endif
-        }
-
         protected virtual IEnumerator Start()
         {
             //Wait for the Animator Source to be defined

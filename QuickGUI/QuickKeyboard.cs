@@ -59,15 +59,15 @@ namespace QuickVR
         #region CREATION AND DESTRUCTION
 
         //Ensure that the keyboard is loaded from the prefab. 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-        protected static void Init()
-        {
-            if (!QuickSingletonManager.IsInstantiated<QuickKeyboard>())
-            {
-                QuickKeyboard keyboard = Instantiate(Resources.Load<QuickKeyboard>("Prefabs/pf_QuickKeyboard"));
-                keyboard.name = "__QuickKeyboard__";
-            }
-        }
+        //[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        //protected static void Init()
+        //{
+        //    if (!QuickSingletonManager.IsInstantiated<QuickKeyboard>())
+        //    {
+        //        QuickKeyboard keyboard = Instantiate(Resources.Load<QuickKeyboard>("Prefabs/pf_QuickKeyboard"));
+        //        keyboard.name = "__QuickKeyboard__";
+        //    }
+        //}
 
         protected virtual void Awake()
         {

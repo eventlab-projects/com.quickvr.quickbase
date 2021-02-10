@@ -36,6 +36,7 @@ namespace QuickVR
         protected static void OnSourceAnimatorSet()
         {
             QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource().GetOrCreateComponent<QuickOVRHandsInitializer>();
+            QuickSingletonManager.GetInstance<InputManager>().CreateDefaultImplementation<InputManagerOVRHands>();
         }
 
         protected virtual void Start()
