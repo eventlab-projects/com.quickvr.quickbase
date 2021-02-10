@@ -31,7 +31,6 @@ namespace QuickVR {
 
         protected Transform _player = null;
 
-        protected DebugManager _debugManager = null;
         protected QuickSceneManager _sceneManager = null;
 
         protected enum State
@@ -166,7 +165,6 @@ namespace QuickVR {
             _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
             //_calibrationAssisted = !QuickUtils.IsMobileTarget();
             _instructionsManager = QuickSingletonManager.GetInstance<QuickInstructionsManager>();
-			_debugManager = QuickSingletonManager.GetInstance<DebugManager>();
             _sceneManager = QuickSingletonManager.GetInstance<QuickSceneManager>();
             
             InitGameConfiguration();
@@ -362,11 +360,11 @@ namespace QuickVR {
                 //Execute the stagesPre
                 _state = State.StagesPre;
                 _stagesPre.Init();
-                while (!_stagesPre.IsFinished())
+                while (QuickStageBase.GetTopStage() != null)
                 {
                     yield return null;
                 }
-
+                
                 Debug.Log("APPLICATION READY");
                 Debug.Log("Time.time = " + Time.time);
                 
@@ -376,11 +374,11 @@ namespace QuickVR {
                 _timeRunning = 0.0f;
                 _state = State.StagesMain;
                 _stagesMain.Init();
-                while (!_stagesMain.IsFinished())
+                while (QuickStageBase.GetTopStage() != null)
                 {
                     yield return null;
                 }
-
+                
                 Finish();
                 
                 //Debug.Log("INITIAL STAGE = " + _initialStageMain);
@@ -403,17 +401,6 @@ namespace QuickVR {
                 //    _footprints.transform.position = new Vector3(_footprints.transform.position.x, GetPlayer().position.y, _footprints.transform.position.z);
             }
 		}
-
-        protected virtual IEnumerator CoPlayInstructions(AudioClip clip, string message = "", Color color = new Color())
-        {
-            _debugManager.Log(message, color);
-            _instructionsManager.Play(clip);
-            while (_instructionsManager.IsPlaying() && !InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE))
-            {
-                yield return null;
-            }
-            _instructionsManager.Stop();
-        }
 
         protected virtual IEnumerator CoUpdateTeleport()
         {
@@ -438,15 +425,19 @@ namespace QuickVR {
 
         protected virtual IEnumerator CoFinish()
         {
-            _stagesMain.gameObject.SetActive(false);    //Kill all the Main stages
+            //Kill the pre and main stages
+            _stagesPre.gameObject.SetActive(false);
+            _stagesMain.gameObject.SetActive(false);    
+            QuickStageBase.ClearStackStages();
+
             Debug.Log("Elapsed Time = " + _timeRunning.ToString("f3") + " seconds");
 
             _stagesPost.Init();
-            while (!_stagesPost.IsFinished())
+            while (QuickStageBase.GetTopStage() != null)
             {
                 yield return null;
             }
-
+            
             QuickUtils.CloseApplication();
         }
 

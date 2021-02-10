@@ -60,7 +60,6 @@ namespace QuickVR
 
             _guiCalibration.gameObject.SetActive(false);
             _vrManager.RequestCalibration();
-            _debugManager.Clear();
         }
 
         protected virtual IEnumerator CoShowLogos()
@@ -88,10 +87,8 @@ namespace QuickVR
             _instructionsManager.Play(_headTrackingCalibrationInstructions);
             _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.ForwardDirection, _hTracking._handTrackingMode);
 
-            _debugManager.Log("[WAIT] Playing calibration instructions.", Color.red);
             while (_instructionsManager.IsPlaying() && !InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
 
-            _debugManager.Log("Wait for the user to look forward. Press RETURN when ready.");
             while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
 
             _instructionsManager.Stop();

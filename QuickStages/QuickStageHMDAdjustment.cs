@@ -32,7 +32,6 @@ namespace QuickVR
                 yield return new WaitForSeconds(0.5f);
 
                 //HMD Adjustment
-                _debugManager.Log("Adjusting HMD. Press CONTINUE when ready.");
                 while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE))
                 {
                     yield return null;

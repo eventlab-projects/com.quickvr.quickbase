@@ -3,14 +3,13 @@ using System.Collections;
 
 namespace QuickVR {
 
-	public abstract class QuickStageCondition : QuickStageBase {
+	public abstract class QuickStageCondition : QuickStageBase 
+    {
 
 		#region PROTECTED PARAMETERS
 
 		protected QuickStageGroup _ifGroup = null;
         protected QuickStageGroup _elseGroup = null;
-
-        protected QuickStageGroup _executedGroup = null;
 
         #endregion
 
@@ -32,10 +31,9 @@ namespace QuickVR {
             _elseGroup._finishPolicy = FinishPolicy.Nothing;
         }
 
-		public override void Init() {
+		public override void Init() 
+        {
             _avoidable = false;
-            _executedGroup = Condition() ? _ifGroup : _elseGroup;
-            _executedGroup.Init();
 
             base.Init();
         }
@@ -52,7 +50,25 @@ namespace QuickVR {
 
         protected override IEnumerator CoUpdate()
         {
-            while (!_executedGroup.IsFinished()) yield return null;
+            QuickStageGroup executedGroup;
+            if (Condition())
+            {
+                executedGroup = _ifGroup;
+                _elseGroup.gameObject.SetActive(false);
+            }
+            else
+            {
+                executedGroup = _elseGroup;
+                _ifGroup.gameObject.SetActive(false);
+            }
+
+            executedGroup.gameObject.SetActive(true);
+            executedGroup.Init();
+
+            while (GetTopStage() != this)
+            {
+                yield return null;
+            }
         }
 
         #endregion

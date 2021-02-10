@@ -8,12 +8,6 @@ namespace QuickVR
     public class QuickStageGroup : QuickStageBase
     {
 
-        #region PROTECTED ATTRIBUTES
-
-        protected List<QuickStageBase> _stages = new List<QuickStageBase>();
-        
-        #endregion
-
         #region CREATION AND DESTRUCTION
 
         protected override void Awake()
@@ -23,29 +17,26 @@ namespace QuickVR
             _avoidable = false;
         }
 
-        public override void Init()
-        {
-            _stages.Clear();
-            foreach (Transform t in transform)
-            {
-                QuickStageBase s = t.GetComponent<QuickStageBase>();
-                if (s && s.gameObject.activeInHierarchy) _stages.Add(s);
-            }
-
-            base.Init();
-        }
-
         #endregion
 
         #region UPDATE
 
         protected override IEnumerator CoUpdate()
         {
-            foreach (QuickStageBase s in _stages)
+            QuickStageBase firstStage = null;
+            for (int i = 0; !firstStage && i < transform.childCount; i++)
             {
-                s._finishPolicy = FinishPolicy.Nothing; //The next stage execution is controlled by the _stages order
-                s.Init();
-                while (!s.IsFinished()) yield return null;
+                firstStage = transform.GetChild(i).GetComponent<QuickStageBase>();
+            }
+
+            if (firstStage)
+            {
+                firstStage.Init();
+            }
+            
+            while (GetTopStage() != this)
+            {
+                yield return null;
             }
         }
 

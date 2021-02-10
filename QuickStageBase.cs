@@ -12,10 +12,7 @@ namespace QuickVR {
 		public bool _pressKeyToFinish = false;		//The test is finished if RETURN is pressed
 		public bool _avoidable = true;				//We can force this test to finish by pressing BACKSPACE
 
-		public string _debugMessage = "";
-		public Color _debugMessageColor = Color.white;
-
-        [Space()]
+		[Space()]
         [Header("Stage Instructions")]
         public List<AudioClip> _instructionsSpanish = new List<AudioClip>();
         public List<AudioClip> _instructionsEnglish = new List<AudioClip>();
@@ -38,18 +35,21 @@ namespace QuickVR {
         protected QuickInstructionsManager _instructionsManager = null;
 
         protected QuickBaseGameManager _gameManager = null;
-		protected DebugManager _debugManager = null;
-
-		protected bool _finished = false;
 
 		protected float _timeStart = 0.0f;	//Indicates when the test started (since the start of the game)
 
         protected QuickCoroutineManager _coManager = null;
         protected int _coSet = -1;
 
-		#endregion
+        #endregion
 
-		#region EVENTS
+        #region PRIVATE ATTRIBUTES
+
+        private static Stack<QuickStageBase> _stackStages = new Stack<QuickStageBase>();
+
+        #endregion
+
+        #region EVENTS
 
         public delegate void OnStageAction(QuickStageBase stageManager);
         public static event OnStageAction OnInit;
@@ -62,7 +62,6 @@ namespace QuickVR {
         protected virtual void Awake() {
             _instructionsManager = QuickSingletonManager.GetInstance<QuickInstructionsManager>();
             _gameManager = QuickSingletonManager.GetInstance<QuickBaseGameManager>();
-            _debugManager = QuickSingletonManager.GetInstance<DebugManager>();
             _coManager = QuickSingletonManager.GetInstance<QuickCoroutineManager>();
         }
 
@@ -73,16 +72,13 @@ namespace QuickVR {
 
 		public virtual void Init()
         {
-            _finished = false;
+            PushStage(this);
+
             enabled = true;
 
             _timeStart = Time.time;
-            _debugManager.Log("RUNNING STAGE: " + GetName());
-            if (_debugMessage.Length != 0)
-            {
-                _debugManager.Log(_debugMessage, _debugMessageColor);
-            }
-
+            Debug.Log("RUNNING STAGE: " + GetName());
+            
             if (OnInit != null) OnInit(this);
 
             StartCoroutine(CoUpdateBase());
@@ -92,19 +88,40 @@ namespace QuickVR {
 
 		#region GET AND SET
 
+        private static void PushStage(QuickStageBase stage)
+        {
+            _stackStages.Push(stage);
+        }
+
+        private static QuickStageBase PopStage()
+        {
+            return _stackStages.Pop();
+        }
+
+        public static QuickStageBase GetTopStage()
+        {
+            return _stackStages.Count > 0 ? _stackStages.Peek() : null;
+        }
+
+        public static void ClearStackStages()
+        {
+            _stackStages.Clear();
+        }
+
         protected virtual string GetName()
         {
             return GetType().Name + " (" + name + ")";
         }
 
-		public virtual bool IsFinished() {
-			return _finished;
-		}
+		//public virtual bool IsFinished() {
+		//	return _finished;
+		//}
 
-		public virtual void Finish() {
-            _finished = true;
+		public virtual void Finish() 
+        {
+            PopStage();
+
             _instructionsManager.Stop();
-            _debugManager.Clear();
             float totalTime = Time.time - _timeStart;
             Debug.Log("STAGE FINISHED: " + GetName() + " " + totalTime.ToString("f3"));
 
@@ -113,13 +130,26 @@ namespace QuickVR {
 
             if (_finishPolicy == FinishPolicy.ExecuteNext)
             {
-                QuickStageBase nextStage = QuickUtils.GetNextSibling<QuickStageBase>(this);
+                QuickStageBase nextStage = null;
+                for (int i = transform.GetSiblingIndex() + 1; !nextStage && i < transform.parent.childCount; i++)
+                {
+                    Transform t = transform.parent.GetChild(i);
+                    if (t.gameObject.activeInHierarchy)
+                    {
+                        nextStage = transform.parent.GetChild(i).GetComponent<QuickStageBase>();
+                    }
+                }
                 if (nextStage)
                 {
-                    //Debug.Log("currentStage = " + name);
-                    //Debug.Log("nextStage = " + nextStage.name);
                     nextStage.Init();
                 }
+                //QuickStageBase nextStage = QuickUtils.GetNextSibling<QuickStageBase>(this);
+                //if (nextStage)
+                //{
+                //    //Debug.Log("currentStage = " + name);
+                //    //Debug.Log("nextStage = " + nextStage.name);
+                //    nextStage.Init();
+                //}
             }
             
 			enabled = false;
@@ -145,8 +175,17 @@ namespace QuickVR {
             _instructionsManager._timePauseBetweenInstructions = _instructionsTimePause;
             _instructionsManager._volume = _instructionsVolume;
             SettingsBase.Languages lang = SettingsBase.GetLanguage();
-            if (lang == SettingsBase.Languages.SPANISH) _instructionsManager.Play(_instructionsSpanish);
-            else if (lang == SettingsBase.Languages.ENGLISH) _instructionsManager.Play(_instructionsEnglish);
+            if (lang == SettingsBase.Languages.SPANISH)
+            {
+                _instructionsManager.Play(_instructionsSpanish);
+            }
+            else if (lang == SettingsBase.Languages.ENGLISH)
+            {
+                if (_instructionsEnglish.Count > 0)
+                {
+                    _instructionsManager.Play(_instructionsEnglish);
+                }
+            }
 
             while (_instructionsManager.IsPlaying()) yield return null;
 
@@ -191,6 +230,16 @@ namespace QuickVR {
         protected virtual IEnumerator CoUpdate()
         {
             yield break;
+        }
+
+        public static void PrintStackStages()
+        {
+            Debug.Log("======================================");
+            foreach (QuickStageBase stage in _stackStages)
+            {
+                Debug.Log(stage.name);
+            }
+            Debug.Log("======================================");
         }
 
         #endregion
