@@ -31,8 +31,6 @@ namespace QuickVR {
 
         protected Transform _player = null;
 
-        protected QuickSceneManager _sceneManager = null;
-
         protected enum State
         {
             Idle,
@@ -165,7 +163,6 @@ namespace QuickVR {
             _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
             //_calibrationAssisted = !QuickUtils.IsMobileTarget();
             _instructionsManager = QuickSingletonManager.GetInstance<QuickInstructionsManager>();
-            _sceneManager = QuickSingletonManager.GetInstance<QuickSceneManager>();
             
             InitGameConfiguration();
 			

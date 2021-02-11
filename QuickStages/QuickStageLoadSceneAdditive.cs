@@ -12,14 +12,17 @@ namespace QuickVR
         #region PUBLIC PARAMETERS
 
         public string[] _scenesToLoad;
-
         public string[] _scenesToUnload;
 
+        public bool _asyncLoad = true;
+        public bool _autoActivateScene = true;
         public string _activeScene = "";
 
         #endregion
 
         #region PROTECTED PARAMETERS
+
+        protected QuickSceneManager _sceneManager = null;
 
         #endregion
 
@@ -29,67 +32,34 @@ namespace QuickVR
         {
             base.Awake();
 
+            _sceneManager = QuickSingletonManager.GetInstance<QuickSceneManager>();
             _avoidable = false;
         }
 
-        protected override IEnumerator CoUpdate()
+        public override void Init()
         {
+            base.Init();
+
             //Unload undesired scenes
-            yield return StartCoroutine(UnloadScenes());
+            _sceneManager.UnloadScenesAsync(_scenesToUnload);
 
             //Load the new scenes
-            yield return StartCoroutine(LoadScenes());
-
-            ActivateScene();
-        }
-
-        #endregion
-
-        #region GET AND SET
-
-        protected virtual IEnumerator UnloadScenes()
-        {
-            foreach (string sceneToUnload in _scenesToUnload)
+            if (_asyncLoad)
             {
-                Scene gScene = SceneManager.GetSceneByName(sceneToUnload);
-                if (gScene.isLoaded)
-                {
-                    SceneManager.UnloadSceneAsync(sceneToUnload);
-                    while (gScene.isLoaded) yield return null;
-                }
+                _sceneManager.LoadScenesAsyncAdditive(_scenesToLoad);
             }
-        }
-
-        protected virtual IEnumerator LoadScenes()
-        {
-            foreach (string sceneToLoad in _scenesToLoad)
+            else
             {
-                Scene gScene = SceneManager.GetSceneByName(sceneToLoad);
-                if (!gScene.isLoaded)
-                {
-                    SceneManager.LoadScene(sceneToLoad, LoadSceneMode.Additive);
-                    while (!gScene.isLoaded) yield return null;
-                }
+                _sceneManager.LoadScenes(_scenesToUnload);
             }
-        }
 
-        protected virtual void ActivateScene()
-        {
             //Mark as current the desired one or the first one to load
-            if (_activeScene == "" && _scenesToLoad.Length > 0)
-                _activeScene = _scenesToLoad[0];
-            
-            if (_activeScene != "")
+            if (_autoActivateScene && _activeScene == "" && _scenesToLoad.Length > 0)
             {
-                Scene activeScene = SceneManager.GetSceneByName(_activeScene);
-                SceneManager.SetActiveScene(activeScene);
+                _activeScene = _scenesToLoad[0];
             }
 
-            //Deactivate any present camera in the geometry scene 
-            foreach (Camera cam in Camera.allCameras)
-            {
-                if (cam.tag != "MainCamera") cam.gameObject.SetActive(false);
-            }
+            _sceneManager.ActivateScene(_activeScene);
         }
 
         #endregion
