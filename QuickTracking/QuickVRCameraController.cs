@@ -166,8 +166,8 @@ namespace QuickVR
         {
             if (_rotateCamera)
             {
-                float x = Input.GetAxis("Mouse X");
-                float y = Input.GetAxis("Mouse Y");
+                float x = InputManager.GetAxis(InputManager.DEFAULT_AXIS_HORIZONTAL);
+                float y = InputManager.GetAxis(InputManager.DEFAULT_AXIS_VERTICAL);
                 _offsetH += _speedH * x;
                 _offsetV -= _speedV * y;
 

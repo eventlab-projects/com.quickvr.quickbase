@@ -147,58 +147,62 @@ namespace QuickVR
 
         protected override float ImpGetAxis(string axis)
         {
-            AxisCodes aCode = GetRealCodeAxis(ToAxis(axis));
-            return Input.GetAxis(_toQuickVRAxis[aCode]);
+            return 0;
+
+            //AxisCodes aCode = GetRealCodeAxis(ToAxis(axis));
+            //return Input.GetAxis(_toQuickVRAxis[aCode]);
         }
 
         protected override bool ImpGetButton(string button)
         {
-            button = GetRealCode(button);
+            return false;
 
-            //Axis based buttons
-            ButtonCodes bCode = _toButton[button];
-            if (bCode == ButtonCodes.TriggerIndexPressLeft)
-            {
-                return ImpGetAxis("TriggerIndexLeft") > AXIS_PRESSED_THRESHOLD;
-            }
-            if (bCode == ButtonCodes.TriggerHandPressLeft)
-            {
-                return ImpGetAxis("TriggerHandLeft") > AXIS_PRESSED_THRESHOLD;
-            }
-            if (bCode == ButtonCodes.TriggerIndexPressRight)
-            {
-                return ImpGetAxis("TriggerIndexRight") > AXIS_PRESSED_THRESHOLD;
-            }
-            if (bCode == ButtonCodes.TriggerHandPressRight)
-            {
-                return ImpGetAxis("TriggerHandRight") > AXIS_PRESSED_THRESHOLD;
-            }
+            //button = GetRealCode(button);
 
-            //Key based buttons
-            string kName = "JoystickButton";
-            KeyCode k = KeyCode.None;
-            if (button.Contains("Primary"))
-            {
-                k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "2" : "0"));
-            }
-            else if (button.Contains("Secondary"))
-            {
-                k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "3" : "1"));
-            }
-            else if (button.Contains("PadPress"))
-            {
-                k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "8" : "9"));
-            }
-            else if (button.Contains("PadTouch"))
-            {
-                k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "16" : "17"));
-            }
-            else if (button.Contains("TriggerIndexTouch"))
-            {
-                k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "14" : "15"));
-            }
+            ////Axis based buttons
+            //ButtonCodes bCode = _toButton[button];
+            //if (bCode == ButtonCodes.TriggerIndexPressLeft)
+            //{
+            //    return ImpGetAxis("TriggerIndexLeft") > AXIS_PRESSED_THRESHOLD;
+            //}
+            //if (bCode == ButtonCodes.TriggerHandPressLeft)
+            //{
+            //    return ImpGetAxis("TriggerHandLeft") > AXIS_PRESSED_THRESHOLD;
+            //}
+            //if (bCode == ButtonCodes.TriggerIndexPressRight)
+            //{
+            //    return ImpGetAxis("TriggerIndexRight") > AXIS_PRESSED_THRESHOLD;
+            //}
+            //if (bCode == ButtonCodes.TriggerHandPressRight)
+            //{
+            //    return ImpGetAxis("TriggerHandRight") > AXIS_PRESSED_THRESHOLD;
+            //}
 
-            return Input.GetKey(k);
+            ////Key based buttons
+            //string kName = "JoystickButton";
+            //KeyCode k = KeyCode.None;
+            //if (button.Contains("Primary"))
+            //{
+            //    k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "2" : "0"));
+            //}
+            //else if (button.Contains("Secondary"))
+            //{
+            //    k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "3" : "1"));
+            //}
+            //else if (button.Contains("PadPress"))
+            //{
+            //    k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "8" : "9"));
+            //}
+            //else if (button.Contains("PadTouch"))
+            //{
+            //    k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "16" : "17"));
+            //}
+            //else if (button.Contains("TriggerIndexTouch"))
+            //{
+            //    k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "14" : "15"));
+            //}
+
+            //return Input.GetKey(k);
         }
 
         #endregion
