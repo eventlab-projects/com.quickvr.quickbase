@@ -31,6 +31,10 @@ namespace QuickVR
 
                 return m_InputDevice;
             }
+            set
+            {
+                m_InputDevice = value;
+            }
         }
         private T m_InputDevice = null;
         
@@ -62,6 +66,16 @@ namespace QuickVR
 
         protected abstract T GetInputDevice();
 
+        protected virtual void SetInputDevice(U axis)
+        {
+            
+        }
+
+        protected virtual void SetInputDevice(V button)
+        {
+            
+        }
+
         public override string[] GetAxisCodes()
         {
             return GetCodes<U>();
@@ -72,13 +86,16 @@ namespace QuickVR
             return GetCodes<V>();
         }
 
-        protected override float ImpGetAxis(string axis)
+        protected override float ImpGetAxis(string axisName)
         {
             float result = 0;
 
-            if (_inputDevice != null)
+            U axis = _stringToAxis[axisName];
+            SetInputDevice(axis);
+
+            if (_inputDevice != null && _inputDevice.added)
             {
-                result = ImpGetAxis(_stringToAxis[axis]);
+                result = ImpGetAxis(axis);
             }
 
             return result;
@@ -86,13 +103,16 @@ namespace QuickVR
 
         protected abstract float ImpGetAxis(U axis);
 
-        protected override bool ImpGetButton(string button)
+        protected override bool ImpGetButton(string buttonName)
         {
             bool result = false;
 
-            if (_inputDevice != null)
+            V button = _stringToButton[buttonName];
+            SetInputDevice(button);
+
+            if (_inputDevice != null && _inputDevice.added)
             {
-                result = ImpGetButton(_stringToButton[button]);
+                result = ImpGetButton(button);
             }
 
             return result;
