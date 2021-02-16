@@ -161,7 +161,7 @@ namespace QuickVR
 
             if (!QuickVRManager.IsXREnabled())
             {
-                InputManagerUnity iManager = QuickSingletonManager.GetInstance<InputManager>().GetComponentInChildren<InputManagerUnity>();
+                InputManagerKeyboard iManager = QuickSingletonManager.GetInstance<InputManager>().GetComponentInChildren<InputManagerKeyboard>();
                 iManager._active = !enable;
                 _rootKeys.gameObject.SetActive(false);
             }

@@ -79,7 +79,9 @@ public class InputManager : MonoBehaviour
         CreateDefaultAxes();
         CreateDefaultButtons();
 
-        CreateDefaultImplementation<InputManagerUnity>();
+        CreateDefaultImplementation<InputManagerKeyboard>();
+        CreateDefaultImplementation<InputManagerMouse>();
+        CreateDefaultImplementation<InputManagerGamepad>();
         CreateDefaultImplementation<InputManagerVR>();
     }
 
