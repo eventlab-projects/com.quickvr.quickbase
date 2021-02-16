@@ -8,33 +8,10 @@ namespace QuickVR
 {
 
     [System.Serializable]
-    public class InputManagerKeyboard : BaseInputManager
+    public class InputManagerKeyboard : InputManagerGeneric<Keyboard, BaseInputManager.DefaultCode, Key>
     {
 
-        #region PROTECTED PARAMETERS
-
-        protected static Dictionary<string, Key> _stringToKey = new Dictionary<string, Key>();
-        
-        protected Keyboard _keyboard
-        {
-            get
-            {
-                return Keyboard.current;
-            }
-        }
-
-        #endregion
-
         #region CREATION AND DESTRUCTION
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        protected static void Init()
-        {
-            foreach (Key k in QuickUtils.GetEnumValues<Key>())
-            {
-                _stringToKey[k.ToString()] = k;
-            }
-        }
 
         public override void Reset()
         {
@@ -55,26 +32,19 @@ namespace QuickVR
 
         #region GET AND SET
 
-        public override string[] GetButtonCodes()
+        protected override Keyboard GetInputDevice()
         {
-            return GetCodes<Key>();
+            return Keyboard.current;
         }
 
-        protected override float ImpGetAxis(string axis)
+        protected override float ImpGetAxis(DefaultCode axis)
         {
             return 0;
         }
 
-        protected override bool ImpGetButton(string button)
+        protected override bool ImpGetButton(Key button)
         {
-            bool result = false; 
-            if (_keyboard != null)
-            {
-                Key key = _stringToKey[button];
-                result = _keyboard[key].isPressed;
-            }
-            
-            return result;
+            return _inputDevice[button].isPressed;
         }
 
         #endregion

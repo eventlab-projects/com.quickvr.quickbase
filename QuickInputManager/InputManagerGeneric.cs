@@ -6,8 +6,14 @@ using UnityEngine.InputSystem;
 
 namespace QuickVR
 {
+    ///<summary>
+    ///T is The type of the InputDevice; 
+    ///U is The enum type defining the Axis for this InputDevice; 
+    ///V is The enum type defining the Buttons for this InputDevice;
+    /// </summary>
+
     public abstract class InputManagerGeneric<T, U, V> : BaseInputManager
-    where T : InputDevice
+    where T : InputDevice   
     where U : struct
     where V : struct
     {
@@ -28,15 +34,14 @@ namespace QuickVR
         }
         private T m_InputDevice = null;
         
-        protected static Dictionary<string, U> _stringToAxis = new Dictionary<string, U>();
-        protected static Dictionary<string, V> _stringToButton = new Dictionary<string, V>();
+        protected Dictionary<string, U> _stringToAxis = new Dictionary<string, U>();
+        protected Dictionary<string, V> _stringToButton = new Dictionary<string, V>();
 
         #endregion
 
         #region CREATION AND DESTRUCTION
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        protected static void Init()
+        protected override void Awake()
         {
             foreach (U u in QuickUtils.GetEnumValues<U>())
             {
@@ -47,6 +52,8 @@ namespace QuickVR
             {
                 _stringToButton[v.ToString()] = v;
             }
+
+            base.Awake();
         }
 
         #endregion

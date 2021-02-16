@@ -11,7 +11,12 @@ public abstract class BaseInputManager : MonoBehaviour {
 
 	public bool _active = true;
     public bool _debug = false;
-	
+
+	public enum DefaultCode
+    {
+		None,
+    }
+
 	#endregion
 
 	#region PROTECTED PARAMETERS
