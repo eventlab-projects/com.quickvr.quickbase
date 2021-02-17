@@ -1,0 +1,21 @@
+{
+  "name": "com.quickvr.quickbase",
+  "version": "1.0.0",
+  "displayName": "QuickVR.QuickBase",
+  "description": "The main QuickVR package",
+  "unity": "2019.1",
+  "dependencies": {
+    "com.unity.inputsystem": "1.0.2"
+  },
+  "keywords": [
+    "vr",
+    "virtual reality",
+    "oculus",
+	"oculus quest"
+  ],
+  "author": {
+    "name": "Ramon Oliva Martinez",
+    "email": "ramon.oliva.martinez@gmail.com",
+    "url": "https://www.ramonoliva.com"
+  }
+}
