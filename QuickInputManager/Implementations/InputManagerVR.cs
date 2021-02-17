@@ -1,208 +1,157 @@
-﻿using UnityEngine;
-using System.Collections;
+﻿using System.Collections;
 using System.Collections.Generic;
-using UnityEngine.UI;
 
-namespace QuickVR 
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.XR;
+using UnityEngine.InputSystem.Controls;
+
+namespace QuickVR
 {
-
-	[System.Serializable]
-	public class InputManagerVR : BaseInputManager 
+    public class InputManagerVR : InputManagerGeneric<XRController, InputManagerVR.AxisCode, InputManagerVR.ButtonCodes>
     {
 
-        #region PUBLIC PARAMETERS
+        #region PUBLIC ATTRIBUTES
 
-        public enum AxisCodes
+        public enum AxisCode
         {
-            TriggerIndexLeft = 9,
-            TriggerHandLeft = 11,
-            PadLeftX = 1,
-            PadLeftY = 2,
+            //Left Controller
+            LeftStick_Horizontal,
+            LeftStick_Vertical,
 
-            TriggerIndexRight = 10,
-            TriggerHandRight = 12,
-            PadRightX = 4,
-            PadRightY = 5,
+            LeftTrigger,
+
+            LeftGrip,
+
+            //Right Controller
+            RightStick_Horizontal,
+            RightStick_Vertical,
+
+            RightTrigger,
+
+            RightGrip,
         }
 
         public enum ButtonCodes
         {
-            PrimaryLeft,
-            SecondaryLeft,
-            PadPressLeft,
-            PadTouchLeft,
-            TriggerIndexPressLeft,
-            TriggerIndexTouchLeft,
-            TriggerHandPressLeft,
+            //Left Controller
+            LeftPrimaryPress,
+            LeftPrimaryTouch,
 
-            PrimaryRight,
-            SecondaryRight,
-            PadPressRight,
-            PadTouchRight,
-            TriggerIndexPressRight,
-            TriggerIndexTouchRight,
-            TriggerHandPressRight,
+            LeftSecondaryPress,
+            LeftSecondaryTouch,
+
+            LeftStickPress,
+            LeftStickTouch,
+
+            LeftTriggerPress,
+            LeftTriggerTouch,
+
+            LeftGripPress,
+            LeftGripTouch,
+
+            //Right Controller
+            RightPrimaryPress,
+            RightPrimaryTouch,
+
+            RightSecondaryPress,
+            RightSecondaryTouch,
+
+            RightStickPress,
+            RightStickTouch,
+
+            RightTriggerPress,
+            RightTriggerTouch,
+
+            RightGripPress,
+            RightGripTouch,
         }
+
+        public float _deadZone = 0.2f;
 
         #endregion
 
         #region PROTECTED ATTRIBUTES
 
-        protected static Dictionary<string, AxisCodes> _toAxis = new Dictionary<string, AxisCodes>();
-        protected static Dictionary<string, ButtonCodes> _toButton = new Dictionary<string, ButtonCodes>();
-
-        protected static Dictionary<AxisCodes, string> _toQuickVRAxis = new Dictionary<AxisCodes, string>();
-
-        #endregion
-
-        #region CONSTANTS
-
-        public const float AXIS_PRESSED_THRESHOLD = 0.6f;
+        protected Dictionary<AxisCode, string> _toAxisControl = new Dictionary<AxisCode, string>();
+        protected Dictionary<ButtonCodes, string> _toButtonControl = new Dictionary<ButtonCodes, string>();
 
         #endregion
 
         #region CREATION AND DESTRUCTION
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        protected static void Init()
+        protected override void Awake()
         {
-            foreach (AxisCodes axis in QuickUtils.GetEnumValues<AxisCodes>())
-            {
-                string aName = axis.ToString();
-                _toAxis[aName] = axis;
-                _toQuickVRAxis[axis] = "QuickVR_" + aName;
-            }
+            //Axis controls
+            _toAxisControl[AxisCode.LeftStick_Horizontal] = _toAxisControl[AxisCode.RightStick_Horizontal] = "thumbstick";
+            _toAxisControl[AxisCode.LeftStick_Vertical] = _toAxisControl[AxisCode.RightStick_Vertical] = "thumbstick";
 
-            foreach (ButtonCodes button in QuickUtils.GetEnumValues<ButtonCodes>())
-            {
-                _toButton[button.ToString()] = button;
-            }
-        }
+            _toAxisControl[AxisCode.LeftTrigger] = _toAxisControl[AxisCode.RightTrigger] = "trigger";
 
-        public override void Reset()
-        {
-            base.Reset();
+            _toAxisControl[AxisCode.LeftGrip] = _toAxisControl[AxisCode.RightGrip] = "grip";
 
-            //Configure the default buttons
-            ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CONTINUE, ButtonCodes.TriggerIndexPressRight.ToString());
-            ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CANCEL, ButtonCodes.TriggerIndexPressLeft.ToString());
+            //Buton controls
+            _toButtonControl[ButtonCodes.LeftPrimaryPress] = _toButtonControl[ButtonCodes.RightPrimaryPress] = "primarybutton";
+            _toButtonControl[ButtonCodes.LeftPrimaryTouch] = _toButtonControl[ButtonCodes.RightPrimaryTouch] = "primarytouched";
+
+            _toButtonControl[ButtonCodes.LeftSecondaryPress] = _toButtonControl[ButtonCodes.RightSecondaryPress] = "secondarybutton";
+            _toButtonControl[ButtonCodes.LeftSecondaryTouch] = _toButtonControl[ButtonCodes.RightSecondaryTouch] = "secondarytouched";
+
+            _toButtonControl[ButtonCodes.LeftStickPress] = _toButtonControl[ButtonCodes.RightStickPress] = "thumbstickclicked";
+            _toButtonControl[ButtonCodes.LeftStickTouch] = _toButtonControl[ButtonCodes.RightStickTouch] = "thumbsticktouched";
+
+            _toButtonControl[ButtonCodes.LeftTriggerPress] = _toButtonControl[ButtonCodes.RightTriggerPress] = "triggerpressed";
+            _toButtonControl[ButtonCodes.LeftTriggerTouch] = _toButtonControl[ButtonCodes.RightTriggerTouch] = "triggertouched";
+
+            _toButtonControl[ButtonCodes.LeftGripPress] = _toButtonControl[ButtonCodes.RightGripPress] = "grippressed";
+            _toButtonControl[ButtonCodes.LeftGripTouch] = _toButtonControl[ButtonCodes.RightGripTouch] = "grippressed";
+
+            base.Awake();
         }
 
         #endregion
 
         #region GET AND SET
 
-        public static AxisCodes ToAxis(string aName)
+        protected override XRController GetInputDevice()
         {
-            return _toAxis[aName];
+            return null;
         }
 
-        public static ButtonCodes ToButton(string bName)
+        protected override void SetInputDevice(AxisCode axis)
         {
-            return _toButton[bName];
+            _inputDevice = (axis <= AxisCode.LeftGrip) ? XRController.leftHand : XRController.rightHand;
         }
 
-        public override string[] GetAxisCodes()
+        protected override void SetInputDevice(ButtonCodes button)
         {
-            return GetCodes<AxisCodes>();
+            _inputDevice = (button <= ButtonCodes.LeftGripTouch) ? XRController.leftHand : XRController.rightHand;
         }
 
-        public override string[] GetButtonCodes()
+        protected override float ImpGetAxis(AxisCode axis)
         {
-            return GetCodes<ButtonCodes>();
-        }
+            AxisControl aControl = null;
 
-        public AxisCodes GetRealCodeAxis(AxisCodes aCode)
-        {
-            if (QuickUnityVR._handsSwaped)
+            if (axis == AxisCode.LeftStick_Horizontal || axis == AxisCode.RightStick_Horizontal)
             {
-                if (aCode == AxisCodes.TriggerIndexLeft) return AxisCodes.TriggerIndexRight;
-                if (aCode == AxisCodes.TriggerHandLeft) return AxisCodes.TriggerHandRight;
-                if (aCode == AxisCodes.PadLeftX) return AxisCodes.PadRightX;
-                if (aCode == AxisCodes.PadLeftY) return AxisCodes.PadRightY;
-
-                if (aCode == AxisCodes.TriggerIndexRight) return AxisCodes.TriggerIndexLeft;
-                if (aCode == AxisCodes.TriggerHandRight) return AxisCodes.TriggerHandLeft;
-                if (aCode == AxisCodes.PadRightX) return AxisCodes.PadLeftX;
-                if (aCode == AxisCodes.PadRightY) return AxisCodes.PadLeftY;
+                aControl = _inputDevice.GetChildControl<Vector2Control>(_toAxisControl[axis]).x;
+            }
+            else if (axis == AxisCode.LeftStick_Vertical || axis == AxisCode.RightStick_Vertical)
+            {
+                aControl = _inputDevice.GetChildControl<Vector2Control>(_toAxisControl[axis]).y;
+            }
+            else
+            {
+                aControl = _inputDevice.GetChildControl<AxisControl>(_toAxisControl[axis]);
             }
 
-            return aCode;
+            float aValue = aControl.ReadValue();
+            return Mathf.Abs(aValue) > _deadZone ? aValue : 0;
         }
 
-        public string GetRealCode(string code)
+        protected override bool ImpGetButton(ButtonCodes button)
         {
-            if (QuickUnityVR._handsSwaped)
-            {
-                if (code.Contains("Left")) code = code.Replace("Left", "Right");
-                else code = code.Replace("Right", "Left");
-            }
-
-            return code;
-        }
-
-        #endregion
-
-        #region INPUT MANAGEMENT
-
-        protected override float ImpGetAxis(string axis)
-        {
-            return 0;
-
-            //AxisCodes aCode = GetRealCodeAxis(ToAxis(axis));
-            //return Input.GetAxis(_toQuickVRAxis[aCode]);
-        }
-
-        protected override bool ImpGetButton(string button)
-        {
-            return false;
-
-            //button = GetRealCode(button);
-
-            ////Axis based buttons
-            //ButtonCodes bCode = _toButton[button];
-            //if (bCode == ButtonCodes.TriggerIndexPressLeft)
-            //{
-            //    return ImpGetAxis("TriggerIndexLeft") > AXIS_PRESSED_THRESHOLD;
-            //}
-            //if (bCode == ButtonCodes.TriggerHandPressLeft)
-            //{
-            //    return ImpGetAxis("TriggerHandLeft") > AXIS_PRESSED_THRESHOLD;
-            //}
-            //if (bCode == ButtonCodes.TriggerIndexPressRight)
-            //{
-            //    return ImpGetAxis("TriggerIndexRight") > AXIS_PRESSED_THRESHOLD;
-            //}
-            //if (bCode == ButtonCodes.TriggerHandPressRight)
-            //{
-            //    return ImpGetAxis("TriggerHandRight") > AXIS_PRESSED_THRESHOLD;
-            //}
-
-            ////Key based buttons
-            //string kName = "JoystickButton";
-            //KeyCode k = KeyCode.None;
-            //if (button.Contains("Primary"))
-            //{
-            //    k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "2" : "0"));
-            //}
-            //else if (button.Contains("Secondary"))
-            //{
-            //    k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "3" : "1"));
-            //}
-            //else if (button.Contains("PadPress"))
-            //{
-            //    k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "8" : "9"));
-            //}
-            //else if (button.Contains("PadTouch"))
-            //{
-            //    k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "16" : "17"));
-            //}
-            //else if (button.Contains("TriggerIndexTouch"))
-            //{
-            //    k = InputManagerUnity.ToKeyCode(kName + (button.Contains("Left") ? "14" : "15"));
-            //}
-
-            //return Input.GetKey(k);
+            return _inputDevice.GetChildControl<ButtonControl>(_toButtonControl[button]).isPressed;
         }
 
         #endregion
@@ -210,3 +159,4 @@ namespace QuickVR
     }
 
 }
+
