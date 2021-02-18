@@ -70,11 +70,11 @@ namespace QuickVR
             controller.controllerNode = controllerNode;
 
             //Add the components to be able to catch close objects. 
-            controller.gameObject.AddComponent<XRDirectInteractor>();
             SphereCollider collider = controller.gameObject.AddComponent<SphereCollider>();
             collider.isTrigger = true;
             collider.radius = 0.2f;
-
+            controller.gameObject.AddComponent<XRDirectInteractor>();
+            
             return controller;
         }
 
