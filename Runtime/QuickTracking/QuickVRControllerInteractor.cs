@@ -56,6 +56,18 @@ namespace QuickVR
             
             _rayInteractorTeleport = tInteractor.gameObject.AddComponent<QuickXRRayInteractor>();
             _rayInteractorTeleport._interactionType = QuickXRRayInteractor.InteractionType.Teleport;
+            _rayInteractorTeleport.lineType = XRRayInteractor.LineType.ProjectileCurve;
+            _rayInteractorTeleport.velocity = 8;
+
+            //Haptics configuration
+            _rayInteractorTeleport.playHapticsOnSelectEntered = true;
+            _rayInteractorTeleport.hapticSelectEnterIntensity = 0.3f;
+            _rayInteractorTeleport.hapticSelectEnterDuration = 0.1f;
+
+            _rayInteractorTeleport.playHapticsOnHoverEntered = true;
+            _rayInteractorTeleport.hapticHoverEnterIntensity = 0.1f;
+            _rayInteractorTeleport.hapticHoverEnterDuration = 0.1f;
+
             tInteractor.gameObject.AddComponent<XRInteractorLineVisual>();
         }
 
