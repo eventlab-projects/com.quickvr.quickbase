@@ -1,7 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+
 using UnityEngine;
 using UnityEngine.XR;
+using UnityEngine.XR.Interaction.Toolkit;
 
 namespace QuickVR
 {
@@ -21,6 +23,9 @@ namespace QuickVR
 
         protected Vector3 _customUserForward = Vector3.zero;  //A custom user forward provided by the application. 
 
+        protected XRController _controllerHandLeft = null;
+        protected XRController _controllerHandRight = null;
+        
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -35,6 +40,16 @@ namespace QuickVR
             }
         }
 
+        protected virtual void OnEnable()
+        {
+            QuickVRManager.OnTargetAnimatorSet += ActionTargetAnimatorSet;
+        }
+
+        protected virtual void OnDisable()
+        {
+            QuickVRManager.OnTargetAnimatorSet += ActionTargetAnimatorSet;
+        }
+
         protected virtual void Awake()
         {
             _calibrationPoseRoot = transform.CreateChild("__CalibrationPoseRoot__");
@@ -42,6 +57,25 @@ namespace QuickVR
             {
                 CreateVRNode(role);
             }
+
+            _controllerHandLeft = CreateHandController(XRNode.LeftHand);
+            _controllerHandRight = CreateHandController(XRNode.RightHand);
+        }
+
+        protected virtual XRController CreateHandController(XRNode controllerNode)
+        {
+            Transform tController = transform.CreateChild("__Controller" + controllerNode.ToString());
+            XRController controller = tController.gameObject.AddComponent<XRController>();
+            controller.enableInputTracking = false;
+            controller.controllerNode = controllerNode;
+
+            //Add the components to be able to catch close objects. 
+            controller.gameObject.AddComponent<XRDirectInteractor>();
+            SphereCollider collider = controller.gameObject.AddComponent<SphereCollider>();
+            collider.isTrigger = true;
+            collider.radius = 0.2f;
+
+            return controller;
         }
 
         protected virtual QuickVRNode CreateVRNode(QuickHumanBodyBones role)
@@ -56,6 +90,16 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
+
+        protected virtual void ActionTargetAnimatorSet()
+        {
+            Animator animator = QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorTarget();
+            _controllerHandLeft.transform.parent = animator.GetBoneTransform(HumanBodyBones.LeftHand);
+            _controllerHandLeft.transform.ResetTransformation();
+
+            _controllerHandRight.transform.parent = animator.GetBoneTransform(HumanBodyBones.RightHand);
+            _controllerHandRight.transform.ResetTransformation();
+        }
 
         public virtual Vector3 GetUserForward()
         {

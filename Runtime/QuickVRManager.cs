@@ -101,6 +101,7 @@ namespace QuickVR
         public static event QuickVRManagerAction OnPostCameraUpdate;
 
         public static event QuickVRManagerAction OnSourceAnimatorSet;
+        public static event QuickVRManagerAction OnTargetAnimatorSet;
         
         #endregion
 
@@ -177,6 +178,7 @@ namespace QuickVR
             }
 
             _copyPose.SetAnimatorDest(_animatorTarget);
+            if (OnTargetAnimatorSet != null) OnTargetAnimatorSet();
         }
 
         public virtual Animator GetAnimatorSource()
