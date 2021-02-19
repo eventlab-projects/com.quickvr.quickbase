@@ -332,13 +332,19 @@ namespace QuickVR {
 
         protected virtual void ResetTPose()
         {
-            _animator.GetBoneTransform(HumanBodyBones.Hips).localPosition = _initialHipsLocalPosition;
-            foreach (HumanBodyBones b in QuickHumanTrait.GetHumanBodyBones())
+            if (_animator)
             {
-                Transform t = _animator.GetBoneTransform(b);
-                if (t)
+                if (_animator.GetBoneTransform(HumanBodyBones.Hips))
                 {
-                    t.localRotation = _initialLocalRotations[(int)b];
+                    _animator.GetBoneTransform(HumanBodyBones.Hips).localPosition = _initialHipsLocalPosition;
+                }
+                foreach (HumanBodyBones b in QuickHumanTrait.GetHumanBodyBones())
+                {
+                    Transform t = _animator.GetBoneTransform(b);
+                    if (t)
+                    {
+                        t.localRotation = _initialLocalRotations[(int)b];
+                    }
                 }
             }
         }

@@ -150,6 +150,11 @@ namespace QuickVR
 
             _locomotionSystem = _xrRig.GetOrCreateComponent<LocomotionSystem>();
             _teleportProvider = _xrRig.GetOrCreateComponent<TeleportationProvider>();
+            BaseTeleportationInteractable[] teleportationInteractables = FindObjectsOfType<BaseTeleportationInteractable>();
+            foreach (BaseTeleportationInteractable t in teleportationInteractables)
+            {
+                t.teleportationProvider = _teleportProvider;
+            }
 
             //Legacy XR Mode is deprecated on 2020 onwards. 
 #if UNITY_2020_1_OR_NEWER
