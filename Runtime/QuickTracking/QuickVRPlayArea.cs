@@ -22,9 +22,6 @@ namespace QuickVR
 
         protected Vector3 _customUserForward = Vector3.zero;  //A custom user forward provided by the application. 
 
-        protected QuickVRControllerInteractor _controllerHandLeft = null;
-        protected QuickVRControllerInteractor _controllerHandRight = null;
-        
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -39,16 +36,6 @@ namespace QuickVR
             }
         }
 
-        protected virtual void OnEnable()
-        {
-            QuickVRManager.OnTargetAnimatorSet += ActionTargetAnimatorSet;
-        }
-
-        protected virtual void OnDisable()
-        {
-            QuickVRManager.OnTargetAnimatorSet += ActionTargetAnimatorSet;
-        }
-
         protected virtual void Awake()
         {
             _calibrationPoseRoot = transform.CreateChild("__CalibrationPoseRoot__");
@@ -56,12 +43,6 @@ namespace QuickVR
             {
                 CreateVRNode(role);
             }
-
-            _controllerHandLeft = transform.CreateChild("__ControllerHandLeft__").GetOrCreateComponent<QuickVRControllerInteractor>();
-            _controllerHandLeft._xrNode = XRNode.LeftHand;
-
-            _controllerHandRight = transform.CreateChild("__ControllerHandRight__").GetOrCreateComponent<QuickVRControllerInteractor>();
-            _controllerHandRight._xrNode = XRNode.RightHand;
         }
 
         protected virtual QuickVRNode CreateVRNode(QuickHumanBodyBones role)
@@ -76,18 +57,6 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
-
-        protected virtual void ActionTargetAnimatorSet()
-        {
-            Animator animator = QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorTarget();
-            _controllerHandLeft.transform.parent = animator.GetBoneTransform(HumanBodyBones.LeftHand);
-            _controllerHandLeft.transform.ResetTransformation();
-            _controllerHandLeft.transform.LookAt(animator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal), transform.up);
-
-            _controllerHandRight.transform.parent = animator.GetBoneTransform(HumanBodyBones.RightHand);
-            _controllerHandRight.transform.ResetTransformation();
-            _controllerHandRight.transform.LookAt(animator.GetBoneTransform(HumanBodyBones.RightMiddleProximal), transform.up);
-        }
 
         public virtual Vector3 GetUserForward()
         {
