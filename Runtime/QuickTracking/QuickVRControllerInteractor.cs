@@ -18,8 +18,15 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected XRDirectInteractor _directInteractor = null;
-        protected QuickXRRayInteractor _rayInteractorTeleport = null;
+        protected XRController _interactorDirect = null;
+        protected XRController _interactorTeleport = null;
+
+        #endregion
+
+        #region CONSTANTS
+
+        protected const string PF_INTERACTOR_DIRECT = "Prefabs/pf_InteractorDirect";
+        protected const string PF_INTERACTOR_TELEPORT = "Prefabs/pf_InteractorTeleport";
 
         #endregion
 
@@ -27,58 +34,22 @@ namespace QuickVR
 
         protected virtual void Start()
         {
-            CreateDirectInteractor();
-            CreateRayInteractor();
+            //Create the Interactor Direct
+            _interactorDirect = CreateInteractorFromPrefab(PF_INTERACTOR_DIRECT);
+
+            //Create the Interactor Teleport and ensure that the ray only interacts with Teleport objects. 
+            _interactorTeleport = CreateInteractorFromPrefab(PF_INTERACTOR_TELEPORT);
+            QuickXRRayInteractor rayInteractor = _interactorTeleport.GetComponent<QuickXRRayInteractor>();
+            rayInteractor._interactionType = QuickXRRayInteractor.InteractionType.Teleport;
         }
 
-        protected virtual void CreateDirectInteractor()
+        protected XRController CreateInteractorFromPrefab(string pfName)
         {
-            Transform tInteractor = CreateInteractorTransform("__DirectInteractor__");
-
-            //Add the components to be able to catch close objects. 
-            SphereCollider collider = tInteractor.gameObject.AddComponent<SphereCollider>();
-            collider.isTrigger = true;
-            collider.radius = 0.2f;
-            _directInteractor = tInteractor.gameObject.AddComponent<XRDirectInteractor>();
-        }
-
-        protected virtual void CreateRayInteractor()
-        {
-            Transform tInteractor = CreateInteractorTransform("__RayInteractor__");
-
-            LineRenderer lRenderer = tInteractor.gameObject.AddComponent<LineRenderer>();
-            lRenderer.material = Resources.Load<Material>("Materials/QuickDefaultLine");
-            lRenderer.numCornerVertices = 4;
-            lRenderer.numCapVertices = 4;
-            lRenderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-            lRenderer.receiveShadows = false;
-            lRenderer.sortingOrder = 5;
-            
-            _rayInteractorTeleport = tInteractor.gameObject.AddComponent<QuickXRRayInteractor>();
-            _rayInteractorTeleport._interactionType = QuickXRRayInteractor.InteractionType.Teleport;
-            _rayInteractorTeleport.lineType = XRRayInteractor.LineType.ProjectileCurve;
-            _rayInteractorTeleport.velocity = 8;
-
-            //Haptics configuration
-            _rayInteractorTeleport.playHapticsOnSelectEntered = true;
-            _rayInteractorTeleport.hapticSelectEnterIntensity = 0.3f;
-            _rayInteractorTeleport.hapticSelectEnterDuration = 0.1f;
-
-            _rayInteractorTeleport.playHapticsOnHoverEntered = true;
-            _rayInteractorTeleport.hapticHoverEnterIntensity = 0.1f;
-            _rayInteractorTeleport.hapticHoverEnterDuration = 0.1f;
-
-            tInteractor.gameObject.AddComponent<XRInteractorLineVisual>();
-        }
-
-        protected Transform CreateInteractorTransform(string tName)
-        {
-            Transform tDirectInteractor = transform.CreateChild(tName);
-            XRController controller = tDirectInteractor.gameObject.AddComponent<XRController>();
-            controller.enableInputTracking = false;
+            XRController controller = Instantiate(Resources.Load<XRController>(pfName), transform);
             controller.controllerNode = _xrNode;
+            controller.enableInputTracking = false;
 
-            return tDirectInteractor;
+            return controller;
         }
 
         #endregion
