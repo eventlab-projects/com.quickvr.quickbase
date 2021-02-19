@@ -69,6 +69,7 @@ namespace QuickVR
         protected QuickXRRig _xrRig = null;
         protected LocomotionSystem _locomotionSystem = null;
         protected TeleportationProvider _teleportProvider = null;
+        protected DeviceBasedContinuousMoveProvider _continousMoveProvider = null;
 
         protected QuickVRPlayArea _vrPlayArea
         {
@@ -155,6 +156,13 @@ namespace QuickVR
             {
                 t.teleportationProvider = _teleportProvider;
             }
+
+            _continousMoveProvider = _xrRig.GetOrCreateComponent<DeviceBasedContinuousMoveProvider>();
+            _continousMoveProvider.forwardSource = _xrRig.transform;
+            _continousMoveProvider.controllers.Add(_controllerHandLeft.GetInteractorDirectController());
+
+            _xrRig.GetOrCreateComponent<CharacterControllerDriver>();
+            _xrRig.GetOrCreateComponent<CharacterController>();
 
             //Legacy XR Mode is deprecated on 2020 onwards. 
 #if UNITY_2020_1_OR_NEWER

@@ -32,7 +32,7 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        protected virtual void Start()
+        protected virtual void Awake()
         {
             //Create the Interactor Direct
             _interactorDirect = CreateInteractorFromPrefab(PF_INTERACTOR_DIRECT);
@@ -43,13 +43,27 @@ namespace QuickVR
             rayInteractor._interactionType = QuickXRRayInteractor.InteractionType.Teleport;
         }
 
+        protected virtual void Start()
+        {
+            _interactorDirect.controllerNode = _xrNode;
+            _interactorTeleport.controllerNode = _xrNode;
+        }
+
         protected XRController CreateInteractorFromPrefab(string pfName)
         {
             XRController controller = Instantiate(Resources.Load<XRController>(pfName), transform);
-            controller.controllerNode = _xrNode;
             controller.enableInputTracking = false;
 
             return controller;
+        }
+
+        #endregion
+
+        #region GET AND SET
+
+        public virtual XRController GetInteractorDirectController()
+        {
+            return _interactorDirect;
         }
 
         #endregion
