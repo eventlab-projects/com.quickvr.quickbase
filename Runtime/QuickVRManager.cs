@@ -70,6 +70,7 @@ namespace QuickVR
         protected LocomotionSystem _locomotionSystem = null;
         protected TeleportationProvider _teleportProvider = null;
         protected DeviceBasedContinuousMoveProvider _continousMoveProvider = null;
+        protected DeviceBasedContinuousTurnProvider _continousRotationProvider = null;
 
         protected QuickVRPlayArea _vrPlayArea
         {
@@ -160,6 +161,9 @@ namespace QuickVR
             _continousMoveProvider = _xrRig.GetOrCreateComponent<DeviceBasedContinuousMoveProvider>();
             _continousMoveProvider.forwardSource = _xrRig.transform;
             _continousMoveProvider.controllers.Add(_controllerHandLeft.GetInteractorDirectController());
+
+            _continousRotationProvider = _xrRig.GetOrCreateComponent<DeviceBasedContinuousTurnProvider>();
+            _continousRotationProvider.controllers.Add(_controllerHandRight.GetInteractorDirectController());            
 
             _xrRig.GetOrCreateComponent<CharacterControllerDriver>();
             _xrRig.GetOrCreateComponent<CharacterController>();

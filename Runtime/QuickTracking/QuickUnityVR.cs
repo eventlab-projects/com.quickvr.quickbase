@@ -41,8 +41,6 @@ namespace QuickVR {
 
         protected QuickVRPlayArea _vrPlayArea = null;
 
-        protected Transform _calibrationPose = null;
-
         protected Vector3 _headOffset = Vector3.zero;
 
         protected PositionConstraint _footprints = null;
@@ -88,17 +86,12 @@ namespace QuickVR {
 
             if (Application.isPlaying)
             {
-
                 _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
                 _vrPlayArea.transform.parent = transform;
 
                 CreateVRHands();
                 CreateVRCursors();
                 CreateFootPrints();
-
-                _calibrationPose = new GameObject("__CalibrationPose__").transform;
-                _calibrationPose.position = transform.position;
-                _calibrationPose.rotation = transform.rotation;
             }
         }
 
@@ -178,16 +171,6 @@ namespace QuickVR {
             return 0;
         }
 
-        public virtual void SetInitialPosition(Vector3 initialPosition)
-        {
-            _calibrationPose.position = initialPosition;
-        }
-
-        public virtual void SetInitialRotation(Quaternion initialRotation)
-        {
-            _calibrationPose.rotation = initialRotation;
-        }
-
         public virtual Vector3 GetDisplacement()
         {
             //if (_isStanding)
@@ -215,8 +198,6 @@ namespace QuickVR {
 
             transform.localScale = Vector3.one;
 
-            transform.position = _calibrationPose.position;
-            transform.rotation = _calibrationPose.rotation;
             _footprints.translationOffset = Vector3.zero;
             _footprints.transform.rotation = transform.rotation;
 

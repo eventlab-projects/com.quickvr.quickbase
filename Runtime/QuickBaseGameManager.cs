@@ -138,23 +138,6 @@ namespace QuickVR {
         }
 
 
-        protected virtual void OnEnable()
-        {            
-            OnRunning += StartTeleport;
-            QuickTeleport.OnPostTeleport += SetInitialPositionAndRotation;
-        }
-
-        protected virtual void OnDisable()
-        {
-            OnRunning -= StartTeleport;
-            QuickTeleport.OnPostTeleport -= SetInitialPositionAndRotation;
-        }
-
-        protected virtual void StartTeleport()
-        {
-            StartCoroutine(CoUpdateTeleport());
-        }
-
         protected virtual void Awake() 
         {
             Reset();
@@ -230,15 +213,7 @@ namespace QuickVR {
             return _timeRunning;
         }
 
-		public virtual void SetInitialPositionAndRotation()
-        {
-            Transform target = GetPlayer().transform;
-
-            _hTracking.SetInitialPosition(target.position);
-            _hTracking.SetInitialRotation(target.rotation);
-        }
-
-        protected bool IsPlayerOnSpot()
+		protected bool IsPlayerOnSpot()
         {
             //if (_footprints != null)
             //    return Vector3.Distance(GetPlayer().transform.position, _footprints.position) <= _minDistToFootPrints;
@@ -258,37 +233,10 @@ namespace QuickVR {
         public virtual void MovePlayerTo(Transform target, bool calibrate = true)
         {
             GetPlayer().position = target.position;
-
             GetPlayer().rotation = target.rotation;
-            SetInitialPositionAndRotation();
-
+            
             if (OnMovedPlayer != null)
                 OnMovedPlayer();
-        }
-
-        public void EnableTeleport(bool b)
-        {
-            if (_teleport != null)
-            {
-                _teleport.enabled = b;
-
-                if (b)
-                {
-                    if (_coUpdateTeleport == null)
-                        _coUpdateTeleport = StartCoroutine(CoUpdateTeleport());
-                }
-                else if (_coUpdateTeleport != null)
-                {
-                    StopCoroutine(_coUpdateTeleport);
-                    _coUpdateTeleport = null;
-                }
-
-                if (!b)
-                {
-                    QuickUICursor.GetVRCursor(QuickUICursor.Role.RightHand).enabled = false;
-                    _teleport.SetTrajectoryVisible(false);
-                }
-            }
         }
 
         public virtual void GetExpirationDate(out int day, out int month, out int year)
@@ -397,27 +345,6 @@ namespace QuickVR {
                 //    _footprints.transform.position = new Vector3(_footprints.transform.position.x, GetPlayer().position.y, _footprints.transform.position.z);
             }
 		}
-
-        protected virtual IEnumerator CoUpdateTeleport()
-        {
-            _teleport = GetPlayer().GetComponentInChildren<QuickTeleport>(true);
-            if (_teleport != null)
-            {
-                QuickUICursor.Role cType = QuickUICursor.Role.RightHand;
-                _teleport.enabled = true;
-                QuickUICursor cursor = QuickUICursor.GetVRCursor(cType);
-
-                cursor._RayCastMask &= ~(1 << LayerMask.NameToLayer("PeripheryVision"));
-
-                while (true)
-                {
-                    yield return null;
-
-                    bool isPointing = GetPlayer().GetComponent<QuickUnityVR>().GetVRHand(QuickVRNode.Type.RightHand).IsPointing();
-                    QuickUICursor.GetVRCursor(cType).enabled = isPointing;
-                }
-            }
-        }
 
         #endregion
     }
