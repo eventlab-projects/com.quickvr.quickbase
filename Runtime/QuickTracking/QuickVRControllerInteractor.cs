@@ -18,8 +18,8 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected XRController _interactorDirect = null;
-        protected XRController _interactorTeleport = null;
+        protected XRBaseController _interactorDirect = null;
+        protected XRBaseController _interactorTeleport = null;
 
         #endregion
 
@@ -45,13 +45,13 @@ namespace QuickVR
 
         protected virtual void Start()
         {
-            _interactorDirect.controllerNode = _xrNode;
-            _interactorTeleport.controllerNode = _xrNode;
+            //_interactorDirect.controllerNode = _xrNode;
+            //_interactorTeleport.controllerNode = _xrNode;
         }
 
-        protected XRController CreateInteractorFromPrefab(string pfName)
+        protected XRBaseController CreateInteractorFromPrefab(string pfName)
         {
-            XRController controller = Instantiate(Resources.Load<XRController>(pfName), transform);
+            XRBaseController controller = Instantiate(Resources.Load<XRBaseController>(pfName), transform);
             controller.enableInputTracking = false;
 
             return controller;
@@ -61,7 +61,7 @@ namespace QuickVR
 
         #region GET AND SET
 
-        public virtual XRController GetInteractorDirectController()
+        public virtual XRBaseController GetInteractorDirectController()
         {
             return _interactorDirect;
         }
