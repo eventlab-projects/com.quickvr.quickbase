@@ -26,14 +26,8 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected Animator _animatorSource 
-        {
-            get
-            {
-                return QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource();
-            }
-        }
-
+        protected Animator _animatorSource = null;
+        
         protected Transform _head
         {
             get
@@ -103,8 +97,9 @@ namespace QuickVR
             QuickVRManager.OnPreCopyPose -= UpdateCameraRotation;
         }
 
-        protected virtual void ActionSourceAnimatorSet()
+        protected virtual void ActionSourceAnimatorSet(Animator animator)
         {
+            _animatorSource = animator;
             _initialLocalRotationHead = _head.localRotation;
         }
 

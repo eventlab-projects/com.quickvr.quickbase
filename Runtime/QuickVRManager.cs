@@ -58,15 +58,14 @@ namespace QuickVR
         protected Animator _animatorTarget = null;
         protected Animator _animatorSource = null;
 
-        protected QuickVRControllerInteractor _controllerHandLeft = null;
-        protected QuickVRControllerInteractor _controllerHandRight = null;
-
         protected QuickUnityVR _unityVR = null;
         protected QuickBaseTrackingManager _handTracking = null;
         protected List<QuickBaseTrackingManager> _bodyTrackingSystems = new List<QuickBaseTrackingManager>();
         protected List<QuickBaseTrackingManager> _ikManagerSystems = new List<QuickBaseTrackingManager>();
 
         protected QuickXRRig _xrRig = null;
+        protected QuickVRControllerInteractor _controllerHandLeft = null;
+        protected QuickVRControllerInteractor _controllerHandRight = null;
         protected LocomotionSystem _locomotionSystem = null;
         protected TeleportationProvider _teleportProvider = null;
         protected DeviceBasedContinuousMoveProvider _continousMoveProvider = null;
@@ -131,8 +130,9 @@ namespace QuickVR
         public static event QuickVRManagerAction OnPreCameraUpdate;
         public static event QuickVRManagerAction OnPostCameraUpdate;
 
-        public static event QuickVRManagerAction OnSourceAnimatorSet;
-        public static event QuickVRManagerAction OnTargetAnimatorSet;
+        public delegate void QuickVRManagerActionAnimator(Animator animator);
+        public static event QuickVRManagerActionAnimator OnSourceAnimatorSet;
+        public static event QuickVRManagerActionAnimator OnTargetAnimatorSet;
         
         #endregion
 
@@ -251,8 +251,11 @@ namespace QuickVR
             _controllerHandRight.transform.ResetTransformation();
             _controllerHandRight.transform.LookAt(animator.GetBoneTransform(HumanBodyBones.RightMiddleProximal), transform.up);
 
-            _copyPose.SetAnimatorDest(_animatorTarget);
-            if (OnTargetAnimatorSet != null) OnTargetAnimatorSet();
+            _copyPose.SetAnimatorDest(animator);
+            if (OnTargetAnimatorSet != null)
+            {
+                OnTargetAnimatorSet(animator);
+            }
         }
 
         protected virtual void ActionTargetAnimatorSet()
@@ -269,8 +272,11 @@ namespace QuickVR
         {
             _animatorSource = animator;
 
-            _copyPose.SetAnimatorSource(_animatorSource);
-            if (OnSourceAnimatorSet != null) OnSourceAnimatorSet();
+            _copyPose.SetAnimatorSource(animator);
+            if (OnSourceAnimatorSet != null)
+            {
+                OnSourceAnimatorSet(animator);
+            }
         }
 
         public virtual void AddUnityVRTrackingSystem(QuickUnityVR unityVR)

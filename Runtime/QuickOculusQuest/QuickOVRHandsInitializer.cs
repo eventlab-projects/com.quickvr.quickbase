@@ -33,9 +33,9 @@ namespace QuickVR
 #endif
         }
 
-        protected static void OnSourceAnimatorSet()
+        protected static void OnSourceAnimatorSet(Animator animator)
         {
-            QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource().GetOrCreateComponent<QuickOVRHandsInitializer>();
+            animator.GetOrCreateComponent<QuickOVRHandsInitializer>();
             QuickSingletonManager.GetInstance<InputManager>().CreateDefaultImplementation<InputManagerOVRHands>();
         }
 

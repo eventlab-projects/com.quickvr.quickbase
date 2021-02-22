@@ -74,10 +74,9 @@ namespace QuickVR
 
         #region GET AND SET
 
-        protected virtual void ActionSourceAnimatorSet()
+        protected virtual void ActionSourceAnimatorSet(Animator animator)
         {
-            Animator animatorSrc = QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource();
-            _unityVR = animatorSrc.GetComponent<QuickUnityVR>();
+            _unityVR = animator.GetComponent<QuickUnityVR>();
         }
 
         public override string[] GetButtonCodes()
