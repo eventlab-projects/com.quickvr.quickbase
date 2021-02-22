@@ -5,6 +5,8 @@ using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
 
+using UnityEngine.InputSystem;
+
 namespace QuickVR
 {
     public class QuickVRControllerInteractor : MonoBehaviour
@@ -18,8 +20,8 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected XRBaseController _interactorDirect = null;
-        protected XRBaseController _interactorTeleport = null;
+        protected ActionBasedController _interactorDirect = null;
+        protected ActionBasedController _interactorTeleport = null;
 
         #endregion
 
@@ -28,6 +30,9 @@ namespace QuickVR
         protected const string PF_INTERACTOR_DIRECT = "Prefabs/pf_InteractorDirect";
         protected const string PF_INTERACTOR_TELEPORT = "Prefabs/pf_InteractorTeleport";
 
+        protected const string ACTION_MAP_CONTROLLER_LEFT = "LeftControllerActions";
+        protected const string ACTION_MAP_CONTROLLER_RIGHT = "RightControllerActions";
+        
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -47,11 +52,28 @@ namespace QuickVR
         {
             //_interactorDirect.controllerNode = _xrNode;
             //_interactorTeleport.controllerNode = _xrNode;
+
+            //Load the default actions if necessary
+            InputActionAsset asset = Resources.Load<InputActionAsset>("QuickDefaultInputActions");
+            InputActionMap aMap = asset.FindActionMap(_xrNode == XRNode.LeftHand ? ACTION_MAP_CONTROLLER_LEFT : ACTION_MAP_CONTROLLER_RIGHT);
+
+            if (_interactorDirect.selectAction.action.bindings.Count == 0)
+            {
+                //There is no user-defined binding for direct interaction. Load the default one. 
+                _interactorDirect.selectAction = new InputActionProperty(aMap.FindAction("Grab"));
+            }
+
+            if (_interactorTeleport.selectAction.action.bindings.Count == 0)
+            {
+                //There is no user-defined binding for teleport. Load the default one. 
+                _interactorTeleport.selectAction = new InputActionProperty(aMap.FindAction("Teleport"));
+            }
+            _interactorTeleport.hapticDeviceAction = new InputActionProperty(aMap.FindAction("Haptic Device"));
         }
 
-        protected XRBaseController CreateInteractorFromPrefab(string pfName)
+        protected ActionBasedController CreateInteractorFromPrefab(string pfName)
         {
-            XRBaseController controller = Instantiate(Resources.Load<XRBaseController>(pfName), transform);
+            ActionBasedController controller = Instantiate(Resources.Load<ActionBasedController>(pfName), transform);
             controller.enableInputTracking = false;
 
             return controller;
@@ -61,7 +83,7 @@ namespace QuickVR
 
         #region GET AND SET
 
-        public virtual XRBaseController GetInteractorDirectController()
+        public virtual ActionBasedController GetInteractorDirectController()
         {
             return _interactorDirect;
         }

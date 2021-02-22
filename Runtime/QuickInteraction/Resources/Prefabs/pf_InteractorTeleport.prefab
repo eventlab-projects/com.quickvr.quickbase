@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3078127456373916670}
-  - component: {fileID: 6623595419741348913}
+  - component: {fileID: 5364868410652934636}
   - component: {fileID: 5343664691003309233}
   - component: {fileID: 9126249880283994263}
   - component: {fileID: 5437032069593228087}
@@ -35,7 +35,7 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 0
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &6623595419741348913
+--- !u!114 &5364868410652934636
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -44,7 +44,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 2936785554598793047}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d31fe8575ce9f314cb2ff3febed509bf, type: 3}
+  m_Script: {fileID: 11500000, guid: caff514de9b15ad48ab85dcff5508221, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_UpdateTrackingType: 0
@@ -61,7 +61,7 @@ MonoBehaviour:
       m_Name: Position
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: c8eeada3-cb7b-4490-8e21-e111642bbc9d
+      m_Id: 49324c69-d0cf-4806-a4af-ce18fc54ef56
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -72,7 +72,7 @@ MonoBehaviour:
       m_Name: Rotation
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: b94dc9f0-1702-4965-bc91-b50751c16fe0
+      m_Id: 9bc8b8a3-2f7e-40e9-ab3b-33c9af614b18
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -83,7 +83,7 @@ MonoBehaviour:
       m_Name: Select
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: cdf4c5b4-bb8a-47bb-89c0-f4d2f5ba2f0b
+      m_Id: 92063e34-9098-4d09-8698-0fdc696d8e80
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -94,7 +94,7 @@ MonoBehaviour:
       m_Name: Activate
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: 78d3192c-4066-4d81-a0eb-b06364980050
+      m_Id: caacc439-24f0-4e9e-9926-9577584a0d1b
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -105,7 +105,7 @@ MonoBehaviour:
       m_Name: UI Press
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: 6ec76fb8-6dab-4046-8fc5-72739450a8e8
+      m_Id: 18bbd9fb-b1f7-46f0-8c2d-183b0589a6c2
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -116,7 +116,7 @@ MonoBehaviour:
       m_Name: Haptic Device
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: 3c05f12d-2360-4d48-a4b4-09daf9bd5ce7
+      m_Id: 2c0b3cae-9f03-42b6-b080-4ffd6bb0b119
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -127,7 +127,7 @@ MonoBehaviour:
       m_Name: Rotate Anchor
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: 92c63456-156f-4bea-b393-6e1a8ed3ba9d
+      m_Id: d6b9823b-85d5-4b83-bb91-8e8b2e2bf935
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
@@ -138,7 +138,7 @@ MonoBehaviour:
       m_Name: Translate Anchor
       m_Type: 0
       m_ExpectedControlType: 
-      m_Id: 60234e02-8033-43c8-a0c3-d03127a84747
+      m_Id: c54c4b32-e49c-4415-beb8-5308826c894f
       m_Processors: 
       m_Interactions: 
       m_SingletonActionBindings: []
