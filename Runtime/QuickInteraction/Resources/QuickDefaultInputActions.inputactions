@@ -446,7 +446,18 @@
                     "path": "<Mouse>/delta",
                     "interactions": "",
                     "processors": "ScaleVector2(x=0.1,y=0.1)",
-                    "groups": "",
+                    "groups": "Keyboard And Mouse",
+                    "action": "RotateCamera",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "a0578fc6-c442-4069-9909-9312475021ee",
+                    "path": "<XRController>{RightHand}/primary2DAxis",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Generic XR Controller",
                     "action": "RotateCamera",
                     "isComposite": false,
                     "isPartOfComposite": false

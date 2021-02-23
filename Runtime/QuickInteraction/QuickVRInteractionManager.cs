@@ -103,7 +103,7 @@ namespace QuickVR
             QuickVRManager.OnPostCameraUpdate += UpdateCharacterController;
             QuickVRManager.OnTargetAnimatorSet += UpdateNewAnimatorTarget;
 
-            _continousMoveProvider.beginLocomotion += OnEndMove;
+            //_continousMoveProvider.beginLocomotion += OnEndMove;
         }
 
         protected virtual void OnDisable()
@@ -111,7 +111,7 @@ namespace QuickVR
             QuickVRManager.OnPostCameraUpdate += UpdateCharacterController;
             QuickVRManager.OnTargetAnimatorSet -= UpdateNewAnimatorTarget;
 
-            _continousMoveProvider.beginLocomotion -= OnEndMove;
+            //_continousMoveProvider.beginLocomotion -= OnEndMove;
         }
 
         #endregion
@@ -158,7 +158,18 @@ namespace QuickVR
             Camera cam = Camera.main;
             if (animator && cam)
             {
-                //animator.transform.forward = Vector3.ProjectOnPlane(cam.transform.forward, animator.transform.up);
+                QuickVRPlayArea playArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
+                Transform tmp = playArea.transform.parent;
+                playArea.transform.parent = null;
+
+                Vector3 fwd = animator.transform.forward;
+                Vector3 rotAxis = animator.transform.up;
+                Vector3 targetFwd = Vector3.ProjectOnPlane(cam.transform.forward, rotAxis);
+
+                animator.GetBoneTransform(HumanBodyBones.Head).Rotate(rotAxis, Vector3.SignedAngle(targetFwd, fwd, rotAxis), Space.World);
+                animator.transform.forward = targetFwd;
+
+                playArea.transform.parent = tmp;
             }
         }
 
