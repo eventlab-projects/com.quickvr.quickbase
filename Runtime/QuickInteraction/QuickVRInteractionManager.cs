@@ -10,27 +10,6 @@ namespace QuickVR
 
     public class QuickVRInteractionManager : MonoBehaviour
     {
-        public class QuickXRRig : XRRig
-        {
-
-            protected new void Awake()
-            {
-
-            }
-
-            protected new IEnumerator Start()
-            {
-                while (!Camera.main)
-                {
-                    yield return null;
-                }
-
-                cameraGameObject = Camera.main.gameObject;
-                cameraFloorOffsetObject = Camera.main.transform.parent.gameObject;
-            }
-
-        }
-
         #region PUBLIC ATTRIBUTES
 
         public ActionBasedController _pfInteractorDirect = null;
@@ -61,6 +40,7 @@ namespace QuickVR
 
         protected virtual void Awake()
         {
+            Reset();
             CheckPrefabs();
 
             _controllerHandLeft = transform.CreateChild("__ControllerHandLeft__").GetOrCreateComponent<QuickVRControllerInteractor>();
@@ -69,19 +49,23 @@ namespace QuickVR
             _controllerHandRight = transform.CreateChild("__ControllerHandRight__").GetOrCreateComponent<QuickVRControllerInteractor>();
             _controllerHandRight._xrNode = XRNode.RightHand;
 
-            _xrRig = new GameObject("__XRRig__").AddComponent<QuickXRRig>();
-            _locomotionSystem = _xrRig.GetOrCreateComponent<LocomotionSystem>();
-            _teleportProvider = _xrRig.GetOrCreateComponent<TeleportationProvider>();
             BaseTeleportationInteractable[] teleportationInteractables = FindObjectsOfType<BaseTeleportationInteractable>();
             foreach (BaseTeleportationInteractable t in teleportationInteractables)
             {
                 t.teleportationProvider = _teleportProvider;
             }
 
-            _continousMoveProvider = _xrRig.GetOrCreateComponent<ActionBasedContinuousMoveProvider>();
-            _continousMoveProvider.forwardSource = _xrRig.transform;
+            _continousMoveProvider = gameObject.GetOrCreateComponent<ActionBasedContinuousMoveProvider>();
+            //_continousMoveProvider.forwardSource = _xrRig.transform;
             
-            _continousRotationProvider = _xrRig.GetOrCreateComponent<ActionBasedContinuousTurnProvider>();
+            _continousRotationProvider = gameObject.GetOrCreateComponent<ActionBasedContinuousTurnProvider>();
+        }
+
+        protected virtual void Reset()
+        {
+            _xrRig = gameObject.GetOrCreateComponent<QuickXRRig>();
+            _locomotionSystem = gameObject.GetOrCreateComponent<LocomotionSystem>();
+            _teleportProvider = gameObject.GetOrCreateComponent<TeleportationProvider>();
         }
 
         protected virtual IEnumerator Start()
