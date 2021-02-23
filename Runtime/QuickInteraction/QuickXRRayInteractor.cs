@@ -11,7 +11,6 @@ namespace QuickVR
 
         #region PUBLIC ATTRIUBTES
 
-
         //Enum that defines what the ray is used for
         public enum InteractionType
         {

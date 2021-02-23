@@ -1,34 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.XR;
-using UnityEngine.XR.Interaction.Toolkit;
 
 using System.Collections;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
 
 namespace QuickVR
 {
-
-    public class QuickXRRig : XRRig
-    {
-
-        protected new void Awake()
-        {
-
-        }
-
-        protected new IEnumerator Start()
-        {
-            while (!Camera.main)
-            {
-                yield return null;
-            }
-
-            cameraGameObject = Camera.main.gameObject;
-            cameraFloorOffsetObject = Camera.main.transform.parent.gameObject;
-        }
-
-    }
 
     public class QuickVRManager : MonoBehaviour
     {
@@ -63,14 +40,6 @@ namespace QuickVR
         protected List<QuickBaseTrackingManager> _bodyTrackingSystems = new List<QuickBaseTrackingManager>();
         protected List<QuickBaseTrackingManager> _ikManagerSystems = new List<QuickBaseTrackingManager>();
 
-        protected QuickXRRig _xrRig = null;
-        protected QuickVRControllerInteractor _controllerHandLeft = null;
-        protected QuickVRControllerInteractor _controllerHandRight = null;
-        protected LocomotionSystem _locomotionSystem = null;
-        protected TeleportationProvider _teleportProvider = null;
-        protected DeviceBasedContinuousMoveProvider _continousMoveProvider = null;
-        protected DeviceBasedContinuousTurnProvider _continousRotationProvider = null;
-
         protected QuickVRPlayArea _vrPlayArea
         {
             get
@@ -104,6 +73,7 @@ namespace QuickVR
         }
 
         protected QuickVRCameraController _cameraController = null;
+        protected QuickVRInteractionManager _interactionManager = null;
 
         protected bool _isCalibrationRequired = false;
 
@@ -140,39 +110,23 @@ namespace QuickVR
 
         protected virtual void Awake()
         {
+            Reset();
+
             _copyPose.enabled = false;
             _cameraController = QuickSingletonManager.GetInstance<QuickVRCameraController>();
-
-            _xrRig = new GameObject("__XRRig__").AddComponent<QuickXRRig>();
-            _controllerHandLeft = _xrRig.transform.CreateChild("__ControllerHandLeft__").GetOrCreateComponent<QuickVRControllerInteractor>();
-            _controllerHandLeft._xrNode = XRNode.LeftHand;
-
-            _controllerHandRight = _xrRig.transform.CreateChild("__ControllerHandRight__").GetOrCreateComponent<QuickVRControllerInteractor>();
-            _controllerHandRight._xrNode = XRNode.RightHand;
-
-            _locomotionSystem = _xrRig.GetOrCreateComponent<LocomotionSystem>();
-            _teleportProvider = _xrRig.GetOrCreateComponent<TeleportationProvider>();
-            BaseTeleportationInteractable[] teleportationInteractables = FindObjectsOfType<BaseTeleportationInteractable>();
-            foreach (BaseTeleportationInteractable t in teleportationInteractables)
-            {
-                t.teleportationProvider = _teleportProvider;
-            }
-
-            _continousMoveProvider = _xrRig.GetOrCreateComponent<DeviceBasedContinuousMoveProvider>();
-            _continousMoveProvider.forwardSource = _xrRig.transform;
-            _continousMoveProvider.controllers.Add(_controllerHandLeft.GetInteractorDirectController());
-
-            _continousRotationProvider = _xrRig.GetOrCreateComponent<DeviceBasedContinuousTurnProvider>();
-            _continousRotationProvider.controllers.Add(_controllerHandRight.GetInteractorDirectController());            
-
-            _xrRig.GetOrCreateComponent<CharacterControllerDriver>();
-            _xrRig.GetOrCreateComponent<CharacterController>();
 
             //Legacy XR Mode is deprecated on 2020 onwards. 
 #if UNITY_2020_1_OR_NEWER
             _XRMode = XRMode.XRPlugin;
 #endif
 
+        }
+
+        protected virtual void Reset()
+        {
+            name = "__QuickVRManager__";
+            transform.ResetTransformation();
+            _interactionManager = gameObject.GetOrCreateComponent<QuickVRInteractionManager>();
         }
 
         #endregion
@@ -236,20 +190,6 @@ namespace QuickVR
             {
                 _cameraController._cameraNearPlane = zNearDefiner._zNear;
             }
-
-            //Configure the XRRig to act in this animator
-            _xrRig.transform.position = animator.transform.position;
-            _xrRig.transform.rotation = animator.transform.rotation;
-            animator.transform.parent = _xrRig.transform;
-            _cameraController.transform.parent = _xrRig.transform;
-
-            _controllerHandLeft.transform.parent = animator.GetBoneTransform(HumanBodyBones.LeftHand);
-            _controllerHandLeft.transform.ResetTransformation();
-            _controllerHandLeft.transform.LookAt(animator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal), transform.up);
-
-            _controllerHandRight.transform.parent = animator.GetBoneTransform(HumanBodyBones.RightHand);
-            _controllerHandRight.transform.ResetTransformation();
-            _controllerHandRight.transform.LookAt(animator.GetBoneTransform(HumanBodyBones.RightMiddleProximal), transform.up);
 
             _copyPose.SetAnimatorDest(animator);
             if (OnTargetAnimatorSet != null)

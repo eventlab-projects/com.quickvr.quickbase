@@ -20,6 +20,9 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
+        protected QuickVRInteractionManager _interactionManager = null;
+        protected InputActionMap _actionMapDefault = null;
+
         protected ActionBasedController _interactorDirect = null;
         protected ActionBasedController _interactorTeleport = null;
 
@@ -27,63 +30,55 @@ namespace QuickVR
 
         #region CONSTANTS
 
-        protected const string PF_INTERACTOR_DIRECT = "Prefabs/pf_InteractorDirect";
-        protected const string PF_INTERACTOR_TELEPORT = "Prefabs/pf_InteractorTeleport";
-
         protected const string ACTION_MAP_CONTROLLER_LEFT = "LeftControllerActions";
         protected const string ACTION_MAP_CONTROLLER_RIGHT = "RightControllerActions";
-        
+
         #endregion
 
         #region CREATION AND DESTRUCTION
 
-        protected virtual void Awake()
-        {
-            //Create the Interactor Direct
-            _interactorDirect = CreateInteractorFromPrefab(PF_INTERACTOR_DIRECT);
-
-            //Create the Interactor Teleport and ensure that the ray only interacts with Teleport objects. 
-            _interactorTeleport = CreateInteractorFromPrefab(PF_INTERACTOR_TELEPORT);
-            QuickXRRayInteractor rayInteractor = _interactorTeleport.GetComponent<QuickXRRayInteractor>();
-            rayInteractor._interactionType = QuickXRRayInteractor.InteractionType.Teleport;
-        }
-
         protected virtual void Start()
         {
-            //_interactorDirect.controllerNode = _xrNode;
-            //_interactorTeleport.controllerNode = _xrNode;
+            _interactionManager = QuickSingletonManager.GetInstance<QuickVRInteractionManager>();
 
-            //Load the default actions if necessary
+            //Load the default ActionMap for this controller
             InputActionAsset asset = Resources.Load<InputActionAsset>("QuickDefaultInputActions");
-            InputActionMap aMap = asset.FindActionMap(_xrNode == XRNode.LeftHand ? ACTION_MAP_CONTROLLER_LEFT : ACTION_MAP_CONTROLLER_RIGHT);
+            _actionMapDefault = asset.FindActionMap(_xrNode == XRNode.LeftHand ? ACTION_MAP_CONTROLLER_LEFT : ACTION_MAP_CONTROLLER_RIGHT);
 
+            CreateInteractorDirect();
+            CreateInteractorTeleport();
+        }
+
+        protected virtual void CreateInteractorDirect()
+        {
+            //Create the Interactor Direct
+            _interactorDirect = Instantiate(_interactionManager._pfInteractorDirect, transform);
             if (_interactorDirect.selectAction.action.bindings.Count == 0)
             {
                 //There is no user-defined binding for direct interaction. Load the default one. 
-                _interactorDirect.selectAction = new InputActionProperty(aMap.FindAction("Grab"));
+                _interactorDirect.selectAction = new InputActionProperty(_actionMapDefault.FindAction("Grab"));
             }
+        }
 
+        protected virtual void CreateInteractorTeleport()
+        {
+            //Create the Interactor Teleport and ensure that the ray only interacts with Teleport objects. 
+            _interactorTeleport = Instantiate(_interactionManager._pfInteractorTeleport, transform);
+            QuickXRRayInteractor rayInteractor = _interactorTeleport.GetComponent<QuickXRRayInteractor>();
+            rayInteractor._interactionType = QuickXRRayInteractor.InteractionType.Teleport;
             if (_interactorTeleport.selectAction.action.bindings.Count == 0)
             {
                 //There is no user-defined binding for teleport. Load the default one. 
-                _interactorTeleport.selectAction = new InputActionProperty(aMap.FindAction("Teleport"));
+                _interactorTeleport.selectAction = new InputActionProperty(_actionMapDefault.FindAction("Teleport"));
             }
-            _interactorTeleport.hapticDeviceAction = new InputActionProperty(aMap.FindAction("Haptic Device"));
-        }
-
-        protected ActionBasedController CreateInteractorFromPrefab(string pfName)
-        {
-            ActionBasedController controller = Instantiate(Resources.Load<ActionBasedController>(pfName), transform);
-            controller.enableInputTracking = false;
-
-            return controller;
+            _interactorTeleport.hapticDeviceAction = new InputActionProperty(_actionMapDefault.FindAction("Haptic Device"));
         }
 
         #endregion
 
         #region GET AND SET
 
-        public virtual ActionBasedController GetInteractorDirectController()
+        public virtual ActionBasedController GetInteractor()
         {
             return _interactorDirect;
         }
