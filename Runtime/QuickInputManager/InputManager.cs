@@ -14,6 +14,8 @@ namespace QuickVR
 
         #region PROTECTED PARAMETERS
 
+        protected static InputActionMap _actionMapDefault = null;
+
         [SerializeField]
         protected List<string> _virtualAxes = new List<string>();
 
@@ -45,6 +47,20 @@ namespace QuickVR
             }
         }
         protected static InputManager m_InputManager = null;
+
+        protected static InputActionAsset _inputActionsDefault
+        {
+            get
+            {
+                if (m_InputActionsDefault == null)
+                {
+                    m_InputActionsDefault = Resources.Load<InputActionAsset>("QuickDefaultInputActions");
+                    m_InputActionsDefault.Enable();
+                }
+                return m_InputActionsDefault;
+            }
+        }
+        protected static InputActionAsset m_InputActionsDefault = null;
 
         #endregion
 
@@ -82,8 +98,7 @@ namespace QuickVR
             CreateDefaultImplementation<InputManagerGamepad>();
             CreateDefaultImplementation<InputManagerVR>();
 
-            InputActionAsset asset = Resources.Load<InputActionAsset>("QuickDefaultInputActions");
-            asset.Enable();
+            _inputActionsDefault.Enable();  //Make sure the InputActionsDefault are enabled
         }
 
         protected virtual void CreateDefaultAxes()
@@ -141,6 +156,11 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
+
+        public static InputActionAsset GetInputActionsDefault()
+        {
+            return _inputActionsDefault;
+        }
 
         public List<BaseInputManager> GetInputManagers()
         {

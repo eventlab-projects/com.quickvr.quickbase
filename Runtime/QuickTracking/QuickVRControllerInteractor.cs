@@ -20,9 +20,10 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected QuickVRInteractionManager _interactionManager = null;
         protected InputActionMap _actionMapDefault = null;
 
+        protected QuickVRInteractionManager _interactionManager = null;
+        
         protected ActionBasedController _interactorDirect = null;
         protected ActionBasedController _interactorTeleport = null;
 
@@ -42,8 +43,7 @@ namespace QuickVR
             _interactionManager = QuickSingletonManager.GetInstance<QuickVRInteractionManager>();
 
             //Load the default ActionMap for this controller
-            InputActionAsset asset = Resources.Load<InputActionAsset>("QuickDefaultInputActions");
-            _actionMapDefault = asset.FindActionMap(_xrNode == XRNode.LeftHand ? ACTION_MAP_CONTROLLER_LEFT : ACTION_MAP_CONTROLLER_RIGHT);
+            _actionMapDefault = InputManager.GetInputActionsDefault().FindActionMap(_xrNode == XRNode.LeftHand ? ACTION_MAP_CONTROLLER_LEFT : ACTION_MAP_CONTROLLER_RIGHT);
 
             CreateInteractorDirect();
             CreateInteractorTeleport();
@@ -53,6 +53,7 @@ namespace QuickVR
         {
             //Create the Interactor Direct
             _interactorDirect = Instantiate(_interactionManager._pfInteractorDirect, transform);
+            _interactorDirect.enableInputTracking = false;
             if (_interactorDirect.selectAction.action.bindings.Count == 0)
             {
                 //There is no user-defined binding for direct interaction. Load the default one. 
@@ -64,9 +65,10 @@ namespace QuickVR
         {
             //Create the Interactor Teleport and ensure that the ray only interacts with Teleport objects. 
             _interactorTeleport = Instantiate(_interactionManager._pfInteractorTeleport, transform);
+            _interactorTeleport.enableInputTracking = false;
             QuickXRRayInteractor rayInteractor = _interactorTeleport.GetComponent<QuickXRRayInteractor>();
             rayInteractor._interactionType = QuickXRRayInteractor.InteractionType.Teleport;
-            if (_interactorTeleport.selectAction.action.bindings.Count == 0)
+            if (!_interactorTeleport.selectAction.action.IsValid())
             {
                 //There is no user-defined binding for teleport. Load the default one. 
                 _interactorTeleport.selectAction = new InputActionProperty(_actionMapDefault.FindAction("Teleport"));

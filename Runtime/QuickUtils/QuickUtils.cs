@@ -619,6 +619,11 @@ namespace QuickVR
             return watch.ElapsedMilliseconds / 1000.0f;
         }
 
+        public static bool IsValid(this UnityEngine.InputSystem.InputAction action)
+        {
+            return action != null && action.bindings.Count > 0;
+        }
+
         #endregion
 
     }

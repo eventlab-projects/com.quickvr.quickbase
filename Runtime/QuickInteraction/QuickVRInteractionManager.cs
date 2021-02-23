@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.InputSystem;
 
 namespace QuickVR
 {
@@ -72,9 +73,17 @@ namespace QuickVR
 
             _continousMoveProvider = gameObject.GetOrCreateComponent<ActionBasedContinuousMoveProvider>();
             _continousMoveProvider.system = _locomotionSystem;
+            if (!_continousMoveProvider.leftHandMoveAction.action.IsValid())
+            {
+                _continousMoveProvider.leftHandMoveAction = new InputActionProperty(InputManager.GetInputActionsDefault().FindAction("GeneralActions/Move"));
+            }
 
             _continousRotationProvider = gameObject.GetOrCreateComponent<ActionBasedContinuousTurnProvider>();
             _continousRotationProvider.system = _locomotionSystem;
+            if (!_continousRotationProvider.rightHandTurnAction.action.IsValid())
+            {
+                _continousRotationProvider.rightHandTurnAction = new InputActionProperty(InputManager.GetInputActionsDefault().FindAction("GeneralActions/RotateCamera"));
+            }
         }
 
         protected virtual void CheckPrefabs()
@@ -93,12 +102,16 @@ namespace QuickVR
         {
             QuickVRManager.OnPostCameraUpdate += UpdateCharacterController;
             QuickVRManager.OnTargetAnimatorSet += UpdateNewAnimatorTarget;
+
+            _continousMoveProvider.beginLocomotion += OnEndMove;
         }
 
         protected virtual void OnDisable()
         {
             QuickVRManager.OnPostCameraUpdate += UpdateCharacterController;
             QuickVRManager.OnTargetAnimatorSet -= UpdateNewAnimatorTarget;
+
+            _continousMoveProvider.beginLocomotion -= OnEndMove;
         }
 
         #endregion
@@ -117,6 +130,8 @@ namespace QuickVR
             _controllerHandRight.transform.parent = animator.GetBoneTransform(HumanBodyBones.RightHand);
             _controllerHandRight.transform.ResetTransformation();
             _controllerHandRight.transform.LookAt(animator.GetBoneTransform(HumanBodyBones.RightMiddleProximal), transform.up);
+
+            _continousMoveProvider.forwardSource = animator.transform;
         }
         
         protected virtual void UpdateCharacterController()
@@ -134,6 +149,16 @@ namespace QuickVR
                 Vector3 v = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm).position - animator.GetBoneTransform(HumanBodyBones.RightUpperArm).position;
                 v = Vector3.ProjectOnPlane(v, animator.transform.up);
                 _characterController.radius = v.magnitude / 2;
+            }
+        }
+
+        protected virtual void OnEndMove(LocomotionSystem lSystem)
+        {
+            Animator animator = _vrManager.GetAnimatorTarget();
+            Camera cam = Camera.main;
+            if (animator && cam)
+            {
+                //animator.transform.forward = Vector3.ProjectOnPlane(cam.transform.forward, animator.transform.up);
             }
         }
 
