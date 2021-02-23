@@ -19,6 +19,8 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
+        protected QuickVRManager _vrManager = null;
+
         protected QuickXRRig _xrRig = null;
         protected QuickVRControllerInteractor _controllerHandLeft = null;
         protected QuickVRControllerInteractor _controllerHandRight = null;
@@ -26,6 +28,8 @@ namespace QuickVR
         protected TeleportationProvider _teleportProvider = null;
         protected ActionBasedContinuousMoveProvider _continousMoveProvider = null;
         protected ActionBasedContinuousTurnProvider _continousRotationProvider = null;
+
+        protected CharacterController _characterController = null;
 
         #endregion
 
@@ -43,6 +47,8 @@ namespace QuickVR
             Reset();
             CheckPrefabs();
 
+            _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
+
             _controllerHandLeft = transform.CreateChild("__ControllerHandLeft__").GetOrCreateComponent<QuickVRControllerInteractor>();
             _controllerHandLeft._xrNode = XRNode.LeftHand;
 
@@ -54,32 +60,21 @@ namespace QuickVR
             {
                 t.teleportationProvider = _teleportProvider;
             }
-
-            _continousMoveProvider = gameObject.GetOrCreateComponent<ActionBasedContinuousMoveProvider>();
-            //_continousMoveProvider.forwardSource = _xrRig.transform;
-            
-            _continousRotationProvider = gameObject.GetOrCreateComponent<ActionBasedContinuousTurnProvider>();
         }
 
         protected virtual void Reset()
         {
-            _xrRig = gameObject.GetOrCreateComponent<QuickXRRig>();
-            _locomotionSystem = gameObject.GetOrCreateComponent<LocomotionSystem>();
+            _xrRig = transform.CreateChild("__XRRig__").GetOrCreateComponent<QuickXRRig>();
+            _locomotionSystem = _xrRig.GetOrCreateComponent<LocomotionSystem>();
+            
             _teleportProvider = gameObject.GetOrCreateComponent<TeleportationProvider>();
-        }
+            _teleportProvider.system = _locomotionSystem;
 
-        protected virtual IEnumerator Start()
-        {
-            //Delay the addition of the CharacterControllerDriver and Character controller until the 
-            //XRRig cameraGameObject is initialized
-            while (!_xrRig.cameraGameObject) yield return null;
+            _continousMoveProvider = gameObject.GetOrCreateComponent<ActionBasedContinuousMoveProvider>();
+            _continousMoveProvider.system = _locomotionSystem;
 
-            Animator animator = QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorTarget();
-            if (animator)
-            {
-                _xrRig.GetOrCreateComponent<CharacterControllerDriver>();
-                animator.transform.GetOrCreateComponent<CharacterController>();
-            }
+            _continousRotationProvider = gameObject.GetOrCreateComponent<ActionBasedContinuousTurnProvider>();
+            _continousRotationProvider.system = _locomotionSystem;
         }
 
         protected virtual void CheckPrefabs()
@@ -96,27 +91,25 @@ namespace QuickVR
 
         protected virtual void OnEnable()
         {
-            QuickVRManager.OnTargetAnimatorSet += OnSetAnimatorTarget;
+            QuickVRManager.OnPostCameraUpdate += UpdateCharacterController;
+            QuickVRManager.OnTargetAnimatorSet += UpdateNewAnimatorTarget;
         }
 
         protected virtual void OnDisable()
         {
-            QuickVRManager.OnTargetAnimatorSet -= OnSetAnimatorTarget;
+            QuickVRManager.OnPostCameraUpdate += UpdateCharacterController;
+            QuickVRManager.OnTargetAnimatorSet -= UpdateNewAnimatorTarget;
         }
 
         #endregion
 
         #region UPDATE
 
-        protected virtual void OnSetAnimatorTarget(Animator animator)
+        protected virtual void UpdateNewAnimatorTarget(Animator animator)
         {
             _xrRig.rig = animator.gameObject;   //Configure the XRRig to act in this animator
-            if (_xrRig.cameraGameObject)
-            {
-                _xrRig.GetOrCreateComponent<CharacterControllerDriver>();
-                animator.transform.GetOrCreateComponent<CharacterController>();
-            }
-            
+            _characterController = animator.transform.GetOrCreateComponent<CharacterController>();
+
             _controllerHandLeft.transform.parent = animator.GetBoneTransform(HumanBodyBones.LeftHand);
             _controllerHandLeft.transform.ResetTransformation();
             _controllerHandLeft.transform.LookAt(animator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal), transform.up);
@@ -124,6 +117,24 @@ namespace QuickVR
             _controllerHandRight.transform.parent = animator.GetBoneTransform(HumanBodyBones.RightHand);
             _controllerHandRight.transform.ResetTransformation();
             _controllerHandRight.transform.LookAt(animator.GetBoneTransform(HumanBodyBones.RightMiddleProximal), transform.up);
+        }
+        
+        protected virtual void UpdateCharacterController()
+        {
+            if (_characterController)
+            {
+                Animator animator = _vrManager.GetAnimatorTarget();
+
+                //Compute the height of the collider
+                float h = animator.GetEyeCenterPosition().y - animator.transform.position.y;
+                _characterController.height = h;
+                _characterController.center = new Vector3(0, h * 0.5f + _characterController.skinWidth, 0);
+
+                //Compute the radius
+                Vector3 v = animator.GetBoneTransform(HumanBodyBones.LeftUpperArm).position - animator.GetBoneTransform(HumanBodyBones.RightUpperArm).position;
+                v = Vector3.ProjectOnPlane(v, animator.transform.up);
+                _characterController.radius = v.magnitude / 2;
+            }
         }
 
         #endregion
