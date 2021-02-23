@@ -12,12 +12,7 @@ namespace QuickVR
         #region PUBLIC ATTRIUBTES
 
         //Enum that defines what the ray is used for
-        public enum InteractionType
-        {
-            Grab,       
-            Teleport,   
-        }
-        public InteractionType _interactionType = InteractionType.Grab;
+        public InteractorType _interactionType = InteractorType.Teleport;
 
         #endregion
 
@@ -32,8 +27,8 @@ namespace QuickVR
             {
                 XRBaseInteractable t = validTargets[i];
                 if (
-                    _interactionType == InteractionType.Grab && !t.GetComponent<XRGrabInteractable>() ||
-                    _interactionType == InteractionType.Teleport && !t.GetComponent<BaseTeleportationInteractable>()
+                    _interactionType == InteractorType.Grab && !t.GetComponent<XRGrabInteractable>() ||
+                    _interactionType == InteractorType.Teleport && !t.GetComponent<BaseTeleportationInteractable>()
                     )
                 {
                     validTargets.RemoveAt(i);

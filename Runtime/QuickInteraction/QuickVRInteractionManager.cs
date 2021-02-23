@@ -16,6 +16,19 @@ namespace QuickVR
         public ActionBasedController _pfInteractorDirect = null;
         public ActionBasedController _pfInteractorTeleport = null;
 
+        public enum ControllerNode
+        {
+            Head,
+            LeftHand,
+            RightHand,
+        }
+
+        [BitMask(typeof(ControllerNode))]
+        public int _maskGrab = 0;
+
+        [BitMask(typeof(ControllerNode))]
+        public int _maskTeleport = 0;
+
         #endregion
 
         #region PROTECTED ATTRIBUTES
@@ -23,8 +36,8 @@ namespace QuickVR
         protected QuickVRManager _vrManager = null;
 
         protected QuickXRRig _xrRig = null;
-        protected QuickVRControllerInteractor _controllerHandLeft = null;
-        protected QuickVRControllerInteractor _controllerHandRight = null;
+        protected QuickVRController _controllerHandLeft = null;
+        protected QuickVRController _controllerHandRight = null;
         protected LocomotionSystem _locomotionSystem = null;
         protected TeleportationProvider _teleportProvider = null;
         protected ActionBasedContinuousMoveProvider _continousMoveProvider = null;
@@ -50,10 +63,10 @@ namespace QuickVR
 
             _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
 
-            _controllerHandLeft = transform.CreateChild("__ControllerHandLeft__").GetOrCreateComponent<QuickVRControllerInteractor>();
+            _controllerHandLeft = transform.CreateChild("__ControllerHandLeft__").GetOrCreateComponent<QuickVRController>();
             _controllerHandLeft._xrNode = XRNode.LeftHand;
 
-            _controllerHandRight = transform.CreateChild("__ControllerHandRight__").GetOrCreateComponent<QuickVRControllerInteractor>();
+            _controllerHandRight = transform.CreateChild("__ControllerHandRight__").GetOrCreateComponent<QuickVRController>();
             _controllerHandRight._xrNode = XRNode.RightHand;
 
             BaseTeleportationInteractable[] teleportationInteractables = FindObjectsOfType<BaseTeleportationInteractable>();
@@ -117,6 +130,17 @@ namespace QuickVR
         #endregion
 
         #region UPDATE
+
+        protected virtual void Update()
+        {
+            //Enable the corresponding interactors for the lefthand
+            _controllerHandLeft.EnableInteractor(InteractorType.Grab, (_maskGrab & (1 << (int)ControllerNode.LeftHand)) != 0);
+            _controllerHandLeft.EnableInteractor(InteractorType.Teleport, (_maskTeleport & (1 << (int)ControllerNode.LeftHand)) != 0);
+
+            //Enable the corresponding interactors for the righthand
+            _controllerHandRight.EnableInteractor(InteractorType.Grab, (_maskGrab & (1 << (int)ControllerNode.RightHand)) != 0);
+            _controllerHandRight.EnableInteractor(InteractorType.Teleport, (_maskTeleport & (1 << (int)ControllerNode.RightHand)) != 0);
+        }
 
         protected virtual void UpdateNewAnimatorTarget(Animator animator)
         {
