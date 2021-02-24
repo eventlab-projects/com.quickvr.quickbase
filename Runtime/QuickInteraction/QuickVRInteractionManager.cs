@@ -175,6 +175,11 @@ namespace QuickVR
             
             //Enable the corresponding interactors for the righthand
             _interactorHandRight._grabMode = _grabModeHandRight;
+
+            if (Input.GetKeyDown(KeyCode.T))
+            {
+                _interactorHandLeft.EnableGrab(!_interactorHandLeft.IsEnabledGrab());
+            }
         }
 
         protected virtual void UpdateNewAnimatorTarget(Animator animator)

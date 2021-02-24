@@ -67,8 +67,8 @@ namespace QuickVR
             _interactorGrabRay = CreateInteractor(_interactionManager._pfInteractorGrabRay);
             _interactorTeleportRay = CreateInteractor(_interactionManager._pfInteractorTeleportRay);
 
-            //EnableGrab(false);
-            //EnableTeleport(false);
+            EnableGrab(false);
+            EnableTeleport(false);
         }
 
         protected virtual void Start()
@@ -140,6 +140,11 @@ namespace QuickVR
             return _interactorTeleportRay;
         }
 
+        public virtual bool IsEnabledGrab()
+        {
+            return GetInteractorGrab().gameObject.activeSelf;
+        }
+
         public virtual void EnableGrab(bool enable)
         {
             if (enable)
@@ -160,6 +165,11 @@ namespace QuickVR
                 _interactorGrabDirect.gameObject.SetActive(false);
                 _interactorGrabRay.gameObject.SetActive(false);
             }
+        }
+
+        public virtual bool IsEnabledTeleport()
+        {
+            return _interactorTeleportRay.gameObject.activeSelf;
         }
 
         public virtual void EnableTeleport(bool enable)
