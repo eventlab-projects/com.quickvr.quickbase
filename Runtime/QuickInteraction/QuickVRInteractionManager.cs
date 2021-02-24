@@ -13,9 +13,9 @@ namespace QuickVR
     {
         #region PUBLIC ATTRIBUTES
 
-        public ActionBasedController _pfInteractorDirect = null;
-        public ActionBasedController _pfInteractorRayGrab = null;
-        public ActionBasedController _pfInteractorRayTeleport = null;
+        public ActionBasedController _pfInteractorGrabDirect = null;
+        public ActionBasedController _pfInteractorGrabRay = null;
+        public ActionBasedController _pfInteractorTeleportRay = null;
 
         public enum ControllerNode
         {
@@ -24,14 +24,8 @@ namespace QuickVR
             RightHand,
         }
 
-        [BitMask(typeof(ControllerNode))]
-        public int _maskInteractorDirect = 0;
-
-        [BitMask(typeof(ControllerNode))]
-        public int _maskInteractorRayGrab = 0;
-
-        [BitMask(typeof(ControllerNode))]
-        public int _maskInteractoRayTeleport = 0;
+        public QuickVRInteractor.GrabMode _grabModeHandLeft = QuickVRInteractor.GrabMode.Direct;
+        public QuickVRInteractor.GrabMode _grabModeHandRight = QuickVRInteractor.GrabMode.Direct;
 
         #endregion
 
@@ -56,9 +50,11 @@ namespace QuickVR
 
         #region CONSTANTS
 
-        protected const string PF_INTERACTOR_DIRECT = "Prefabs/pf_InteractorDirect";
-        protected const string PF_INTERACTOR_RAY_GRAB = "Prefabs/pf_InteractorRayGrab";
-        protected const string PF_INTERACTOR_RAY_TELEPORT = "Prefabs/pf_InteractorRayTeleport";
+        protected const string GRAB_PIVOT_NAME = "GrabPivot";
+
+        protected const string PF_INTERACTOR_GRAB_DIRECT = "Prefabs/pf_InteractorGrabDirect";
+        protected const string PF_INTERACTOR_GRAB_RAY = "Prefabs/pf_InteractorGrabRay";
+        protected const string PF_INTERACTOR_TELEPORT_RAY = "Prefabs/pf_InteractorTeleportRay";
 
         #endregion
 
@@ -87,6 +83,11 @@ namespace QuickVR
             XRGrabInteractable[] grabInteractables = FindObjectsOfType<XRGrabInteractable>();
             foreach (XRGrabInteractable g in grabInteractables)
             {
+                if (!g.attachTransform)
+                {
+                    //Try to find the default attach transform
+                    g.attachTransform = g.transform.Find(GRAB_PIVOT_NAME);
+                }
                 g.selectEntered.AddListener(OnGrabInteractable);
                 g.selectExited.AddListener(OnDropInteractable);
             }
@@ -117,17 +118,17 @@ namespace QuickVR
 
         protected virtual void CheckPrefabs()
         {
-            if (_pfInteractorDirect == null)
+            if (_pfInteractorGrabDirect == null)
             {
-                _pfInteractorDirect = Resources.Load<ActionBasedController>(PF_INTERACTOR_DIRECT);
+                _pfInteractorGrabDirect = Resources.Load<ActionBasedController>(PF_INTERACTOR_GRAB_DIRECT);
             }
-            if (_pfInteractorRayGrab == null)
+            if (_pfInteractorGrabRay == null)
             {
-                _pfInteractorRayGrab = Resources.Load<ActionBasedController>(PF_INTERACTOR_RAY_GRAB);
+                _pfInteractorGrabRay = Resources.Load<ActionBasedController>(PF_INTERACTOR_GRAB_RAY);
             }
-            if (_pfInteractorRayTeleport == null)
+            if (_pfInteractorTeleportRay == null)
             {
-                _pfInteractorRayTeleport = Resources.Load<ActionBasedController>(PF_INTERACTOR_RAY_TELEPORT);
+                _pfInteractorTeleportRay = Resources.Load<ActionBasedController>(PF_INTERACTOR_TELEPORT_RAY);
             }
         }
 
@@ -136,9 +137,6 @@ namespace QuickVR
             QuickVRManager.OnPostCameraUpdate += UpdateCharacterController;
             QuickVRManager.OnTargetAnimatorSet += UpdateNewAnimatorTarget;
             
-            _xrInteractionManager.interactableRegistered += InteractableRegistered;
-            //_xrInteractionManager.interactableUnregistered += InteractableUnregistered;
-
             //_continousMoveProvider.beginLocomotion += OnEndMove;
         }
 
@@ -147,14 +145,7 @@ namespace QuickVR
             QuickVRManager.OnPostCameraUpdate += UpdateCharacterController;
             QuickVRManager.OnTargetAnimatorSet -= UpdateNewAnimatorTarget;
 
-            _xrInteractionManager.interactableRegistered -= InteractableRegistered;
-
             //_continousMoveProvider.beginLocomotion -= OnEndMove;
-        }
-
-        protected virtual void InteractableRegistered(InteractableRegisteredEventArgs args)
-        {
-            Debug.Log(args.interactable.name);
         }
 
         #endregion
@@ -180,14 +171,10 @@ namespace QuickVR
         protected virtual void Update()
         {
             //Enable the corresponding interactors for the lefthand
-            _interactorHandLeft.EnableInteractorDirect((_maskInteractorDirect & (1 << (int)ControllerNode.LeftHand)) != 0);
-            _interactorHandLeft.EnableInteractorRayGrab((_maskInteractorRayGrab & (1 << (int)ControllerNode.LeftHand)) != 0);
-            _interactorHandLeft.EnableInteractorRayTeleport((_maskInteractoRayTeleport & (1 << (int)ControllerNode.LeftHand)) != 0);
-
+            _interactorHandLeft._grabMode = _grabModeHandLeft;
+            
             //Enable the corresponding interactors for the righthand
-            _interactorHandRight.EnableInteractorDirect((_maskInteractorDirect & (1 << (int)ControllerNode.RightHand)) != 0);
-            _interactorHandRight.EnableInteractorRayGrab((_maskInteractorRayGrab & (1 << (int)ControllerNode.RightHand)) != 0);
-            _interactorHandRight.EnableInteractorRayTeleport((_maskInteractoRayTeleport & (1 << (int)ControllerNode.RightHand)) != 0);
+            _interactorHandRight._grabMode = _grabModeHandRight;
         }
 
         protected virtual void UpdateNewAnimatorTarget(Animator animator)
