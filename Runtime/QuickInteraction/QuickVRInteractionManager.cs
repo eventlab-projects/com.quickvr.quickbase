@@ -14,7 +14,8 @@ namespace QuickVR
         #region PUBLIC ATTRIBUTES
 
         public ActionBasedController _pfInteractorDirect = null;
-        public ActionBasedController _pfInteractorTeleport = null;
+        public ActionBasedController _pfInteractorRayGrab = null;
+        public ActionBasedController _pfInteractorRayTeleport = null;
 
         public enum ControllerNode
         {
@@ -24,20 +25,26 @@ namespace QuickVR
         }
 
         [BitMask(typeof(ControllerNode))]
-        public int _maskGrab = 0;
+        public int _maskInteractorDirect = 0;
 
         [BitMask(typeof(ControllerNode))]
-        public int _maskTeleport = 0;
+        public int _maskInteractorRayGrab = 0;
+
+        [BitMask(typeof(ControllerNode))]
+        public int _maskInteractoRayTeleport = 0;
 
         #endregion
 
         #region PROTECTED ATTRIBUTES
 
         protected QuickVRManager _vrManager = null;
+        protected XRInteractionManager _xrInteractionManager = null;
 
         protected QuickXRRig _xrRig = null;
-        protected QuickVRController _controllerHandLeft = null;
-        protected QuickVRController _controllerHandRight = null;
+        
+        protected QuickVRInteractor _interactorHandLeft = null;
+        protected QuickVRInteractor _interactorHandRight = null;
+
         protected LocomotionSystem _locomotionSystem = null;
         protected TeleportationProvider _teleportProvider = null;
         protected ActionBasedContinuousMoveProvider _continousMoveProvider = null;
@@ -50,7 +57,8 @@ namespace QuickVR
         #region CONSTANTS
 
         protected const string PF_INTERACTOR_DIRECT = "Prefabs/pf_InteractorDirect";
-        protected const string PF_INTERACTOR_TELEPORT = "Prefabs/pf_InteractorTeleport";
+        protected const string PF_INTERACTOR_RAY_GRAB = "Prefabs/pf_InteractorRayGrab";
+        protected const string PF_INTERACTOR_RAY_TELEPORT = "Prefabs/pf_InteractorRayTeleport";
 
         #endregion
 
@@ -62,17 +70,25 @@ namespace QuickVR
             CheckPrefabs();
 
             _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
+            _xrInteractionManager = QuickSingletonManager.GetInstance<XRInteractionManager>();
 
-            _controllerHandLeft = transform.CreateChild("__ControllerHandLeft__").GetOrCreateComponent<QuickVRController>();
-            _controllerHandLeft._xrNode = XRNode.LeftHand;
+            _interactorHandLeft = transform.CreateChild("__InteractorHandLeft__").GetOrCreateComponent<QuickVRInteractor>();
+            _interactorHandLeft._xrNode = XRNode.LeftHand;
 
-            _controllerHandRight = transform.CreateChild("__ControllerHandRight__").GetOrCreateComponent<QuickVRController>();
-            _controllerHandRight._xrNode = XRNode.RightHand;
+            _interactorHandRight = transform.CreateChild("__InteractorHandRight__").GetOrCreateComponent<QuickVRInteractor>();
+            _interactorHandRight._xrNode = XRNode.RightHand;
 
             BaseTeleportationInteractable[] teleportationInteractables = FindObjectsOfType<BaseTeleportationInteractable>();
             foreach (BaseTeleportationInteractable t in teleportationInteractables)
             {
                 t.teleportationProvider = _teleportProvider;
+            }
+
+            XRGrabInteractable[] grabInteractables = FindObjectsOfType<XRGrabInteractable>();
+            foreach (XRGrabInteractable g in grabInteractables)
+            {
+                g.selectEntered.AddListener(OnGrabInteractable);
+                g.selectExited.AddListener(OnDropInteractable);
             }
         }
 
@@ -105,9 +121,13 @@ namespace QuickVR
             {
                 _pfInteractorDirect = Resources.Load<ActionBasedController>(PF_INTERACTOR_DIRECT);
             }
-            if (_pfInteractorTeleport == null)
+            if (_pfInteractorRayGrab == null)
             {
-                _pfInteractorTeleport = Resources.Load<ActionBasedController>(PF_INTERACTOR_TELEPORT);
+                _pfInteractorRayGrab = Resources.Load<ActionBasedController>(PF_INTERACTOR_RAY_GRAB);
+            }
+            if (_pfInteractorRayTeleport == null)
+            {
+                _pfInteractorRayTeleport = Resources.Load<ActionBasedController>(PF_INTERACTOR_RAY_TELEPORT);
             }
         }
 
@@ -115,6 +135,9 @@ namespace QuickVR
         {
             QuickVRManager.OnPostCameraUpdate += UpdateCharacterController;
             QuickVRManager.OnTargetAnimatorSet += UpdateNewAnimatorTarget;
+            
+            _xrInteractionManager.interactableRegistered += InteractableRegistered;
+            //_xrInteractionManager.interactableUnregistered += InteractableUnregistered;
 
             //_continousMoveProvider.beginLocomotion += OnEndMove;
         }
@@ -124,36 +147,62 @@ namespace QuickVR
             QuickVRManager.OnPostCameraUpdate += UpdateCharacterController;
             QuickVRManager.OnTargetAnimatorSet -= UpdateNewAnimatorTarget;
 
+            _xrInteractionManager.interactableRegistered -= InteractableRegistered;
+
             //_continousMoveProvider.beginLocomotion -= OnEndMove;
+        }
+
+        protected virtual void InteractableRegistered(InteractableRegisteredEventArgs args)
+        {
+            Debug.Log(args.interactable.name);
         }
 
         #endregion
 
         #region UPDATE
+        
+        protected virtual void OnGrabInteractable(SelectEnterEventArgs args)
+        {
+            foreach (Collider c in args.interactable.colliders)
+            {
+                Physics.IgnoreCollision(_characterController, c, true);
+            }
+        }
+
+        protected virtual void OnDropInteractable(SelectExitEventArgs args)
+        {
+            foreach (Collider c in args.interactable.colliders)
+            {
+                Physics.IgnoreCollision(_characterController, c, false);
+            }
+        }
 
         protected virtual void Update()
         {
             //Enable the corresponding interactors for the lefthand
-            _controllerHandLeft.EnableInteractor(InteractorType.Grab, (_maskGrab & (1 << (int)ControllerNode.LeftHand)) != 0);
-            _controllerHandLeft.EnableInteractor(InteractorType.Teleport, (_maskTeleport & (1 << (int)ControllerNode.LeftHand)) != 0);
+            _interactorHandLeft.EnableInteractorDirect((_maskInteractorDirect & (1 << (int)ControllerNode.LeftHand)) != 0);
+            _interactorHandLeft.EnableInteractorRayGrab((_maskInteractorRayGrab & (1 << (int)ControllerNode.LeftHand)) != 0);
+            _interactorHandLeft.EnableInteractorRayTeleport((_maskInteractoRayTeleport & (1 << (int)ControllerNode.LeftHand)) != 0);
 
             //Enable the corresponding interactors for the righthand
-            _controllerHandRight.EnableInteractor(InteractorType.Grab, (_maskGrab & (1 << (int)ControllerNode.RightHand)) != 0);
-            _controllerHandRight.EnableInteractor(InteractorType.Teleport, (_maskTeleport & (1 << (int)ControllerNode.RightHand)) != 0);
+            _interactorHandRight.EnableInteractorDirect((_maskInteractorDirect & (1 << (int)ControllerNode.RightHand)) != 0);
+            _interactorHandRight.EnableInteractorRayGrab((_maskInteractorRayGrab & (1 << (int)ControllerNode.RightHand)) != 0);
+            _interactorHandRight.EnableInteractorRayTeleport((_maskInteractoRayTeleport & (1 << (int)ControllerNode.RightHand)) != 0);
         }
 
         protected virtual void UpdateNewAnimatorTarget(Animator animator)
         {
             _xrRig.rig = animator.gameObject;   //Configure the XRRig to act in this animator
             _characterController = animator.transform.GetOrCreateComponent<CharacterController>();
+            Debug.Log(_characterController.GetComponent<Collider>().GetType());
 
-            _controllerHandLeft.transform.parent = animator.GetBoneTransform(HumanBodyBones.LeftHand);
-            _controllerHandLeft.transform.ResetTransformation();
-            _controllerHandLeft.transform.LookAt(animator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal), transform.up);
+            _interactorHandLeft.transform.parent = animator.GetBoneTransform(HumanBodyBones.LeftHand);
+            _interactorHandLeft.transform.ResetTransformation();
+            _interactorHandLeft.transform.LookAt(animator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal), transform.up);
 
-            _controllerHandRight.transform.parent = animator.GetBoneTransform(HumanBodyBones.RightHand);
-            _controllerHandRight.transform.ResetTransformation();
-            _controllerHandRight.transform.LookAt(animator.GetBoneTransform(HumanBodyBones.RightMiddleProximal), transform.up);
+            _interactorHandRight.transform.parent = animator.GetBoneTransform(HumanBodyBones.RightHand);
+            _interactorHandRight.transform.ResetTransformation();
+            _interactorHandRight.transform.LookAt(animator.GetBoneTransform(HumanBodyBones.RightMiddleProximal), transform.up);
 
             _continousMoveProvider.forwardSource = animator.transform;
         }

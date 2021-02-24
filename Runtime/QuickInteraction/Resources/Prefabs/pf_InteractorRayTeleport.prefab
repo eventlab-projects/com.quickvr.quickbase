@@ -14,7 +14,7 @@ GameObject:
   - component: {fileID: 9126249880283994263}
   - component: {fileID: 5437032069593228087}
   m_Layer: 0
-  m_Name: pf_InteractorTeleport
+  m_Name: pf_InteractorRayTeleport
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

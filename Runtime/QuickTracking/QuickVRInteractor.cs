@@ -15,7 +15,7 @@ namespace QuickVR
         Teleport,
     }
 
-    public class QuickVRController : MonoBehaviour
+    public class QuickVRInteractor : MonoBehaviour
     {
 
         #region PUBLIC ATTRIBUTES
@@ -29,8 +29,10 @@ namespace QuickVR
         protected InputActionMap _actionMapDefault = null;
 
         protected QuickVRInteractionManager _interactionManager = null;
-        
-        protected Dictionary<InteractorType, ActionBasedController> _interactors = new Dictionary<InteractorType, ActionBasedController>();
+
+        protected ActionBasedController _interactorDirect = null;
+        protected ActionBasedController _interactorRayGrab = null;
+        protected ActionBasedController _interactorRayTeleport = null;
 
         #endregion
 
@@ -50,12 +52,18 @@ namespace QuickVR
             //Load the default ActionMap for this controller
             _actionMapDefault = InputManager.GetInputActionsDefault().FindActionMap(_xrNode == XRNode.LeftHand ? ACTION_MAP_CONTROLLER_LEFT : ACTION_MAP_CONTROLLER_RIGHT);
 
-            _interactors[InteractorType.Grab] = CreateInteractor(_interactionManager._pfInteractorDirect, "Grab");
+            //Create the direct interactor
+            _interactorDirect = CreateInteractor(_interactionManager._pfInteractorDirect, "Grab");
 
-            ActionBasedController interactorTeleport = CreateInteractor(_interactionManager._pfInteractorTeleport, "Teleport");
-            interactorTeleport.GetComponent<QuickXRRayInteractor>()._interactionType = InteractorType.Teleport;
-            interactorTeleport.hapticDeviceAction = new InputActionProperty(_actionMapDefault.FindAction("Haptic Device"));
-            _interactors[InteractorType.Teleport] = interactorTeleport;
+            //Create the grab ray
+            _interactorRayGrab = CreateInteractor(_interactionManager._pfInteractorRayGrab, "Grab");
+            _interactorRayGrab.GetComponent<QuickXRRayInteractor>()._interactionType = InteractorType.Grab;
+            _interactorRayGrab.hapticDeviceAction = new InputActionProperty(_actionMapDefault.FindAction("Haptic Device"));
+
+            //Create the teleport ray
+            _interactorRayTeleport = CreateInteractor(_interactionManager._pfInteractorRayTeleport, "Teleport");
+            _interactorRayTeleport.GetComponent<QuickXRRayInteractor>()._interactionType = InteractorType.Teleport;
+            _interactorRayTeleport.hapticDeviceAction = new InputActionProperty(_actionMapDefault.FindAction("Haptic Device"));
         }
 
         protected virtual ActionBasedController CreateInteractor(ActionBasedController pfInteractor, string defaultActionName)
@@ -77,14 +85,34 @@ namespace QuickVR
 
         #region GET AND SET
 
-        public virtual ActionBasedController GetInteractor(InteractorType type)
+        public virtual ActionBasedController GetInteractorDirect()
         {
-            return _interactors[type];
+            return _interactorDirect;
         }
 
-        public virtual void EnableInteractor(InteractorType t, bool enable)
+        public virtual ActionBasedController GetInteractorRayGrab()
         {
-            GetInteractor(t).gameObject.SetActive(enable);
+            return _interactorRayGrab;
+        }
+
+        public virtual ActionBasedController GetInteractorRayTeleport()
+        {
+            return _interactorRayTeleport;
+        }
+
+        public virtual void EnableInteractorDirect(bool enable)
+        {
+            _interactorDirect.gameObject.SetActive(enable);
+        }
+
+        public virtual void EnableInteractorRayGrab(bool enable)
+        {
+            _interactorRayGrab.gameObject.SetActive(enable);
+        }
+
+        public virtual void EnableInteractorRayTeleport(bool enable)
+        {
+            _interactorRayTeleport.gameObject.SetActive(enable);
         }
 
         #endregion
