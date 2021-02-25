@@ -13,6 +13,7 @@ namespace QuickVR
     {
         Grab,
         Teleport,
+        UI,
     }
 
     public class QuickVRInteractor : MonoBehaviour
@@ -130,7 +131,9 @@ namespace QuickVR
             //Configure the UI ray
             CheckInputAction(_interactorUIRay, ActionType.UI, "Use");
 
-            _interactorUIRay.GetComponent<XRRayInteractor>().enableUIInteraction = true;  
+            QuickXRRayInteractor ray = _interactorUIRay.GetComponent<QuickXRRayInteractor>();
+            ray._interactionType = InteractorType.UI;
+            ray.enableUIInteraction = true;
         }
 
         protected virtual void CheckInputAction(ActionBasedController interactor, ActionType actionType, string defaultActionName)

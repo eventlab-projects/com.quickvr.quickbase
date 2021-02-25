@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.XR;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR.Interaction.Toolkit.UI;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 
 namespace QuickVR
 {
@@ -66,6 +68,7 @@ namespace QuickVR
         {
             Reset();
             CheckPrefabs();
+            CheckEventSystem();
 
             _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
             _xrInteractionManager = QuickSingletonManager.GetInstance<XRInteractionManager>();
@@ -136,6 +139,21 @@ namespace QuickVR
             {
                 _pfInteractorUIRay = Resources.Load<ActionBasedController>(PF_INTERACTOR_UI_RAY);
             }
+        }
+
+        protected virtual void CheckEventSystem()
+        {
+            //Look if there is an EventSystem already created, and if this is the case, destroy it and 
+            //create our own one to be able to interact with the UI in VR. 
+            EventSystem eSystem = FindObjectOfType<EventSystem>();
+            if (eSystem)
+            {
+                Destroy(eSystem.gameObject);
+            }
+
+            GameObject go = new GameObject("__EventSystem__");
+            go.AddComponent<EventSystem>();
+            go.AddComponent<XRUIInputModule>();
         }
 
         protected virtual void OnEnable()

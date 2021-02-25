@@ -73,6 +73,7 @@ namespace QuickVR
             gameObject.layer = LayerMask.NameToLayer("UI");
             _canvas = CreateCanvas();
             _instructions = CreateInstructionsText();
+            gameObject.GetOrCreateComponent<QuickCanvasEventCameraDefiner>();
         }
 
         protected virtual Canvas CreateCanvas()

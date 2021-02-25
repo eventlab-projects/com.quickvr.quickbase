@@ -28,7 +28,8 @@ namespace QuickVR
                 XRBaseInteractable t = validTargets[i];
                 if (
                     _interactionType == InteractorType.Grab && !t.GetComponent<XRGrabInteractable>() ||
-                    _interactionType == InteractorType.Teleport && !t.GetComponent<BaseTeleportationInteractable>()
+                    _interactionType == InteractorType.Teleport && !t.GetComponent<BaseTeleportationInteractable>() ||
+                    _interactionType == InteractorType.UI && t.gameObject.layer != LayerMask.NameToLayer("UI")
                     )
                 {
                     validTargets.RemoveAt(i);
