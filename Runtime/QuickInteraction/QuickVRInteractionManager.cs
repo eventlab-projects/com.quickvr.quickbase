@@ -16,6 +16,7 @@ namespace QuickVR
         public ActionBasedController _pfInteractorGrabDirect = null;
         public ActionBasedController _pfInteractorGrabRay = null;
         public ActionBasedController _pfInteractorTeleportRay = null;
+        public ActionBasedController _pfInteractorUIRay = null;
 
         public enum ControllerNode
         {
@@ -55,6 +56,7 @@ namespace QuickVR
         protected const string PF_INTERACTOR_GRAB_DIRECT = "Prefabs/pf_InteractorGrabDirect";
         protected const string PF_INTERACTOR_GRAB_RAY = "Prefabs/pf_InteractorGrabRay";
         protected const string PF_INTERACTOR_TELEPORT_RAY = "Prefabs/pf_InteractorTeleportRay";
+        protected const string PF_INTERACTOR_UI_RAY = "Prefabs/pf_InteractorUIRay";
 
         #endregion
 
@@ -130,6 +132,10 @@ namespace QuickVR
             {
                 _pfInteractorTeleportRay = Resources.Load<ActionBasedController>(PF_INTERACTOR_TELEPORT_RAY);
             }
+            if (_pfInteractorUIRay == null)
+            {
+                _pfInteractorUIRay = Resources.Load<ActionBasedController>(PF_INTERACTOR_UI_RAY);
+            }
         }
 
         protected virtual void OnEnable()
@@ -176,9 +182,30 @@ namespace QuickVR
             //Enable the corresponding interactors for the righthand
             _interactorHandRight._grabMode = _grabModeHandRight;
 
-            if (Input.GetKeyDown(KeyCode.T))
+            if (Input.GetKeyDown(KeyCode.Alpha1))
             {
-                _interactorHandLeft.EnableGrab(!_interactorHandLeft.IsEnabledGrab());
+                _interactorHandLeft.EnableInteractorGrab(!_interactorHandLeft.IsEnabledInteractorGrab());
+            }
+            if (Input.GetKeyDown(KeyCode.Alpha2))
+            {
+                _interactorHandLeft.EnableInteractorTeleport(!_interactorHandLeft.IsEnabledInteractorTeleport());
+            }
+            if (Input.GetKeyDown(KeyCode.Alpha3))
+            {
+                _interactorHandLeft.EnableInteractorUI(!_interactorHandLeft.IsEnabledInteractorUI());
+            }
+
+            if (Input.GetKeyDown(KeyCode.Alpha4))
+            {
+                _interactorHandRight.EnableInteractorGrab(!_interactorHandRight.IsEnabledInteractorGrab());
+            }
+            if (Input.GetKeyDown(KeyCode.Alpha5))
+            {
+                _interactorHandRight.EnableInteractorTeleport(!_interactorHandRight.IsEnabledInteractorTeleport());
+            }
+            if (Input.GetKeyDown(KeyCode.Alpha6))
+            {
+                _interactorHandRight.EnableInteractorUI(!_interactorHandRight.IsEnabledInteractorUI());
             }
         }
 
