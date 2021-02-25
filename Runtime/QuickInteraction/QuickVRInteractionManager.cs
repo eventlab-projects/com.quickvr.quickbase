@@ -48,6 +48,7 @@ namespace QuickVR
         protected ActionBasedContinuousTurnProvider _continousRotationProvider = null;
 
         protected CharacterController _characterController = null;
+        protected List<XRGrabInteractable> _grabInteractables = new List<XRGrabInteractable>();
 
         #endregion
 
@@ -85,16 +86,14 @@ namespace QuickVR
                 t.teleportationProvider = _teleportProvider;
             }
 
-            XRGrabInteractable[] grabInteractables = FindObjectsOfType<XRGrabInteractable>();
-            foreach (XRGrabInteractable g in grabInteractables)
+            _grabInteractables = new List<XRGrabInteractable>(FindObjectsOfType<XRGrabInteractable>());
+            foreach (XRGrabInteractable g in _grabInteractables)
             {
                 if (!g.attachTransform)
                 {
                     //Try to find the default attach transform
                     g.attachTransform = g.transform.Find(GRAB_PIVOT_NAME);
                 }
-                g.selectEntered.AddListener(OnGrabInteractable);
-                g.selectExited.AddListener(OnDropInteractable);
             }
         }
 
@@ -231,7 +230,13 @@ namespace QuickVR
         {
             _xrRig.rig = animator.gameObject;   //Configure the XRRig to act in this animator
             _characterController = animator.transform.GetOrCreateComponent<CharacterController>();
-            Debug.Log(_characterController.GetComponent<Collider>().GetType());
+            foreach (XRGrabInteractable g in _grabInteractables)
+            {
+                foreach (Collider c in g.GetComponentsInChildren<Collider>(true))
+                {
+                    Physics.IgnoreCollision(_characterController, c, true);
+                }
+            }
 
             _interactorHandLeft.transform.parent = animator.GetBoneTransform(HumanBodyBones.LeftHand);
             _interactorHandLeft.transform.ResetTransformation();
