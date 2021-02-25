@@ -27,8 +27,13 @@ namespace QuickVR
             {
                 XRBaseInteractable t = validTargets[i];
                 if (
-                    _interactionType == InteractorType.Grab && !t.GetComponent<XRGrabInteractable>() ||
+                    //The Grab ray only interacts with XRGrabInteractables and XRSimpleInteractables
+                    _interactionType == InteractorType.Grab && (!t.GetComponent<XRGrabInteractable>() && !t.GetComponent<XRSimpleInteractable>()) ||
+
+                    //The Teleport ray only interacts with BaseTeleportationInteractables.
                     _interactionType == InteractorType.Teleport && !t.GetComponent<BaseTeleportationInteractable>() ||
+
+                    //The UI ray only interacts with objects in the UILayer. 
                     _interactionType == InteractorType.UI && t.gameObject.layer != LayerMask.NameToLayer("UI")
                     )
                 {
