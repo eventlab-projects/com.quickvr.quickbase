@@ -337,20 +337,20 @@ namespace QuickVR
 
         #region UPDATE
 
-        public virtual void UpdateState(XRNodeState s)
+        public virtual void UpdateState(InputDevice device)
         {
             Vector3 pos;
             Quaternion rot;
-            if (s.TryGetPosition(out pos))
+            if (device.TryGetFeatureValue(CommonUsages.devicePosition, out pos))
             {
                 transform.localPosition = pos;
             }
-            if (s.TryGetRotation(out rot))
+            if (device.TryGetFeatureValue(CommonUsages.deviceRotation, out rot))
             {
                 transform.localRotation = rot;
             }
 
-            _isTracked = s.tracked;
+            _isTracked = device.isValid; //s.tracked;
         }
 
         #endregion

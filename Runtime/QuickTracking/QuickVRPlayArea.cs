@@ -11,8 +11,6 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected static Dictionary<XRNode, HumanBodyBones> _essentialNodes = new Dictionary<XRNode, HumanBodyBones>();
-        protected Dictionary<ulong, QuickVRNode> _vrNodes = new Dictionary<ulong, QuickVRNode>();
         protected Dictionary<QuickHumanBodyBones, QuickVRNode> _vrNodeRoles = new Dictionary<QuickHumanBodyBones, QuickVRNode>();
         protected List<XRNodeState> _vrNodeStates = new List<XRNodeState>();
 
@@ -25,16 +23,6 @@ namespace QuickVR
         #endregion
 
         #region CREATION AND DESTRUCTION
-
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-        protected static void Init()
-        {
-            XRNode[] eNodes = { XRNode.Head, XRNode.LeftHand, XRNode.RightHand, XRNode.LeftEye, XRNode.RightEye };
-            foreach (XRNode n in eNodes)
-            {
-                _essentialNodes[n] = QuickUtils.ParseEnum<HumanBodyBones>(n.ToString());
-            }
-        }
 
         protected virtual void Awake()
         {
@@ -90,11 +78,6 @@ namespace QuickVR
             return nodeHips.IsTracked() ? nodeHips : nodeHead;
         }
 
-        protected virtual QuickVRNode GetVRNode(ulong id)
-        {
-            return _vrNodes.ContainsKey(id) ? _vrNodes[id] : null;
-        }
-
         public virtual QuickVRNode GetVRNode(QuickHumanBodyBones role)
         {
             return _vrNodeRoles[role];
@@ -145,7 +128,6 @@ namespace QuickVR
 
         public virtual void Calibrate()
         {
-            _vrNodes.Clear();
             List<XRNodeState> bodyTrackers = GetBodyTrackers();
             
             //POSSIBLE TRACKER CONFIGURATIONS
@@ -172,55 +154,56 @@ namespace QuickVR
 
             ////InputDevice dRightHand = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
             ////Debug.Log("dRightHand = " + dRightHand.name);
+            ///
 
-            if (numTrackers == 1 || numTrackers == 3 || numTrackers == 4 || numTrackers == 6 || numTrackers == 10)
-            {
-                //The head will always be the upper body tracker
-                InitVRNode(HumanBodyBones.Head, bodyTrackers[0]);
+            //if (numTrackers == 1 || numTrackers == 3 || numTrackers == 4 || numTrackers == 6 || numTrackers == 10)
+            //{
+            //    //The head will always be the upper body tracker
+            //    //InitVRNode(HumanBodyBones.Head, bodyTrackers[0]);
 
-                if (numTrackers == 3)
-                {
-                    //Head + Hands
-                    InitVRNode(HumanBodyBones.LeftHand, bodyTrackers[1]);
-                    InitVRNode(HumanBodyBones.RightHand, bodyTrackers[2]);
-                }
-                else if (numTrackers == 4)
-                {
-                    //Head + Hands + Hips
-                    //1) Remove the head node from the list
-                    bodyTrackers.RemoveAt(0);
+            //    if (numTrackers == 3)
+            //    {
+            //        //Head + Hands
+            //        //InitVRNode(HumanBodyBones.LeftHand, bodyTrackers[1]);
+            //        //InitVRNode(HumanBodyBones.RightHand, bodyTrackers[2]);
+            //    }
+            //    else if (numTrackers == 4)
+            //    {
+            //        //Head + Hands + Hips
+            //        //1) Remove the head node from the list
+            //        bodyTrackers.RemoveAt(0);
 
-                    //2) The hips is the node that is "in the middle", i.e., the hands are in opposite sides of the hips node. 
-                    InitHipsAndHands(bodyTrackers);
-                }
-                else if (numTrackers == 6)
-                {
-                    //Head + Hands + Hips + Feet
-                    //1) The Feet are the trackers with the lower y
-                    InitVRNode(HumanBodyBones.LeftFoot, bodyTrackers[5]);
-                    InitVRNode(HumanBodyBones.RightFoot, bodyTrackers[4]);
+            //        //2) The hips is the node that is "in the middle", i.e., the hands are in opposite sides of the hips node. 
+            //        InitHipsAndHands(bodyTrackers);
+            //    }
+            //    else if (numTrackers == 6)
+            //    {
+            //        //Head + Hands + Hips + Feet
+            //        //1) The Feet are the trackers with the lower y
+            //        InitVRNode(HumanBodyBones.LeftFoot, bodyTrackers[5]);
+            //        InitVRNode(HumanBodyBones.RightFoot, bodyTrackers[4]);
 
-                    //2) Remove the unnecessary nodes and proceed as in the previous case
-                    bodyTrackers.RemoveAt(5);
-                    bodyTrackers.RemoveAt(4);
-                    bodyTrackers.RemoveAt(0);
+            //        //2) Remove the unnecessary nodes and proceed as in the previous case
+            //        bodyTrackers.RemoveAt(5);
+            //        bodyTrackers.RemoveAt(4);
+            //        bodyTrackers.RemoveAt(0);
 
-                    InitHipsAndHands(bodyTrackers);
-                }
+            //        InitHipsAndHands(bodyTrackers);
+            //    }
 
-                UpdateVRNodes();
+            //    UpdateVRNodes();
 
-                IsVRNodesSwaped(HumanBodyBones.LeftFoot, HumanBodyBones.RightFoot);
-                _isHandsSwaped = IsVRNodesSwaped(HumanBodyBones.LeftHand, HumanBodyBones.RightHand);
+            //    IsVRNodesSwaped(HumanBodyBones.LeftFoot, HumanBodyBones.RightFoot);
+            //}
+            //else
+            //{
+            //    Debug.LogWarning("BAD NUMBER OF BODY TRACKERS!!!");
+            //}
 
-                Debug.Log("handsSwaped = " + _isHandsSwaped);
-
-                UpdateVRNodes();
-            }
-            else
-            {
-                Debug.LogWarning("BAD NUMBER OF BODY TRACKERS!!!");
-            }
+            _isHandsSwaped = false;
+            UpdateVRNodes();
+            _isHandsSwaped = IsVRNodesSwaped(HumanBodyBones.LeftHand, HumanBodyBones.RightHand);
+            Debug.Log("handsSwaped = " + _isHandsSwaped);
 
             foreach (HumanBodyBones t in QuickVRNode.GetTypeList())
             {
@@ -274,9 +257,12 @@ namespace QuickVR
 
         protected virtual void InitVRNode(HumanBodyBones nodeType, XRNodeState initialState)
         {
-            QuickVRNode node = GetVRNode(nodeType);
-            _vrNodes[initialState.uniqueID] = node;
-            node.UpdateState(initialState);
+            
+        }
+
+        public virtual bool IsHandsSwapped()
+        {
+            return _isHandsSwaped;
         }
 
         public virtual bool IsVRNodesSwaped(HumanBodyBones typeNodeLeft, HumanBodyBones typeNodeRight, bool doSwaping = true)
@@ -286,17 +272,22 @@ namespace QuickVR
 
         public virtual bool IsVRNodesSwaped(QuickVRNode nodeLeft, QuickVRNode nodeRight, bool doSwaping = true)
         {
+            bool result = false;
+
             QuickVRNode hmdNode = GetVRNode(HumanBodyBones.Head);
-            float dLeft = nodeLeft.IsTracked() ? Vector3.Dot(nodeLeft.transform.position - hmdNode.transform.position, hmdNode.transform.right) : 0.0f;
-            float dRight = nodeRight.IsTracked() ? Vector3.Dot(nodeRight.transform.position - hmdNode.transform.position, hmdNode.transform.right) : 0.0f;
-
-            bool swaped = dLeft > dRight;
-            if (swaped && doSwaping)
+            if (hmdNode.IsTracked() && nodeLeft.IsTracked() && nodeRight.IsTracked())
             {
-                SwapQuickVRNode(nodeLeft, nodeRight);
-            }
+                float dLeft = Vector3.Dot(nodeLeft.transform.position - hmdNode.transform.position, hmdNode.transform.right);
+                float dRight = Vector3.Dot(nodeRight.transform.position - hmdNode.transform.position, hmdNode.transform.right);
 
-            return swaped;
+                result = dLeft > dRight;
+                //if (swaped && doSwaping)
+                //{
+                //    SwapQuickVRNode(nodeLeft, nodeRight);
+                //}
+            }
+            
+            return result;
         }
 
         protected virtual void SwapQuickVRNode(HumanBodyBones typeA, HumanBodyBones typeB)
@@ -306,19 +297,19 @@ namespace QuickVR
 
         protected virtual void SwapQuickVRNode(QuickVRNode vrNodeA, QuickVRNode vrNodeB)
         {
-            ulong idNodeA = 0;
-            ulong idNodeB = 0;
-            foreach (var pair in _vrNodes)
-            {
-                if (pair.Value == vrNodeA) idNodeA = pair.Key;
-                else if (pair.Value == vrNodeB) idNodeB = pair.Key;
-            }
+            //ulong idNodeA = 0;
+            //ulong idNodeB = 0;
+            //foreach (var pair in _vrNodes)
+            //{
+            //    if (pair.Value == vrNodeA) idNodeA = pair.Key;
+            //    else if (pair.Value == vrNodeB) idNodeB = pair.Key;
+            //}
 
-            if (idNodeA != 0 && idNodeB != 0)
-            {
-                _vrNodes[idNodeA] = vrNodeB;
-                _vrNodes[idNodeB] = vrNodeA;
-            }
+            //if (idNodeA != 0 && idNodeB != 0)
+            //{
+            //    _vrNodes[idNodeA] = vrNodeB;
+            //    _vrNodes[idNodeB] = vrNodeA;
+            //}
         }
 
         #endregion
@@ -327,19 +318,28 @@ namespace QuickVR
 
         public virtual void UpdateVRNodes()
         {
-            InputTracking.GetNodeStates(_vrNodeStates);
-            foreach (XRNodeState s in _vrNodeStates)
-            {
-                if (_essentialNodes.ContainsKey(s.nodeType))
-                {
-                    _vrNodes[s.uniqueID] = GetVRNode(_essentialNodes[s.nodeType]);
-                }
-                QuickVRNode n = GetVRNode(s.uniqueID);
-                if (n)
-                {
-                    n.UpdateState(s);
-                }
-            }
+            //List<InputDevice> inputDevices = new List<InputDevice>();
+            GetVRNode(HumanBodyBones.Head).UpdateState(InputDevices.GetDeviceAtXRNode(XRNode.Head));
+            GetVRNode(HumanBodyBones.LeftHand).UpdateState(InputDevices.GetDeviceAtXRNode(_isHandsSwaped? XRNode.RightHand : XRNode.LeftHand));
+            GetVRNode(HumanBodyBones.RightHand).UpdateState(InputDevices.GetDeviceAtXRNode(_isHandsSwaped? XRNode.LeftHand : XRNode.RightHand));
+            //foreach (InputDevice d in inputDevices)
+            //{
+            //    d.characteristics
+            //}
+
+            //InputTracking.GetNodeStates(_vrNodeStates);
+            //foreach (XRNodeState s in _vrNodeStates)
+            //{
+            //    if (_essentialNodes.ContainsKey(s.nodeType))
+            //    {
+            //        _vrNodes[s.uniqueID] = GetVRNode(_essentialNodes[s.nodeType]);
+            //    }
+            //    QuickVRNode n = GetVRNode(s.uniqueID);
+            //    if (n)
+            //    {
+            //        n.UpdateState(s);
+            //    }
+            //}
             
         }
 

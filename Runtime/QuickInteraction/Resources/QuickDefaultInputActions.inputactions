@@ -48,7 +48,7 @@
             ]
         },
         {
-            "name": "LeftControllerActions",
+            "name": "LeftController",
             "id": "5fe596f9-1b7b-49b7-80a7-3b5195caf74d",
             "actions": [
                 {
@@ -132,7 +132,7 @@
             ]
         },
         {
-            "name": "RightControllerActions",
+            "name": "RightController",
             "id": "7960f8ef-2bf3-4281-aecc-4c03809d6c8c",
             "actions": [
                 {
@@ -216,7 +216,7 @@
             ]
         },
         {
-            "name": "GeneralActions",
+            "name": "General",
             "id": "870379b0-345a-40b8-8111-5dd1793a2d12",
             "actions": [
                 {

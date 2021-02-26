@@ -55,8 +55,8 @@ namespace QuickVR
 
         #region CONSTANTS
 
-        protected const string ACTION_MAP_CONTROLLER_LEFT = "LeftControllerActions";
-        protected const string ACTION_MAP_CONTROLLER_RIGHT = "RightControllerActions";
+        protected const string ACTION_MAP_CONTROLLER_LEFT = "LeftController";
+        protected const string ACTION_MAP_CONTROLLER_RIGHT = "RightController";
 
         #endregion
 

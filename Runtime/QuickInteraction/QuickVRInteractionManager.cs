@@ -109,14 +109,14 @@ namespace QuickVR
             _continousMoveProvider.system = _locomotionSystem;
             if (!_continousMoveProvider.leftHandMoveAction.action.IsValid())
             {
-                _continousMoveProvider.leftHandMoveAction = new InputActionProperty(InputManager.GetInputActionsDefault().FindAction("GeneralActions/Move"));
+                _continousMoveProvider.leftHandMoveAction = new InputActionProperty(InputManager.GetInputActionsDefault().FindAction("General/Move"));
             }
 
             _continousRotationProvider = gameObject.GetOrCreateComponent<ActionBasedContinuousTurnProvider>();
             _continousRotationProvider.system = _locomotionSystem;
             if (!_continousRotationProvider.rightHandTurnAction.action.IsValid())
             {
-                _continousRotationProvider.rightHandTurnAction = new InputActionProperty(InputManager.GetInputActionsDefault().FindAction("GeneralActions/RotateCamera"));
+                _continousRotationProvider.rightHandTurnAction = new InputActionProperty(InputManager.GetInputActionsDefault().FindAction("General/RotateCamera"));
             }
         }
 
