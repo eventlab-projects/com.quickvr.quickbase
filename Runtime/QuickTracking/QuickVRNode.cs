@@ -98,6 +98,8 @@ namespace QuickVR
         public UpdateMode _updateModePos = UpdateMode.FromUser;
         public UpdateMode _updateModeRot = UpdateMode.FromUser;
 
+        public InputDevice _inputDevice { get; set; }
+
         #endregion
 
         #region PROTECTED PARAMETERS
@@ -105,8 +107,6 @@ namespace QuickVR
         protected QuickTrackedObject _trackedObject = null;
 
         protected static List<QuickHumanBodyBones> _typeList = new List<QuickHumanBodyBones>();
-
-        protected static List<XRNodeState> _vrNodesStates = new List<XRNodeState>();
 
         protected Transform _model = null;
 
@@ -337,20 +337,42 @@ namespace QuickVR
 
         #region UPDATE
 
-        public virtual void UpdateState(InputDevice device)
+        public virtual void UpdateState()
         {
-            Vector3 pos;
-            Quaternion rot;
-            if (device.TryGetFeatureValue(CommonUsages.devicePosition, out pos))
+            if (!_inputDevice.isValid)
             {
-                transform.localPosition = pos;
-            }
-            if (device.TryGetFeatureValue(CommonUsages.deviceRotation, out rot))
-            {
-                transform.localRotation = rot;
+                //try to find a valid inputdevice for this role. 
+                if (_role == QuickHumanBodyBones.Head)
+                {
+                    _inputDevice = InputDevices.GetDeviceAtXRNode(XRNode.Head);
+                }
+                else if (_role == QuickHumanBodyBones.LeftHand)
+                {
+                    _inputDevice = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
+                }
+                else if (_role == QuickHumanBodyBones.RightHand)
+                {
+                    _inputDevice = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+                }
             }
 
-            _isTracked = device.isValid; //s.tracked;
+            if (_inputDevice.isValid)
+            {
+                if (_inputDevice.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 pos))
+                {
+                    transform.localPosition = pos;
+                }
+                if (_inputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion rot))
+                {
+                    transform.localRotation = rot;
+                }
+
+                _isTracked = true;
+            }
+            else
+            {
+                _isTracked = false;
+            }
         }
 
         #endregion
