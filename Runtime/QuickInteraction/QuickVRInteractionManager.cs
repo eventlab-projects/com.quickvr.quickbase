@@ -30,6 +30,13 @@ namespace QuickVR
         public QuickVRInteractor.GrabMode _grabModeHandLeft = QuickVRInteractor.GrabMode.Direct;
         public QuickVRInteractor.GrabMode _grabModeHandRight = QuickVRInteractor.GrabMode.Direct;
 
+        public enum DefaultLocomotionProvider
+        {
+            Teleport, 
+            ContinuousMove, 
+            ContinuousTurn,
+        }
+
         #endregion
 
         #region PROTECTED ATTRIBUTES
@@ -79,6 +86,12 @@ namespace QuickVR
 
             _interactorHandRight = transform.CreateChild("__InteractorHandRight__").GetOrCreateComponent<QuickVRInteractor>();
             _interactorHandRight._xrNode = XRNode.RightHand;
+
+            //By default, disable all the locomotion providers
+            foreach (DefaultLocomotionProvider lProvider in QuickUtils.GetEnumValues<DefaultLocomotionProvider>())
+            {
+                EnableLocomotionSystem(lProvider, false);
+            }
 
             BaseTeleportationInteractable[] teleportationInteractables = FindObjectsOfType<BaseTeleportationInteractable>();
             foreach (BaseTeleportationInteractable t in teleportationInteractables)
@@ -173,8 +186,28 @@ namespace QuickVR
 
         #endregion
 
+        #region GET AND SET
+
+        public virtual void EnableLocomotionSystem(DefaultLocomotionProvider lProvider, bool enable)
+        {
+            if (lProvider == DefaultLocomotionProvider.Teleport)
+            {
+                _teleportProvider.enabled = enable;
+            }
+            else if (lProvider == DefaultLocomotionProvider.ContinuousMove)
+            {
+                _continousMoveProvider.enabled = enable;
+            }
+            else if (lProvider == DefaultLocomotionProvider.ContinuousTurn)
+            {
+                _continousRotationProvider.enabled = enable;
+            }
+        }
+
+        #endregion
+
         #region UPDATE
-        
+
         protected virtual void OnGrabInteractable(SelectEnterEventArgs args)
         {
             foreach (Collider c in args.interactable.colliders)
