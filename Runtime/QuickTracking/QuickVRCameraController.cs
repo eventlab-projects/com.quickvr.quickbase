@@ -87,20 +87,12 @@ namespace QuickVR
 
         protected virtual void OnEnable()
         {
-            QuickVRManager.OnSourceAnimatorSet += ActionSourceAnimatorSet;
             QuickVRManager.OnPreCopyPose += UpdateCameraRotation;
         }
 
         protected virtual void OnDisable()
         {
-            QuickVRManager.OnSourceAnimatorSet -= ActionSourceAnimatorSet;
             QuickVRManager.OnPreCopyPose -= UpdateCameraRotation;
-        }
-
-        protected virtual void ActionSourceAnimatorSet(Animator animator)
-        {
-            _animatorSource = animator;
-            _initialLocalRotationHead = _head.localRotation;
         }
 
         #endregion
@@ -116,7 +108,7 @@ namespace QuickVR
                 cam.cullingMask = _visibleLayers.value;
             }
             
-            if (animator && _animatorSource)
+            if (animator)
             {
                 //Apply the correct rotation to the cameracontrollerroot:
                 Vector3 up = animator.transform.up;
@@ -134,16 +126,13 @@ namespace QuickVR
 
         protected virtual void UpdateCameraRotation()
         {
-            if (_animatorSource) 
+            if (QuickVRManager.IsXREnabled())
             {
-                if (QuickVRManager.IsXREnabled())
-                {
-                    UpdateCameraRotationXR();
-                }
-                else
-                {
-                    UpdateCameraRotationMono();
-                }
+                UpdateCameraRotationXR();
+            }
+            else
+            {
+                //UpdateCameraRotationMono();
             }
         }
 
