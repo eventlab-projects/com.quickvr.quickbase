@@ -304,6 +304,11 @@ namespace QuickVR
             {
                 pair.Value.UpdateState();
             }
+
+            //if (GetVRNode(HumanBodyBones.RightHand)._inputDevice.TryGetFeatureValue(CommonUsages.handData, out Hand rightHand))
+            //{
+            //    Debug.Log("HAND DATA!!!");
+            //}
         }
 
         #endregion

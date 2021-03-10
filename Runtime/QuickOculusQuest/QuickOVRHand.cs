@@ -402,20 +402,24 @@ namespace QuickVR
                     {
                         int boneID = ((int)f) * NUM_BONES_PER_FINGER + i;
 
-                        if (_vrNodeFingers[boneID].IsTracked())
+                        if (_tBoneFingers[boneID] != null)
                         {
-                            //The finger is tracked.
-                            if (i < NUM_BONES_PER_FINGER - 1)
+                            if (_vrNodeFingers[boneID].IsTracked())
                             {
-                                UpdateTracking(boneID);
+                                //The finger is tracked.
+                                if (i < NUM_BONES_PER_FINGER - 1)
+                                {
+                                    UpdateTracking(boneID);
+                                }
+                                _handFingerLastRotation[boneID] = _tBoneFingers[boneID].localRotation;
                             }
-                            _handFingerLastRotation[boneID] = _tBoneFingers[boneID].localRotation;
+                            else
+                            {
+                                //The finger is not tracked. Restore the last valid local rotation. 
+                                _tBoneFingers[boneID].localRotation = _handFingerLastRotation[boneID];
+                            }
                         }
-                        else
-                        {
-                            //The finger is not tracked. Restore the last valid local rotation. 
-                            _tBoneFingers[boneID].localRotation = _handFingerLastRotation[boneID];
-                        }
+                        
                     }
                 }
             }
@@ -428,12 +432,15 @@ namespace QuickVR
             Transform ovrBone0 = _vrNodeFingers[boneID].transform;
             Transform ovrBone1 = _vrNodeFingers[boneID + 1].transform;
 
-            Vector3 currentDir = bone1.position - bone0.position;
-            Vector3 targetDir = ovrBone1.position - ovrBone0.position;
-            float rotAngle = Vector3.Angle(currentDir, targetDir);
-            Vector3 rotAxis = Vector3.Cross(currentDir, targetDir).normalized;
+            if (bone0 && bone1 && ovrBone0 && ovrBone1)
+            {
+                Vector3 currentDir = bone1.position - bone0.position;
+                Vector3 targetDir = ovrBone1.position - ovrBone0.position;
+                float rotAngle = Vector3.Angle(currentDir, targetDir);
+                Vector3 rotAxis = Vector3.Cross(currentDir, targetDir).normalized;
 
-            bone0.Rotate(rotAxis, rotAngle, Space.World);
+                bone0.Rotate(rotAxis, rotAngle, Space.World);
+            }
         }
 
         #endregion

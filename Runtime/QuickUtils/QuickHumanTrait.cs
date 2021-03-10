@@ -525,6 +525,32 @@ namespace QuickVR
             return animator.transform.position;
         }
 
+        public static void EnforceTPose(this Animator animator)
+        {
+            //Enforce the TPose of the LeftArm
+            EnforceTPose(animator, HumanBodyBones.LeftUpperArm, HumanBodyBones.LeftLowerArm, -animator.transform.right);
+            EnforceTPose(animator, HumanBodyBones.LeftLowerArm, HumanBodyBones.LeftHand, -animator.transform.right);
+            EnforceTPose(animator, HumanBodyBones.LeftHand, HumanBodyBones.LeftMiddleProximal, -animator.transform.right);
+
+            //Enforce the TPose of the RightArm
+            EnforceTPose(animator, HumanBodyBones.RightUpperArm, HumanBodyBones.RightLowerArm, animator.transform.right);
+            EnforceTPose(animator, HumanBodyBones.RightLowerArm, HumanBodyBones.RightHand, animator.transform.right);
+            EnforceTPose(animator, HumanBodyBones.RightHand, HumanBodyBones.RightMiddleProximal, animator.transform.right);
+        }
+
+        private static void EnforceTPose(Animator animator, HumanBodyBones boneUpperID, HumanBodyBones boneLowerID, Vector3 vTarget)
+        {
+            Transform tUpper = animator.GetBoneTransform(boneUpperID);
+            Transform tLower = animator.GetBoneTransform(boneLowerID);
+            
+            if (tUpper && tLower)
+            {
+                Vector3 vUpperArm = tLower.position - tUpper.position;
+
+                tUpper.Rotate(Vector3.Cross(vUpperArm, vTarget).normalized, Vector3.Angle(vUpperArm, vTarget), Space.World);
+            }
+        }
+
         #endregion
 
     }
