@@ -170,6 +170,8 @@ namespace QuickVR {
         {
             if (!_isInitialized)
             {
+                _animator.EnforceTPose();
+
                 _initialHipsLocalPosition = _animator.GetBoneTransform(HumanBodyBones.Hips).localPosition;
                 _initialLocalRotations.Clear();
                 foreach (HumanBodyBones b in QuickHumanTrait.GetHumanBodyBones())
