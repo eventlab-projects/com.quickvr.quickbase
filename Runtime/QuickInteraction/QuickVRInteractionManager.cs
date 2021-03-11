@@ -232,31 +232,31 @@ namespace QuickVR
             //Enable the corresponding interactors for the righthand
             _interactorHandRight._grabMode = _grabModeHandRight;
 
-            if (Input.GetKeyDown(KeyCode.Alpha1))
-            {
-                _interactorHandLeft.EnableInteractorGrab(!_interactorHandLeft.IsEnabledInteractorGrab());
-            }
-            if (Input.GetKeyDown(KeyCode.Alpha2))
-            {
-                _interactorHandLeft.EnableInteractorTeleport(!_interactorHandLeft.IsEnabledInteractorTeleport());
-            }
-            if (Input.GetKeyDown(KeyCode.Alpha3))
-            {
-                _interactorHandLeft.EnableInteractorUI(!_interactorHandLeft.IsEnabledInteractorUI());
-            }
+            //if (Input.GetKeyDown(KeyCode.Alpha1))
+            //{
+            //    _interactorHandLeft.EnableInteractorGrab(!_interactorHandLeft.IsEnabledInteractorGrab());
+            //}
+            //if (Input.GetKeyDown(KeyCode.Alpha2))
+            //{
+            //    _interactorHandLeft.EnableInteractorTeleport(!_interactorHandLeft.IsEnabledInteractorTeleport());
+            //}
+            //if (Input.GetKeyDown(KeyCode.Alpha3))
+            //{
+            //    _interactorHandLeft.EnableInteractorUI(!_interactorHandLeft.IsEnabledInteractorUI());
+            //}
 
-            if (Input.GetKeyDown(KeyCode.Alpha4))
-            {
-                _interactorHandRight.EnableInteractorGrab(!_interactorHandRight.IsEnabledInteractorGrab());
-            }
-            if (Input.GetKeyDown(KeyCode.Alpha5))
-            {
-                _interactorHandRight.EnableInteractorTeleport(!_interactorHandRight.IsEnabledInteractorTeleport());
-            }
-            if (Input.GetKeyDown(KeyCode.Alpha6))
-            {
-                _interactorHandRight.EnableInteractorUI(!_interactorHandRight.IsEnabledInteractorUI());
-            }
+            //if (Input.GetKeyDown(KeyCode.Alpha4))
+            //{
+            //    _interactorHandRight.EnableInteractorGrab(!_interactorHandRight.IsEnabledInteractorGrab());
+            //}
+            //if (Input.GetKeyDown(KeyCode.Alpha5))
+            //{
+            //    _interactorHandRight.EnableInteractorTeleport(!_interactorHandRight.IsEnabledInteractorTeleport());
+            //}
+            //if (Input.GetKeyDown(KeyCode.Alpha6))
+            //{
+            //    _interactorHandRight.EnableInteractorUI(!_interactorHandRight.IsEnabledInteractorUI());
+            //}
         }
 
         protected virtual void UpdateNewAnimatorTarget(Animator animator)
