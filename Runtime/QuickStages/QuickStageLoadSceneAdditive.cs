@@ -46,11 +46,11 @@ namespace QuickVR
             //Load the new scenes
             if (_asyncLoad)
             {
-                _sceneManager.LoadScenesAsyncAdditive(_scenesToLoad);
+                _sceneManager.LoadScenesAdditiveAsync(_scenesToLoad);
             }
             else
             {
-                _sceneManager.LoadScenes(_scenesToUnload);
+                _sceneManager.LoadScenesAdditive(_scenesToLoad);
             }
 
             //Mark as current the desired one or the first one to load

@@ -17,30 +17,30 @@ namespace QuickVR
             return SceneManager.GetSceneByName(sceneName).IsValid();
         }
 
-        public virtual void LoadScenes(string[] sceneNames)
+        public virtual void LoadScenesAdditive(string[] sceneNames)
         {
             foreach (string s in sceneNames)
             {
-                LoadScene(s);
+                LoadSceneAdditive(s);
             }
         }
 
-        public virtual void LoadScene(string sceneName)
+        public virtual void LoadSceneAdditive(string sceneName)
         {
-            SceneManager.LoadScene(sceneName);
+            SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
         }
 
-        public virtual void LoadScenesAsyncAdditive(string[] sceneNames)
+        public virtual void LoadScenesAdditiveAsync(string[] sceneNames)
         {
             foreach (string s in sceneNames)
             {
-                LoadSceneAsyncAdditive(s, false);
+                LoadSceneAdditiveAsync(s, false);
             }
         }
 
-        public virtual void LoadSceneAsyncAdditive(string sceneName, bool allowSceneActivation)
+        public virtual void LoadSceneAdditiveAsync(string sceneName, bool allowSceneActivation)
         {
-            StartCoroutine(CoLoadSceneAsyncAdditive(sceneName, allowSceneActivation));
+            StartCoroutine(CoLoadSceneAdditiveAsync(sceneName, allowSceneActivation));
         }
 
         public virtual void UnloadScenesAsync(string[] sceneNames)
@@ -72,7 +72,7 @@ namespace QuickVR
 
         #region UPDATE
 
-        protected virtual IEnumerator CoLoadSceneAsyncAdditive(string sceneName, bool allowSceneActivation)
+        protected virtual IEnumerator CoLoadSceneAdditiveAsync(string sceneName, bool allowSceneActivation)
         {
             yield return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
 
