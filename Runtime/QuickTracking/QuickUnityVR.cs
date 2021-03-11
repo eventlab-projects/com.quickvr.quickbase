@@ -100,7 +100,7 @@ namespace QuickVR {
             _vrManager.AddUnityVRTrackingSystem(this);
         }
 
-        protected virtual void Start()
+        protected override void Start()
         {
             _headOffset = Quaternion.Inverse(transform.rotation) * (_animator.GetBoneTransform(HumanBodyBones.Head).position - _animator.GetEyeCenterPosition());
 
@@ -108,6 +108,8 @@ namespace QuickVR {
             {
                 CheckHandtrackingMode();
             }
+
+            base.Start();
         }
 
         protected virtual void CreateFootPrints()

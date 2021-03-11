@@ -53,7 +53,10 @@ namespace QuickVR {
             {
                 r.updateWhenOffscreen = true;
             }
+        }
 
+        protected virtual void Start()
+        {
             RegisterTrackingManager();
         }
 
