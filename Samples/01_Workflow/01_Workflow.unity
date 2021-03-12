@@ -2447,7 +2447,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d63998ce4c5f7b64c982c34b343dc008, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxTimeOut: 0
+  _maxTimeOut: -1
   _pressKeyToFinish: 0
   _avoidable: 1
   _instructionsSpanish: []
