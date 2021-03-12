@@ -39,8 +39,8 @@ public static class SettingsBase
     
     public enum Languages
     {
-        SPANISH = 0,
-        ENGLISH = 1,
+        ENGLISH = 0,
+        SPANISH = 1,
     };
     
     public enum Environment
