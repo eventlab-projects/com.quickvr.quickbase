@@ -105,6 +105,8 @@ public class OVRProjectConfig : ScriptableObject
 		// Initialize the asset only if a build is not currently running.
 		if (projectConfig == null && !BuildPipeline.isBuildingPlayer)
 		{
+			Debug.Log(projectConfig);
+			Debug.Log(oculusProjectConfigAssetPath);
 			projectConfig = ScriptableObject.CreateInstance<OVRProjectConfig>();
 			projectConfig.targetDeviceTypes = new List<DeviceType>();
 			projectConfig.targetDeviceTypes.Add(DeviceType.Quest);
