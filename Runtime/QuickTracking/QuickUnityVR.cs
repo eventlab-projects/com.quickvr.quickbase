@@ -107,9 +107,8 @@ namespace QuickVR {
             if (Application.isPlaying)
             {
                 CheckHandtrackingMode();
+                base.Start();
             }
-
-            base.Start();
         }
 
         protected virtual void CreateFootPrints()

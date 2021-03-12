@@ -18,5 +18,16 @@
     "name": "EventLab",
     "email": "eventlab.projects@gmail.com",
     "url": "http://www.event-lab.org/"
+  },
+  
+  "samples": [
+  {
+    "displayName": "00_HelloWorld",
+    "description": "QuickVR hello world",
+    "path": "Samples~/00_HelloWorld"
   }
+
+  
+  ]
+  
 }
