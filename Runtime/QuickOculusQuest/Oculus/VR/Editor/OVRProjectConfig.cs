@@ -76,18 +76,7 @@ public class OVRProjectConfig : ScriptableObject
 
 	private static string GetOculusProjectConfigAssetPath()
 	{
-		var so = ScriptableObject.CreateInstance(typeof(OVRPluginUpdaterStub));
-		var script = MonoScript.FromScriptableObject(so);
-		string assetPath = AssetDatabase.GetAssetPath(script);
-		string editorDir = Directory.GetParent(assetPath).FullName;
-		string ovrDir = Directory.GetParent(editorDir).FullName;
-		string oculusDir = Directory.GetParent(ovrDir).FullName;
-		string configAssetPath = Path.GetFullPath(Path.Combine(oculusDir, "OculusProjectConfig.asset"));
-		Uri configUri = new Uri(configAssetPath);
-		Uri projectUri = new Uri(Application.dataPath);
-		Uri relativeUri = projectUri.MakeRelativeUri(configUri);
-
-		return relativeUri.ToString();
+		return "Packages/com.quickvr.quickbase/Runtime/QuickOculusQuest/Oculus/OculusProjectConfig.asset";
 	}
 
 	public static OVRProjectConfig GetProjectConfig()
