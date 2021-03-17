@@ -1,5 +1,3 @@
-#QuickVR
-
 QuickVR is the result of our technical research and development in Virtual Reality at the EventLab, and offers a series of tools to quickly start developing your own VR application on Unity.
 
 The main target is to be able to reuse as much code as possible from our past applications. Therefore, it is not something fixed or closed, but it keeps constantly evolving responding to the new requirements of the applications that we develop, and the new features that Unity introduces.
