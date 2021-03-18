@@ -12,35 +12,17 @@ public enum ButtonState {
 };
 
 [System.Serializable]
-public class ButtonMapping : MonoBehaviour {
+public class ButtonMapping {
 
 	#region PUBLIC PARAMETERS
 
 	public bool _showInInspector = true;
 
+	public string _actionName = "";
     public string _keyCode = BaseInputManager.NULL_MAPPING;
     public string _altKeyCode = BaseInputManager.NULL_MAPPING;
 
 	public ButtonState _state = ButtonState.IDLE;
-
-    #endregion
-
-    #region CREATION AND DESTRUCTION
-
-    protected virtual void OnEnable()
-    {
-        SceneManager.sceneLoaded += OnSceneLoaded;
-    }
-
-    protected virtual void OnDisable()
-    {
-        SceneManager.sceneLoaded -= OnSceneLoaded;
-    }
-
-    protected virtual void OnSceneLoaded(Scene scene, LoadSceneMode mode)
-    {
-        SetState(ButtonState.IDLE);
-    }
 
     #endregion
 
@@ -60,10 +42,6 @@ public class ButtonMapping : MonoBehaviour {
 
 	public virtual bool IsReleased() {
 		return (_state == ButtonState.RELEASED);
-	}
-
-	public virtual ButtonState GetState() {
-		return _state;
 	}
 
 	public virtual void SetState(ButtonState state) {

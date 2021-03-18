@@ -2,171 +2,180 @@
 using UnityEditor;
 using System.Collections.Generic;
 
-namespace QuickVR {
+namespace QuickVR
+{
 
-	[System.Serializable]
-	[CustomEditor(typeof(BaseInputManager), true)]	
-	[CanEditMultipleObjects]
-	public class BaseInputManagerEditor : QuickBaseEditor {
+    [System.Serializable]
+    [CustomEditor(typeof(BaseInputManager), true)]
+    [CanEditMultipleObjects]
+    public class BaseInputManagerEditor : QuickBaseEditor
+    {
 
-		#region PROTECTED PARAMETERS
+        #region PROTECTED PARAMETERS
 
-		protected InputManager _inputManager = null;
-		protected BaseInputManager _baseInputManager = null;
+        protected InputManager _inputManager = null;
+        protected BaseInputManager _baseInputManager = null;
 
-		protected string[] _axisCodes;
-		protected string[] _buttonCodes;
-		
-		[SerializeField] protected bool _showAxes = true;
-		[SerializeField] protected bool _showButtons = true;
+        protected string[] _axisCodes;
+        protected string[] _buttonCodes;
 
-		#endregion
+        [SerializeField] protected bool _showAxes = true;
+        [SerializeField] protected bool _showButtons = true;
 
-		#region CONSTANTS
+        #endregion
 
-		protected const string AXIS = "Axis";
-		protected const string POSITIVE_KEY = "Positive Key";
-		protected const string NEGATIVE_KEY = "Negative Key";
-		protected const string ALT_POSITIVE_KEY = "Alt. Positive Key";
-		protected const string ALT_NEGATIVE_KEY = "Alt. Negative Key";
-		protected const string KEY = "Key";
-		protected const string ALT_KEY = "Alt. Key";
+        #region CONSTANTS
 
-		protected const string WARNING_TITLE = 	"Reset All Mapping";
-		protected const string WARNING_MESSAGE = "Are you sure you want to reset all mapped keys of ";
+        protected const string AXIS = "Axis";
+        protected const string POSITIVE_KEY = "Positive Key";
+        protected const string NEGATIVE_KEY = "Negative Key";
+        protected const string ALT_POSITIVE_KEY = "Alt. Positive Key";
+        protected const string ALT_NEGATIVE_KEY = "Alt. Negative Key";
+        protected const string KEY = "Key";
+        protected const string ALT_KEY = "Alt. Key";
 
-		#endregion
+        protected const string WARNING_TITLE = "Reset All Mapping";
+        protected const string WARNING_MESSAGE = "Are you sure you want to reset all mapped keys of ";
 
-		#region GUI DRAW
+        #endregion
 
-		protected override void DrawGUI() {
-			_inputManager = QuickSingletonManager.GetInstance<InputManager>();
-			_baseInputManager = target as BaseInputManager;
+        #region GUI DRAW
 
-			_axisCodes = _baseInputManager.GetAxisCodes();
+        protected override void DrawGUI()
+        {
+            _inputManager = QuickSingletonManager.GetInstance<InputManager>();
+            _baseInputManager = target as BaseInputManager;
+
+            _axisCodes = _baseInputManager.GetAxisCodes();
             _buttonCodes = _baseInputManager.GetButtonCodes();
 
-			DrawAxesMapping();
-			EditorGUILayout.Separator();
-			DrawButtonsMapping();
+            DrawAxesMapping();
+            EditorGUILayout.Separator();
+            DrawButtonsMapping();
 
-			EditorGUILayout.Separator();
-			if (DrawButton(WARNING_TITLE)) {
-				if (EditorUtility.DisplayDialog(WARNING_TITLE + "?", WARNING_MESSAGE + target.name + "?", "Confirm", "Cancel")) {
-					BaseInputManager bManager = target as BaseInputManager;
-					bManager.ResetAllMapping();
-				}
-			}
+            EditorGUILayout.Separator();
+            if (DrawButton(WARNING_TITLE))
+            {
+                if (EditorUtility.DisplayDialog(WARNING_TITLE + "?", WARNING_MESSAGE + target.name + "?", "Confirm", "Cancel"))
+                {
+                    BaseInputManager bManager = target as BaseInputManager;
+                    bManager.ResetAllMapping();
+                }
+            }
 
             base.DrawGUI();
-		}
+        }
 
-		protected virtual void DrawAxesMapping() {
-			if (_baseInputManager.GetNumAxesMapped() != _inputManager.GetNumAxes()) _baseInputManager.ResetAxesMapping();
+        protected virtual void DrawAxesMapping()
+        {
+            if (_baseInputManager.GetNumAxesMapped() != _inputManager.GetNumAxes()) _baseInputManager.ResetAxesMapping();
 
-			_showAxes = EditorGUILayout.Foldout(_showAxes, "Axes Mapping");
-			if (!_showAxes) return;
-			
-			int numAxes = _inputManager.GetNumAxes();
-			for (int i = 0; i < numAxes; i++) {
-				DrawAxisMapping(i);
-			}
-		}
-		
-		protected virtual void DrawButtonsMapping() {
-			if (_baseInputManager.GetNumButtonsMapped() != _inputManager.GetNumButtons()) _baseInputManager.ResetButtonMapping();
+            _showAxes = EditorGUILayout.Foldout(_showAxes, "Axes Mapping");
+            if (!_showAxes) return;
 
-			_showButtons = EditorGUILayout.Foldout(_showButtons, "Buttons Mapping");
-			if (!_showButtons) return;
-			
-			int numButtons = _inputManager.GetNumButtons();
-			for (int i = 0; i < numButtons; i++) {
-				DrawButtonMapping(i);
-			}
-		}
+            int numAxes = _inputManager.GetNumAxes();
+            for (int i = 0; i < numAxes; i++)
+            {
+                DrawAxisMapping(i);
+            }
+        }
 
-		protected virtual void DrawAxisMapping(int axisID) {
-			SerializedObject mapping = new SerializedObject(_baseInputManager.GetAxisMapping(axisID));
-			mapping.Update();
+        protected virtual void DrawButtonsMapping()
+        {
+            if (_baseInputManager.GetNumButtonsMapped() != _inputManager.GetNumButtons()) _baseInputManager.ResetButtonMapping();
 
-            EditorGUI.indentLevel++;
-			
-            bool showInInspector = EditorGUILayout.Foldout(mapping.FindProperty("_showInInspector").boolValue, _inputManager.GetVirtualAxis(axisID));
-			if (showInInspector) {
+            _showButtons = EditorGUILayout.Foldout(_showButtons, "Buttons Mapping");
+            if (!_showButtons) return;
 
-                EditorGUI.indentLevel++;
-				
-                int index = EditorGUILayout.Popup(AXIS, GetSelectedIndex(_axisCodes, mapping.FindProperty("_axisCode").stringValue), _axisCodes);
-				mapping.FindProperty("_axisCode").stringValue = _axisCodes[index];
+            int numButtons = _inputManager.GetNumButtons();
+            for (int i = 0; i < numButtons; i++)
+            {
+                DrawButtonMapping(i);
+            }
+        }
 
-				SerializedObject positiveButton = new SerializedObject(((AxisMapping)mapping.targetObject).GetPositiveButton());
-				positiveButton.Update();
-				index = EditorGUILayout.Popup(POSITIVE_KEY, GetSelectedIndex(_buttonCodes, positiveButton.FindProperty("_keyCode").stringValue), _buttonCodes);
-                positiveButton.FindProperty("_keyCode").stringValue = _buttonCodes[index];
-				index = EditorGUILayout.Popup(ALT_POSITIVE_KEY, GetSelectedIndex(_buttonCodes, positiveButton.FindProperty("_altKeyCode").stringValue), _buttonCodes);
-                positiveButton.FindProperty("_altKeyCode").stringValue = _buttonCodes[index];
-				positiveButton.ApplyModifiedProperties();
-
-                SerializedObject negativeButton = new SerializedObject(((AxisMapping)mapping.targetObject).GetNegativeButton());
-                negativeButton.Update();
-                index = EditorGUILayout.Popup(NEGATIVE_KEY, GetSelectedIndex(_buttonCodes, negativeButton.FindProperty("_keyCode").stringValue), _buttonCodes);
-                negativeButton.FindProperty("_keyCode").stringValue = _buttonCodes[index];
-                index = EditorGUILayout.Popup(ALT_NEGATIVE_KEY, GetSelectedIndex(_buttonCodes, negativeButton.FindProperty("_altKeyCode").stringValue), _buttonCodes);
-                negativeButton.FindProperty("_altKeyCode").stringValue = _buttonCodes[index];
-                negativeButton.ApplyModifiedProperties();
-                
-                EditorGUI.indentLevel--;
-			}
-
-            EditorGUI.indentLevel--;
-
-            mapping.FindProperty("_showInInspector").boolValue = showInInspector;
-			mapping.ApplyModifiedProperties();
-		}
-
-		protected virtual void DrawButtonMapping(int buttonID) {
-			SerializedObject mapping = new SerializedObject(_baseInputManager.GetButtonMapping(buttonID));
-			mapping.Update();
-
+        protected virtual void DrawAxisMapping(int axisID)
+        {
+            AxisMapping mapping = _baseInputManager.GetAxisMapping(axisID);
             EditorGUI.indentLevel++;
 
-			bool showInInspector = EditorGUILayout.Foldout(mapping.FindProperty("_showInInspector").boolValue, _inputManager.GetVirtualButton(buttonID));
-			if (showInInspector) {
+            bool showInInspector = EditorGUILayout.Foldout(mapping._showInInspector, _inputManager.GetVirtualAxis(axisID));
+            if (showInInspector)
+            {
 
                 EditorGUI.indentLevel++;
 
-				int index = EditorGUILayout.Popup(KEY, GetSelectedIndex(_buttonCodes, mapping.FindProperty("_keyCode").stringValue), _buttonCodes);
-                mapping.FindProperty("_keyCode").stringValue = _buttonCodes[index];
+                int index = EditorGUILayout.Popup(AXIS, GetSelectedIndex(_axisCodes, mapping._axisCode), _axisCodes);
+                mapping._axisCode = _axisCodes[index];
 
-				index = EditorGUILayout.Popup(ALT_KEY, GetSelectedIndex(_buttonCodes, mapping.FindProperty("_altKeyCode").stringValue), _buttonCodes);
-                mapping.FindProperty("_altKeyCode").stringValue = _buttonCodes[index];
+                ButtonMapping positiveButton = mapping.GetPositiveButton();
+                index = EditorGUILayout.Popup(POSITIVE_KEY, GetSelectedIndex(_buttonCodes, positiveButton._keyCode), _buttonCodes);
+                positiveButton._keyCode = _buttonCodes[index];
+
+                index = EditorGUILayout.Popup(ALT_POSITIVE_KEY, GetSelectedIndex(_buttonCodes, positiveButton._altKeyCode), _buttonCodes);
+                positiveButton._altKeyCode = _buttonCodes[index];
+
+                ButtonMapping negativeButton = mapping.GetNegativeButton();
+                index = EditorGUILayout.Popup(NEGATIVE_KEY, GetSelectedIndex(_buttonCodes, negativeButton._keyCode), _buttonCodes);
+                negativeButton._keyCode = _buttonCodes[index];
+                index = EditorGUILayout.Popup(ALT_NEGATIVE_KEY, GetSelectedIndex(_buttonCodes, negativeButton._altKeyCode), _buttonCodes);
+                negativeButton._altKeyCode = _buttonCodes[index];
 
                 EditorGUI.indentLevel--;
-			}
+            }
 
             EditorGUI.indentLevel--;
 
-            mapping.FindProperty("_showInInspector").boolValue = showInInspector;
-			mapping.ApplyModifiedProperties();
-		}
+            mapping._showInInspector = showInInspector;
+            //mapping.ApplyModifiedProperties();
+        }
 
-		#endregion
+        protected virtual void DrawButtonMapping(int buttonID)
+        {
+            ButtonMapping mapping = _baseInputManager.GetButtonMapping(buttonID);
+            EditorGUI.indentLevel++;
 
-		#region AUX FUNCTIONS
+            bool showInInspector = EditorGUILayout.Foldout(mapping._showInInspector, _inputManager.GetVirtualButton(buttonID));
+            if (showInInspector)
+            {
 
-		protected virtual int GetSelectedIndex(string[] list, string value) {
-			for (int i = 0; i < list.Length; i++) {
-				if (list[i] == value) return i;
-			}
-			return 0;
-		}
+                EditorGUI.indentLevel++;
 
-		protected virtual string GetButtonCode(int key) {
-			if (key < _buttonCodes.Length) return _buttonCodes[key];
-			return _buttonCodes[0];
-		}
+                int index = EditorGUILayout.Popup(KEY, GetSelectedIndex(_buttonCodes, mapping._keyCode), _buttonCodes);
+                mapping._keyCode = _buttonCodes[index];
 
-		#endregion
-	}
+                index = EditorGUILayout.Popup(ALT_KEY, GetSelectedIndex(_buttonCodes, mapping._altKeyCode), _buttonCodes);
+                mapping._altKeyCode = _buttonCodes[index];
+
+                EditorGUI.indentLevel--;
+            }
+
+            EditorGUI.indentLevel--;
+
+            mapping._showInInspector = showInInspector;
+            //mapping.ApplyModifiedProperties();
+        }
+
+        #endregion
+
+        #region AUX FUNCTIONS
+
+        protected virtual int GetSelectedIndex(string[] list, string value)
+        {
+            for (int i = 0; i < list.Length; i++)
+            {
+                if (list[i] == value) return i;
+            }
+            return 0;
+        }
+
+        protected virtual string GetButtonCode(int key)
+        {
+            if (key < _buttonCodes.Length) return _buttonCodes[key];
+            return _buttonCodes[0];
+        }
+
+        #endregion
+    }
 
 }

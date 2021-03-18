@@ -243,8 +243,8 @@ public class InputManagerBodyPosture : BaseInputManager {
 
 	#region DEBUG
 
-	protected override void OnDrawGizmos() {
-        base.OnDrawGizmos();
+	protected virtual void OnDrawGizmos() 
+	{
 
 		if (!_animator) return;
 

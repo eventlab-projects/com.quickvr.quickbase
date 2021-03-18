@@ -21,12 +21,6 @@ public abstract class BaseInputManager : MonoBehaviour {
 
 	#region PROTECTED PARAMETERS
 
-	[SerializeField, HideInInspector] 
-    protected Transform _axisMappingRoot = null;
-
-	[SerializeField, HideInInspector] 
-    protected Transform _buttonMappingRoot = null;
-
 	protected static InputManager _inputManager
 	{
 		get
@@ -40,7 +34,11 @@ public abstract class BaseInputManager : MonoBehaviour {
 	}
 	protected static InputManager m_InputManager = null;
 
-	protected Dictionary<string, ButtonMapping> _buttonMapping = null;
+	[SerializeField, HideInInspector]
+	protected List<AxisMapping> _axisMapping = new List<AxisMapping>();
+
+	[SerializeField, HideInInspector]
+	protected List<ButtonMapping> _buttonMapping = new List<ButtonMapping>();
 
 	#endregion
 
@@ -74,40 +72,29 @@ public abstract class BaseInputManager : MonoBehaviour {
 	{
         name = this.GetType().FullName;
 
-        _axisMappingRoot = transform.CreateChild(ROOT_AXIS_MAPPING_NAME);
-        _buttonMappingRoot = transform.CreateChild(ROOT_BUTTON_MAPPING_NAME);
-
         int numVirtualAxes = _inputManager.GetVirtualAxes().Count;
-        while (_axisMappingRoot.childCount != numVirtualAxes) AddAxisMapping();
+		while (_axisMapping.Count != numVirtualAxes)
+		{
+			AddAxisMapping();
+		}
 
         int numVirtualButtons = _inputManager.GetVirtualButtons().Count;
-        while (_buttonMappingRoot.childCount != numVirtualButtons) AddButtonMapping();
+		while (_buttonMapping.Count != numVirtualButtons)
+		{
+			AddButtonMapping();
+		}
 
-		_buttonMapping = new Dictionary<string, ButtonMapping>();
 		List<string> virtualButtons = _inputManager.GetVirtualButtons();
 		for (int i = 0; i < virtualButtons.Count; i++)
 		{
-			_buttonMapping[virtualButtons[i]] = _buttonMappingRoot.GetChild(i).GetComponent<ButtonMapping>();
+			_buttonMapping[i]._actionName = virtualButtons[i];
 		}
 	}
 
-    protected virtual void OnDestroy() {
-        DestroyAxisMapping();
-		DestroyButtonMapping();
-	}
-
-	protected virtual void DestroyAxisMapping() {
-        _axisMappingRoot.DestroyChildsImmediate();
-	}
-
-	protected virtual void DestroyButtonMapping() {
-        _buttonMappingRoot.DestroyChildsImmediate();
-	}
-
-	public virtual void ConfigureDefaultAxis(string virtualAxisName, string axisName)
+    public virtual void ConfigureDefaultAxis(string virtualAxisName, string axisName)
     {
 		AxisMapping aMapping = GetAxisMapping(virtualAxisName);
-		if (aMapping)
+		if (aMapping != null)
         {
 			if (aMapping._axisCode == NULL_MAPPING)
 			{
@@ -138,23 +125,35 @@ public abstract class BaseInputManager : MonoBehaviour {
 
 	#region MAPPING
 
-	public virtual void RemoveLastAxisMapping() {
-        _axisMappingRoot.DestroyChildImmediate(_axisMappingRoot.childCount - 1);
+	public virtual void RemoveLastAxisMapping() 
+	{
+		if (_axisMapping.Count > 0)
+        {
+			_axisMapping.RemoveAt(_axisMapping.Count - 1);
+        }
 	}
 
-	public virtual void RemoveLastButtonMapping() {
-        _buttonMappingRoot.DestroyChildImmediate(_buttonMappingRoot.childCount - 1);
+	public virtual void RemoveLastButtonMapping() 
+	{
+		if (_buttonMapping.Count > 0)
+        {
+			_buttonMapping.RemoveAt(_buttonMapping.Count - 1);
+        }
 	}
 
-	public AxisMapping GetAxisMapping(int axisID) {
-        return (axisID >= _axisMappingRoot.childCount)? null : _axisMappingRoot.GetChild(axisID).GetComponent<AxisMapping>();
+	public AxisMapping GetAxisMapping(int axisID) 
+	{
+		return (axisID >= _axisMapping.Count) ? null : _axisMapping[axisID];
 	}
 
 	public AxisMapping GetAxisMapping(string virtualAxis) {
         List<string> virtualAxes = _inputManager.GetVirtualAxes();
         for (int i = 0; i < virtualAxes.Count; i++)
         {
-            if (virtualAxes[i] == virtualAxis) return _axisMappingRoot.GetChild(i).GetComponent<AxisMapping>();
+			if (virtualAxes[i] == virtualAxis)
+			{
+				return _axisMapping[i];
+			}
         }
 
         return null;
@@ -162,52 +161,67 @@ public abstract class BaseInputManager : MonoBehaviour {
 
 	public ButtonMapping GetButtonMapping(int buttonID) 
 	{
-        return (buttonID >= _buttonMappingRoot.childCount) ? null : _buttonMappingRoot.GetChild(buttonID).GetComponent<ButtonMapping>();
+        return (buttonID >= _buttonMapping.Count) ? null : _buttonMapping[buttonID];
 	}
 
 	public ButtonMapping GetButtonMapping(string virtualButton) 
 	{
-		return _buttonMapping.ContainsKey(virtualButton) ? _buttonMapping[virtualButton] : null;
+		List<string> virtualButtons = _inputManager.GetVirtualButtons();
+		for (int i = 0; i < virtualButtons.Count; i++)
+        {
+			if (virtualButtons[i] == virtualButton)
+            {
+				return _buttonMapping[i];
+            }
+        }
+
+		return null;
 	}
 
-	public virtual void AddAxisMapping() {
-        string mapName = AXIS_MAPPING_NAME + _axisMappingRoot.childCount.ToString();
-        AxisMapping aMapping = _axisMappingRoot.CreateChild(mapName).gameObject.AddComponent<AxisMapping>();
-        aMapping.Init();
+	public virtual void AddAxisMapping() 
+	{
+		_axisMapping.Add(new AxisMapping());
 	}
 
-	public virtual void AddButtonMapping() {
-        string mapName = BUTTON_MAPPING_NAME + _buttonMappingRoot.childCount.ToString();
-        _buttonMappingRoot.CreateChild(mapName).gameObject.AddComponent<ButtonMapping>();
+	public virtual void AddButtonMapping() 
+	{
+		_buttonMapping.Add(new ButtonMapping());
 	}
 
-	public virtual void ResetAllMapping() {
+	public virtual void ResetAllMapping() 
+	{
 		ResetAxesMapping();
 		ResetButtonMapping();
 	}
 
 	public virtual void ResetAxesMapping() {
-		DestroyAxisMapping();
-        _axisMappingRoot = transform.CreateChild(ROOT_AXIS_MAPPING_NAME);
-
+		_axisMapping.Clear();
+		
 		int numAxes = _inputManager.GetNumAxes();
-        for (int i = 0; i < numAxes; i++) AddAxisMapping();
+		for (int i = 0; i < numAxes; i++)
+		{
+			AddAxisMapping();
+		}
 	}
 
 	public virtual void ResetButtonMapping() {
-		DestroyButtonMapping();
-		_buttonMappingRoot = transform.CreateChild(ROOT_BUTTON_MAPPING_NAME);
+		_buttonMapping.Clear();
 
 		int numButtons = _inputManager.GetNumButtons();
-		for (int i = 0; i < numButtons; i++) AddButtonMapping();
+		for (int i = 0; i < numButtons; i++)
+		{
+			AddButtonMapping();
+		}
 	}
 
-	public virtual int GetNumAxesMapped() {
-        return _axisMappingRoot.childCount;
+	public virtual int GetNumAxesMapped() 
+	{
+        return _axisMapping.Count;
 	}
 
-	public virtual int GetNumButtonsMapped() {
-        return _buttonMappingRoot.childCount;
+	public virtual int GetNumButtonsMapped() 
+	{
+		return _buttonMapping.Count;
 	}
 
 	#endregion
@@ -306,28 +320,21 @@ public abstract class BaseInputManager : MonoBehaviour {
 	
 	#region UPDATE
 
-	protected virtual void OnDrawGizmos()
-    {
-        if (_axisMappingRoot && _buttonMappingRoot)
-        {
-            _axisMappingRoot.hideFlags = _buttonMappingRoot.hideFlags = _debug ? HideFlags.None : HideFlags.HideInHierarchy;
-        }
-    }
-
-    public virtual void UpdateMappingState()
+	public virtual void UpdateMappingState()
     {
         if (!IsActive()) return;
 
-        //Update the state of the buttons
-        for (int i = 0; i < _buttonMappingRoot.childCount; i++) UpdateButtonState(i);
+        //Update the state of the axes
+		foreach (AxisMapping aMapping in _axisMapping)
+        {
+			UpdateAxisState(aMapping);
+        }
 
-        //Update the state of the buttons of the axis
-        for (int i = 0; i < _axisMappingRoot.childCount; i++) UpdateAxisState(i);
-    }
-
-    protected virtual void UpdateAxisState(int axisID)
-    {
-        UpdateAxisState(GetAxisMapping(axisID));
+		//Update the state of the buttons
+		foreach (ButtonMapping bMapping in _buttonMapping)
+        {
+			UpdateButtonState(bMapping);
+        }
     }
 
     protected virtual void UpdateAxisState(AxisMapping mapping)
@@ -340,12 +347,7 @@ public abstract class BaseInputManager : MonoBehaviour {
         UpdateButtonState(mapping.GetNegativeButton());
     }
 
-    protected virtual void UpdateButtonState(int buttonID)
-    {
-        UpdateButtonState(GetButtonMapping(buttonID));
-    }
-
-	protected virtual void UpdateButtonState(ButtonMapping mapping) {
+    protected virtual void UpdateButtonState(ButtonMapping mapping) {
 		if (mapping.IsIdle() && CheckButtonPressed(mapping)) {
 			//IDLE => TRIGGERED
 			mapping.SetState(ButtonState.TRIGGERED);
