@@ -34,11 +34,16 @@ public abstract class BaseInputManager : MonoBehaviour {
 	}
 	protected static InputManager m_InputManager = null;
 
-	[SerializeField, HideInInspector]
+	//[SerializeField, HideInInspector]
+	[SerializeField]
 	protected List<AxisMapping> _axisMapping = new List<AxisMapping>();
 
-	[SerializeField, HideInInspector]
+	//[SerializeField, HideInInspector]
+	[SerializeField]
 	protected List<ButtonMapping> _buttonMapping = new List<ButtonMapping>();
+
+	//Maps a specific device button to a virtual button
+	protected List<KeyValuePair<string, string>> _buttonToVirtual = new List<KeyValuePair<string, string>>();
 
 	#endregion
 
@@ -66,6 +71,19 @@ public abstract class BaseInputManager : MonoBehaviour {
 	protected virtual void Awake()
 	{
 		Reset();
+
+		foreach (ButtonMapping bMapping in _buttonMapping)
+        {
+			if (bMapping._keyCode != NULL_MAPPING)
+            {
+				_buttonToVirtual.Add(new KeyValuePair<string, string>(bMapping._keyCode, bMapping._actionName));
+            }
+
+			if (bMapping._altKeyCode != NULL_MAPPING)
+            {
+				_buttonToVirtual.Add(new KeyValuePair<string, string>(bMapping._keyCode, bMapping._actionName));
+			}
+        }
 	}
 
     public virtual void Reset() 
@@ -282,36 +300,6 @@ public abstract class BaseInputManager : MonoBehaviour {
 		return value;
 	}
 	
-	/// <summary>
-	/// Returns true while the user is pressing the button
-	/// </summary>
-	public virtual bool GetButton(string virtualButton) {
-		if (!IsActive()) return false;
-
-		ButtonMapping mapping = GetButtonMapping(virtualButton);
-		return (mapping == null)? false : mapping.IsPressed();
-	}
-	
-	/// <summary>
-	/// Returns true during the frame the user starts pressing down the key
-	/// </summary>
-	public virtual bool GetButtonDown(string virtualButton) {
-		if (!IsActive()) return false;
-
-		ButtonMapping mapping = GetButtonMapping(virtualButton);
-		return (mapping == null)? false : mapping.IsTriggered();
-	}
-	
-	/// <summary>
-	/// Returns true during the frame the user releases the key
-	/// </summary>
-	public virtual bool GetButtonUp(string virtualButton) {
-		if (!IsActive()) return false;
-
-		ButtonMapping mapping = GetButtonMapping(virtualButton);
-		return (mapping == null)? false : mapping.IsReleased();
-	}
-
 	public virtual bool IsActive() {
 		return _active;
 	}
@@ -322,19 +310,20 @@ public abstract class BaseInputManager : MonoBehaviour {
 
 	public virtual void UpdateMappingState()
     {
-        if (!IsActive()) return;
 
-        //Update the state of the axes
-		foreach (AxisMapping aMapping in _axisMapping)
-        {
-			UpdateAxisState(aMapping);
-        }
+  //      if (!IsActive()) return;
 
-		//Update the state of the buttons
-		foreach (ButtonMapping bMapping in _buttonMapping)
-        {
-			UpdateButtonState(bMapping);
-        }
+  //      //Update the state of the axes
+		//foreach (AxisMapping aMapping in _axisMapping)
+  //      {
+		//	UpdateAxisState(aMapping);
+  //      }
+
+		////Update the state of the buttons
+		//foreach (ButtonMapping bMapping in _buttonMapping)
+  //      {
+		//	UpdateButtonState(bMapping);
+  //      }
     }
 
     protected virtual void UpdateAxisState(AxisMapping mapping)
@@ -366,19 +355,12 @@ public abstract class BaseInputManager : MonoBehaviour {
 		}
 	}
 
-	protected virtual bool CheckButtonPressed(ButtonMapping mapping) 
+	public virtual bool CheckButtonPressed(ButtonMapping bMapping) 
 	{
-		bool pressed = false;
-		if (mapping._keyCode != NULL_MAPPING)
-        {
-			pressed = ImpGetButton(mapping._keyCode);
-		}
-		if (!pressed && mapping._altKeyCode != NULL_MAPPING)
-        {
-			pressed = ImpGetButton(mapping._altKeyCode);
-		}
-
-		return pressed;
+		return (
+				((bMapping._keyCode != NULL_MAPPING) && ImpGetButton(bMapping._keyCode)) ||
+				((bMapping._altKeyCode != NULL_MAPPING) && ImpGetButton(bMapping._altKeyCode))
+				);
 	}
 	
 	#endregion

@@ -22,6 +22,7 @@ namespace QuickVR
 
         [SerializeField]
         protected List<string> _virtualButtons = new List<string>();
+        protected Dictionary<string, VirtualButtonState> _virtualButtonStates = null;
 
         protected Dictionary<string, bool> _activeVirtualAxes = new Dictionary<string, bool>();
 
@@ -29,9 +30,10 @@ namespace QuickVR
 
         protected enum VirtualButtonState
         {
-            UP,
-            DOWN,
-            PRESSED,
+            Idle,
+            Triggered, 
+            Pressed,
+            Released,
         }
 
         protected List<BaseInputManager> _inputManagers = new List<BaseInputManager>();
@@ -111,6 +113,12 @@ namespace QuickVR
         protected virtual void Awake()
         {
             Reset();
+
+            _virtualButtonStates = new Dictionary<string, VirtualButtonState>();
+            foreach (string vButton in _virtualButtons)
+            {
+                _virtualButtonStates[vButton] = VirtualButtonState.Idle;
+            }
         }
 
         protected virtual void Reset()
@@ -368,39 +376,39 @@ namespace QuickVR
             return value;
         }
 
-        protected static bool IsButtonState(string button, VirtualButtonState state)
-        {
-            bool inState = false;
-            if (_inputManager.IsActiveVirtualButton(button))
-            {
-                List<BaseInputManager> inputManagers = _inputManager.GetInputManagers();
-                for (int i = 0; !inState && (i < inputManagers.Count); i++)
-                {
-                    BaseInputManager iManager = inputManagers[i];
-                    if (!iManager._active) continue;
+        //protected static bool IsButtonState(string button, VirtualButtonState state)
+        //{
+        //    bool inState = false;
+        //    if (_inputManager.IsActiveVirtualButton(button))
+        //    {
+        //        List<BaseInputManager> inputManagers = _inputManager.GetInputManagers();
+        //        for (int i = 0; !inState && (i < inputManagers.Count); i++)
+        //        {
+        //            BaseInputManager iManager = inputManagers[i];
+        //            if (!iManager._active) continue;
 
-                    if (state == VirtualButtonState.UP) inState = iManager.GetButtonUp(button);
-                    else if (state == VirtualButtonState.DOWN) inState = iManager.GetButtonDown(button);
-                    else inState = iManager.GetButton(button);
-                }
-            }
+        //            if (state == VirtualButtonState.UP) inState = iManager.GetButtonUp(button);
+        //            else if (state == VirtualButtonState.DOWN) inState = iManager.GetButtonDown(button);
+        //            else inState = iManager.GetButton(button);
+        //        }
+        //    }
 
-            return inState;
-        }
+        //    return inState;
+        //}
 
         public static bool GetButton(string button)
         {
-            return IsButtonState(button, VirtualButtonState.PRESSED);
+            return _inputManager.IsVirtualButton(button)? _inputManager._virtualButtonStates[button] == VirtualButtonState.Pressed : false;
         }
 
         public static bool GetButtonDown(string button)
         {
-            return IsButtonState(button, VirtualButtonState.DOWN);
+            return _inputManager.IsVirtualButton(button) ? _inputManager._virtualButtonStates[button] == VirtualButtonState.Triggered : false;
         }
 
         public static bool GetButtonUp(string button)
         {
-            return IsButtonState(button, VirtualButtonState.UP);
+            return _inputManager.IsVirtualButton(button) ? _inputManager._virtualButtonStates[button] == VirtualButtonState.Released : false;
         }
 
         #endregion
@@ -409,9 +417,37 @@ namespace QuickVR
 
         public virtual void UpdateState()
         {
-            foreach (BaseInputManager iManager in GetInputManagers())
+            for (int i = 0; i < _virtualButtons.Count; i++)
             {
-                iManager.UpdateMappingState();
+                string vButtonName = _virtualButtons[i];
+                bool bPressed = false;
+
+                List<BaseInputManager> inputManagers = GetInputManagers();
+                for (int j = 0; j < inputManagers.Count && !bPressed; j++)
+                {
+                    BaseInputManager iManager = inputManagers[j];
+                    bPressed = iManager.CheckButtonPressed(iManager.GetButtonMapping(i));
+                }
+
+                VirtualButtonState currentState = _virtualButtonStates[vButtonName];
+                if (bPressed)
+                {
+                    if (currentState == VirtualButtonState.Idle)
+                    {
+                        _virtualButtonStates[vButtonName] = VirtualButtonState.Triggered;
+                    }
+                    else if (currentState == VirtualButtonState.Triggered)
+                    {
+                        _virtualButtonStates[vButtonName] = VirtualButtonState.Pressed;
+                    }
+                }
+                else
+                {
+                    if (currentState == VirtualButtonState.Triggered || currentState == VirtualButtonState.Pressed)
+                    {
+                        _virtualButtonStates[vButtonName] = VirtualButtonState.Released;
+                    }
+                }
             }
         }
 
