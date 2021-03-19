@@ -146,7 +146,7 @@ namespace QuickVR
 
             if (numTrackers == 1 || numTrackers == 3 || numTrackers == 4 || numTrackers == 6 || numTrackers == 10)
             {
-                if (!nodeHMD._inputDevice.isValid)
+                if (!nodeHMD._inputDevice.Value.isValid)
                 {
                     //The head will always be the upper body tracker
                     nodeHMD._inputDevice = bodyTrackers[0];
@@ -155,11 +155,11 @@ namespace QuickVR
                 if (numTrackers == 3)
                 {
                     //Head + Hands
-                    if (!nodeLeftHand._inputDevice.isValid)
+                    if (!nodeLeftHand._inputDevice.Value.isValid)
                     {
                         nodeLeftHand._inputDevice = bodyTrackers[1];
                     }
-                    if (!nodeRightHand._inputDevice.isValid)
+                    if (!nodeRightHand._inputDevice.Value.isValid)
                     {
                         nodeRightHand._inputDevice = bodyTrackers[2];
                     }
@@ -288,7 +288,7 @@ namespace QuickVR
 
         protected virtual void SwapQuickVRNode(QuickVRNode vrNodeA, QuickVRNode vrNodeB)
         {
-            InputDevice deviceA = vrNodeA._inputDevice;
+            InputDevice deviceA = vrNodeA._inputDevice.Value;
             vrNodeA._inputDevice = vrNodeB._inputDevice;
             vrNodeB._inputDevice = deviceA;
         }

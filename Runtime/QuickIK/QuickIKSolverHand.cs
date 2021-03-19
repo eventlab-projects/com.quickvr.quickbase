@@ -56,7 +56,7 @@ namespace QuickVR
             //Correct the rotations of the wrist and forearm by applying human body constraints
             float boneMidWeight = 0.5f;
             float rotAngle = _targetLimb.localEulerAngles.z * boneMidWeight;
-            Vector3 rotAxis = (_boneLimb.position - _boneMid.position).normalized;
+            Vector3 rotAxis = (_boneLimb.position - _boneMid.position);
 
             //Apply the rotation to the forearm
             Quaternion limbRot = _boneLimb.rotation;

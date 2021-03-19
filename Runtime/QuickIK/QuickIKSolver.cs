@@ -172,6 +172,8 @@ namespace QuickVR
             }
         }
 
+        protected QuickIKManager _ikManager = null;
+
         #endregion
 
         #region PROTECTED PARAMETERS
@@ -236,6 +238,8 @@ namespace QuickVR
                 _initialLocalRotationTargetLimb = _targetLimb.localRotation;
             }
             if (_targetHint) _initialLocalPositionTargetHint = _targetHint.localPosition;
+
+            _ikManager = GetComponentInParent<QuickIKManager>();
         }
 
         #endregion
@@ -272,12 +276,6 @@ namespace QuickVR
         public virtual float GetChainLength()
         {
             return GetUpperLength() + GetMidLength();
-        }
-
-        protected virtual Vector3 GetIKTargetLimbPosition()
-        {
-            Vector3 v = _targetLimb.position - _boneUpper.position;
-            return _boneUpper.position + (v.normalized * Mathf.Min(v.magnitude, GetChainLength()));
         }
 
         protected virtual Vector3 GetIKTargetHintPosition()
@@ -323,7 +321,8 @@ namespace QuickVR
 
         protected virtual void LateUpdate()
         {
-            if (!GetComponentInParent<QuickIKManager>())
+            //If we have an IKManager on the parent, the update order is determined by the IKManager. Otherwise, update it at lateUpdate.
+            if (!_ikManager)
             {
                 UpdateIK();
             }
@@ -356,28 +355,30 @@ namespace QuickVR
             float chainLength = GetChainLength() * 0.9999f;
 
             //Align the bone with the target limb
-            Vector3 ikTargetLimbPos = GetIKTargetLimbPosition();
-            Vector3 u = (_boneMid.position - _boneUpper.position);
-            Vector3 v = (ikTargetLimbPos - _boneUpper.position);
+            Vector3 ikTargetLimbPos = _targetLimb.position;
+            Vector3 bUpperPos = _boneUpper.position;
+
+            Vector3 u = (_boneMid.position - bUpperPos);
+            Vector3 v = (ikTargetLimbPos - bUpperPos);
             float rotAngle = Vector3.Angle(u, v);
-            _boneUpper.Rotate(Vector3.Cross(u, v).normalized, rotAngle, Space.World);
+            _boneUpper.Rotate(Vector3.Cross(u, v), rotAngle, Space.World);
 
             if (_targetHint && _boneLimb)
             {
                 //Apply the ikAngle to the boneUpper. The ikAngle is computed using the cosine rule
-                float targetDistance = Mathf.Min(Vector3.Distance(_boneUpper.position, ikTargetLimbPos), chainLength);
+                float targetDistance = Mathf.Min(Vector3.Distance(bUpperPos, ikTargetLimbPos), chainLength);
                 float cos = (Mathf.Pow(midLength, 2) - Mathf.Pow(upperLength, 2) - Mathf.Pow(targetDistance, 2)) / (-2 * upperLength * targetDistance);
                 float ikAngle = Mathf.Acos(cos) * Mathf.Rad2Deg;
-                v = _boneMid.position - _boneUpper.position;
-                Vector3 w = GetIKTargetHintPosition() - _boneUpper.position;
-                _boneUpper.Rotate(Vector3.Cross(v, w).normalized, ikAngle, Space.World);
+                v = _boneMid.position - bUpperPos;
+                Vector3 w = GetIKTargetHintPosition() - bUpperPos;
+                _boneUpper.Rotate(Vector3.Cross(v, w), ikAngle, Space.World);
             }
 
             //Rotate the mid limb towards the target position. 
-            Vector3 currentMidDir = (_boneLimb.position - _boneMid.position).normalized;
-            Vector3 targetMidDir = (ikTargetLimbPos - _boneMid.position).normalized;
+            Vector3 currentMidDir = (_boneLimb.position - _boneMid.position);
+            Vector3 targetMidDir = (ikTargetLimbPos - _boneMid.position);
             rotAngle = Vector3.Angle(currentMidDir, targetMidDir);
-            _boneMid.Rotate(Vector3.Cross(currentMidDir, targetMidDir).normalized, rotAngle, Space.World);
+            _boneMid.Rotate(Vector3.Cross(currentMidDir, targetMidDir), rotAngle, Space.World);
 
             boneUpperRot = _boneUpper.rotation;
             boneMidRot = _boneMid.rotation;

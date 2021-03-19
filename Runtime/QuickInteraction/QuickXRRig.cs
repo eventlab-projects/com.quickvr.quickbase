@@ -17,13 +17,14 @@ namespace QuickVR
 
         protected new IEnumerator Start()
         {
-            while (!Camera.main)
+            while (!QuickVRCameraController.GetCamera())
             {
                 yield return null;
             }
 
-            cameraGameObject = Camera.main.gameObject;
-            cameraFloorOffsetObject = Camera.main.transform.parent.gameObject;
+            Camera cam = QuickVRCameraController.GetCamera();
+            cameraGameObject = cam.gameObject;
+            cameraFloorOffsetObject = cam.transform.parent.gameObject;
         }
 
     }

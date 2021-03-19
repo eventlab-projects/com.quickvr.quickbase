@@ -32,7 +32,7 @@ namespace QuickVR
         {
             get
             {
-                return Camera.main;
+                return QuickVRCameraController.GetCamera();
             }
         }
 
@@ -155,7 +155,7 @@ namespace QuickVR
         {
             Animator animator = QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorTarget();
             //Vector3 fwd = animator.transform.forward;
-            Vector3 fwd = Vector3.ProjectOnPlane(Camera.main.transform.forward, animator.transform.up);
+            Vector3 fwd = Vector3.ProjectOnPlane(QuickVRCameraController.GetCamera().transform.forward, animator.transform.up);
             transform.position = animator.GetBoneTransform(HumanBodyBones.Head).position + fwd * 3;
             transform.forward = fwd;
         }

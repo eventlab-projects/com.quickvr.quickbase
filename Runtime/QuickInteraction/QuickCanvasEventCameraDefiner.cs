@@ -30,7 +30,7 @@ namespace QuickVR
         {
             if (!_canvas.worldCamera)
             {
-                _canvas.worldCamera = Camera.main;
+                _canvas.worldCamera = QuickVRCameraController.GetCamera();
             }
         }
 

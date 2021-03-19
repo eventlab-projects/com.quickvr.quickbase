@@ -179,7 +179,7 @@ namespace QuickVR
         {
             if ( !QuickVRManager.IsXREnabled() && GetVRCursor(Role.Head) == this)
             {
-                return Camera.main.ScreenPointToRay(Input.mousePosition);
+                return QuickVRCameraController.GetCamera().ScreenPointToRay(Input.mousePosition);
             }
 
             return new Ray(transform.position, _CursorTransform.position - transform.position);

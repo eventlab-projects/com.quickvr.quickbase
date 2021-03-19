@@ -98,7 +98,7 @@ namespace QuickVR
         public UpdateMode _updateModePos = UpdateMode.FromUser;
         public UpdateMode _updateModeRot = UpdateMode.FromUser;
 
-        public InputDevice _inputDevice { get; set; }
+        public InputDevice? _inputDevice { get; set; }
 
         #endregion
 
@@ -339,7 +339,7 @@ namespace QuickVR
 
         public virtual void UpdateState()
         {
-            if (!_inputDevice.isValid)
+            if (_inputDevice == null)
             {
                 //try to find a valid inputdevice for this role. 
                 if (_role == QuickHumanBodyBones.Head)
@@ -356,18 +356,18 @@ namespace QuickVR
                 }
             }
 
-            if (_inputDevice.isValid)
+            if (_inputDevice != null)
             {
-                if (_inputDevice.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 pos))
+                if (_inputDevice.Value.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 pos))
                 {
                     transform.localPosition = pos;
                 }
-                if (_inputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion rot))
+                if (_inputDevice.Value.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion rot))
                 {
                     transform.localRotation = rot;
                 }
 
-                _isTracked = true;
+                _inputDevice.Value.TryGetFeatureValue(CommonUsages.isTracked, out _isTracked);
             }
             else
             {

@@ -9,6 +9,28 @@ using UnityEngine.InputSystem.XR;
 namespace QuickVR
 {
 
+    public class InputMap
+    {
+        public enum Type
+        {
+            Axis, 
+            Button,
+        }
+
+        public BaseInputManager _inputManager = null;
+        public string _inputCode = "";
+        public Type _type = Type.Axis;
+        public float _scale = 1;
+
+        public InputMap(BaseInputManager iManager, string inputCode, Type t, float scale = 1)
+        {
+            _inputManager = iManager;
+            _inputCode = inputCode;
+            _type = t;
+            _scale = scale;
+        }
+    }
+
     [System.Serializable]
     public class InputManager : MonoBehaviour
     {
@@ -19,14 +41,20 @@ namespace QuickVR
 
         [SerializeField]
         protected List<string> _virtualAxes = new List<string>();
+        protected Dictionary<string, float> _virtualAxesState = new Dictionary<string, float>();
+        protected Dictionary<string, int> _axisToID = new Dictionary<string, int>();
 
         [SerializeField]
         protected List<string> _virtualButtons = new List<string>();
-        protected Dictionary<string, VirtualButtonState> _virtualButtonStates = null;
+        protected Dictionary<string, VirtualButtonState> _virtualButtonsState = new Dictionary<string, VirtualButtonState>();
+        protected Dictionary<string, int> _buttonToID = new Dictionary<string, int>();
 
         protected Dictionary<string, bool> _activeVirtualAxes = new Dictionary<string, bool>();
-
+        
         protected Dictionary<string, bool> _activeVirtualButtons = new Dictionary<string, bool>();
+
+        protected List<List<InputMap>> _validAxesMapping = new List<List<InputMap>>();
+        protected List<List<InputMap>> _validButtonsMapping = new List<List<InputMap>>();
 
         protected enum VirtualButtonState
         {
@@ -114,10 +142,73 @@ namespace QuickVR
         {
             Reset();
 
-            _virtualButtonStates = new Dictionary<string, VirtualButtonState>();
-            foreach (string vButton in _virtualButtons)
+            for (int i = 0; i < _virtualAxes.Count; i++)
             {
-                _virtualButtonStates[vButton] = VirtualButtonState.Idle;
+                string vAxis = _virtualAxes[i];
+                _virtualAxesState[vAxis] = 0;
+                _axisToID[vAxis] = i;
+            }
+
+            for (int i = 0; i < _virtualButtons.Count; i++)
+            {
+                string vButton = _virtualButtons[i];
+                _virtualButtonsState[vButton] = VirtualButtonState.Idle;
+                _buttonToID[vButton] = i;
+            }
+        }
+
+        protected virtual void Start()
+        {
+            _validAxesMapping.Clear();
+            for (int i = 0; i < _virtualAxes.Count; i++)
+            {
+                List<InputMap> maps = new List<InputMap>();
+                foreach (BaseInputManager iManager in GetInputManagers())
+                {
+                    AxisMapping axisMapping = iManager.GetAxisMapping(i);
+                    if (axisMapping._axisCode != BaseInputManager.NULL_MAPPING)
+                    {
+                        maps.Add(new InputMap(iManager, axisMapping._axisCode, InputMap.Type.Axis));
+                    }
+                    if (axisMapping._positiveButton._keyCode != BaseInputManager.NULL_MAPPING)
+                    {
+                        maps.Add(new InputMap(iManager, axisMapping._positiveButton._keyCode, InputMap.Type.Button, 1));
+                    }
+                    if (axisMapping._positiveButton._altKeyCode != BaseInputManager.NULL_MAPPING)
+                    {
+                        maps.Add(new InputMap(iManager, axisMapping._positiveButton._altKeyCode, InputMap.Type.Button, 1));
+                    }
+                    if (axisMapping._negativeButton._keyCode != BaseInputManager.NULL_MAPPING)
+                    {
+                        maps.Add(new InputMap(iManager, axisMapping._negativeButton._keyCode, InputMap.Type.Button, -1));
+                    }
+                    if (axisMapping._negativeButton._altKeyCode != BaseInputManager.NULL_MAPPING)
+                    {
+                        maps.Add(new InputMap(iManager, axisMapping._negativeButton._altKeyCode, InputMap.Type.Button, -1));
+                    }
+                }
+
+                _validAxesMapping.Add(maps);
+            }
+
+            _validButtonsMapping.Clear();
+            for (int i = 0; i < _virtualButtons.Count; i++)
+            {
+                List<InputMap> maps = new List<InputMap>();
+                foreach (BaseInputManager iManager in GetInputManagers())
+                {
+                    ButtonMapping bMapping = iManager.GetButtonMapping(i);
+                    if (bMapping._keyCode != BaseInputManager.NULL_MAPPING)
+                    {
+                        maps.Add(new InputMap(iManager, bMapping._keyCode, InputMap.Type.Button));
+                    }
+                    if (bMapping._altKeyCode != BaseInputManager.NULL_MAPPING)
+                    {
+                        maps.Add(new InputMap(iManager, bMapping._altKeyCode, InputMap.Type.Button));
+                    }
+                }
+
+                _validButtonsMapping.Add(maps);
             }
         }
 
@@ -218,6 +309,16 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
+
+        public virtual int ToAxisID(string virtualAxisName)
+        {
+            return _axisToID.ContainsKey(virtualAxisName) ? _axisToID[virtualAxisName] : -1;
+        }
+
+        public virtual int ToButtonID(string virtualButtonName)
+        {
+            return _buttonToID.ContainsKey(virtualButtonName)? _buttonToID[virtualButtonName] : -1;
+        }
 
         public static InputActionAsset GetInputActionsDefault()
         {
@@ -358,57 +459,22 @@ namespace QuickVR
 
         public static float GetAxis(string axis)
         {
-            float value = 0.0f;
-            if (_inputManager.IsActiveVirtualAxis(axis))
-            {
-                foreach (BaseInputManager iManager in _inputManager.GetInputManagers())
-                {
-                    if (!iManager.IsActive()) continue;
-
-                    float v = iManager.GetAxis(axis);
-                    if (Mathf.Abs(v) > Mathf.Abs(value))
-                    {
-                        value = v;
-                    }
-                }
-            }
-
-            return value;
+            return _inputManager._virtualAxesState[axis];
         }
-
-        //protected static bool IsButtonState(string button, VirtualButtonState state)
-        //{
-        //    bool inState = false;
-        //    if (_inputManager.IsActiveVirtualButton(button))
-        //    {
-        //        List<BaseInputManager> inputManagers = _inputManager.GetInputManagers();
-        //        for (int i = 0; !inState && (i < inputManagers.Count); i++)
-        //        {
-        //            BaseInputManager iManager = inputManagers[i];
-        //            if (!iManager._active) continue;
-
-        //            if (state == VirtualButtonState.UP) inState = iManager.GetButtonUp(button);
-        //            else if (state == VirtualButtonState.DOWN) inState = iManager.GetButtonDown(button);
-        //            else inState = iManager.GetButton(button);
-        //        }
-        //    }
-
-        //    return inState;
-        //}
 
         public static bool GetButton(string button)
         {
-            return _inputManager.IsVirtualButton(button)? _inputManager._virtualButtonStates[button] == VirtualButtonState.Pressed : false;
+            return _inputManager.IsVirtualButton(button)? _inputManager._virtualButtonsState[button] == VirtualButtonState.Pressed : false;
         }
 
         public static bool GetButtonDown(string button)
         {
-            return _inputManager.IsVirtualButton(button) ? _inputManager._virtualButtonStates[button] == VirtualButtonState.Triggered : false;
+            return _inputManager.IsVirtualButton(button) ? _inputManager._virtualButtonsState[button] == VirtualButtonState.Triggered : false;
         }
 
         public static bool GetButtonUp(string button)
         {
-            return _inputManager.IsVirtualButton(button) ? _inputManager._virtualButtonStates[button] == VirtualButtonState.Released : false;
+            return _inputManager.IsVirtualButton(button) ? _inputManager._virtualButtonsState[button] == VirtualButtonState.Released : false;
         }
 
         #endregion
@@ -417,35 +483,75 @@ namespace QuickVR
 
         public virtual void UpdateState()
         {
+            UpdateStateVirtualAxes();
+            UpdateStateVirtualButtons();
+        }
+
+        protected virtual void UpdateStateVirtualAxes()
+        {
+            for (int i = 0; i < _virtualAxes.Count; i++)
+            {
+                float aValue = 0;
+                List<InputMap> inputMaps = _validAxesMapping[i];
+
+                for (int j = 0; j < inputMaps.Count && aValue == 0; j++)
+                {
+                    InputMap iMap = inputMaps[j];
+                    if (iMap._type == InputMap.Type.Axis)
+                    {
+                        aValue = iMap._inputManager.GetAxis(iMap._inputCode);
+                    }
+                    else
+                    {
+                        //The axis input is defined by a button. Check if the button mapped to the axis
+                        //is pressed or not and return the corresponding value. 
+                        bool bPressed = iMap._inputManager.GetButton(iMap._inputCode);
+                        if (bPressed)
+                        {
+                            aValue = iMap._scale;
+                        }
+                    }
+                }
+
+                _virtualAxesState[_virtualAxes[i]] = aValue;
+            }
+        }
+
+        protected virtual void UpdateStateVirtualButtons()
+        {
             for (int i = 0; i < _virtualButtons.Count; i++)
             {
                 string vButtonName = _virtualButtons[i];
                 bool bPressed = false;
+                List<InputMap> inputMaps = _validButtonsMapping[i];
 
-                List<BaseInputManager> inputManagers = GetInputManagers();
-                for (int j = 0; j < inputManagers.Count && !bPressed; j++)
+                for (int j = 0; j < inputMaps.Count && !bPressed; j++)
                 {
-                    BaseInputManager iManager = inputManagers[j];
-                    bPressed = iManager.CheckButtonPressed(iManager.GetButtonMapping(i));
+                    InputMap iMap = inputMaps[j];
+                    bPressed = iMap._inputManager.GetButton(iMap._inputCode);
                 }
 
-                VirtualButtonState currentState = _virtualButtonStates[vButtonName];
+                VirtualButtonState currentState = _virtualButtonsState[vButtonName];
                 if (bPressed)
                 {
                     if (currentState == VirtualButtonState.Idle)
                     {
-                        _virtualButtonStates[vButtonName] = VirtualButtonState.Triggered;
+                        _virtualButtonsState[vButtonName] = VirtualButtonState.Triggered;
                     }
                     else if (currentState == VirtualButtonState.Triggered)
                     {
-                        _virtualButtonStates[vButtonName] = VirtualButtonState.Pressed;
+                        _virtualButtonsState[vButtonName] = VirtualButtonState.Pressed;
                     }
                 }
                 else
                 {
                     if (currentState == VirtualButtonState.Triggered || currentState == VirtualButtonState.Pressed)
                     {
-                        _virtualButtonStates[vButtonName] = VirtualButtonState.Released;
+                        _virtualButtonsState[vButtonName] = VirtualButtonState.Released;
+                    }
+                    else if (currentState == VirtualButtonState.Released)
+                    {
+                        _virtualButtonsState[vButtonName] = VirtualButtonState.Idle;
                     }
                 }
             }

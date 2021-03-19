@@ -303,7 +303,7 @@ namespace QuickVR
         protected virtual void OnEndMove(LocomotionSystem lSystem)
         {
             Animator animator = _vrManager.GetAnimatorTarget();
-            Camera cam = Camera.main;
+            Camera cam = QuickVRCameraController.GetCamera();
             if (animator && cam)
             {
                 QuickVRPlayArea playArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();

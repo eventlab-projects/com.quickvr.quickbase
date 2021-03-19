@@ -108,14 +108,14 @@ namespace QuickVR
                 int index = EditorGUILayout.Popup(AXIS, GetSelectedIndex(_axisCodes, mapping._axisCode), _axisCodes);
                 mapping._axisCode = _axisCodes[index];
 
-                ButtonMapping positiveButton = mapping.GetPositiveButton();
+                ButtonMapping positiveButton = mapping._positiveButton;
                 index = EditorGUILayout.Popup(POSITIVE_KEY, GetSelectedIndex(_buttonCodes, positiveButton._keyCode), _buttonCodes);
                 positiveButton._keyCode = _buttonCodes[index];
 
                 index = EditorGUILayout.Popup(ALT_POSITIVE_KEY, GetSelectedIndex(_buttonCodes, positiveButton._altKeyCode), _buttonCodes);
                 positiveButton._altKeyCode = _buttonCodes[index];
 
-                ButtonMapping negativeButton = mapping.GetNegativeButton();
+                ButtonMapping negativeButton = mapping._negativeButton;
                 index = EditorGUILayout.Popup(NEGATIVE_KEY, GetSelectedIndex(_buttonCodes, negativeButton._keyCode), _buttonCodes);
                 negativeButton._keyCode = _buttonCodes[index];
                 index = EditorGUILayout.Popup(ALT_NEGATIVE_KEY, GetSelectedIndex(_buttonCodes, negativeButton._altKeyCode), _buttonCodes);

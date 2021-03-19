@@ -36,14 +36,8 @@ namespace QuickVR
             }
         }
 
-        protected Camera _camera
-        {
-            get
-            {
-                return Camera.main;
-            }
-        }
-
+        protected static Camera _camera = null;
+        
         protected float _offsetH = 0;
         protected float _offsetV = 0;
         protected Quaternion _initialLocalRotationHead = Quaternion.identity;
@@ -74,7 +68,8 @@ namespace QuickVR
                 camera.tag = "MainCamera";
                 camera.gameObject.GetOrCreateComponent<FlareLayer>();
             }
-            
+
+            _camera = Camera.main;
             _camera.GetOrCreateComponent<AudioListener>();
 
             if (!QuickVRManager.IsXREnabled())
@@ -93,6 +88,15 @@ namespace QuickVR
         protected virtual void OnDisable()
         {
             QuickVRManager.OnPreCopyPose -= UpdateCameraRotation;
+        }
+
+        #endregion
+
+        #region GET AND SET
+
+        public static Camera GetCamera()
+        {
+            return _camera;
         }
 
         #endregion
