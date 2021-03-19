@@ -67,13 +67,14 @@ namespace QuickVR
 		}
 		protected static InputManager m_InputManager = null;
 
-		//[SerializeField, HideInInspector]
-		[SerializeField]
-		protected List<AxisMapping> _axisMapping = new List<AxisMapping>();
+        [SerializeField, HideInInspector]
+        protected List<AxisMapping> _axisMapping = new List<AxisMapping>();
 
-		//[SerializeField, HideInInspector]
-		[SerializeField]
-		protected List<ButtonMapping> _buttonMapping = new List<ButtonMapping>();
+        [SerializeField, HideInInspector]
+        protected List<ButtonMapping> _buttonMapping = new List<ButtonMapping>();
+
+		[SerializeField, HideInInspector]
+		protected bool _initialized = false;
 
 		#endregion
 
@@ -100,7 +101,10 @@ namespace QuickVR
 
 		protected virtual void Awake()
 		{
-			Reset();
+			if (!_initialized)
+            {
+				Reset();
+			}
 		}
 
 		public virtual void Reset()
@@ -118,6 +122,8 @@ namespace QuickVR
 			{
 				AddButtonMapping();
 			}
+
+			_initialized = true;
 		}
 
 		public virtual void ConfigureDefaultAxis(string virtualAxisName, string axisName)

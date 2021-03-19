@@ -42,12 +42,12 @@ namespace QuickVR
         [SerializeField]
         protected List<string> _virtualAxes = new List<string>();
         protected Dictionary<string, float> _virtualAxesState = new Dictionary<string, float>();
-        protected Dictionary<string, int> _axisToID = new Dictionary<string, int>();
+        protected Dictionary<string, int> _axisToID = null;
 
         [SerializeField]
         protected List<string> _virtualButtons = new List<string>();
         protected Dictionary<string, VirtualButtonState> _virtualButtonsState = new Dictionary<string, VirtualButtonState>();
-        protected Dictionary<string, int> _buttonToID = new Dictionary<string, int>();
+        protected Dictionary<string, int> _buttonToID = null;
 
         protected Dictionary<string, bool> _activeVirtualAxes = new Dictionary<string, bool>();
         
@@ -141,20 +141,6 @@ namespace QuickVR
         protected virtual void Awake()
         {
             Reset();
-
-            for (int i = 0; i < _virtualAxes.Count; i++)
-            {
-                string vAxis = _virtualAxes[i];
-                _virtualAxesState[vAxis] = 0;
-                _axisToID[vAxis] = i;
-            }
-
-            for (int i = 0; i < _virtualButtons.Count; i++)
-            {
-                string vButton = _virtualButtons[i];
-                _virtualButtonsState[vButton] = VirtualButtonState.Idle;
-                _buttonToID[vButton] = i;
-            }
         }
 
         protected virtual void Start()
@@ -312,12 +298,54 @@ namespace QuickVR
 
         public virtual int ToAxisID(string virtualAxisName)
         {
-            return _axisToID.ContainsKey(virtualAxisName) ? _axisToID[virtualAxisName] : -1;
+            int id = 0;
+            if (Application.isPlaying)
+            {
+                if (_axisToID == null)
+                {
+                    _axisToID = new Dictionary<string, int>();
+                    for (int i = 0; i < _virtualAxes.Count; i++)
+                    {
+                        string vAxis = _virtualAxes[i];
+                        _virtualAxesState[vAxis] = 0;
+                        _axisToID[vAxis] = i;
+                    }
+                }
+
+                id = _axisToID.ContainsKey(virtualAxisName) ? _axisToID[virtualAxisName] : -1;
+            }
+            else
+            {
+                for (; id < _virtualAxes.Count && _virtualAxes[id] != virtualAxisName; id++);
+            }
+
+            return id;
         }
 
         public virtual int ToButtonID(string virtualButtonName)
         {
-            return _buttonToID.ContainsKey(virtualButtonName)? _buttonToID[virtualButtonName] : -1;
+            int id = 0;
+            if (Application.isPlaying)
+            {
+                if (_buttonToID == null)
+                {
+                    _buttonToID = new Dictionary<string, int>();
+                    for (int i = 0; i < _virtualButtons.Count; i++)
+                    {
+                        string vButton = _virtualButtons[i];
+                        _virtualButtonsState[vButton] = VirtualButtonState.Idle;
+                        _buttonToID[vButton] = i;
+                    }
+                }
+                
+                id = _buttonToID.ContainsKey(virtualButtonName) ? _buttonToID[virtualButtonName] : -1;
+            }
+            else
+            {
+                for (; id < _virtualButtons.Count && _virtualButtons[id] != virtualButtonName; id++) ;
+            }
+
+            return id;
         }
 
         public static InputActionAsset GetInputActionsDefault()

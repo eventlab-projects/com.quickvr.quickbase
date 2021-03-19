@@ -363,7 +363,7 @@ namespace QuickVR
             float rotAngle = Vector3.Angle(u, v);
             _boneUpper.Rotate(Vector3.Cross(u, v), rotAngle, Space.World);
 
-            if (_targetHint && _boneLimb)
+            if (_targetHint)
             {
                 //Apply the ikAngle to the boneUpper. The ikAngle is computed using the cosine rule
                 float targetDistance = Mathf.Min(Vector3.Distance(bUpperPos, ikTargetLimbPos), chainLength);
