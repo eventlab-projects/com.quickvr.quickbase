@@ -211,7 +211,7 @@ namespace QuickVR
 
         protected virtual bool AllowRender()
         {
-            return (Vector3.Distance(_currentCamera.transform.position, transform.position) < _reflectionDistance);
+            return ((_currentCamera.transform.position - transform.position).sqrMagnitude < _reflectionDistance * _reflectionDistance);
         }
 
         //protected virtual void OnWillRenderObject()

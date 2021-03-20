@@ -339,21 +339,18 @@ namespace QuickVR
 
         public virtual void UpdateState()
         {
-            if (_inputDevice == null)
+            //try to find a valid inputdevice for the key roles
+            if (_role == QuickHumanBodyBones.Head && _inputDevice == null)
             {
-                //try to find a valid inputdevice for this role. 
-                if (_role == QuickHumanBodyBones.Head)
-                {
-                    _inputDevice = InputDevices.GetDeviceAtXRNode(XRNode.Head);
-                }
-                else if (_role == QuickHumanBodyBones.LeftHand)
-                {
-                    _inputDevice = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
-                }
-                else if (_role == QuickHumanBodyBones.RightHand)
-                {
-                    _inputDevice = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
-                }
+                _inputDevice = InputDevices.GetDeviceAtXRNode(XRNode.Head);
+            }
+            else if (_role == QuickHumanBodyBones.LeftHand && _inputDevice == null)
+            {
+                _inputDevice = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
+            }
+            else if (_role == QuickHumanBodyBones.RightHand && _inputDevice == null)
+            {
+                _inputDevice = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
             }
 
             if (_inputDevice != null)

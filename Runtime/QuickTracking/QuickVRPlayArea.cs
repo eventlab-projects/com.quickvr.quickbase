@@ -88,13 +88,6 @@ namespace QuickVR
             return GetVRNode((QuickHumanBodyBones)role);
         }
 
-        public virtual float GetEyeStereoSeparation()
-        {
-            QuickVRNode eLeft = GetVRNode(HumanBodyBones.LeftEye);
-            QuickVRNode eRight = GetVRNode(HumanBodyBones.RightEye);
-            return (eLeft != null && eRight != null) ? Vector3.Distance(eLeft.transform.position, eRight.transform.position) : 0.0f;
-        }
-
         protected virtual bool IsNodeLeftSide(QuickVRNode vrNode)
         {
             QuickVRNode nodeHead = GetVRNode(HumanBodyBones.Head);

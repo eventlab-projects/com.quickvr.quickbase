@@ -37,42 +37,13 @@ namespace QuickVR
 
         protected QuickUnityVR _unityVR = null;
         protected QuickBaseTrackingManager _handTracking = null;
-        protected List<QuickBaseTrackingManager> _bodyTrackingSystems = new List<QuickBaseTrackingManager>();
-        protected List<QuickBaseTrackingManager> _ikManagerSystems = new List<QuickBaseTrackingManager>();
 
-        protected QuickVRPlayArea _vrPlayArea
-        {
-            get
-            {
-                return QuickSingletonManager.GetInstance<QuickVRPlayArea>();
-            }
-        }
-
-        protected static InputManager _inputManager
-        {
-            get
-            {
-                return QuickSingletonManager.GetInstance<InputManager>();
-            }
-        }
-
-        protected QuickCopyPoseBase _copyPose
-        {
-            get
-            {
-                return gameObject.GetOrCreateComponent<QuickCopyPoseBase>();
-            }
-        }
-
-        protected static PerformanceFPS _fpsCounter
-        {
-            get
-            {
-                return QuickSingletonManager.GetInstance<PerformanceFPS>();
-            }
-        }
-
+        protected QuickVRPlayArea _vrPlayArea = null;
         protected QuickVRCameraController _cameraController = null;
+        protected InputManager _inputManager = null;
+        protected PerformanceFPS _fpsCounter = null;
+        protected QuickCopyPoseBase _copyPose = null;
+        
         protected QuickVRInteractionManager _interactionManager = null;
 
         protected bool _isCalibrationRequired = false;
@@ -87,9 +58,6 @@ namespace QuickVR
 
         public static event QuickVRManagerAction OnPreCalibrate;
         public static event QuickVRManagerAction OnPostCalibrate;
-
-        public static event QuickVRManagerAction OnPreUpdateTrackingEarly;
-        public static event QuickVRManagerAction OnPostUpdateTrackingEarly;
 
         public static event QuickVRManagerAction OnPreUpdateTracking;
         public static event QuickVRManagerAction OnPostUpdateTracking;
@@ -112,14 +80,29 @@ namespace QuickVR
         {
             Reset();
 
-            _copyPose.enabled = false;
+            _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
             _cameraController = QuickSingletonManager.GetInstance<QuickVRCameraController>();
+            _inputManager = QuickSingletonManager.GetInstance<InputManager>();
+            _fpsCounter = QuickSingletonManager.GetInstance<PerformanceFPS>();
+            
+            _copyPose = gameObject.GetOrCreateComponent<QuickCopyPoseBase>();
+            _copyPose.enabled = false;
 
             //Legacy XR Mode is deprecated on 2020 onwards. 
 #if UNITY_2020_1_OR_NEWER
             _XRMode = XRMode.XRPlugin;
 #endif
 
+        }
+
+        protected virtual void OnEnable()
+        {
+            Application.onBeforeRender += UpdateTracking;
+        }
+
+        protected virtual void OnDisable()
+        {
+            Application.onBeforeRender -= UpdateTracking;
         }
 
         protected virtual void Reset()
@@ -198,11 +181,6 @@ namespace QuickVR
             }
         }
 
-        protected virtual void ActionTargetAnimatorSet()
-        {
-            
-        }
-
         public virtual Animator GetAnimatorSource()
         {
             return _animatorSource;
@@ -228,16 +206,6 @@ namespace QuickVR
             SetAnimatorTarget(animator);
         }
 
-        public virtual void AddBodyTrackingSystem(QuickBaseTrackingManager bTracking)
-        {
-            _bodyTrackingSystems.Add(bTracking);
-        }
-
-        public virtual void AddIKManagerSystem(QuickBaseTrackingManager ikManager)
-        {
-            _ikManagerSystems.Add(ikManager);
-        }
-
         public virtual void AddHandTrackingSystem(QuickBaseTrackingManager handTracking)
         {
             _handTracking = handTracking;
@@ -247,9 +215,7 @@ namespace QuickVR
         {
             List<QuickBaseTrackingManager> result = new List<QuickBaseTrackingManager>();
             result.Add(_unityVR);
-            result.AddRange(_bodyTrackingSystems);
-            result.AddRange(_ikManagerSystems);
-
+            
             return result;
         }
 
@@ -281,6 +247,9 @@ namespace QuickVR
 
         protected virtual void Update()
         {
+            //Update the InputState
+            _inputManager.UpdateState();
+
             _fpsCounter.gameObject.SetActive(_showFPS);
 
             //Calibrate the TrackingManagers that needs to be calibrated. 
@@ -288,20 +257,24 @@ namespace QuickVR
             {
                 Calibrate();
             }
+        }
 
+        //protected virtual void LateUpdate()
+        protected virtual void UpdateTracking()
+        {
             //Update the VRNodes
             _vrPlayArea.UpdateVRNodes();
 
-            if (OnPreUpdateTrackingEarly != null) OnPreUpdateTrackingEarly();
-            UpdateTracking(true);
-            if (OnPostUpdateTrackingEarly != null) OnPostUpdateTrackingEarly();
-        }
-
-        protected virtual void LateUpdate()
-        {
-            //Update the TrackingManagers
             if (OnPreUpdateTracking != null) OnPreUpdateTracking();
-            UpdateTracking(false);
+            if (_unityVR && _unityVR.enabled)
+            {
+                _unityVR.UpdateTracking();
+            }
+
+            if (_handTracking && _handTracking.enabled)
+            {
+                _handTracking.UpdateTracking();
+            }
             if (OnPostUpdateTracking != null) OnPostUpdateTracking();
 
             //Copy the pose of the source avatar to the target avatar
@@ -313,39 +286,6 @@ namespace QuickVR
             if (OnPreCameraUpdate != null) OnPreCameraUpdate();
             _cameraController.UpdateCameraPosition(_animatorTarget);
             if (OnPostCameraUpdate != null) OnPostCameraUpdate();
-
-            //Update the InputState
-            _inputManager.UpdateState();
-        }
-
-        protected virtual void UpdateTracking(bool isEarly)
-        {
-            //1) Update the HeadTracking systems
-            UpdateTracking(_unityVR, isEarly);
-            
-            //2) Update the BodyTracking systems
-            foreach (QuickBaseTrackingManager bTracking in _bodyTrackingSystems)
-            {
-                UpdateTracking(bTracking, isEarly);
-            }
-
-            //3) Update the IKManager systems
-            foreach (QuickBaseTrackingManager ikManager in _ikManagerSystems)
-            {
-                UpdateTracking(ikManager, isEarly);
-            }
-
-            //4) Update the hand tracking system
-            UpdateTracking(_handTracking, isEarly);
-        }
-
-        protected virtual void UpdateTracking(QuickBaseTrackingManager tManager, bool isEarly)
-        {
-            if (tManager && tManager.enabled)
-            {
-                if (isEarly) tManager.UpdateTrackingEarly();
-                else tManager.UpdateTrackingLate();
-            }
         }
 
         #endregion

@@ -123,12 +123,12 @@ namespace QuickVR
 
         protected virtual void OnEnable()
         {
-            QuickVRManager.OnPreUpdateTrackingEarly += UpdateVRNodeTracked;
+            QuickVRManager.OnPreUpdateTracking += UpdateVRNodeTracked;
         }
 
         protected virtual void OnDisable()
         {
-            QuickVRManager.OnPreUpdateTrackingEarly -= UpdateVRNodeTracked;
+            QuickVRManager.OnPreUpdateTracking -= UpdateVRNodeTracked;
         }
 
         protected virtual void CreatePhysics()

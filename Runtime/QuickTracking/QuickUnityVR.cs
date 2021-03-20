@@ -95,19 +95,15 @@ namespace QuickVR {
             }
         }
 
-        protected override void RegisterTrackingManager()
-        {
-            _vrManager.AddUnityVRTrackingSystem(this);
-        }
-
-        protected override void Start()
+        protected virtual void Start()
         {
             _headOffset = Quaternion.Inverse(transform.rotation) * (_animator.GetBoneTransform(HumanBodyBones.Head).position - _animator.GetEyeCenterPosition());
 
             if (Application.isPlaying)
             {
                 CheckHandtrackingMode();
-                base.Start();
+
+                _vrManager.AddUnityVRTrackingSystem(this);
             }
         }
 
@@ -282,46 +278,12 @@ namespace QuickVR {
 
         #region UPDATE
 
-        public override void UpdateTrackingEarly()
+        protected override void LateUpdate()
         {
-            base.UpdateTrackingEarly();
-
-            if (Application.isPlaying)
-            {
-                UpdateTransformRoot();
-                UpdateTransformNodes();
-
-                UpdateVRCursors();
-
-                _footprints.gameObject.SetActive(_useFootprints);
-            }
+            
         }
 
-        protected virtual void UpdateTransformRoot()
-        {
-            //_vrPlayArea.transform.parent = null;
-
-            //if (_updateRotation)
-            //{
-            //    //Update the rotation
-            //    float rotOffset = GetRotationOffset();
-            //    transform.Rotate(transform.up, rotOffset, Space.World);
-            //}
-
-            //if (_updatePosition)
-            //{
-            //    //Update the position
-            //    Vector3 disp = GetDisplacement();
-            //    transform.Translate(disp, Space.World);
-            //    _vrPlayArea.GetCalibrationPoseRoot().Translate(disp, Space.World);
-
-            //    _footprints.translationOffset -= disp;
-            //}
-
-            //_vrPlayArea.transform.parent = transform;
-        }
-
-        protected virtual void UpdateTransformNodes()
+        public override void UpdateTracking()
         {
             //1) Update all the nodes but the hips, which has to be treated differently. 
             //foreach (HumanBodyBones boneID in QuickVRNode.GetTypeList())
@@ -329,7 +291,7 @@ namespace QuickVR {
             {
                 QuickVRNode node = _vrPlayArea.GetVRNode(boneID);
                 if (!node.IsTracked()) continue;
-                
+
                 QuickTrackedObject tObject = node.GetTrackedObject();
 
                 //Update the QuickVRNode's position
@@ -347,10 +309,15 @@ namespace QuickVR {
             {
                 QuickVRNode vrNode = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
                 UpdateTransformNodePosFromCalibrationPose(vrNode, HumanBodyBones.Hips, Vector3.up);
-                float maxY = GetIKSolver(HumanBodyBones.Hips).GetInitialLocalPosTargetLimb().y; 
+                float maxY = GetIKSolver(HumanBodyBones.Hips).GetInitialLocalPosTargetLimb().y;
                 Transform targetHips = GetIKSolver(HumanBodyBones.Hips)._targetLimb;
                 targetHips.localPosition = new Vector3(targetHips.localPosition.x, Mathf.Min(targetHips.localPosition.y, maxY), targetHips.localPosition.z);
             }
+
+            UpdateVRCursors();
+            _footprints.gameObject.SetActive(_useFootprints);
+
+            base.UpdateTracking();
         }
 
         protected virtual void UpdateTransformNodePosFromUser(QuickVRNode node, HumanBodyBones boneID)

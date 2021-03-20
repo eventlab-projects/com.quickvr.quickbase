@@ -209,14 +209,6 @@ namespace QuickVR {
             QuickUtils.Destroy(m_ikSolversRightHand);
         }
 
-        protected override void RegisterTrackingManager()
-        {
-            if (Application.isPlaying)
-            {
-                _vrManager.AddIKManagerSystem(this);
-            }
-        }
-
         protected virtual void CreateIKSolversBody()
         {
             CreateIKSolver<QuickIKSolverHips>(HumanBodyBones.Hips);
@@ -595,16 +587,12 @@ namespace QuickVR {
 
         #region UPDATE
 
-        protected virtual void Update()
+        protected virtual void LateUpdate()
         {
-            if (!Application.isPlaying)
-            {
-                UpdateTrackingEarly();
-                UpdateTrackingLate();
-            }
+            UpdateTracking();
         }
 
-        public override void UpdateTrackingLate()
+        public override void UpdateTracking()
         {
             if (IsTrackedIKLimbBone(IKLimbBones.Hips))
             {

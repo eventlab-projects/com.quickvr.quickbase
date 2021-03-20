@@ -51,7 +51,7 @@ namespace QuickVR
             QuickSingletonManager.GetInstance<InputManager>().CreateDefaultImplementation<InputManagerOVRHands>();
         }
 
-        protected override void Start()
+        protected virtual void Start()
         {
             QuickVRPlayArea vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
             _leftHand = Instantiate<QuickOVRHand>(Resources.Load<QuickOVRHand>("Prefabs/pf_QuickOVRHandLeft"), vrPlayArea.GetVRNode(HumanBodyBones.LeftHand).transform);
@@ -60,14 +60,9 @@ namespace QuickVR
             _rightHand = Instantiate<QuickOVRHand>(Resources.Load<QuickOVRHand>("Prefabs/pf_QuickOVRHandRight"), vrPlayArea.GetVRNode(HumanBodyBones.RightHand).transform);
             _rightHand.transform.ResetTransformation();
 
-            base.Start();
-        }
-
-        protected override void RegisterTrackingManager()
-        {
             _vrManager.AddHandTrackingSystem(this);
         }
-        
+
 #endregion
 
         #region GET AND SET
@@ -86,7 +81,7 @@ namespace QuickVR
 
         #region UPDATE
 
-        public override void UpdateTrackingLate()
+        public override void UpdateTracking()
         {
             if (_hTracking && _hTracking._handTrackingMode == QuickUnityVR.HandTrackingMode.Hands)
             {

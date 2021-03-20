@@ -55,13 +55,6 @@ namespace QuickVR {
             }
         }
 
-        protected virtual void Start()
-        {
-            RegisterTrackingManager();
-        }
-
-        protected abstract void RegisterTrackingManager();
-
         #endregion
 
         #region GET AND SET
@@ -72,12 +65,7 @@ namespace QuickVR {
 
         #region UPDATE
 
-        public virtual void UpdateTrackingEarly()
-        {
-
-        }
-
-        public virtual void UpdateTrackingLate()
+        public virtual void UpdateTracking()
         {
 
         }
