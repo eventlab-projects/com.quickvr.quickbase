@@ -13,3 +13,30 @@ Our library is focused on more high level features that are necessary in all of 
 So the different applications that are built using __QuickVR__, have access to all those features already implemented. Without this library, those features should be implemented from the scratch on every new application, which would increase the production time dramatically. With this approach, we can have a prototype of a new VR application in a matter of hours to days, depending on its complexity.
 
 This work is funded by the European Research Council (ERC) Advanced Grant Moments in Time in Immersive Virtual Environments (MoTIVE) 742989.
+
+# Install
+
+Go to _Window > Package Manager_ and click on the ‘+’ symbol in the top left corner of the new window. Select _Add package from git URL…_
+
+![image](https://drive.google.com/uc?export=view&id=1iJBbaDI8AiwihPotd2TuruHfWbgHn38G)
+
+A text field will open. Copy and paste the following URL, and then click on _Add_. 
+
+https://github.com/eventlab-projects/com.quickvr.quickbase.git
+
+__Now be patient__. It seems that Unity does not produce any kind of visual feedback and it looks like nothing is happening, but the package is downloading. Then it will be automatically imported. 
+
+Once this process is done, the following window may appear, depending on the settings of your project. 
+
+![image](https://drive.google.com/uc?export=view&id=1NHGVY8s0_LOhxoM9Pbk2Txlk6ei07Cz5)
+
+If you’re starting a new project, just select _Yes_ and ignore the following sentence. Otherwise, if you are introducing the QuickVR library in an existing project and you want to keep support for legacy’s Unity input system, select _No_, and go to _Edit > Project Settings > Player_ and set _Active Input Handling_ to _Both_. 
+
+If you want, you can install some samples by going to _Window > Package Manager_. You’ll see that a new tab called __EventLab__ has appeared, containing the package __QuickVR.QuickBase__. 
+
+![image](https://drive.google.com/uc?export=view&id=10Lbb-nq7xVMnpfEtDDWIBdWPV_g3Zz8G)
+
+Select _Import_ on those samples you want to install. The samples are installed in _Assets > Samples_.  
+
+Done! Follow the documentation on the _Samples_ folder and the documentation on the wiki to learn how to configure your application for VR and start using the library. 
+
