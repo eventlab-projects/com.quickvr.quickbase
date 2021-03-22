@@ -63,13 +63,13 @@ namespace QuickVR
             {
                 Camera camera = _pfCamera ? Instantiate<Camera>(_pfCamera) : new GameObject().GetOrCreateComponent<Camera>();
                 camera.name = "__Camera__";
-                camera.transform.parent = transform;
-                camera.transform.ResetTransformation();
                 camera.tag = "MainCamera";
                 camera.gameObject.GetOrCreateComponent<FlareLayer>();
             }
 
             _camera = Camera.main;
+            _camera.transform.parent = transform;
+            _camera.transform.ResetTransformation();
             _camera.GetOrCreateComponent<AudioListener>();
 
             if (!QuickVRManager.IsXREnabled())

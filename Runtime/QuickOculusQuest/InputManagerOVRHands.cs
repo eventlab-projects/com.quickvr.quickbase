@@ -24,34 +24,25 @@ namespace QuickVR
         #region PROTECTED ATTRIBUTES
 
         protected QuickUnityVR _unityVR = null;
-        protected QuickOVRHandsInitializer _ovrHands = null;
+        protected QuickOVRHandsInitializer _ovrHands
+        {
+            get
+            {
+                if (!m_OVRHands && _unityVR)
+                {
+                    m_OVRHands = _unityVR.GetComponent<QuickOVRHandsInitializer>();
+                }
+
+                return m_OVRHands;
+            }
+        }
+        protected QuickOVRHandsInitializer m_OVRHands = null;
         
         #endregion
 
         #region CREATION AND DESTRUCTION
 
-        protected virtual IEnumerator Start()
-        {
-            //Wait for the Animator Source to be defined
-            QuickVRManager vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
-            Animator animatorSrc = null;
-            do
-            {
-                animatorSrc = vrManager.GetAnimatorSource();
-                yield return null;
-            } while (!animatorSrc);
-
-
-            //Get the QuickUnityVR and QuickOVRHandsInitializer components
-            _unityVR = animatorSrc.GetComponent<QuickUnityVR>();
-            while (!_ovrHands)
-            {
-                _ovrHands = _unityVR.GetComponent<QuickOVRHandsInitializer>();
-                yield return null;
-            }
-        }
-
-        public override void Reset()
+        protected override void Reset()
         {
             base.Reset();
 

@@ -13,7 +13,7 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        public override void Reset()
+        protected override void Reset()
         {
             base.Reset();
 

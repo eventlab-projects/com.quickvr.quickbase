@@ -60,6 +60,7 @@ namespace QuickVR
             }
 
             _sceneManager.ActivateScene(_activeScene);
+            Debug.Log("ACTIVE SCENE = " + SceneManager.GetActiveScene().name);
         }
 
         #endregion

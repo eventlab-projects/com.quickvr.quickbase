@@ -109,7 +109,7 @@ namespace QuickVR
             base.Awake();
         }
 
-        public override void Reset()
+        protected override void Reset()
         {
             base.Reset();
 

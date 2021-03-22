@@ -107,7 +107,7 @@ namespace QuickVR
 			}
 		}
 
-		public virtual void Reset()
+		protected virtual void Reset()
 		{
 			name = this.GetType().FullName;
 

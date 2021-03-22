@@ -141,23 +141,6 @@ namespace QuickVR
         protected virtual void Awake()
         {
             Reset();
-
-            if (Application.isPlaying)
-            {
-                for (int i = 0; i < _virtualAxes.Count; i++)
-                {
-                    string vAxis = _virtualAxes[i];
-                    _virtualAxesState[vAxis] = 0;
-                    _axisToID[vAxis] = i;
-                }
-
-                for (int i = 0; i < _virtualButtons.Count; i++)
-                {
-                    string vButton = _virtualButtons[i];
-                    _virtualButtonsState[vButton] = VirtualButtonState.Idle;
-                    _buttonToID[vButton] = i;
-                }
-            }
         }
 
         protected virtual void Start()
@@ -222,6 +205,23 @@ namespace QuickVR
             CreateDefaultAxes();
             CreateDefaultButtons();
 
+            if (Application.isPlaying)
+            {
+                for (int i = 0; i < _virtualAxes.Count; i++)
+                {
+                    string vAxis = _virtualAxes[i];
+                    _virtualAxesState[vAxis] = 0;
+                    _axisToID[vAxis] = i;
+                }
+
+                for (int i = 0; i < _virtualButtons.Count; i++)
+                {
+                    string vButton = _virtualButtons[i];
+                    _virtualButtonsState[vButton] = VirtualButtonState.Idle;
+                    _buttonToID[vButton] = i;
+                }
+            }
+
             CreateDefaultImplementation<InputManagerKeyboard>();
             CreateDefaultImplementation<InputManagerMouse>();
             CreateDefaultImplementation<InputManagerGamepad>();
@@ -271,7 +271,6 @@ namespace QuickVR
             if (!iManager)
             {
                 iManager = transform.CreateChild("").GetOrCreateComponent<T>();
-                iManager.Reset();
             }
 
             if (!_inputManagers.Contains(iManager))
