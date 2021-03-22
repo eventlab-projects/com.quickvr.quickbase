@@ -11,3 +11,5 @@ __QuickVR__ is built on top of the __Unity XR Framework__ (XR stands for VR/AR),
 Our library is focused on more high level features that are necessary in all of the applications that we develop, such as Avatar Tracking, planar reflections, logic workflow, locomotion systems and interaction with the environment.
 
 So the different applications that are built using __QuickVR__, have access to all those features already implemented. Without this library, those features should be implemented from the scratch on every new application, which would increase the production time dramatically. With this approach, we can have a prototype of a new VR application in a matter of hours to days, depending on its complexity.
+
+This work is funded by the European Research Council (ERC) Advanced Grant Moments in Time in Immersive Virtual Environments (MoTIVE) 742989.
