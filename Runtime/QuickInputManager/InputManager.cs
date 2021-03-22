@@ -42,12 +42,12 @@ namespace QuickVR
         [SerializeField]
         protected List<string> _virtualAxes = new List<string>();
         protected Dictionary<string, float> _virtualAxesState = new Dictionary<string, float>();
-        protected Dictionary<string, int> _axisToID = null;
+        protected Dictionary<string, int> _axisToID = new Dictionary<string, int>();
 
         [SerializeField]
         protected List<string> _virtualButtons = new List<string>();
         protected Dictionary<string, VirtualButtonState> _virtualButtonsState = new Dictionary<string, VirtualButtonState>();
-        protected Dictionary<string, int> _buttonToID = null;
+        protected Dictionary<string, int> _buttonToID = new Dictionary<string, int>();
 
         protected Dictionary<string, bool> _activeVirtualAxes = new Dictionary<string, bool>();
         
@@ -141,6 +141,23 @@ namespace QuickVR
         protected virtual void Awake()
         {
             Reset();
+
+            if (Application.isPlaying)
+            {
+                for (int i = 0; i < _virtualAxes.Count; i++)
+                {
+                    string vAxis = _virtualAxes[i];
+                    _virtualAxesState[vAxis] = 0;
+                    _axisToID[vAxis] = i;
+                }
+
+                for (int i = 0; i < _virtualButtons.Count; i++)
+                {
+                    string vButton = _virtualButtons[i];
+                    _virtualButtonsState[vButton] = VirtualButtonState.Idle;
+                    _buttonToID[vButton] = i;
+                }
+            }
         }
 
         protected virtual void Start()
@@ -301,17 +318,6 @@ namespace QuickVR
             int id = 0;
             if (Application.isPlaying)
             {
-                if (_axisToID == null)
-                {
-                    _axisToID = new Dictionary<string, int>();
-                    for (int i = 0; i < _virtualAxes.Count; i++)
-                    {
-                        string vAxis = _virtualAxes[i];
-                        _virtualAxesState[vAxis] = 0;
-                        _axisToID[vAxis] = i;
-                    }
-                }
-
                 id = _axisToID.ContainsKey(virtualAxisName) ? _axisToID[virtualAxisName] : -1;
             }
             else
@@ -327,17 +333,6 @@ namespace QuickVR
             int id = 0;
             if (Application.isPlaying)
             {
-                if (_buttonToID == null)
-                {
-                    _buttonToID = new Dictionary<string, int>();
-                    for (int i = 0; i < _virtualButtons.Count; i++)
-                    {
-                        string vButton = _virtualButtons[i];
-                        _virtualButtonsState[vButton] = VirtualButtonState.Idle;
-                        _buttonToID[vButton] = i;
-                    }
-                }
-                
                 id = _buttonToID.ContainsKey(virtualButtonName) ? _buttonToID[virtualButtonName] : -1;
             }
             else
