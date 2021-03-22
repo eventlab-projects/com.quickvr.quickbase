@@ -49,9 +49,14 @@ namespace QuickVR
             _axisCodes = _baseInputManager.GetAxisCodes();
             _buttonCodes = _baseInputManager.GetButtonCodes();
 
+            EditorGUI.BeginChangeCheck();
             DrawAxesMapping();
             EditorGUILayout.Separator();
             DrawButtonsMapping();
+            if (EditorGUI.EndChangeCheck())
+            {
+                QuickUtilsEditor.MarkSceneDirty();
+            }
 
             EditorGUILayout.Separator();
             if (DrawButton(WARNING_TITLE))
