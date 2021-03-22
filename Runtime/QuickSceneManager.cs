@@ -10,6 +10,12 @@ namespace QuickVR
     public class QuickSceneManager : MonoBehaviour
     {
 
+        #region PROTECTED ATTRIBUTES
+
+        protected static HashSet<string> _loadedScenes = new HashSet<string>();
+
+        #endregion
+
         #region GET AND SET
 
         public virtual bool IsValidScene(string sceneName)
@@ -27,7 +33,11 @@ namespace QuickVR
 
         public virtual void LoadSceneAdditive(string sceneName)
         {
-            SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
+            if (!_loadedScenes.Contains(sceneName))
+            {
+                SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
+                _loadedScenes.Add(sceneName);
+            }
         }
 
         public virtual void LoadScenesAdditiveAsync(string[] sceneNames)
@@ -40,7 +50,11 @@ namespace QuickVR
 
         public virtual void LoadSceneAdditiveAsync(string sceneName, bool allowSceneActivation)
         {
-            StartCoroutine(CoLoadSceneAdditiveAsync(sceneName, allowSceneActivation));
+            if (!_loadedScenes.Contains(sceneName))
+            {
+                StartCoroutine(CoLoadSceneAdditiveAsync(sceneName, allowSceneActivation));
+                _loadedScenes.Add(sceneName);
+            }
         }
 
         public virtual void UnloadScenesAsync(string[] sceneNames)
@@ -55,7 +69,7 @@ namespace QuickVR
         {
             if (IsValidScene(sceneName))
             {
-                SceneManager.UnloadSceneAsync(sceneName);
+                StartCoroutine(CoUnloadSceneAsync(sceneName));
             }
         }
 
@@ -80,6 +94,13 @@ namespace QuickVR
             {
                 ActivateScene(sceneName);
             }
+        }
+
+        protected virtual IEnumerator CoUnloadSceneAsync(string sceneName)
+        {
+            yield return SceneManager.UnloadSceneAsync(sceneName);
+
+            _loadedScenes.Remove(sceneName);
         }
 
         protected virtual IEnumerator CoActivateScene(Scene scene, bool disableCameras)
