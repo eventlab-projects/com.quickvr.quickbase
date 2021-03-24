@@ -481,7 +481,13 @@ namespace QuickVR
 
         public static float GetAxis(string axis)
         {
-            return _inputManager._virtualAxesState[axis];
+            float aValue = 0;
+            if (_inputManager._axisToID.ContainsKey(axis))
+            {
+                aValue = _inputManager._virtualAxesState[axis];
+            }
+
+            return aValue;
         }
 
         public static bool GetButton(string button)

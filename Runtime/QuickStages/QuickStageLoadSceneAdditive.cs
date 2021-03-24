@@ -8,13 +8,32 @@ namespace QuickVR
 {
     public class QuickStageLoadSceneAdditive : QuickStageBase
     {
-
         #region PUBLIC PARAMETERS
 
-        public string[] _scenesToLoad;
-        public string[] _scenesToUnload;
+        [System.Serializable]
+        public struct SceneAction
+        {
+            public enum Type
+            {
+                Preload,        //The scene is loaded, but remains in background with the root game objects deactivated
+                PreLoadAsync,   //...async
+                Load,           //The scene is loaded and activated. 
+                LoadAsync,      //...async
+                Unload,         //The scene is unloaded. 
+            }
 
-        public bool _asyncLoad = true;
+            public string _sceneName;
+            public Type _type;
+
+            public SceneAction(string sceneName, Type t)
+            {
+                _sceneName = sceneName;
+                _type = t;
+            }
+        }
+
+        public List<SceneAction> _sceneActions = new List<SceneAction>();
+
         public bool _autoActivateScene = true;
         public string _activeScene = "";
 
@@ -40,26 +59,37 @@ namespace QuickVR
         {
             base.Init();
 
-            //Unload undesired scenes
-            _sceneManager.UnloadScenesAsync(_scenesToUnload);
-
-            //Load the new scenes
-            if (_asyncLoad)
+            foreach (SceneAction s in _sceneActions)
             {
-                _sceneManager.LoadScenesAdditiveAsync(_scenesToLoad);
-            }
-            else
-            {
-                _sceneManager.LoadScenesAdditive(_scenesToLoad);
+                if (s._type == SceneAction.Type.Preload)
+                {
+                    _sceneManager.PreLoadSceneAdditive(s._sceneName);
+                }
+                else if (s._type == SceneAction.Type.PreLoadAsync)
+                {
+                    _sceneManager.PreLoadSceneAdditiveAsync(s._sceneName);
+                }
+                else if (s._type == SceneAction.Type.Load)
+                {
+                    _sceneManager.LoadSceneAdditive(s._sceneName);
+                }
+                else if (s._type == SceneAction.Type.LoadAsync)
+                {
+                    _sceneManager.LoadSceneAdditiveAsync(s._sceneName);
+                }
+                else if (s._type == SceneAction.Type.Unload)
+                {
+                    _sceneManager.UnloadScene(s._sceneName);
+                }
             }
 
-            //Mark as current the desired one or the first one to load
-            if (_autoActivateScene && _activeScene == "" && _scenesToLoad.Length > 0)
-            {
-                _activeScene = _scenesToLoad[0];
-            }
+            ////Mark as current the desired one or the first one to load
+            //if (_autoActivateScene && _activeScene == "" && _scenesToLoad.Length > 0)
+            //{
+            //    _activeScene = _scenesToLoad[0];
+            //}
 
-            _sceneManager.ActivateScene(_activeScene);
+            //_sceneManager.ActivateScene(_activeScene);
             Debug.Log("ACTIVE SCENE = " + SceneManager.GetActiveScene().name);
         }
 
