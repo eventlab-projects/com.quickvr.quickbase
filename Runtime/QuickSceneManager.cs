@@ -194,7 +194,6 @@ namespace QuickVR
 
         protected virtual IEnumerator CoActivateScene(string sceneName, bool disableCameras)
         {
-            Debug.Log(sceneName);
             //Ensure that we are activating a loaded scene
             if (!_loadedScenes.ContainsKey(sceneName))
             {
