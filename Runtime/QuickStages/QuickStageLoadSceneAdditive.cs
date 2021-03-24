@@ -33,8 +33,6 @@ namespace QuickVR
         }
 
         public List<SceneAction> _sceneActions = new List<SceneAction>();
-
-        public bool _autoActivateScene = true;
         public string _activeScene = "";
 
         #endregion
@@ -89,8 +87,10 @@ namespace QuickVR
             //    _activeScene = _scenesToLoad[0];
             //}
 
-            //_sceneManager.ActivateScene(_activeScene);
-            Debug.Log("ACTIVE SCENE = " + SceneManager.GetActiveScene().name);
+            if (_activeScene.Length != 0)
+            {
+                _sceneManager.ActivateScene(_activeScene);
+            }
         }
 
         #endregion

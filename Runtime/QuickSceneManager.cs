@@ -35,6 +35,22 @@ namespace QuickVR
 
         #endregion
 
+        #region CREATION AND DESTRUCTION
+
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        protected static void Init()
+        {
+            QuickSceneManager instance = QuickSingletonManager.GetInstance<QuickSceneManager>();
+            for (int i = 0; i < SceneManager.sceneCount; i++)
+            {
+                SceneData sData = new SceneData();
+                sData._state = SceneState.Loaded;
+                _loadedScenes[SceneManager.GetSceneAt(i).name] = sData;
+            }
+        }
+
+        #endregion
+
         #region GET AND SET
 
         public virtual SceneState? GetSceneState(string sceneName)

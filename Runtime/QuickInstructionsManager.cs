@@ -30,6 +30,7 @@ namespace QuickVR
             _audioSource = gameObject.GetOrCreateComponent<AudioSource>();
             _audioSource.spatialBlend = 0.0f;
             _audioSource.volume = _volume;
+            _audioSource.bypassListenerEffects = true;
         }
 
         #endregion
