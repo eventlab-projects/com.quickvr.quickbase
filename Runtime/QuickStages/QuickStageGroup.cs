@@ -26,7 +26,11 @@ namespace QuickVR
             QuickStageBase firstStage = null;
             for (int i = 0; !firstStage && i < transform.childCount; i++)
             {
-                firstStage = transform.GetChild(i).GetComponent<QuickStageBase>();
+                Transform tChild = transform.GetChild(i);
+                if (tChild.gameObject.activeSelf)
+                {
+                    firstStage = tChild.GetComponent<QuickStageBase>();
+                }
             }
 
             if (firstStage)
