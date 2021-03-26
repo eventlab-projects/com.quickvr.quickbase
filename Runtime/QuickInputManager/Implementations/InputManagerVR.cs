@@ -109,10 +109,8 @@ namespace QuickVR
             base.Awake();
         }
 
-        protected override void Reset()
+        protected override void ResetDefaultConfiguration()
         {
-            base.Reset();
-
             //Configure the default buttons
             ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CONTINUE, ButtonCodes.RightTriggerPress.ToString());
             ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CALIBRATE, ButtonCodes.LeftSecondaryPress.ToString());

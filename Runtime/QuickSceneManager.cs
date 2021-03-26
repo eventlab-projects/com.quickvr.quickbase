@@ -126,7 +126,7 @@ namespace QuickVR
                 allowSceneActivation && (sceneData._state == SceneState.Loading || sceneData._state == SceneState.Preloaded)
                 )
             {
-                StartCoroutine(CoLoadSceneAdditiveAsync(sceneName, allowSceneActivation, isAsync));
+                StartCoroutine(CoLoadSceneAdditive(sceneName, allowSceneActivation, isAsync));
             }
             else
             {
@@ -167,7 +167,7 @@ namespace QuickVR
 
         #region UPDATE
 
-        protected virtual IEnumerator CoLoadSceneAdditiveAsync(string sceneName, bool allowSceneActivation, bool isAsync)
+        protected virtual IEnumerator CoLoadSceneAdditive(string sceneName, bool allowSceneActivation, bool isAsync)
         {
             if (_loadedScenes.TryGetValue(sceneName, out SceneData sceneData))
             {
@@ -178,9 +178,9 @@ namespace QuickVR
             }
             else
             {
+                SetSceneState(sceneName, SceneState.Loading);
                 if (isAsync)
                 {
-                    SetSceneState(sceneName, SceneState.Loading);
                     yield return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
                 }
                 else

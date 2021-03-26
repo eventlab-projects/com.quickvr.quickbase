@@ -42,9 +42,6 @@ namespace QuickVR
 
 		#region PUBLIC PARAMETERS
 
-		public bool _active = true;
-		public bool _debug = false;
-
 		public enum DefaultCode
 		{
 			None,
@@ -101,32 +98,57 @@ namespace QuickVR
 
 		protected virtual void Awake()
 		{
-			if (!_initialized)
-            {
-				Reset();
-			}
+			Reset();
 		}
 
 		protected virtual void Reset()
 		{
 			name = this.GetType().FullName;
 
-			int numVirtualAxes = _inputManager.GetVirtualAxes().Count;
-			while (_axisMapping.Count != numVirtualAxes)
-			{
-				AddAxisMapping();
+			CheckAxesMapping();
+			CheckButtonsMapping();
+			
+			if (!_initialized)
+            {
+				ResetDefaultConfiguration();
+				_initialized = true;
 			}
-
-			int numVirtualButtons = _inputManager.GetVirtualButtons().Count;
-			while (_buttonMapping.Count != numVirtualButtons)
-			{
-				AddButtonMapping();
-			}
-
-			_initialized = true;
 		}
 
-		public virtual void ConfigureDefaultAxis(string virtualAxisName, string axisName)
+		public virtual void CheckAxesMapping()
+        {
+			//Check if we have an axis mapping for each defined virtual axis
+			int numVirtualAxes = _inputManager.GetVirtualAxes().Count;
+			while (_axisMapping.Count < numVirtualAxes)
+			{
+				_axisMapping.Add(new AxisMapping());
+			}
+			while (_axisMapping.Count > numVirtualAxes)
+			{
+				_axisMapping.RemoveAt(_axisMapping.Count - 1);
+			}
+		}
+
+		public virtual void CheckButtonsMapping()
+        {
+			//Check if we have a button mapping for each defined virtual button
+			int numVirtualButtons = _inputManager.GetVirtualButtons().Count;
+			while (_buttonMapping.Count < numVirtualButtons)
+			{
+				_buttonMapping.Add(new ButtonMapping());
+			}
+			while (_buttonMapping.Count > numVirtualButtons)
+			{
+				_buttonMapping.RemoveAt(_buttonMapping.Count - 1);
+			}
+		}
+
+		protected virtual void ResetDefaultConfiguration()
+        {
+
+        }
+
+		protected virtual void ConfigureDefaultAxis(string virtualAxisName, string axisName)
 		{
 			AxisMapping aMapping = GetAxisMapping(_inputManager.ToAxisID(virtualAxisName));
 			if (aMapping != null)
@@ -138,7 +160,7 @@ namespace QuickVR
 			}
 		}
 
-		public virtual void ConfigureDefaultAxis(string virtualAxisName, string kPositive, string kNegative)
+		protected virtual void ConfigureDefaultAxis(string virtualAxisName, string kPositive, string kNegative)
 		{
 			AxisMapping aMapping = GetAxisMapping(_inputManager.ToAxisID(virtualAxisName));
 			if (aMapping == null) return;
@@ -153,7 +175,7 @@ namespace QuickVR
 			}
 		}
 
-		public virtual void ConfigureDefaultButton(string virtualButtonName, string key, string altKey = NULL_MAPPING)
+		protected virtual void ConfigureDefaultButton(string virtualButtonName, string key, string altKey = NULL_MAPPING)
 		{
 			ButtonMapping bMapping = GetButtonMapping(_inputManager.ToButtonID(virtualButtonName));
 			if (bMapping == null) return;
@@ -166,22 +188,6 @@ namespace QuickVR
 
 		#region MAPPING
 
-		public virtual void RemoveLastAxisMapping()
-		{
-			if (_axisMapping.Count > 0)
-			{
-				_axisMapping.RemoveAt(_axisMapping.Count - 1);
-			}
-		}
-
-		public virtual void RemoveLastButtonMapping()
-		{
-			if (_buttonMapping.Count > 0)
-			{
-				_buttonMapping.RemoveAt(_buttonMapping.Count - 1);
-			}
-		}
-
 		public AxisMapping GetAxisMapping(int axisID)
 		{
 			return (axisID >= 0 && axisID < _axisMapping.Count) ? _axisMapping[axisID] : null;
@@ -190,44 +196,6 @@ namespace QuickVR
 		public ButtonMapping GetButtonMapping(int buttonID)
 		{
 			return (buttonID >= 0 && buttonID <= _buttonMapping.Count) ? _buttonMapping[buttonID] : null;
-		}
-
-		public virtual void AddAxisMapping()
-		{
-			_axisMapping.Add(new AxisMapping());
-		}
-
-		public virtual void AddButtonMapping()
-		{
-			_buttonMapping.Add(new ButtonMapping());
-		}
-
-		public virtual void ResetAllMapping()
-		{
-			ResetAxesMapping();
-			ResetButtonMapping();
-		}
-
-		public virtual void ResetAxesMapping()
-		{
-			_axisMapping.Clear();
-
-			int numAxes = _inputManager.GetNumAxes();
-			for (int i = 0; i < numAxes; i++)
-			{
-				AddAxisMapping();
-			}
-		}
-
-		public virtual void ResetButtonMapping()
-		{
-			_buttonMapping.Clear();
-
-			int numButtons = _inputManager.GetNumButtons();
-			for (int i = 0; i < numButtons; i++)
-			{
-				AddButtonMapping();
-			}
 		}
 
 		public virtual int GetNumAxesMapped()
@@ -281,18 +249,13 @@ namespace QuickVR
 
 		public virtual float GetAxis(string axisCode)
 		{
-			return ImpGetAxis(axisCode);
+			return enabled? ImpGetAxis(axisCode) : 0;
 		}
 
 		public virtual bool GetButton(string buttonCode)
         {
-			return ImpGetButton(buttonCode);
+			return enabled? ImpGetButton(buttonCode) : false;
         }
-
-		public virtual bool IsActive()
-		{
-			return _active;
-		}
 
 		#endregion
 

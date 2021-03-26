@@ -123,16 +123,15 @@ namespace QuickVR
 
         #region CONSTANTS
 
+        public const int NUM_DEFAULT_AXES = 2;
+        public const string DEFAULT_AXIS_HORIZONTAL = "Horizontal";
+        public const string DEFAULT_AXIS_VERTICAL = "Vertical";
+
+        public const int NUM_DEFAULT_BUTTONS = 4;
         public const string DEFAULT_BUTTON_CONTINUE = "Continue";
         public const string DEFAULT_BUTTON_EXIT = "Exit";
         public const string DEFAULT_BUTTON_CANCEL = "Cancel";
         public const string DEFAULT_BUTTON_CALIBRATE = "Calibrate";
-
-        public const string DEFAULT_AXIS_HORIZONTAL = "Horizontal";
-        public const string DEFAULT_AXIS_VERTICAL = "Vertical";
-
-        public const string DEFAULT_AXIS_LEFT_TRIGGER = "LeftTrigger";
-        public const string DEFAULT_AXIS_RIGHT_TRIGGER = "RightTrigger";
 
         #endregion
 
@@ -200,6 +199,7 @@ namespace QuickVR
 
         protected virtual void Reset()
         {
+            transform.ResetTransformation();
             name = this.GetType().FullName;
 
             CreateDefaultAxes();
@@ -235,9 +235,6 @@ namespace QuickVR
             //Create the default axes needed for applications constructed with QuickVR
             CreateDefaultAxis(DEFAULT_AXIS_HORIZONTAL);
             CreateDefaultAxis(DEFAULT_AXIS_VERTICAL);
-
-            CreateDefaultAxis(DEFAULT_AXIS_LEFT_TRIGGER);
-            CreateDefaultAxis(DEFAULT_AXIS_RIGHT_TRIGGER);
         }
 
         protected virtual void CreateDefaultButtons()
@@ -249,21 +246,50 @@ namespace QuickVR
             CreateDefaultButton(DEFAULT_BUTTON_CALIBRATE);
         }
 
-        public virtual void CreateDefaultButton(string virtualButtonName)
-        {
-            if (_virtualButtons.Contains(virtualButtonName)) return;
-
-            AddNewButton();
-            _virtualButtons[_virtualButtons.Count - 1] = virtualButtonName;
-        }
-
-        public virtual void CreateDefaultAxis(string virtualAxisName)
+        protected virtual void CreateDefaultAxis(string virtualAxisName)
         {
             if (_virtualAxes.Contains(virtualAxisName)) return;
 
-            AddNewAxis();
-            _virtualAxes[_virtualAxes.Count - 1] = virtualAxisName;
+            _virtualAxes.Add(virtualAxisName);
         }
+
+        protected virtual void CreateDefaultButton(string virtualButtonName)
+        {
+            if (_virtualButtons.Contains(virtualButtonName)) return;
+
+            _virtualButtons.Add(virtualButtonName);
+        }
+
+
+#if UNITY_EDITOR
+
+        public virtual void AddVirtualAxis(string virtualAxisName)
+        {
+            _virtualAxes.Add(virtualAxisName);
+        }
+
+        public virtual void AddVirtualButton(string virtualButtonName)
+        {
+            _virtualButtons.Add(virtualButtonName);
+        }
+
+        public virtual void RemoveLastVirtualAxis()
+        {
+            if (_virtualAxes.Count > NUM_DEFAULT_AXES)
+            {
+                _virtualAxes.RemoveAt(_virtualAxes.Count - 1);
+            }
+        }
+
+        public virtual void RemoveLastVirtualButton()
+        {
+            if (_virtualButtons.Count > NUM_DEFAULT_BUTTONS)
+            {
+                _virtualButtons.RemoveAt(_virtualButtons.Count - 1);
+            }
+        }
+
+#endif
 
         public virtual T CreateDefaultImplementation<T>() where T : BaseInputManager
         {
@@ -407,52 +433,6 @@ namespace QuickVR
         {
             if (buttonID >= _virtualButtons.Count) return null;
             return _virtualButtons[buttonID];
-        }
-
-        [ButtonMethod]
-        public void AddNewAxis()
-        {
-            _virtualAxes.Add("New Axis");
-
-            foreach (BaseInputManager manager in GetInputManagers())
-            {
-                manager.AddAxisMapping();
-            }
-        }
-
-        [ButtonMethod]
-        public void RemoveLastAxis()
-        {
-            if (_virtualAxes.Count == 0) return;
-            _virtualAxes.RemoveAt(_virtualAxes.Count - 1);
-
-            foreach (BaseInputManager manager in GetInputManagers())
-            {
-                manager.RemoveLastAxisMapping();
-            }
-        }
-
-        [ButtonMethod]
-        public void AddNewButton()
-        {
-            _virtualButtons.Add("New Button");
-
-            foreach (BaseInputManager manager in GetInputManagers())
-            {
-                manager.AddButtonMapping();
-            }
-        }
-
-        [ButtonMethod]
-        public void RemoveLastButton()
-        {
-            if (_virtualButtons.Count == 0) return;
-            _virtualButtons.RemoveAt(_virtualButtons.Count - 1);
-
-            foreach (BaseInputManager manager in GetInputManagers())
-            {
-                manager.RemoveLastButtonMapping();
-            }
         }
 
         public int GetNumAxes()

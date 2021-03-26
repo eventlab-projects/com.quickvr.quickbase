@@ -42,10 +42,8 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        protected override void Reset()
+        protected override void ResetDefaultConfiguration()
         {
-            base.Reset();
-
             //Configure the default buttons
             ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CONTINUE, ButtonCodes.ThumbUp + "Right", ButtonCodes.ThumbUp + "Left");
             //ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CANCEL, ButtonCodes.ThumbDown + "Right", ButtonCodes.ThumbDown + "Left");

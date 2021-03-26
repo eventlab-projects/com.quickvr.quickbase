@@ -13,10 +13,8 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        protected override void Reset()
+        protected override void ResetDefaultConfiguration()
         {
-            base.Reset();
-
             //Configure the default axes
             ConfigureDefaultAxis(InputManager.DEFAULT_AXIS_HORIZONTAL, Key.D.ToString(), Key.A.ToString());
             ConfigureDefaultAxis(InputManager.DEFAULT_AXIS_VERTICAL, Key.W.ToString(), Key.S.ToString());

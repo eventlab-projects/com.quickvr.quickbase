@@ -43,6 +43,8 @@ namespace QuickVR
 
         protected override void DrawGUI()
         {
+            base.DrawGUI();
+
             _inputManager = QuickSingletonManager.GetInstance<InputManager>();
             _baseInputManager = target as BaseInputManager;
 
@@ -57,23 +59,11 @@ namespace QuickVR
             {
                 QuickUtilsEditor.MarkSceneDirty();
             }
-
-            EditorGUILayout.Separator();
-            if (DrawButton(WARNING_TITLE))
-            {
-                if (EditorUtility.DisplayDialog(WARNING_TITLE + "?", WARNING_MESSAGE + target.name + "?", "Confirm", "Cancel"))
-                {
-                    BaseInputManager bManager = target as BaseInputManager;
-                    bManager.ResetAllMapping();
-                }
-            }
-
-            base.DrawGUI();
         }
 
         protected virtual void DrawAxesMapping()
         {
-            if (_baseInputManager.GetNumAxesMapped() != _inputManager.GetNumAxes()) _baseInputManager.ResetAxesMapping();
+            _baseInputManager.CheckAxesMapping();
 
             _showAxes = EditorGUILayout.Foldout(_showAxes, "Axes Mapping");
             if (!_showAxes) return;
@@ -87,7 +77,7 @@ namespace QuickVR
 
         protected virtual void DrawButtonsMapping()
         {
-            if (_baseInputManager.GetNumButtonsMapped() != _inputManager.GetNumButtons()) _baseInputManager.ResetButtonMapping();
+            _baseInputManager.CheckButtonsMapping();
 
             _showButtons = EditorGUILayout.Foldout(_showButtons, "Buttons Mapping");
             if (!_showButtons) return;
