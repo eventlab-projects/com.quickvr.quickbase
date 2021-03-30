@@ -46,9 +46,6 @@ namespace QuickVR {
 
         protected QuickUnityVR _hTracking;
 
-        protected QuickTeleport _teleport = null;
-        protected Coroutine _coUpdateTeleport = null;
-
         [SerializeField, HideInInspector]
         protected int _expirationDay = 0;
 

@@ -61,7 +61,7 @@ namespace QuickVR
         {
             //Configure the default axes
             ConfigureDefaultAxis(InputManager.DEFAULT_AXIS_HORIZONTAL, AxisCode.RightStick_Horizontal.ToString());
-            ConfigureDefaultAxis(InputManager.DEFAULT_AXIS_VERTICAL, AxisCode.RightStick_Vertical.ToString());
+            ConfigureDefaultAxis(InputManager.DEFAULT_AXIS_VERTICAL, AxisCode.LeftStick_Vertical.ToString());
 
             //Configure the default buttons
             ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CONTINUE, ButtonCode.South.ToString());
