@@ -40,7 +40,6 @@ namespace QuickVR
         [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
         protected static void Init()
         {
-            QuickSceneManager instance = QuickSingletonManager.GetInstance<QuickSceneManager>();
             for (int i = 0; i < SceneManager.sceneCount; i++)
             {
                 SceneData sData = new SceneData();
