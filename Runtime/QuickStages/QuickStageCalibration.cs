@@ -37,7 +37,7 @@ namespace QuickVR
         protected virtual string GetDefaultHMDCalibrationInstructions()
         {
             string path = "HMDCalibrationInstructions/";
-            if (SettingsBase.GetLanguage() == SettingsBase.Languages.ENGLISH) path += "en/";
+            if (SettingsBase.GetLanguage() == SettingsBase.Languages.English) path += "en/";
             else path += "es/";
             return path + "instructions";
         }

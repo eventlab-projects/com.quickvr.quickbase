@@ -165,11 +165,11 @@ namespace QuickVR {
             _instructionsManager._timePauseBetweenInstructions = _instructionsTimePause;
             _instructionsManager._volume = _instructionsVolume;
             SettingsBase.Languages lang = SettingsBase.GetLanguage();
-            if (lang == SettingsBase.Languages.SPANISH)
+            if (lang == SettingsBase.Languages.Spanish)
             {
                 _instructionsManager.Play(_instructionsSpanish);
             }
-            else if (lang == SettingsBase.Languages.ENGLISH)
+            else if (lang == SettingsBase.Languages.English)
             {
                 if (_instructionsEnglish.Count > 0)
                 {

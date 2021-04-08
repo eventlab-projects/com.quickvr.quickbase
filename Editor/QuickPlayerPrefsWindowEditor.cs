@@ -50,7 +50,7 @@ namespace QuickVR
         [MenuItem("QuickVR/PlayerPrefs")]
         public static void ShowWindow()
         {
-            EditorWindow.GetWindow<QuickPlayerPrefsWindowEditor>();
+            GetWindow<QuickPlayerPrefsWindowEditor>();
 
             string path = "Assets/QuickVRCfg/Resources/QuickSettingsCustom.asset";
             QuickSettingsAsset settings = AssetDatabase.LoadAssetAtPath<QuickSettingsAsset>(path);
@@ -66,13 +66,8 @@ namespace QuickVR
 
             //Check if the base settings are defined
             SettingsBase.SetSubjectID(SettingsBase.GetSubjectID());
-            SettingsBase.SetSubjectHeight(SettingsBase.GetSubjectHeight());
             SettingsBase.SetGender(SettingsBase.GetGender());
             SettingsBase.SetLanguage(SettingsBase.GetLanguage());
-            SettingsBase.SetEnvironment(SettingsBase.GetEnvironment());
-            SettingsBase.SetCOMPort(SettingsBase.GetCOMPort());
-            SettingsBase.SetTimeOutMinutes(SettingsBase.GetTimeOutMinutes());
-            SettingsBase.SetHeightMode(SettingsBase.GetHeightMode());
         }
 
         protected virtual bool CreateNewSetting(out object value)
@@ -238,22 +233,25 @@ namespace QuickVR
                 QuickPlayerPrefs.Init();
             }
 
-            _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos, GUILayout.Height(512));
+            _scrollPos = EditorGUILayout.BeginScrollView(_scrollPos);
 
             titleContent.text = "PlayerPrefs";
 
             GUILayoutOption[] options = { GUILayout.Width(256) };
 
+            EditorGUILayout.BeginVertical("box");
             DrawNewSettingsArea(options);
-            QuickBaseEditor.DrawHorizontalLine();
+            EditorGUILayout.EndVertical();
 
+            EditorGUILayout.BeginVertical("box");
             _showBaseSettings = EditorGUILayout.Foldout(_showBaseSettings, "Base Settings");
             if (_showBaseSettings) DrawSettings(true);
+            EditorGUILayout.EndVertical();
 
-            QuickBaseEditor.DrawHorizontalLine();
-
+            EditorGUILayout.BeginVertical("box");
             _showCustomSettings = EditorGUILayout.Foldout(_showCustomSettings, "Custom Settings");
             if (_showCustomSettings) DrawSettings(false);
+            EditorGUILayout.EndVertical();
 
             //if (QuickBaseEditor.DrawButton("Clear Custom Settings", options))
             //{
@@ -263,8 +261,9 @@ namespace QuickVR
             //    }
             //}
 
-            QuickBaseEditor.DrawHorizontalLine();
+            //QuickBaseEditor.DrawHorizontalLine();
 
+            EditorGUILayout.BeginVertical("box");
             _customSettingsScriptName = EditorGUILayout.TextField("Custom Settings Script: ", _customSettingsScriptName, options);
             List<QuickSetting> customSettings = QuickPlayerPrefs.GetSettingsCustom();
             List<string> keys = new List<string>();
@@ -274,6 +273,7 @@ namespace QuickVR
             {
                 CreateSettingsScript(_customSettingsScriptName, keys);
             }
+            EditorGUILayout.EndVertical();
 
             EditorGUILayout.EndScrollView();
 

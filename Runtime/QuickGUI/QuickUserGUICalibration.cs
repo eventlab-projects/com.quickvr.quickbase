@@ -94,7 +94,7 @@ namespace QuickVR
         public virtual void SetCalibrationInstructions(CalibrationStep step, QuickUnityVR.HandTrackingMode handTrackingMode)
         {
             //Fill the instructions field
-            bool isEnglish = SettingsBase.GetLanguage() == SettingsBase.Languages.ENGLISH;
+            bool isEnglish = SettingsBase.GetLanguage() == SettingsBase.Languages.English;
             if (step == CalibrationStep.HandTrackingMode)
             {
                 SetTextInstructions(isEnglish ? INSTRUCTIONS_HAND_TRACKING_MODE_EN : INSTRUCTIONS_HAND_TRACKING_MODE_ES);

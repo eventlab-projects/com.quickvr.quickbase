@@ -170,7 +170,7 @@ namespace QuickVR {
         {
             if (_playerFemale) _playerFemale.gameObject.SetActive(false);
             if (_playerMale) _playerMale.gameObject.SetActive(false);
-            _player = (SettingsBase.GetGender() == SettingsBase.Genders.FEMALE) ? _playerFemale : _playerMale;
+            _player = (SettingsBase.GetGender() == SettingsBase.Genders.Female) ? _playerFemale : _playerMale;
             if (!_player)
             {
                 QuickUnityVR hTracking = FindObjectOfType<QuickUnityVR>();
