@@ -1,6 +1,3 @@
-The following license governs the use of QuickVR in non-profit, academic and educational environments. 
-Commercial use may require to contact with 
-
 GNU GENERAL PUBLIC LICENSE
                        Version 3, 29 June 2007
 
