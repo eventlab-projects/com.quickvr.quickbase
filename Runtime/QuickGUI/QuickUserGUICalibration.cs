@@ -48,7 +48,7 @@ namespace QuickVR
         public const string INSTRUCTIONS_INTERNET_CONNECTION_REQUIRED_ES = "Se requiere conexión a\n Internet. Por favor, conecte el\n dispositivo a Internet.";
 
         public const string HINT_CONTROLLERS_EN = "Press the \"Right Trigger\" to continue.";
-        public const string HINT_CONTROLLERS_ES = "Pulsa el \"Botón del mando derecho\" para continuar.";
+        public const string HINT_CONTROLLERS_ES = "Pulsa el \"Gatillo del mando derecho\" para continuar.";
 
         public const string HINT_HANDS_EN = "Make the \"Thumb Up\" sign to continue.";
         public const string HINT_HANDS_ES = "Haz el signo\"Pulgar Arriba\" para continuar.";

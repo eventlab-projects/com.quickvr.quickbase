@@ -114,16 +114,24 @@ namespace QuickVR
             
             if (animator)
             {
+                Transform tEyeCenter = animator.GetEyeCenter();
+                if (transform.parent != animator.transform)
+                {
+                    transform.parent = animator.transform;
+                }
+
+                transform.localPosition = Vector3.zero;
+                transform.localRotation = Quaternion.identity;
+
                 //Apply the correct rotation to the cameracontrollerroot:
                 Vector3 up = animator.transform.up;
                 Vector3 rightCam = Vector3.ProjectOnPlane(_camera.transform.right, up).normalized;
-                Vector3 r = animator.GetEye(false).position - animator.GetEye(true).position;
-                Vector3 rightHead = Vector3.ProjectOnPlane(r, up).normalized;
+                Vector3 rightHead = Vector3.ProjectOnPlane(tEyeCenter.right, up).normalized;
                 float rotOffset = Vector3.SignedAngle(rightCam, rightHead, up);
                 transform.Rotate(up, rotOffset, Space.World);
 
                 //This forces the camera to be in the Avatar's eye center. 
-                Vector3 offset = animator.GetEyeCenterPosition() - _camera.transform.position;
+                Vector3 offset = tEyeCenter.position - _camera.transform.position;
                 transform.position += offset;
             }
         }

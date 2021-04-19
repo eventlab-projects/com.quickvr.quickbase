@@ -207,6 +207,8 @@ namespace QuickVR {
             QuickVRNode node = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
             Vector3 offset = GetIKSolver(HumanBodyBones.Head)._targetLimb.position - node.GetTrackedObject().transform.position;
             _vrPlayArea.transform.position += offset;
+
+            _animator.GetEyeCenter().rotation = transform.rotation;
         }
 
         protected virtual void OnCalibrateVRNodeHead(QuickVRNode node)

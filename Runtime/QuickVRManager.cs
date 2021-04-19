@@ -262,10 +262,14 @@ namespace QuickVR
         //protected virtual void LateUpdate()
         protected virtual void UpdateTracking()
         {
+            Vector3 tmpPos = _animatorSource.transform.position;
+            _animatorSource.transform.position = Vector3.zero;
+
             //Update the VRNodes
             _vrPlayArea.UpdateVRNodes();
 
             if (OnPreUpdateTracking != null) OnPreUpdateTracking();
+
             if (_unityVR && _unityVR.enabled)
             {
                 _unityVR.UpdateTracking();
@@ -275,12 +279,15 @@ namespace QuickVR
             {
                 _handTracking.UpdateTracking();
             }
+
             if (OnPostUpdateTracking != null) OnPostUpdateTracking();
 
             //Copy the pose of the source avatar to the target avatar
             if (OnPreCopyPose != null) OnPreCopyPose();
             _copyPose.CopyPose();
             if (OnPostCopyPose != null) OnPostCopyPose();
+
+            _animatorSource.transform.position = tmpPos;
 
             //Update the Camera position
             if (OnPreCameraUpdate != null) OnPreCameraUpdate();

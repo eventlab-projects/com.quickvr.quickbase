@@ -513,6 +513,20 @@ namespace QuickVR
             return eye;
         }
 
+        public static Transform GetEyeCenter(this Animator animator)
+        {
+            Transform tHead = animator.GetBoneTransform(HumanBodyBones.Head);
+            Transform tResult = tHead.Find("__EyeCenter__");
+            if (!tResult)
+            {
+                tResult = tHead.CreateChild("__EyeCenter__");
+                tResult.localPosition = Vector3.Lerp(animator.GetEye(true).localPosition, animator.GetEye(false).localPosition, 0.5f);
+                tResult.rotation = Quaternion.identity;
+            }
+
+            return tResult;
+        }
+
         public static Vector3 GetEyeCenterPosition(this Animator animator)
         {
             Transform lEye = animator.GetEye(true);
