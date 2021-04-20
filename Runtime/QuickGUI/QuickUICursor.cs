@@ -40,7 +40,7 @@ namespace QuickVR
 
         #region CONSTANTS
 
-        protected const string DEFAULT_RAY_SHADER = "QuickVR/UIOpaque";
+        protected const string DEFAULT_RAY_SHADER = "UI/OverOverlay";
 
         #endregion
 

@@ -280,14 +280,14 @@ namespace QuickVR
                 _handTracking.UpdateTracking();
             }
 
+            _animatorSource.transform.position = tmpPos;
+
             if (OnPostUpdateTracking != null) OnPostUpdateTracking();
 
             //Copy the pose of the source avatar to the target avatar
             if (OnPreCopyPose != null) OnPreCopyPose();
             _copyPose.CopyPose();
             if (OnPostCopyPose != null) OnPostCopyPose();
-
-            _animatorSource.transform.position = tmpPos;
 
             //Update the Camera position
             if (OnPreCameraUpdate != null) OnPreCameraUpdate();

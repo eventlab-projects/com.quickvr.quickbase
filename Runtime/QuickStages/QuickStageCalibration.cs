@@ -20,14 +20,14 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        protected override void Awake()
+        public override void Init()
         {
             if (!_headTrackingCalibrationInstructions)
             {
                 _headTrackingCalibrationInstructions = Resources.Load<AudioClip>(GetDefaultHMDCalibrationInstructions());
             }
 
-            base.Awake();
+            base.Init();
         }
 
         #endregion
