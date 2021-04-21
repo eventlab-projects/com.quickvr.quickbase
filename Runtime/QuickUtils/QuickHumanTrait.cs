@@ -520,8 +520,8 @@ namespace QuickVR
             if (!tResult)
             {
                 tResult = tHead.CreateChild("__EyeCenter__");
-                tResult.localPosition = Vector3.Lerp(animator.GetEye(true).localPosition, animator.GetEye(false).localPosition, 0.5f);
-                tResult.rotation = Quaternion.identity;
+                tResult.rotation = animator.transform.rotation;
+                tResult.position = Vector3.Lerp(animator.GetEye(true).position, animator.GetEye(false).position, 0.5f);
             }
 
             return tResult;

@@ -98,7 +98,7 @@ namespace QuickVR
         public UpdateMode _updateModePos = UpdateMode.FromUser;
         public UpdateMode _updateModeRot = UpdateMode.FromUser;
 
-        public InputDevice? _inputDevice { get; set; }
+        public InputDevice _inputDevice { get; set; }
 
         #endregion
 
@@ -340,31 +340,34 @@ namespace QuickVR
         public virtual void UpdateState()
         {
             //try to find a valid inputdevice for the key roles
-            if (_role == QuickHumanBodyBones.Head && _inputDevice == null)
+            if (!_inputDevice.isValid)
             {
-                _inputDevice = InputDevices.GetDeviceAtXRNode(XRNode.Head);
+                if (_role == QuickHumanBodyBones.Head)
+                {
+                    _inputDevice = InputDevices.GetDeviceAtXRNode(XRNode.Head);
+                }
+                else if (_role == QuickHumanBodyBones.LeftHand)
+                {
+                    _inputDevice = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
+                }
+                else if (_role == QuickHumanBodyBones.RightHand)
+                {
+                    _inputDevice = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
+                }
             }
-            else if (_role == QuickHumanBodyBones.LeftHand && _inputDevice == null)
+            
+            if (_inputDevice.isValid)
             {
-                _inputDevice = InputDevices.GetDeviceAtXRNode(XRNode.LeftHand);
-            }
-            else if (_role == QuickHumanBodyBones.RightHand && _inputDevice == null)
-            {
-                _inputDevice = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
-            }
-
-            if (_inputDevice != null)
-            {
-                if (_inputDevice.Value.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 pos))
+                if (_inputDevice.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 pos))
                 {
                     transform.localPosition = pos;
                 }
-                if (_inputDevice.Value.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion rot))
+                if (_inputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion rot))
                 {
                     transform.localRotation = rot;
                 }
 
-                _inputDevice.Value.TryGetFeatureValue(CommonUsages.isTracked, out _isTracked);
+                _inputDevice.TryGetFeatureValue(CommonUsages.isTracked, out _isTracked);
             }
             else
             {
