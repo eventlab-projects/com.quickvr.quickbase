@@ -80,16 +80,6 @@ namespace QuickVR
             QuickUICursor.CreateVRCursor(QuickUICursor.Role.Head, _camera.transform);
         }
 
-        protected virtual void OnEnable()
-        {
-            QuickVRManager.OnPreCopyPose += UpdateCameraRotation;
-        }
-
-        protected virtual void OnDisable()
-        {
-            QuickVRManager.OnPreCopyPose -= UpdateCameraRotation;
-        }
-
         #endregion
 
         #region GET AND SET
@@ -111,6 +101,8 @@ namespace QuickVR
                 cam.farClipPlane = _cameraFarPlane;
                 cam.cullingMask = _visibleLayers.value;
             }
+
+            UpdateCameraRotation();
             
             if (animator)
             {
@@ -118,16 +110,16 @@ namespace QuickVR
                 if (transform.parent != animator.transform)
                 {
                     transform.parent = animator.transform;
+                    transform.localPosition = Vector3.zero;
+                    transform.localRotation = Quaternion.identity;
                 }
-
-                transform.localPosition = Vector3.zero;
-                transform.localRotation = Quaternion.identity;
 
                 //Apply the correct rotation to the cameracontrollerroot:
                 Vector3 up = animator.transform.up;
-                Vector3 rightCam = Vector3.ProjectOnPlane(_camera.transform.right, up).normalized;
-                Vector3 rightHead = Vector3.ProjectOnPlane(tEyeCenter.right, up).normalized;
-                float rotOffset = Vector3.SignedAngle(rightCam, rightHead, up);
+                Vector3 fwdCam = Vector3.ProjectOnPlane(_camera.transform.forward, up);
+                Vector3 fwdHead = Vector3.ProjectOnPlane(tEyeCenter.forward, up);
+
+                float rotOffset = Vector3.SignedAngle(fwdCam, fwdHead, up);
                 transform.Rotate(up, rotOffset, Space.World);
 
                 //This forces the camera to be in the Avatar's eye center. 
@@ -154,7 +146,9 @@ namespace QuickVR
             //have to manually apply the rotation of the HMD to the camera. 
             if (QuickSingletonManager.GetInstance<QuickVRManager>()._XRMode == QuickVRManager.XRMode.XRPlugin)
             {
-                _camera.transform.rotation = QuickSingletonManager.GetInstance<QuickVRPlayArea>().GetVRNode(HumanBodyBones.Head).transform.rotation;
+                QuickVRNode vrNodeHead = QuickSingletonManager.GetInstance<QuickVRPlayArea>().GetVRNode(HumanBodyBones.Head);
+                vrNodeHead.UpdateState();
+                _camera.transform.localRotation = vrNodeHead.transform.localRotation;
             }
         }
 

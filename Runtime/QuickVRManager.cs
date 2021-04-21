@@ -97,12 +97,12 @@ namespace QuickVR
 
         protected virtual void OnEnable()
         {
-            Application.onBeforeRender += UpdateTracking;
+            Application.onBeforeRender += UpdateCamera;
         }
 
         protected virtual void OnDisable()
         {
-            Application.onBeforeRender -= UpdateTracking;
+            Application.onBeforeRender -= UpdateCamera;
         }
 
         protected virtual void Reset()
@@ -259,8 +259,8 @@ namespace QuickVR
             }
         }
 
-        //protected virtual void LateUpdate()
-        protected virtual void UpdateTracking()
+        protected virtual void LateUpdate()
+        //protected virtual void UpdateTracking()
         {
             Vector3 tmpPos = _animatorSource.transform.position;
             _animatorSource.transform.position = Vector3.zero;
@@ -288,7 +288,10 @@ namespace QuickVR
             if (OnPreCopyPose != null) OnPreCopyPose();
             _copyPose.CopyPose();
             if (OnPostCopyPose != null) OnPostCopyPose();
+        }
 
+        protected virtual void UpdateCamera()
+        {
             //Update the Camera position
             if (OnPreCameraUpdate != null) OnPreCameraUpdate();
             _cameraController.UpdateCameraPosition(_animatorTarget);
