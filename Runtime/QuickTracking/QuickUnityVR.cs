@@ -7,6 +7,7 @@ namespace QuickVR {
 
     public class QuickUnityVR : QuickIKManager
     {
+
         #region CONSTANTS
 
         protected static float HUMAN_HEADS_TALL = 7.5f;
@@ -30,12 +31,21 @@ namespace QuickVR {
         }
         public HandTrackingMode _handTrackingMode = HandTrackingMode.Hands;
 
-        public bool _updatePosition = false;
-        public bool _updateRotation = false;
+        public enum ControlType
+        {
+            Tracking,
+            Animation,
+            IK,
+        }
 
-        public bool _applyUserScale = false;
+#if UNITY_EDITOR
 
-        #endregion
+        [SerializeField, HideInInspector]
+        public bool _showControlsBody = false;
+
+#endif
+
+#endregion
 
         #region PROTECTED PARAMETERS
 
@@ -47,6 +57,26 @@ namespace QuickVR {
 
         protected QuickVRHand _vrHandLeft = null;
         protected QuickVRHand _vrHandRight = null;
+
+        protected List<ControlType> _controlsBody
+        {
+            get
+            {
+                if (m_ControlsBody == null || m_ControlsBody.Count == 0)
+                {
+                    m_ControlsBody = new List<ControlType>();
+                    foreach (HumanBodyBones boneID in GetIKLimbBones())
+                    {
+                        m_ControlsBody.Add(ControlType.Tracking);
+                    }
+                }
+
+                return m_ControlsBody;
+            }
+        }
+
+        [SerializeField, HideInInspector]
+        protected List<ControlType> m_ControlsBody = null;
 
         #endregion
 
@@ -154,6 +184,27 @@ namespace QuickVR {
         #endregion
 
         #region GET AND SET
+
+        public virtual ControlType GetControlBody(HumanBodyBones boneID)
+        {
+            ControlType cType = ControlType.Tracking;
+            int i = GetIKLimbBones().IndexOf(boneID);
+            if (i != -1)
+            {
+                cType = _controlsBody[i];
+            }
+
+            return cType;
+        }
+
+        public virtual void SetControlBody(HumanBodyBones boneID, ControlType cType)
+        {
+            int i = GetIKLimbBones().IndexOf(boneID);
+            if (i != -1)
+            {
+                _controlsBody[i] = cType;
+            }
+        }
 
         public virtual void CheckHandtrackingMode()
         {
@@ -290,22 +341,32 @@ namespace QuickVR {
 
         public override void UpdateTracking()
         {
-            //1) Update all the nodes but the hips, which has to be treated differently. 
-            //foreach (HumanBodyBones boneID in QuickVRNode.GetTypeList())
-            foreach (HumanBodyBones boneID in GetIKLimbBones())
+            //1) Update all the IKTargets taking into consideration its ControlType. 
+            _ikMaskBody = -1;
+            List<HumanBodyBones> ikLimbBones = GetIKLimbBones();
+            for (int i = 0; i < ikLimbBones.Count; i++)
             {
-                QuickVRNode node = _vrPlayArea.GetVRNode(boneID);
-                if (!node.IsTracked()) continue;
+                HumanBodyBones boneID = ikLimbBones[i];
+                ControlType cType = GetControlBody(boneID);
+                if (cType == ControlType.Animation)
+                {
+                    //This body limb is controlled by the Animation. So disable the IK
+                    _ikMaskBody &= ~(1 << i);
+                }
+                else if (cType == ControlType.Tracking)
+                {
+                    QuickVRNode node = _vrPlayArea.GetVRNode(boneID);
+                    if (node.IsTracked())
+                    {
+                        //Update the QuickVRNode's position
+                        if (node._updateModePos == QuickVRNode.UpdateMode.FromUser) UpdateIKTargetPosFromUser(node, boneID);
+                        else UpdateIKTargetPosFromCalibrationPose(node, boneID);
 
-                QuickTrackedObject tObject = node.GetTrackedObject();
-
-                //Update the QuickVRNode's position
-                if (node._updateModePos == QuickVRNode.UpdateMode.FromUser) UpdateTransformNodePosFromUser(node, boneID);
-                else UpdateTransformNodePosFromCalibrationPose(node, boneID);
-
-                //Update the QuickVRNode's rotation
-                if (node._updateModeRot == QuickVRNode.UpdateMode.FromUser) UpdateTransformNodeRotFromUser(node, boneID);
-                else UpdateTransformNodeRotFromCalibrationPose(node, boneID);
+                        //Update the QuickVRNode's rotation
+                        if (node._updateModeRot == QuickVRNode.UpdateMode.FromUser) UpdateIKTargetRotFromUser(node, boneID);
+                        else UpdateIKTargetRotFromCalibrationPose(node, boneID);
+                    }
+                }
             }
 
             //2) Special case: There is no tracker on the hips. So the hips position is estimated by the movement of the head
@@ -313,7 +374,7 @@ namespace QuickVR {
             if (!nodeHips.IsTracked())
             {
                 QuickVRNode vrNode = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
-                UpdateTransformNodePosFromCalibrationPose(vrNode, HumanBodyBones.Hips, Vector3.up);
+                UpdateIKTargetPosFromCalibrationPose(vrNode, HumanBodyBones.Hips, Vector3.up);
                 float maxY = GetIKSolver(HumanBodyBones.Hips).GetInitialLocalPosTargetLimb().y;
                 Transform targetHips = GetIKSolver(HumanBodyBones.Hips)._targetLimb;
                 targetHips.localPosition = new Vector3(targetHips.localPosition.x, Mathf.Min(targetHips.localPosition.y, maxY), targetHips.localPosition.z);
@@ -325,22 +386,22 @@ namespace QuickVR {
             base.UpdateTracking();
         }
 
-        protected virtual void UpdateTransformNodePosFromUser(QuickVRNode node, HumanBodyBones boneID)
+        protected virtual void UpdateIKTargetPosFromUser(QuickVRNode node, HumanBodyBones boneID)
         {
             GetIKSolver(boneID)._targetLimb.position = node.GetTrackedObject().transform.position;
         }
 
-        protected virtual void UpdateTransformNodeRotFromUser(QuickVRNode node, HumanBodyBones boneID)
+        protected virtual void UpdateIKTargetRotFromUser(QuickVRNode node, HumanBodyBones boneID)
         {
             GetIKSolver(boneID)._targetLimb.rotation = node.GetTrackedObject().transform.rotation;
         }
 
-        protected virtual void UpdateTransformNodePosFromCalibrationPose(QuickVRNode node, HumanBodyBones boneID)
+        protected virtual void UpdateIKTargetPosFromCalibrationPose(QuickVRNode node, HumanBodyBones boneID)
         {
-            UpdateTransformNodePosFromCalibrationPose(node, boneID, Vector3.one);
+            UpdateIKTargetPosFromCalibrationPose(node, boneID, Vector3.one);
         }
 
-        protected virtual void UpdateTransformNodePosFromCalibrationPose(QuickVRNode node, HumanBodyBones boneID, Vector3 offsetScale)
+        protected virtual void UpdateIKTargetPosFromCalibrationPose(QuickVRNode node, HumanBodyBones boneID, Vector3 offsetScale)
         {
             Transform t = GetIKSolver(boneID)._targetLimb;
             Transform calibrationPose = node.GetCalibrationPose();
@@ -351,7 +412,7 @@ namespace QuickVR {
             t.position += offset;
         }
 
-        protected virtual void UpdateTransformNodeRotFromCalibrationPose(QuickVRNode node, HumanBodyBones boneID)
+        protected virtual void UpdateIKTargetRotFromCalibrationPose(QuickVRNode node, HumanBodyBones boneID)
         {
             Transform t = GetIKSolver(boneID)._targetLimb;
             Transform calibrationPose = node.GetCalibrationPose();

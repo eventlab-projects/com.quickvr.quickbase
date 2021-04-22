@@ -55,9 +55,49 @@ namespace QuickVR
 
         protected override void DrawGUI()
         {
-            base.DrawGUI();
+            //base.DrawGUI();
+
+            GUI.enabled = false;
+            DrawPropertyField("m_Script", "Script");
+            GUI.enabled = true;
+
+            EditorGUI.BeginChangeCheck();
+
+            GUIStyle style = EditorStyles.foldout;
+            FontStyle previousStyle = style.fontStyle;
+            style.fontStyle = FontStyle.Bold;
+            _target._showControlsBody = EditorGUILayout.Foldout(_target._showControlsBody, "Body Controls");
+            style.fontStyle = previousStyle;
+
+            if (_target._showControlsBody)
+            {
+                EditorGUI.indentLevel++;
+                foreach (HumanBodyBones boneID in QuickIKManager.GetIKLimbBones())
+                {
+                    EditorGUILayout.BeginVertical("box");
+                    _target.SetControlBody(boneID, (QuickUnityVR.ControlType)EditorGUILayout.EnumPopup(boneID.ToString(), _target.GetControlBody(boneID)));
+                    if (_target.GetControlBody(boneID) == QuickUnityVR.ControlType.IK)
+                    {
+                        GUI.enabled = false;
+                        EditorGUILayout.ObjectField("IKTarget", _target.GetIKSolver(boneID)._targetLimb, typeof(Transform), true);
+                        GUI.enabled = true;
+                    }
+                    EditorGUILayout.EndVertical();
+                }
+                EditorGUI.indentLevel--;
+            }
+
+            DrawPropertyField("_useFootprints", "Use Footprints");
+            DrawPropertyField("_handTrackingMode", "Hand Tracking Mode");
+
 
             UpdateHandTrackingSupport();
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                //serializedObject.ApplyModifiedProperties();
+                QuickUtilsEditor.MarkSceneDirty();
+            }
         }
 
         #endregion

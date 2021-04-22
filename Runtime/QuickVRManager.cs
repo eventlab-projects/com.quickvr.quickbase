@@ -97,6 +97,10 @@ namespace QuickVR
 
         protected virtual void OnEnable()
         {
+            //If we are in the Editor, the UpdateTracking function is called on LateUpdate, as onBeforeRender seems
+            //not to be properly called when in Editor, i.e., the Animation is not correctly blended with the tracking. 
+            //On Build, we do the UpdateTracking onBeforeRender because this provide the smoothest possible result as we
+            //are delaying the application of the tracking as much as possible. onBeforeRender works as expected on Build. 
             if (!Application.isEditor)
             {
                 Application.onBeforeRender += UpdateTracking;

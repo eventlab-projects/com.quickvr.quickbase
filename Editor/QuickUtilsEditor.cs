@@ -21,7 +21,10 @@ namespace QuickVR
 
         public static void MarkSceneDirty()
         {
-            EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+            if (!Application.isPlaying)
+            {
+                EditorSceneManager.MarkSceneDirty(SceneManager.GetActiveScene());
+            }
         }
 
         private static void SaveSettingsAsset()
