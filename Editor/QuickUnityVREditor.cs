@@ -63,6 +63,25 @@ namespace QuickVR
 
             EditorGUI.BeginChangeCheck();
 
+            DrawControlsBody();
+            DrawControlsHand(true);
+            DrawControlsHand(false);
+
+            DrawPropertyField("_useFootprints", "Use Footprints");
+            DrawPropertyField("_handTrackingMode", "Hand Tracking Mode");
+
+
+            UpdateHandTrackingSupport();
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                //serializedObject.ApplyModifiedProperties();
+                QuickUtilsEditor.MarkSceneDirty();
+            }
+        }
+
+        protected virtual void DrawControlsBody()
+        {
             GUIStyle style = EditorStyles.foldout;
             FontStyle previousStyle = style.fontStyle;
             style.fontStyle = FontStyle.Bold;
@@ -86,17 +105,40 @@ namespace QuickVR
                 }
                 EditorGUI.indentLevel--;
             }
+        }
 
-            DrawPropertyField("_useFootprints", "Use Footprints");
-            DrawPropertyField("_handTrackingMode", "Hand Tracking Mode");
-
-
-            UpdateHandTrackingSupport();
-
-            if (EditorGUI.EndChangeCheck())
+        protected virtual void DrawControlsHand(bool isLeft)
+        {
+            GUIStyle style = EditorStyles.foldout;
+            FontStyle previousStyle = style.fontStyle;
+            style.fontStyle = FontStyle.Bold;
+            if (isLeft)
             {
-                //serializedObject.ApplyModifiedProperties();
-                QuickUtilsEditor.MarkSceneDirty();
+                _target._showControlsFingersLeftHand = EditorGUILayout.Foldout(_target._showControlsFingersLeftHand, "Left Hand Fingers Controls");
+            }
+            else
+            {
+                _target._showControlsFingersRightHand = EditorGUILayout.Foldout(_target._showControlsFingersRightHand, "Right Hand Fingers Controls");
+            }
+            
+            style.fontStyle = previousStyle;
+
+            if (isLeft && _target._showControlsFingersLeftHand || !isLeft && _target._showControlsFingersRightHand)
+            {
+                EditorGUI.indentLevel++;
+                foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
+                {
+                    EditorGUILayout.BeginVertical("box");
+                    _target.SetControlFinger(f, isLeft, (QuickUnityVR.ControlType)EditorGUILayout.EnumPopup(f.ToString(), _target.GetControlFinger(f, isLeft)));
+                    if (_target.GetControlFinger(f, isLeft) == QuickUnityVR.ControlType.IK)
+                    {
+                        GUI.enabled = false;
+                        EditorGUILayout.ObjectField("IKTarget", _target.GetIKSolver(f, isLeft)._targetLimb, typeof(Transform), true);
+                        GUI.enabled = true;
+                    }
+                    EditorGUILayout.EndVertical();
+                }
+                EditorGUI.indentLevel--;
             }
         }
 

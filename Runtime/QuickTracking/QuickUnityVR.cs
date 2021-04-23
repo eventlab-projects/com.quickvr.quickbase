@@ -43,6 +43,12 @@ namespace QuickVR {
         [SerializeField, HideInInspector]
         public bool _showControlsBody = false;
 
+        [SerializeField, HideInInspector]
+        public bool _showControlsFingersLeftHand = false;
+
+        [SerializeField, HideInInspector]
+        public bool _showControlsFingersRightHand = false;
+
 #endif
 
 #endregion
@@ -77,6 +83,46 @@ namespace QuickVR {
 
         [SerializeField, HideInInspector]
         protected List<ControlType> m_ControlsBody = null;
+
+        protected List<ControlType> _controlsFingersLeftHand
+        {
+            get
+            {
+                if (m_ControlsFingersLeftHand == null || m_ControlsFingersLeftHand.Count != 5)
+                {
+                    m_ControlsFingersLeftHand = new List<ControlType>();
+                    foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
+                    {
+                        m_ControlsFingersLeftHand.Add(ControlType.Tracking);
+                    }
+                }
+
+                return m_ControlsFingersLeftHand;
+            }
+        }
+
+        [SerializeField, HideInInspector]
+        protected List<ControlType> m_ControlsFingersLeftHand = null;
+
+        protected List<ControlType> _controlsFingersRightHand
+        {
+            get
+            {
+                if (m_ControlsFingersRightHand == null || m_ControlsFingersRightHand.Count != 5)
+                {
+                    m_ControlsFingersRightHand = new List<ControlType>();
+                    foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
+                    {
+                        m_ControlsFingersRightHand.Add(ControlType.Tracking);
+                    }
+                }
+
+                return m_ControlsFingersRightHand;
+            }
+        }
+
+        [SerializeField, HideInInspector]
+        protected List<ControlType> m_ControlsFingersRightHand = null;
 
         #endregion
 
@@ -203,6 +249,25 @@ namespace QuickVR {
             if (i != -1)
             {
                 _controlsBody[i] = cType;
+            }
+        }
+
+        public virtual ControlType GetControlFinger(QuickHumanFingers f, bool isLeft)
+        {
+            int i = (int)f;
+            return isLeft ? _controlsFingersLeftHand[i] : _controlsFingersRightHand[i];
+        }
+
+        public virtual void SetControlFinger(QuickHumanFingers f, bool isLeft, ControlType cType)
+        {
+            int i = (int)f;
+            if (isLeft)
+            {
+                _controlsFingersLeftHand[i] = cType;
+            }
+            else
+            {
+                _controlsFingersRightHand[i] = cType;
             }
         }
 
@@ -336,7 +401,10 @@ namespace QuickVR {
 
         protected override void LateUpdate()
         {
-            
+            if (!Application.isPlaying)
+            {
+                base.UpdateTracking();
+            }
         }
 
         public override void UpdateTracking()
