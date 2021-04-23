@@ -6,7 +6,7 @@ using UnityEngine.XR;
 namespace QuickVR
 {
 
-    public class QuickOVRHandsInitializer : QuickBaseTrackingManager
+    public class QuickOVRHandsInitializer : MonoBehaviour
     {
 
         #region PUBLIC ATTRIBUTES
@@ -45,6 +45,16 @@ namespace QuickVR
 #endif
         }
 
+        protected virtual void OnEnable()
+        {
+            QuickVRManager.OnPreUpdateVRNodes += UpdateOVR;
+        }
+
+        protected virtual void OnDisable()
+        {
+            QuickVRManager.OnPreUpdateVRNodes -= UpdateOVR;
+        }
+
         protected static void OnSourceAnimatorSet(Animator animator)
         {
             animator.GetOrCreateComponent<QuickOVRHandsInitializer>();
@@ -59,18 +69,11 @@ namespace QuickVR
 
             _rightHand = Instantiate<QuickOVRHand>(Resources.Load<QuickOVRHand>("Prefabs/pf_QuickOVRHandRight"), vrPlayArea.GetVRNode(HumanBodyBones.RightHand).transform);
             _rightHand.transform.ResetTransformation();
-
-            _vrManager.AddHandTrackingSystem(this);
         }
 
 #endregion
 
         #region GET AND SET
-
-        public override void Calibrate()
-        {
-
-        }
 
         public virtual QuickOVRHand GetOVRHand(bool left)
         {
@@ -81,13 +84,11 @@ namespace QuickVR
 
         #region UPDATE
 
-        public override void UpdateTracking()
+        public virtual void UpdateOVR()
         {
             if (_hTracking && _hTracking._handTrackingMode == QuickUnityVR.HandTrackingMode.Hands)
             {
                 OVRInput.Update();
-                if (_leftHand) _leftHand.UpdateTracking();
-                if (_rightHand) _rightHand.UpdateTracking();
             }
         }
 

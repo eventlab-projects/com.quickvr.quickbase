@@ -656,13 +656,13 @@ namespace QuickVR {
 
             //foreach (QuickHumanFingers boneID in QuickHumanTrait.GetHumanFingers())
             //{
-            //    QuickIKSolver ikSolver = GetIKSolver<QuickIKSolver>(ToUnity(boneID, true));
+            //    QuickIKSolver ikSolver = GetIKSolver(boneID, true);
             //    if ((_ikMaskLeftHand & (1 << (int)boneID)) != 0) ikSolver.UpdateIK();
             //}
 
             //foreach (QuickHumanFingers boneID in QuickHumanTrait.GetHumanFingers())
             //{
-            //    QuickIKSolver ikSolver = GetIKSolver<QuickIKSolver>(ToUnity(boneID, false));
+            //    QuickIKSolver ikSolver = GetIKSolver(boneID, false);
             //    if ((_ikMaskRightHand & (1 << (int)boneID)) != 0) ikSolver.UpdateIK();
             //}
         }

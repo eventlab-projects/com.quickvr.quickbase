@@ -451,7 +451,45 @@ namespace QuickVR {
             UpdateVRCursors();
             _footprints.gameObject.SetActive(_useFootprints);
 
+            UpdateTrackingFingers(true);
+            UpdateTrackingFingers(false);
+
             base.UpdateTracking();
+        }
+
+        protected virtual void UpdateTrackingFingers(bool isLeft)
+        {
+            //Apply the rotation to the bones
+            foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
+            {
+                List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, isLeft);
+                for (int i = 0; i < fingerBones.Count - 1; i++)
+                {
+                    QuickVRNode node = _vrPlayArea.GetVRNode(fingerBones[i]);
+                    if (node.IsTracked())
+                    {
+                        UpdateTrackingFingerPhalange(fingerBones[i], fingerBones[i + 1]);
+                    }
+                }
+            }
+        }
+
+        protected virtual void UpdateTrackingFingerPhalange(QuickHumanBodyBones boneStartID, QuickHumanBodyBones boneEndID)
+        {
+            Transform bone0 = _animator.GetBoneTransform(boneStartID);
+            Transform bone1 = _animator.GetBoneTransform(boneEndID);
+            Transform node0 = _vrPlayArea.GetVRNode(boneStartID).transform;
+            Transform node1 = _vrPlayArea.GetVRNode(boneEndID).transform;
+
+            if (bone0 && bone1 && node0 && node1)
+            {
+                Vector3 currentDir = bone1.position - bone0.position;
+                Vector3 targetDir = node1.position - node0.position;
+                float rotAngle = Vector3.Angle(currentDir, targetDir);
+                Vector3 rotAxis = Vector3.Cross(currentDir, targetDir).normalized;
+
+                bone0.Rotate(rotAxis, rotAngle, Space.World);
+            }
         }
 
         protected virtual void UpdateIKTargetPosFromUser(QuickVRNode node, HumanBodyBones boneID)

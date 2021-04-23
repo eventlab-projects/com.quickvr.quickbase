@@ -113,7 +113,8 @@ namespace QuickVR
         protected QuickHumanBodyBones _role = QuickHumanBodyBones.Head;
 
         protected Transform _calibrationPose = null;
-
+        
+        [SerializeField, ReadOnly]
         protected bool _isTracked = false;
 
         #endregion

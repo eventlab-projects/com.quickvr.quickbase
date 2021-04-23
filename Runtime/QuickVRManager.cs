@@ -36,7 +36,6 @@ namespace QuickVR
         protected Animator _animatorSource = null;
 
         protected QuickUnityVR _unityVR = null;
-        protected QuickBaseTrackingManager _handTracking = null;
 
         protected QuickVRPlayArea _vrPlayArea = null;
         protected QuickVRCameraController _cameraController = null;
@@ -58,6 +57,9 @@ namespace QuickVR
 
         public static event QuickVRManagerAction OnPreCalibrate;
         public static event QuickVRManagerAction OnPostCalibrate;
+
+        public static event QuickVRManagerAction OnPreUpdateVRNodes;
+        public static event QuickVRManagerAction OnPostUpdateVRNodes;
 
         public static event QuickVRManagerAction OnPreUpdateTracking;
         public static event QuickVRManagerAction OnPostUpdateTracking;
@@ -216,11 +218,6 @@ namespace QuickVR
             SetAnimatorTarget(animator);
         }
 
-        public virtual void AddHandTrackingSystem(QuickBaseTrackingManager handTracking)
-        {
-            _handTracking = handTracking;
-        }
-
         protected virtual List<QuickBaseTrackingManager> GetAllTrackingSystems()
         {
             List<QuickBaseTrackingManager> result = new List<QuickBaseTrackingManager>();
@@ -283,22 +280,17 @@ namespace QuickVR
             _animatorSource.transform.position = Vector3.zero;
 
             //Update the VRNodes
+            if (OnPreUpdateVRNodes != null) OnPreUpdateVRNodes();
             _vrPlayArea.UpdateVRNodes();
+            if (OnPostUpdateVRNodes != null) OnPostUpdateVRNodes();
 
+            //Apply the tracking of the VRNodes
             if (OnPreUpdateTracking != null) OnPreUpdateTracking();
-
             if (_unityVR && _unityVR.enabled)
             {
                 _unityVR.UpdateTracking();
             }
-
-            if (_handTracking && _handTracking.enabled)
-            {
-                _handTracking.UpdateTracking();
-            }
-
             _animatorSource.transform.position = tmpPos;
-
             if (OnPostUpdateTracking != null) OnPostUpdateTracking();
 
             //Copy the pose of the source avatar to the target avatar
