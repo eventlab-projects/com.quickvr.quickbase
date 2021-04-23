@@ -460,15 +460,48 @@ namespace QuickVR {
         protected virtual void UpdateTrackingFingers(bool isLeft)
         {
             //Apply the rotation to the bones
-            foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
+            QuickHumanFingers[] fingers = QuickHumanTrait.GetHumanFingers();
+            for (int i = 0; i < fingers.Length; i++)
             {
-                List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, isLeft);
-                for (int i = 0; i < fingerBones.Count - 1; i++)
+                QuickHumanFingers f = fingers[i];
+                ControlType cType = GetControlFinger(f, isLeft);
+                int m = (1 << i);
+                if (cType == ControlType.IK)
                 {
-                    QuickVRNode node = _vrPlayArea.GetVRNode(fingerBones[i]);
-                    if (node.IsTracked())
+                    //If this finger is driven by the IK, activate the corresponding position in the mask
+                    if (isLeft)
                     {
-                        UpdateTrackingFingerPhalange(fingerBones[i], fingerBones[i + 1]);
+                        _ikMaskLeftHand |= m;
+                    }
+                    else
+                    {
+                        _ikMaskRightHand |= m;
+                    }
+                }
+                else
+                {
+                    //Otherwise, deactivate the corresponding position in the mask
+                    if (isLeft)
+                    {
+                        _ikMaskLeftHand &= ~m;
+                    }
+                    else
+                    {
+                        _ikMaskRightHand &= ~m;
+                    }
+
+                    if (cType == ControlType.Tracking)
+                    {
+                        //Apply the tracking data to this finger
+                        List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, isLeft);
+                        for (int j = 0; j < fingerBones.Count - 1; j++)
+                        {
+                            QuickVRNode node = _vrPlayArea.GetVRNode(fingerBones[j]);
+                            if (node.IsTracked())
+                            {
+                                UpdateTrackingFingerPhalange(fingerBones[j], fingerBones[j + 1]);
+                            }
+                        }
                     }
                 }
             }
