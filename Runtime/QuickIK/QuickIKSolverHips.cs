@@ -73,18 +73,6 @@ namespace QuickVR
             }
         }
 
-        public override float _weightIKHint
-        {
-            get
-            {
-                return 0;
-            }
-            set
-            {
-
-            }
-        }
-
         #endregion
 
         #region PROTECTED ATTRIBUTES

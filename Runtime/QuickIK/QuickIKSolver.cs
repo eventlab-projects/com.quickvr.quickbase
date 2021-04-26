@@ -162,18 +162,6 @@ namespace QuickVR
             }
         }
 
-        public virtual float _weightIKHint
-        {
-            get
-            {
-                return _targetHint ? 1.0f : 0.0f;
-            }
-            set
-            {
-
-            }
-        }
-
         protected QuickIKManager _ikManager = null;
 
         #endregion

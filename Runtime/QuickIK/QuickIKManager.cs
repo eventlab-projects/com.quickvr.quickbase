@@ -293,45 +293,43 @@ namespace QuickVR {
                 ikTarget.position = bone.position;
 
                 //Set the rotation of the IKTarget
-                if (boneName.Contains("Distal"))
+                ikTarget.rotation = transform.rotation;
+                if (boneID == HumanBodyBones.LeftHand)
                 {
-                    ikTarget.rotation = bone.rotation;
+                    ikTarget.LookAt(ikTarget.position - transform.right, transform.up);
                 }
-                else
+                else if (boneID == HumanBodyBones.RightHand)
                 {
-                    ikTarget.rotation = transform.rotation;
-                    if (boneID == HumanBodyBones.LeftHand)
+                    ikTarget.LookAt(ikTarget.position + transform.right, transform.up);
+                }
+                else if (boneName.Contains("Spine"))
+                {
+                    ikTarget.position -= transform.forward * DEFAULT_TARGET_HINT_DISTANCE;
+                }
+                else if (boneID == HumanBodyBones.LeftLowerArm || boneID == HumanBodyBones.RightLowerArm)
+                {
+                    ikTarget.position += Vector3.Lerp(-transform.forward, -transform.up, 0.35f).normalized * DEFAULT_TARGET_HINT_DISTANCE;
+                }
+                else if (boneID == HumanBodyBones.LeftLowerLeg || boneID == HumanBodyBones.RightLowerLeg)
+                {
+                    ikTarget.position += transform.forward * DEFAULT_TARGET_HINT_DISTANCE;
+                }
+                else if (boneName.Contains("Distal"))
+                {
+                    ikTarget.up = transform.up;
+                    ikTarget.forward = _animator.GetBoneTransform(boneID).position - _animator.GetBoneTransform(boneID - 1).position;
+                }
+                else if (boneName.Contains("Intermediate"))
+                {
+                    if (boneName.Contains("Thumb"))
                     {
-                        ikTarget.LookAt(ikTarget.position - transform.right, transform.up);
+                        Vector3 v = Vector3.Cross(_animator.GetBoneTransform(boneID - 1).position - _animator.GetBoneTransform(boneID).position, transform.up).normalized;
+                        float sign = boneName.Contains("Left") ? 1 : -1;
+                        ikTarget.position += sign * v * 0.1f;
                     }
-                    else if (boneID == HumanBodyBones.RightHand)
+                    else
                     {
-                        ikTarget.LookAt(ikTarget.position + transform.right, transform.up);
-                    }
-                    else if (boneName.Contains("Spine"))
-                    {
-                        ikTarget.position -= transform.forward * DEFAULT_TARGET_HINT_DISTANCE;
-                    }
-                    else if (boneID == HumanBodyBones.LeftLowerArm || boneID == HumanBodyBones.RightLowerArm)
-                    {
-                        ikTarget.position += Vector3.Lerp(-transform.forward, -transform.up, 0.35f).normalized * DEFAULT_TARGET_HINT_DISTANCE;
-                    }
-                    else if (boneID == HumanBodyBones.LeftLowerLeg || boneID == HumanBodyBones.RightLowerLeg)
-                    {
-                        ikTarget.position += transform.forward * DEFAULT_TARGET_HINT_DISTANCE;
-                    }
-                    else if (boneName.Contains("Intermediate"))
-                    {
-                        if (boneName.Contains("Thumb"))
-                        {
-                            Vector3 v = Vector3.Cross(_animator.GetBoneTransform(boneID - 1).position - _animator.GetBoneTransform(boneID).position, transform.up).normalized;
-                            float sign = boneName.Contains("Left") ? 1 : -1;
-                            ikTarget.position += sign * v * 0.1f;
-                        }
-                        else
-                        {
-                            ikTarget.position += transform.up * 0.1f;
-                        }
+                        ikTarget.position += transform.up * 0.1f;
                     }
                 }
             }
@@ -391,23 +389,45 @@ namespace QuickVR {
                 }
             }
 
+            //Check the rotation of the parents of the targets of the finger bones
+            for (HumanBodyBones boneID = HumanBodyBones.LeftThumbDistal; boneID <= HumanBodyBones.LeftLittleDistal; boneID += 3)
+            {
+                Transform t = GetIKTargetParent(boneID);
+                t.position = _animator.GetBoneTransform(boneID - 2).position;
+                t.LookAt(_animator.GetBoneTransform(boneID - 1), transform.up);
+            }
+            for (HumanBodyBones boneID = HumanBodyBones.RightThumbDistal; boneID <= HumanBodyBones.RightLittleDistal; boneID += 3)
+            {
+                Transform t = GetIKTargetParent(boneID);
+                t.position = _animator.GetBoneTransform(boneID - 2).position;
+                t.LookAt(_animator.GetBoneTransform(boneID - 1), transform.up);
+            }
+
             //Restore the ikTargetLimb real parent. 
             foreach (var pair in _ikSolvers)
             {
                 QuickIKSolver ikSolver = pair.Value;
                 ikSolver._targetLimb.parent = GetIKTargetParent(ikSolver._boneID);
+                ikSolver._targetLimb.localScale = Vector3.one;
+                if (QuickHumanTrait.IsBoneFingerLeft(ikSolver._boneID) || QuickHumanTrait.IsBoneFingerRight(ikSolver._boneID))
+                {
+                    ikSolver._targetLimb.localRotation = Quaternion.identity;
+                }
             }
 
             _ikTargetsLeftHand.parent = transform;
+            _ikTargetsLeftHand.localScale = Vector3.one;
+
             _ikTargetsRightHand.parent = transform;
+            _ikTargetsRightHand.localScale = Vector3.one;
 
             SaveCurrentPose();
         }
 
         protected virtual Transform GetIKTargetParent(HumanBodyBones boneID)
         {
-            if (QuickHumanTrait.IsBoneFingerLeft(boneID)) return _ikTargetsLeftHand;
-            if (QuickHumanTrait.IsBoneFingerRight(boneID)) return _ikTargetsRightHand;
+            if (QuickHumanTrait.IsBoneFingerLeft(boneID)) return _ikTargetsLeftHand.CreateChild("_Axis_" + boneID.ToString());
+            if (QuickHumanTrait.IsBoneFingerRight(boneID)) return _ikTargetsRightHand.CreateChild("_Axis_" + boneID.ToString());
             return _ikTargetsRoot;
         }
 
@@ -544,10 +564,10 @@ namespace QuickVR {
             Quaternion srcRot = srcIKSolver._targetLimb.localRotation;
             dstIKSolver._targetLimb.localPosition = Vector3.Scale(new Vector3(-1, 1, 1), srcPos);
             dstIKSolver._targetLimb.localRotation = new Quaternion(srcRot.x, -srcRot.y, -srcRot.z, srcRot.w);
-            if (dstIKSolver._targetHint && srcIKSolver._targetHint)
-            {
-                dstIKSolver._targetHint.localPosition = Vector3.Scale(new Vector3(-1, 1, 1), srcIKSolver._targetHint.localPosition);
-            }
+            //if (dstIKSolver._targetHint && srcIKSolver._targetHint)
+            //{
+            //    dstIKSolver._targetHint.localPosition = Vector3.Scale(new Vector3(-1, 1, 1), srcIKSolver._targetHint.localPosition);
+            //}
         }
 
         protected virtual bool IsTrackedIKLimbBone(IKLimbBones boneID)

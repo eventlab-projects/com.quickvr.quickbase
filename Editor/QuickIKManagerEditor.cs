@@ -106,10 +106,6 @@ namespace QuickVR
             EditorGUILayout.LabelField(boneName, EditorStyles.boldLabel);
             ikSolver._weightIKPos = EditorGUILayout.Slider(" IK Pos Weight", ikSolver._weightIKPos, 0.0f, 1.0f);
             ikSolver._weightIKRot = EditorGUILayout.Slider(" IK Rot Weight", ikSolver._weightIKRot, 0.0f, 1.0f);
-            if (ikSolver._targetHint)
-            {
-                ikSolver._weightIKHint = EditorGUILayout.Slider(" IK Hint Weight", ikSolver._weightIKHint, 0.0f, 1.0f);
-            }
         }
 
         protected virtual void UpdateDebug()
