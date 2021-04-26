@@ -92,11 +92,13 @@ namespace QuickVR
         {
             get
             {
+                if (!m_targetLimb)
+                {
+                    m_targetLimb = transform.CreateChild(QuickIKManager.IK_TARGET_PREFIX);
+                    m_targetLimb.CreateChild("__BoneRotation__").rotation = _boneLimb.rotation;
+                }
+
                 return m_targetLimb;
-            }
-            set
-            {
-                m_targetLimb = value;
             }
         }
 
@@ -106,21 +108,21 @@ namespace QuickVR
             {
                 if (!m_targetHint && _boneUpper)
                 {
-                    foreach (Transform t in _boneUpper)
+                    int i = 0;
+                    for (; i < _boneUpper.childCount && !_boneUpper.GetChild(i).name.Contains(QuickIKManager.IK_TARGET_PREFIX); i++)
                     {
-                        if (t.name.Contains(QuickIKManager.IK_TARGET_PREFIX))
-                        {
-                            m_targetHint = t;
-                            break;
-                        }
+                        
+                    }
+                    if (i < _boneUpper.childCount)
+                    {
+                        m_targetHint = m_boneUpper.GetChild(i);
+                    }
+                    else
+                    {
+                        m_targetHint = m_boneUpper.CreateChild(QuickIKManager.IK_TARGET_PREFIX);
                     }
                 }
                 return m_targetHint;
-            }
-            set
-            {
-                m_targetHint = value;
-                m_targetHint.parent = _boneUpper;
             }
         }
 

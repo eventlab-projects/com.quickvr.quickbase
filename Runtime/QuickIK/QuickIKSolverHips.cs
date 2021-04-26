@@ -53,27 +53,11 @@ namespace QuickVR
             }
         }
 
-        public override Transform _targetLimb
-        {
-            get
-            {
-                return m_targetLimb;
-            }
-            set
-            {
-                m_targetLimb = value;
-            }
-        }
-
         public override Transform _targetHint
         {
             get
             {
                 return null;
-            }
-            set
-            {
-                
             }
         }
 
