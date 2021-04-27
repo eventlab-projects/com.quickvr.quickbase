@@ -97,9 +97,17 @@ namespace QuickVR
                     _target.SetControlBody(boneID, (QuickUnityVR.ControlType)EditorGUILayout.EnumPopup(boneID.ToString(), _target.GetControlBody(boneID)));
                     if (_target.GetControlBody(boneID) == QuickUnityVR.ControlType.IK)
                     {
+                        QuickIKSolver ikSolver = _target.GetIKSolver(boneID);
+
+                        EditorGUILayout.BeginHorizontal();
                         GUI.enabled = false;
-                        EditorGUILayout.ObjectField("IKTarget", _target.GetIKSolver(boneID)._targetLimb, typeof(Transform), true);
+                        EditorGUILayout.ObjectField("IKTarget", ikSolver._targetLimb, typeof(Transform), true);
                         GUI.enabled = true;
+                        DrawButton("Reset", GUILayout.Width(52));
+                        EditorGUILayout.EndHorizontal();
+
+                        ikSolver._weightIKPos = EditorGUILayout.Slider("IKPosWeight", ikSolver._weightIKPos, 0, 1);
+                        ikSolver._weightIKRot = EditorGUILayout.Slider("IKRotWeight", ikSolver._weightIKRot, 0, 1);
                     }
                     EditorGUILayout.EndVertical();
                 }
