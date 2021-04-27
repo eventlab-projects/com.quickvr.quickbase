@@ -185,22 +185,22 @@ namespace QuickVR
         [SerializeField, ReadOnly]
         protected Transform m_targetHint = null;
 
-        [SerializeField, ReadOnly]
+        [SerializeField, HideInInspector]
         protected Quaternion _initialLocalRotationUpper = Quaternion.identity;
 
-        [SerializeField, ReadOnly]
+        [SerializeField, HideInInspector]
         protected Quaternion _initialLocalRotationMid = Quaternion.identity;
 
-        [SerializeField, ReadOnly]
+        [SerializeField, HideInInspector]
         protected Quaternion _initialLocalRotationLimb = Quaternion.identity;
 
-        [SerializeField, ReadOnly]
+        [SerializeField, HideInInspector]
         protected Vector3 _initialLocalPositionTargetLimb = Vector3.zero;
 
-        [SerializeField, ReadOnly]
+        [SerializeField, HideInInspector]
         protected Quaternion _initialLocalRotationTargetLimb = Quaternion.identity;
 
-        [SerializeField, ReadOnly]
+        [SerializeField, HideInInspector]
         protected Vector3 _initialLocalPositionTargetHint = Vector3.zero;
 
         protected float _lengthUpper = 0;
@@ -222,12 +222,7 @@ namespace QuickVR
             if (_boneMid) _initialLocalRotationMid = _boneMid.localRotation;
             if (_boneLimb) _initialLocalRotationLimb = _boneLimb.localRotation;
 
-            if (_targetLimb)
-            {
-                _initialLocalPositionTargetLimb = _targetLimb.localPosition;
-                _initialLocalRotationTargetLimb = _targetLimb.localRotation;
-            }
-            if (_targetHint) _initialLocalPositionTargetHint = _targetHint.localPosition;
+            SaveCurrentPose();
 
             _ikManager = GetComponentInParent<QuickIKManager>();
         }
@@ -238,9 +233,22 @@ namespace QuickVR
 
         public virtual void SaveCurrentPose()
         {
-            _initialLocalPositionTargetLimb = _targetLimb.localPosition;
-            _initialLocalRotationTargetLimb = _targetLimb.localRotation;
+            if (_targetLimb)
+            {
+                _initialLocalPositionTargetLimb = _targetLimb.localPosition;
+                _initialLocalRotationTargetLimb = _targetLimb.localRotation;
+            }
             if (_targetHint) _initialLocalPositionTargetHint = _targetHint.localPosition;
+        }
+
+        public virtual void LoadCurrentPose()
+        {
+            if (_targetLimb)
+            {
+                _targetLimb.localPosition = _initialLocalPositionTargetLimb;
+                _targetLimb.localRotation = _initialLocalRotationTargetLimb;
+            }
+            if (_targetHint) _targetHint.localPosition = _initialLocalPositionTargetHint;
         }
 
         public virtual float GetUpperLength()

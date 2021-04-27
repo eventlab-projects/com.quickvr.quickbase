@@ -141,6 +141,17 @@ namespace QuickVR {
             return result;
         }
 
+        public static bool FoldoutBolt(bool expand, string label)
+        {
+            GUIStyle style = EditorStyles.foldout;
+            FontStyle previousStyle = style.fontStyle;
+            style.fontStyle = FontStyle.Bold;
+            bool result = EditorGUILayout.Foldout(expand, label);
+            style.fontStyle = previousStyle;
+
+            return result;
+        }
+
 		#endregion
 	}
 

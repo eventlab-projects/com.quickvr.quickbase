@@ -18,15 +18,6 @@ namespace QuickVR
 
         protected QuickIKManager _ikManager = null;
         
-        [SerializeField] 
-        protected bool _showCfgBody = false;
-
-        [SerializeField]
-        protected bool _showCfgLeftHand = false;
-
-        [SerializeField]
-        protected bool _showCfgRightHand = false;
-
         #endregion
 
         #region CONSTANTS
@@ -58,54 +49,90 @@ namespace QuickVR
         {
             base.DrawGUI();
 
-            EditorGUILayout.Space();
-            _showCfgBody = EditorGUILayout.Foldout(_showCfgBody, "Body IK Solvers", true);
-            if (_showCfgBody)
+            EditorGUI.BeginChangeCheck();
+
+            _ikManager._showControlsBody = FoldoutBolt(_ikManager._showControlsBody, "Body Controls");
+            if (_ikManager._showControlsBody)
             {
                 EditorGUI.indentLevel++;
                 foreach (HumanBodyBones boneID in QuickIKManager.GetIKLimbBones())
                 {
-                    DrawIKSolverProperties(_ikManager.GetIKSolver(boneID), boneID.ToString());
-                    EditorGUILayout.Space();
+                    EditorGUILayout.BeginVertical("box");
+                    DrawIKSolverProperties(boneID);
+                    EditorGUILayout.EndVertical();
                 }
                 EditorGUI.indentLevel--;
             }
 
-            _showCfgLeftHand = EditorGUILayout.Foldout(_showCfgLeftHand, "Left Hand IK Solvers");
-            if (_showCfgLeftHand)
+            _ikManager._showControlsFingersLeftHand = FoldoutBolt(_ikManager._showControlsFingersLeftHand, "Left Hand Fingers Controlsa");
+            if (_ikManager._showControlsFingersLeftHand)
             {
                 EditorGUI.indentLevel++;
                 foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
                 {
-                    DrawIKSolverProperties(_ikManager.GetIKSolver(QuickIKManager.ToUnity(f, true)), f.ToString());
-                    EditorGUILayout.Space();
+                    EditorGUILayout.BeginVertical("box");
+                    DrawIKSolverProperties(f, true);
+                    EditorGUILayout.EndVertical();
                 }
                 EditorGUI.indentLevel--;
             }
 
-            _showCfgRightHand = EditorGUILayout.Foldout(_showCfgRightHand, "Right Hand IK Solvers");
-            if (_showCfgRightHand)
+            _ikManager._showControlsFingersRightHand = FoldoutBolt(_ikManager._showControlsFingersRightHand, "Right Hand Fingers Controls");
+            if (_ikManager._showControlsFingersRightHand)
             {
                 EditorGUI.indentLevel++;
                 foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
                 {
-                    DrawIKSolverProperties(_ikManager.GetIKSolver(QuickIKManager.ToUnity(f, false)), f.ToString());
-                    EditorGUILayout.Space();
+                    EditorGUILayout.BeginVertical("box");
+                    DrawIKSolverProperties(f, false);
+                    EditorGUILayout.EndVertical();
                 }
                 EditorGUI.indentLevel--;
+            }
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                //serializedObject.ApplyModifiedProperties();
+                QuickUtilsEditor.MarkSceneDirty();
             }
 
             //UpdateDebug();
-
         }
 
-        protected virtual void DrawIKSolverProperties(QuickIKSolver ikSolver, string boneName)
+        protected virtual void DrawIKSolverProperties(HumanBodyBones boneID)
         {
-            if (ikSolver == null) return;
+            DrawIKSolverProperties(_ikManager.GetIKSolver(boneID), boneID.ToString());
+        }
 
-            EditorGUILayout.LabelField(boneName, EditorStyles.boldLabel);
-            ikSolver._weightIKPos = EditorGUILayout.Slider(" IK Pos Weight", ikSolver._weightIKPos, 0.0f, 1.0f);
-            ikSolver._weightIKRot = EditorGUILayout.Slider(" IK Rot Weight", ikSolver._weightIKRot, 0.0f, 1.0f);
+        protected virtual void DrawIKSolverProperties(QuickHumanFingers f, bool isLeft)
+        {
+            DrawIKSolverProperties(_ikManager.GetIKSolver(f, isLeft), f.ToString());
+        }
+
+        protected virtual void DrawIKSolverProperties(QuickIKSolver ikSolver, string name)
+        {
+            ikSolver._enableIK = EditorGUILayout.Toggle(name, ikSolver._enableIK);
+            if (ikSolver._enableIK)
+            {
+                DrawIKSolverPropertiesBase(ikSolver);
+            }
+        }
+
+        protected virtual void DrawIKSolverPropertiesBase(QuickIKSolver ikSolver)
+        {
+            EditorGUILayout.BeginHorizontal();
+            GUI.enabled = false;
+            EditorGUILayout.ObjectField("IKTarget", ikSolver._targetLimb, typeof(Transform), true);
+            GUI.enabled = true;
+            if (DrawButton("Reset", GUILayout.Width(52)))
+            {
+                ikSolver.LoadCurrentPose();
+                //_target.ResetIKTarget(boneID);
+            }
+            EditorGUILayout.EndHorizontal();
+
+            ikSolver._weightIKPos = EditorGUILayout.Slider("IKPosWeight", ikSolver._weightIKPos, 0, 1);
+            ikSolver._weightIKRot = EditorGUILayout.Slider("IKRotWeight", ikSolver._weightIKRot, 0, 1);
         }
 
         protected virtual void UpdateDebug()

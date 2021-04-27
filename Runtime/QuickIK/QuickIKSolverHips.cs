@@ -77,7 +77,7 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        [SerializeField]
+        [SerializeField, HideInInspector]
         protected Vector3 _hipsInitialLocalPos = Vector3.zero;
 
         #endregion
@@ -89,6 +89,13 @@ namespace QuickVR
             base.SaveCurrentPose();
             
             _hipsInitialLocalPos = _boneLimb.localPosition;
+        }
+
+        public override void LoadCurrentPose()
+        {
+            base.LoadCurrentPose();
+
+            _boneLimb.localPosition = _hipsInitialLocalPos;
         }
 
         public override void ResetIKChain()

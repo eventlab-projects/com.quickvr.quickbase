@@ -7,7 +7,7 @@ using UnityEditor;
 namespace QuickVR
 {
     [CustomEditor(typeof(QuickUnityVR), true)]
-    public class QuickUnityVREditor : QuickBaseEditor
+    public class QuickUnityVREditor : QuickIKManagerEditor
     {
 
         #region PROTECTED ATTRIBUTES
@@ -17,7 +17,7 @@ namespace QuickVR
 
         #endregion
 
-        #region CREATION AND DESTRUCTIOn
+        #region CREATION AND DESTRUCTION
 
         protected virtual void Awake()
         {
@@ -53,101 +53,22 @@ namespace QuickVR
             }
         }
 
-        protected override void DrawGUI()
+        protected override void DrawIKSolverProperties(HumanBodyBones boneID)
         {
-            //base.DrawGUI();
-
-            GUI.enabled = false;
-            DrawPropertyField("m_Script", "Script");
-            GUI.enabled = true;
-
-            EditorGUI.BeginChangeCheck();
-
-            DrawControlsBody();
-            DrawControlsHand(true);
-            DrawControlsHand(false);
-
-            DrawPropertyField("_useFootprints", "Use Footprints");
-            DrawPropertyField("_handTrackingMode", "Hand Tracking Mode");
-
-
-            UpdateHandTrackingSupport();
-
-            if (EditorGUI.EndChangeCheck())
+            _target.SetControlBody(boneID, (QuickUnityVR.ControlType)EditorGUILayout.EnumPopup(boneID.ToString(), _target.GetControlBody(boneID)));
+            if (_target.GetControlBody(boneID) == QuickUnityVR.ControlType.IK)
             {
-                //serializedObject.ApplyModifiedProperties();
-                QuickUtilsEditor.MarkSceneDirty();
+                DrawIKSolverPropertiesBase(_target.GetIKSolver(boneID));
             }
         }
 
-        protected virtual void DrawControlsBody()
+        protected override void DrawIKSolverProperties(QuickHumanFingers f, bool isLeft)
         {
-            GUIStyle style = EditorStyles.foldout;
-            FontStyle previousStyle = style.fontStyle;
-            style.fontStyle = FontStyle.Bold;
-            _target._showControlsBody = EditorGUILayout.Foldout(_target._showControlsBody, "Body Controls");
-            style.fontStyle = previousStyle;
-
-            if (_target._showControlsBody)
+            _target.SetControlFinger(f, isLeft, (QuickUnityVR.ControlType)EditorGUILayout.EnumPopup(f.ToString(), _target.GetControlFinger(f, isLeft)));
+            if (_target.GetControlFinger(f, isLeft) == QuickUnityVR.ControlType.IK)
             {
-                EditorGUI.indentLevel++;
-                foreach (HumanBodyBones boneID in QuickIKManager.GetIKLimbBones())
-                {
-                    EditorGUILayout.BeginVertical("box");
-                    _target.SetControlBody(boneID, (QuickUnityVR.ControlType)EditorGUILayout.EnumPopup(boneID.ToString(), _target.GetControlBody(boneID)));
-                    if (_target.GetControlBody(boneID) == QuickUnityVR.ControlType.IK)
-                    {
-                        QuickIKSolver ikSolver = _target.GetIKSolver(boneID);
-
-                        EditorGUILayout.BeginHorizontal();
-                        GUI.enabled = false;
-                        EditorGUILayout.ObjectField("IKTarget", ikSolver._targetLimb, typeof(Transform), true);
-                        GUI.enabled = true;
-                        DrawButton("Reset", GUILayout.Width(52));
-                        EditorGUILayout.EndHorizontal();
-
-                        ikSolver._weightIKPos = EditorGUILayout.Slider("IKPosWeight", ikSolver._weightIKPos, 0, 1);
-                        ikSolver._weightIKRot = EditorGUILayout.Slider("IKRotWeight", ikSolver._weightIKRot, 0, 1);
-                    }
-                    EditorGUILayout.EndVertical();
-                }
-                EditorGUI.indentLevel--;
-            }
-        }
-
-        protected virtual void DrawControlsHand(bool isLeft)
-        {
-            GUIStyle style = EditorStyles.foldout;
-            FontStyle previousStyle = style.fontStyle;
-            style.fontStyle = FontStyle.Bold;
-            if (isLeft)
-            {
-                _target._showControlsFingersLeftHand = EditorGUILayout.Foldout(_target._showControlsFingersLeftHand, "Left Hand Fingers Controls");
-            }
-            else
-            {
-                _target._showControlsFingersRightHand = EditorGUILayout.Foldout(_target._showControlsFingersRightHand, "Right Hand Fingers Controls");
-            }
-            
-            style.fontStyle = previousStyle;
-
-            if (isLeft && _target._showControlsFingersLeftHand || !isLeft && _target._showControlsFingersRightHand)
-            {
-                EditorGUI.indentLevel++;
-                foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
-                {
-                    EditorGUILayout.BeginVertical("box");
-                    _target.SetControlFinger(f, isLeft, (QuickUnityVR.ControlType)EditorGUILayout.EnumPopup(f.ToString(), _target.GetControlFinger(f, isLeft)));
-                    if (_target.GetControlFinger(f, isLeft) == QuickUnityVR.ControlType.IK)
-                    {
-                        GUI.enabled = false;
-                        EditorGUILayout.ObjectField("IKTarget", _target.GetIKSolver(f, isLeft)._targetLimb, typeof(Transform), true);
-                        GUI.enabled = true;
-                    }
-                    EditorGUILayout.EndVertical();
-                }
-                EditorGUI.indentLevel--;
-            }
+                DrawIKSolverPropertiesBase(_target.GetIKSolver(f, isLeft));
+            }            
         }
 
         #endregion

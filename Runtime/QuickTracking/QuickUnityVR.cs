@@ -38,20 +38,7 @@ namespace QuickVR {
             IK,
         }
 
-#if UNITY_EDITOR
-
-        [SerializeField, HideInInspector]
-        public bool _showControlsBody = false;
-
-        [SerializeField, HideInInspector]
-        public bool _showControlsFingersLeftHand = false;
-
-        [SerializeField, HideInInspector]
-        public bool _showControlsFingersRightHand = false;
-
-#endif
-
-#endregion
+        #endregion
 
         #region PROTECTED PARAMETERS
 
@@ -250,6 +237,8 @@ namespace QuickVR {
             {
                 _controlsBody[i] = cType;
             }
+
+            GetIKSolver(boneID)._enableIK = cType != ControlType.Animation;
         }
 
         public virtual ControlType GetControlFinger(QuickHumanFingers f, bool isLeft)
@@ -269,6 +258,8 @@ namespace QuickVR {
             {
                 _controlsFingersRightHand[i] = cType;
             }
+
+            GetIKSolver(f, isLeft)._enableIK = cType == ControlType.IK;
         }
 
         public virtual void CheckHandtrackingMode()
@@ -410,7 +401,6 @@ namespace QuickVR {
         public override void UpdateTracking()
         {
             //1) Update all the IKTargets taking into consideration its ControlType. 
-            _ikMaskBody = -1;
             List<HumanBodyBones> ikLimbBones = GetIKLimbBones();
             for (int i = 0; i < ikLimbBones.Count; i++)
             {
@@ -419,10 +409,11 @@ namespace QuickVR {
                 if (cType == ControlType.Animation)
                 {
                     //This body limb is controlled by the Animation. So disable the IK
-                    _ikMaskBody &= ~(1 << i);
+                    GetIKSolver(boneID)._enableIK = false;
                 }
                 else if (cType == ControlType.Tracking)
                 {
+                    GetIKSolver(boneID)._enableIK = true;
                     QuickVRNode node = _vrPlayArea.GetVRNode(boneID);
                     if (node.IsTracked())
                     {
@@ -465,31 +456,18 @@ namespace QuickVR {
             {
                 QuickHumanFingers f = fingers[i];
                 ControlType cType = GetControlFinger(f, isLeft);
-                int m = (1 << i);
+                QuickIKSolver ikSolver = GetIKSolver(f, isLeft);
                 if (cType == ControlType.IK)
                 {
                     //If this finger is driven by the IK, activate the corresponding position in the mask
-                    if (isLeft)
-                    {
-                        _ikMaskLeftHand |= m;
-                    }
-                    else
-                    {
-                        _ikMaskRightHand |= m;
-                    }
+                    ikSolver._enableIK = true;
                 }
                 else
                 {
                     //Otherwise, deactivate the corresponding position in the mask
-                    if (isLeft)
-                    {
-                        _ikMaskLeftHand &= ~m;
-                    }
-                    else
-                    {
-                        _ikMaskRightHand &= ~m;
-                    }
-
+                    ikSolver._enableIK = false;
+                    ikSolver.ResetIKChain();
+                    
                     if (cType == ControlType.Tracking)
                     {
                         //Apply the tracking data to this finger

@@ -64,8 +64,8 @@ namespace QuickVR
             base.Start();
 
             QuickIKManager ikManager = GetComponent<QuickIKManager>();
-            ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.LeftFoot);
-            ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.RightFoot);
+            //ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.LeftFoot);
+            //ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.RightFoot);
         }            
 
         protected virtual void OnEnable()

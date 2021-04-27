@@ -50,8 +50,8 @@ namespace QuickVR
 
             _headTracking = GetComponent<QuickUnityVR>();
             QuickIKManager ikManager = GetComponent<QuickIKManager>();
-            ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.LeftFoot);
-            ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.RightFoot);
+            //ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.LeftFoot);
+            //ikManager._ikHintMaskUpdate &= ~(1 << (int)IKLimbBones.RightFoot);
         }
 
         protected virtual void OnEnable()
