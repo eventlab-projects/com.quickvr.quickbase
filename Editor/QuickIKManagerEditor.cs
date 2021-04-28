@@ -64,7 +64,7 @@ namespace QuickVR
                 EditorGUI.indentLevel--;
             }
 
-            _ikManager._showControlsFingersLeftHand = FoldoutBolt(_ikManager._showControlsFingersLeftHand, "Left Hand Fingers Controlsa");
+            _ikManager._showControlsFingersLeftHand = FoldoutBolt(_ikManager._showControlsFingersLeftHand, "Left Hand Fingers Controls");
             if (_ikManager._showControlsFingersLeftHand)
             {
                 EditorGUI.indentLevel++;
