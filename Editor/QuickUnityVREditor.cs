@@ -56,7 +56,7 @@ namespace QuickVR
         protected override void DrawIKSolverProperties(HumanBodyBones boneID)
         {
             _target.SetControlBody(boneID, (QuickUnityVR.ControlType)EditorGUILayout.EnumPopup(boneID.ToString(), _target.GetControlBody(boneID)));
-            if (_target.GetControlBody(boneID) == QuickUnityVR.ControlType.IK)
+            if (_target.GetControlBody(boneID) != QuickUnityVR.ControlType.Animation)
             {
                 DrawIKSolverPropertiesBase(_target.GetIKSolver(boneID));
             }
@@ -65,7 +65,7 @@ namespace QuickVR
         protected override void DrawIKSolverProperties(QuickHumanFingers f, bool isLeft)
         {
             _target.SetControlFinger(f, isLeft, (QuickUnityVR.ControlType)EditorGUILayout.EnumPopup(f.ToString(), _target.GetControlFinger(f, isLeft)));
-            if (_target.GetControlFinger(f, isLeft) == QuickUnityVR.ControlType.IK)
+            if (_target.GetControlFinger(f, isLeft) != QuickUnityVR.ControlType.Animation)
             {
                 DrawIKSolverPropertiesBase(_target.GetIKSolver(f, isLeft));
             }            
