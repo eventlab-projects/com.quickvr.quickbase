@@ -20,6 +20,8 @@ namespace QuickVR
 
         protected Vector3 _customUserForward = Vector3.zero;  //A custom user forward provided by the application. 
 
+        protected Dictionary<HumanBodyBones, float> _fingerLength = new Dictionary<HumanBodyBones, float>();
+
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -30,6 +32,11 @@ namespace QuickVR
             foreach (QuickHumanBodyBones role in QuickVRNode.GetTypeList())
             {
                 CreateVRNode(role);
+            }
+
+            for (HumanBodyBones boneID = HumanBodyBones.LeftThumbProximal; boneID <= HumanBodyBones.RightLittleProximal; boneID++)
+            {
+                _fingerLength[boneID] = 0;
             }
         }
 
@@ -112,6 +119,25 @@ namespace QuickVR
 
             return result;
         }
+
+        public virtual float GetFingerLength(QuickHumanFingers f, bool isLeft)
+        {
+            List<QuickHumanBodyBones> boneFingers = QuickHumanTrait.GetBonesFromFinger(f, isLeft);
+            HumanBodyBones boneID = (HumanBodyBones)boneFingers[0];
+            if (_fingerLength[boneID] == 0)
+            {
+                QuickVRNode n0 = GetVRNode(boneFingers[0]);
+                QuickVRNode n1 = GetVRNode(boneFingers[1]);
+                QuickVRNode n2 = GetVRNode(boneFingers[2]);
+
+                if (n0.IsTracked() && n1.IsTracked() && n2.IsTracked())
+                {
+                    _fingerLength[boneID] = Vector3.Distance(n0.transform.position, n1.transform.position) + Vector3.Distance(n1.transform.position, n2.transform.position);
+                }
+            }
+
+            return _fingerLength[boneID];
+        } 
 
         public virtual void Calibrate()
         {

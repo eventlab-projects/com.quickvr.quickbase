@@ -222,7 +222,7 @@ namespace QuickVR
             if (_boneMid) _initialLocalRotationMid = _boneMid.localRotation;
             if (_boneLimb) _initialLocalRotationLimb = _boneLimb.localRotation;
 
-            SaveCurrentPose();
+            SavePose();
 
             _ikManager = GetComponentInParent<QuickIKManager>();
         }
@@ -231,7 +231,7 @@ namespace QuickVR
 
         #region GET AND SET
 
-        public virtual void SaveCurrentPose()
+        public virtual void SavePose()
         {
             if (_targetLimb)
             {
@@ -241,7 +241,7 @@ namespace QuickVR
             if (_targetHint) _initialLocalPositionTargetHint = _targetHint.localPosition;
         }
 
-        public virtual void LoadCurrentPose()
+        public virtual void LoadPose()
         {
             if (_targetLimb)
             {

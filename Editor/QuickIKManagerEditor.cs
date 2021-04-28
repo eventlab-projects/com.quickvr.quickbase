@@ -90,9 +90,12 @@ namespace QuickVR
                 EditorGUI.indentLevel--;
             }
 
+            DrawPoseButtons();
+
             if (EditorGUI.EndChangeCheck())
             {
                 //serializedObject.ApplyModifiedProperties();
+                _ikManager.UpdateTracking();
                 QuickUtilsEditor.MarkSceneDirty();
             }
 
@@ -126,7 +129,7 @@ namespace QuickVR
             GUI.enabled = true;
             if (DrawButton("Reset", GUILayout.Width(52)))
             {
-                ikSolver.LoadCurrentPose();
+                ikSolver.LoadPose();
                 //_target.ResetIKTarget(boneID);
             }
             EditorGUILayout.EndHorizontal();
@@ -184,6 +187,57 @@ namespace QuickVR
 
             DrawIKTarget(ikSolver._targetLimb, Handles.CubeHandleCap, isSolverFinger);
             DrawIKTarget(ikSolver._targetHint, Handles.SphereHandleCap, isSolverFinger);
+        }
+
+        protected virtual void DrawPoseButtons()
+        {
+            EditorGUILayout.BeginVertical("box");
+
+            if (DrawButton(new GUIContent("Save Pose", "Save the current pose")))
+            {
+                _ikManager.SavePose();
+            }
+
+            EditorGUILayout.BeginHorizontal();
+            if (DrawButton(new GUIContent("Copy LH > RH", "Copy the Left Hand Pose to the Right Hand")))
+            {
+                _ikManager.CopyLeftHandPoseToRightHand();
+            }
+            if (DrawButton(new GUIContent("Copy RH > LH", "Copy the Right Hand Pose to the Left Hand")))
+            {
+                _ikManager.CopyRightHandPoseToLeftHand();
+            }
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.BeginHorizontal();
+            if (DrawButton(new GUIContent("Copy LF > RF", "Copy the Left Foot Pose to the Right Foot")))
+            {
+                _ikManager.CopyLeftFootPoseToRightFoot();
+            }
+            if (DrawButton(new GUIContent("Copy RF > LF", "Copy the Right Foot Pose to the Left Foot")))
+            {
+                _ikManager.CopyRightFootPoseToLeftFoot();
+            }
+            EditorGUILayout.EndHorizontal();
+
+            EditorGUILayout.EndVertical();
+
+            EditorGUILayout.BeginVertical("box");
+
+            if (DrawButton(new GUIContent("Load Pose", "Load the last saved pose")))
+            {
+                _ikManager.LoadPose();
+            }
+            if (DrawButton(new GUIContent("Load T-Pose", "Load the T-Pose")))
+            {
+                _ikManager.LoadTPose();
+            }
+            if (DrawButton(new GUIContent("Load Anim Pose", "Load the pose determined by the first frame of the Animation")))
+            {
+                _ikManager.LoadAnimPose();
+            }
+
+            EditorGUILayout.EndVertical();
         }
 
         #endregion

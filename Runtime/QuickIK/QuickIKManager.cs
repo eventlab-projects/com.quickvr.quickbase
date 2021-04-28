@@ -202,7 +202,7 @@ namespace QuickVR {
 
             Reset();
 
-            SaveCurrentPose();
+            SavePose();
         }
 
         protected virtual void Reset()
@@ -217,7 +217,7 @@ namespace QuickVR {
                 CreateIKSolversHand(HumanBodyBones.LeftHand);
                 CreateIKSolversHand(HumanBodyBones.RightHand);
 
-                ResetIKTargetsToTPose();
+                LoadTPose();
 
                 _isInitialized = true;
             }
@@ -285,11 +285,19 @@ namespace QuickVR {
 
         #region GET AND SET
 
-        public virtual void SaveCurrentPose()
+        public virtual void SavePose()
         {
             foreach (var pair in _ikSolvers)
             {
-                pair.Value.SaveCurrentPose();
+                pair.Value.SavePose();
+            }
+        }
+
+        public virtual void LoadPose()
+        {
+            foreach (var pair in _ikSolvers)
+            {
+                pair.Value.LoadPose();
             }
         }
 
@@ -360,14 +368,12 @@ namespace QuickVR {
             }
         }
 
-        [ButtonMethod]
-        public virtual void ResetIKTargetsToTPose()
+        public virtual void LoadTPose()
         {
             ResetIKTargets(false);
         }
 
-        [ButtonMethod]
-        public virtual void ResetIKTargetsToAnim()
+        public virtual void LoadAnimPose()
         {
             ResetIKTargets(true);
         }
@@ -450,8 +456,6 @@ namespace QuickVR {
 
             _ikTargetsRightHand.parent = transform;
             _ikTargetsRightHand.localScale = Vector3.one;
-
-            SaveCurrentPose();
         }
 
         protected virtual Transform GetIKTargetParent(HumanBodyBones boneID)
@@ -562,13 +566,11 @@ namespace QuickVR {
             return _hintToLimbBone.ContainsKey(boneID);
         }
 
-        [ButtonMethod]
         public virtual void CopyLeftHandPoseToRightHand()
         {
             CopyHandPose(HumanBodyBones.LeftHand, HumanBodyBones.RightHand);
         }
 
-        [ButtonMethod]
         public virtual void CopyRightHandPoseToLeftHand()
         {
             CopyHandPose(HumanBodyBones.RightHand, HumanBodyBones.LeftHand);
@@ -586,6 +588,16 @@ namespace QuickVR {
             {
                 MirrorPose(srcHandIKSolvers[i], dstHandIKSolvers[i]);
             }
+        }
+
+        public virtual void CopyLeftFootPoseToRightFoot()
+        {
+            MirrorPose(GetIKSolver(HumanBodyBones.LeftFoot), GetIKSolver(HumanBodyBones.RightFoot));
+        }
+
+        public virtual void CopyRightFootPoseToLeftFoot()
+        {
+            MirrorPose(GetIKSolver(HumanBodyBones.RightFoot), GetIKSolver(HumanBodyBones.LeftFoot));
         }
 
         protected virtual void MirrorPose(QuickIKSolver srcIKSolver, QuickIKSolver dstIKSolver)

@@ -141,6 +141,18 @@ namespace QuickVR {
             return result;
         }
 
+        public static bool DrawButton(GUIContent content, params GUILayoutOption[] options)
+        {
+            Color originalColor = GUI.backgroundColor;
+            GUI.backgroundColor = DEFAULT_BUTTON_COLOR;
+
+            bool result = GUILayout.Button(content, options);
+
+            GUI.backgroundColor = originalColor;
+
+            return result;
+        }
+
         public static bool FoldoutBolt(bool expand, string label)
         {
             GUIStyle style = EditorStyles.foldout;

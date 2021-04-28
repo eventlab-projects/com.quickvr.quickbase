@@ -259,7 +259,7 @@ namespace QuickVR {
                 _controlsFingersRightHand[i] = cType;
             }
 
-            GetIKSolver(f, isLeft)._enableIK = cType == ControlType.IK;
+            GetIKSolver(f, isLeft)._enableIK = cType != ControlType.Animation;
         }
 
         public virtual void CheckHandtrackingMode()
@@ -390,62 +390,61 @@ namespace QuickVR {
 
         #region UPDATE
 
-        protected override void LateUpdate()
+        public override void UpdateTracking()
         {
-            if (!Application.isPlaying)
+            if (Application.isPlaying)
+            {
+                //1) Update all the IKTargets taking into consideration its ControlType. 
+                List<HumanBodyBones> ikLimbBones = GetIKLimbBones();
+                for (int i = 0; i < ikLimbBones.Count; i++)
+                {
+                    HumanBodyBones boneID = ikLimbBones[i];
+                    ControlType cType = GetControlBody(boneID);
+                    if (cType == ControlType.Animation)
+                    {
+                        //This body limb is controlled by the Animation. So disable the IK
+                        GetIKSolver(boneID)._enableIK = false;
+                    }
+                    else if (cType == ControlType.Tracking)
+                    {
+                        GetIKSolver(boneID)._enableIK = true;
+                        QuickVRNode node = _vrPlayArea.GetVRNode(boneID);
+                        if (node.IsTracked())
+                        {
+                            //Update the QuickVRNode's position
+                            if (node._updateModePos == QuickVRNode.UpdateMode.FromUser) UpdateIKTargetPosFromUser(node, boneID);
+                            else UpdateIKTargetPosFromCalibrationPose(node, boneID);
+
+                            //Update the QuickVRNode's rotation
+                            if (node._updateModeRot == QuickVRNode.UpdateMode.FromUser) UpdateIKTargetRotFromUser(node, boneID);
+                            else UpdateIKTargetRotFromCalibrationPose(node, boneID);
+                        }
+                    }
+                }
+
+                //2) Special case: There is no tracker on the hips. So the hips position is estimated by the movement of the head
+                QuickVRNode nodeHips = _vrPlayArea.GetVRNode(HumanBodyBones.Hips);
+                if (!nodeHips.IsTracked())
+                {
+                    QuickVRNode vrNode = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
+                    UpdateIKTargetPosFromCalibrationPose(vrNode, HumanBodyBones.Hips, Vector3.up);
+                    float maxY = GetIKSolver(HumanBodyBones.Hips).GetInitialLocalPosTargetLimb().y;
+                    Transform targetHips = GetIKSolver(HumanBodyBones.Hips)._targetLimb;
+                    targetHips.localPosition = new Vector3(targetHips.localPosition.x, Mathf.Min(targetHips.localPosition.y, maxY), targetHips.localPosition.z);
+                }
+
+                UpdateVRCursors();
+                _footprints.gameObject.SetActive(_useFootprints);
+
+                base.UpdateTracking();
+
+                UpdateTrackingFingers(true);
+                UpdateTrackingFingers(false);
+            }
+            else
             {
                 base.UpdateTracking();
             }
-        }
-
-        public override void UpdateTracking()
-        {
-            //1) Update all the IKTargets taking into consideration its ControlType. 
-            List<HumanBodyBones> ikLimbBones = GetIKLimbBones();
-            for (int i = 0; i < ikLimbBones.Count; i++)
-            {
-                HumanBodyBones boneID = ikLimbBones[i];
-                ControlType cType = GetControlBody(boneID);
-                if (cType == ControlType.Animation)
-                {
-                    //This body limb is controlled by the Animation. So disable the IK
-                    GetIKSolver(boneID)._enableIK = false;
-                }
-                else if (cType == ControlType.Tracking)
-                {
-                    GetIKSolver(boneID)._enableIK = true;
-                    QuickVRNode node = _vrPlayArea.GetVRNode(boneID);
-                    if (node.IsTracked())
-                    {
-                        //Update the QuickVRNode's position
-                        if (node._updateModePos == QuickVRNode.UpdateMode.FromUser) UpdateIKTargetPosFromUser(node, boneID);
-                        else UpdateIKTargetPosFromCalibrationPose(node, boneID);
-
-                        //Update the QuickVRNode's rotation
-                        if (node._updateModeRot == QuickVRNode.UpdateMode.FromUser) UpdateIKTargetRotFromUser(node, boneID);
-                        else UpdateIKTargetRotFromCalibrationPose(node, boneID);
-                    }
-                }
-            }
-
-            //2) Special case: There is no tracker on the hips. So the hips position is estimated by the movement of the head
-            QuickVRNode nodeHips = _vrPlayArea.GetVRNode(HumanBodyBones.Hips);
-            if (!nodeHips.IsTracked())
-            {
-                QuickVRNode vrNode = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
-                UpdateIKTargetPosFromCalibrationPose(vrNode, HumanBodyBones.Hips, Vector3.up);
-                float maxY = GetIKSolver(HumanBodyBones.Hips).GetInitialLocalPosTargetLimb().y;
-                Transform targetHips = GetIKSolver(HumanBodyBones.Hips)._targetLimb;
-                targetHips.localPosition = new Vector3(targetHips.localPosition.x, Mathf.Min(targetHips.localPosition.y, maxY), targetHips.localPosition.z);
-            }
-
-            UpdateVRCursors();
-            _footprints.gameObject.SetActive(_useFootprints);
-
-            UpdateTrackingFingers(true);
-            UpdateTrackingFingers(false);
-
-            base.UpdateTracking();
         }
 
         protected virtual void UpdateTrackingFingers(bool isLeft)
@@ -457,19 +456,47 @@ namespace QuickVR {
                 QuickHumanFingers f = fingers[i];
                 ControlType cType = GetControlFinger(f, isLeft);
                 QuickIKSolver ikSolver = GetIKSolver(f, isLeft);
-                if (cType == ControlType.IK)
+                if (cType == ControlType.Animation)
                 {
-                    //If this finger is driven by the IK, activate the corresponding position in the mask
-                    ikSolver._enableIK = true;
+                    //If this finger is driven by the Animation, deactivate the corresponding iksolver
+                    ikSolver._enableIK = false;
                 }
                 else
                 {
-                    //Otherwise, deactivate the corresponding position in the mask
-                    ikSolver._enableIK = false;
-                    ikSolver.ResetIKChain();
-                    
+                    //Otherwise, activate it
+                    ikSolver._enableIK = true;
+                    //ikSolver.ResetIKChain();
+
                     if (cType == ControlType.Tracking)
                     {
+                        ikSolver.ResetIKChain();
+
+                        ////Apply the tracking data to this finger
+                        //float fLength = _vrPlayArea.GetFingerLength(f, isLeft);
+                        //if (fLength > 0)
+                        //{
+                        //    List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, isLeft);
+                        //    QuickVRNode n0 = _vrPlayArea.GetVRNode(fingerBones[0]);
+                        //    QuickVRNode n1 = _vrPlayArea.GetVRNode(fingerBones[1]);
+                        //    QuickVRNode n2 = _vrPlayArea.GetVRNode(fingerBones[2]);
+                        //    QuickVRNode n3 = _vrPlayArea.GetVRNode(fingerBones[3]);
+
+                        //    if (n0.IsTracked() && n1.IsTracked() && n2.IsTracked())
+                        //    {
+                        //        float sf = ikSolver.GetChainLength() / fLength;
+                        //        Vector3 v = sf * (n2.transform.position - n0.transform.position);
+
+                        //        Transform ikTarget = ikSolver._targetLimb;
+                        //        ikTarget.position = ikSolver._boneUpper.position + v;
+
+                        //        Vector3 fwd = ikTarget.forward;
+                        //        Vector3 targetFwd = Vector3.ProjectOnPlane(n3.transform.position - n2.transform.position, ikTarget.right);
+                        //        float sign = Mathf.Sign(Vector3.Dot(ikTarget.right, Vector3.Cross(fwd, targetFwd)));
+
+                        //        ikTarget.Rotate(Vector3.right, sign * Vector3.Angle(fwd, targetFwd), Space.Self);
+                        //    }
+                        //}
+
                         //Apply the tracking data to this finger
                         List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, isLeft);
                         for (int j = 0; j < fingerBones.Count - 1; j++)
@@ -487,6 +514,7 @@ namespace QuickVR {
 
         protected virtual void UpdateTrackingFingerPhalange(QuickHumanBodyBones boneStartID, QuickHumanBodyBones boneEndID)
         {
+            
             Transform bone0 = _animator.GetBoneTransform(boneStartID);
             Transform bone1 = _animator.GetBoneTransform(boneEndID);
             Transform node0 = _vrPlayArea.GetVRNode(boneStartID).transform;
