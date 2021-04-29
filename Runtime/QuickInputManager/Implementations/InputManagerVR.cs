@@ -67,7 +67,8 @@ namespace QuickVR
             RightGripTouch,
         }
 
-        public float _deadZone = 0.2f;
+        public float _deadZoneThumbStick = 0.2f;
+        public float _deadZoneIndexTrigger = 0.1f;
 
         #endregion
 
@@ -142,22 +143,26 @@ namespace QuickVR
         protected override float ImpGetAxis(AxisCode axis)
         {
             AxisControl aControl = null;
+            float dZone = 0;
 
             if (axis == AxisCode.LeftStick_Horizontal || axis == AxisCode.RightStick_Horizontal)
             {
                 aControl = _inputDevice.GetChildControl<Vector2Control>(_toAxisControl[axis]).x;
+                dZone = _deadZoneThumbStick;
             }
             else if (axis == AxisCode.LeftStick_Vertical || axis == AxisCode.RightStick_Vertical)
             {
                 aControl = _inputDevice.GetChildControl<Vector2Control>(_toAxisControl[axis]).y;
+                dZone = _deadZoneThumbStick;
             }
             else
             {
                 aControl = _inputDevice.GetChildControl<AxisControl>(_toAxisControl[axis]);
+                dZone = _deadZoneIndexTrigger;
             }
 
             float aValue = aControl.ReadValue();
-            return Mathf.Abs(aValue) > _deadZone ? aValue : 0;
+            return Mathf.Abs(aValue) > dZone ? aValue : 0;
         }
 
         protected override bool ImpGetButton(ButtonCodes button)
