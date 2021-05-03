@@ -130,14 +130,7 @@ namespace QuickVR
 
         protected virtual void UpdateCameraRotation()
         {
-            if (QuickVRManager.IsXREnabled())
-            {
-                UpdateCameraRotationXR();
-            }
-            else
-            {
-                //UpdateCameraRotationMono();
-            }
+            UpdateCameraRotationXR();
         }
 
         protected virtual void UpdateCameraRotationXR()
