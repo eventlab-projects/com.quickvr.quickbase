@@ -93,6 +93,8 @@ namespace QuickVR
         RightMiddleTip,
         RightRingTip,
         RightLittleTip,
+
+        LastBone,
     }
 
     public enum QuickHumanFingers
@@ -350,20 +352,31 @@ namespace QuickVR
         {
             Transform result = null;
 
-            if ((int)boneID < (int)HumanBodyBones.LastBone)
+            if (boneID == QuickHumanBodyBones.LeftEye)
             {
-                result = animator.GetBoneTransform((HumanBodyBones)boneID);
+                result = animator.GetEye(true);
+            }
+            else if (boneID == QuickHumanBodyBones.RightEye)
+            {
+                result = animator.GetEye(false);
             }
             else
             {
-                //At this point, boneID is a bone finger tip
-                Transform tBoneDistal = animator.GetBoneTransform(GetParentBone(boneID));
-                if (tBoneDistal)
+                if ((int)boneID < (int)HumanBodyBones.LastBone)
                 {
-                    result = tBoneDistal.GetChild(0);
+                    result = animator.GetBoneTransform((HumanBodyBones)boneID);
+                }
+                else
+                {
+                    //At this point, boneID is a bone finger tip
+                    Transform tBoneDistal = animator.GetBoneTransform(GetParentBone(boneID));
+                    if (tBoneDistal)
+                    {
+                        result = tBoneDistal.GetChild(0);
+                    }
                 }
             }
-
+            
             return result;
         }
 
@@ -541,22 +554,25 @@ namespace QuickVR
 
         public static void EnforceTPose(this Animator animator)
         {
+            //Enforce the TPose of the Spine
+            //animator.EnforceTPose(QuickHumanBodyBones.Hips, QuickHumanBodyBones.Head, animator.transform.up);
+
             //Enforce the TPose of the LeftArm
-            EnforceTPose(animator, QuickHumanBodyBones.LeftUpperArm, QuickHumanBodyBones.LeftLowerArm, -animator.transform.right);
-            EnforceTPose(animator, QuickHumanBodyBones.LeftLowerArm, QuickHumanBodyBones.LeftHand, -animator.transform.right);
-            EnforceTPose(animator, QuickHumanBodyBones.LeftHand, QuickHumanBodyBones.LeftMiddleProximal, -animator.transform.right);
+            animator.EnforceTPose(QuickHumanBodyBones.LeftUpperArm, QuickHumanBodyBones.LeftLowerArm, -animator.transform.right);
+            animator.EnforceTPose(QuickHumanBodyBones.LeftLowerArm, QuickHumanBodyBones.LeftHand, -animator.transform.right);
+            animator.EnforceTPose(QuickHumanBodyBones.LeftHand, QuickHumanBodyBones.LeftMiddleProximal, -animator.transform.right);
 
             //Enforce the TPose of the RightArm
-            EnforceTPose(animator, QuickHumanBodyBones.RightUpperArm, QuickHumanBodyBones.RightLowerArm, animator.transform.right);
-            EnforceTPose(animator, QuickHumanBodyBones.RightLowerArm, QuickHumanBodyBones.RightHand, animator.transform.right);
-            EnforceTPose(animator, QuickHumanBodyBones.RightHand, QuickHumanBodyBones.RightMiddleProximal, animator.transform.right);
+            animator.EnforceTPose(QuickHumanBodyBones.RightUpperArm, QuickHumanBodyBones.RightLowerArm, animator.transform.right);
+            animator.EnforceTPose(QuickHumanBodyBones.RightLowerArm, QuickHumanBodyBones.RightHand, animator.transform.right);
+            animator.EnforceTPose(QuickHumanBodyBones.RightHand, QuickHumanBodyBones.RightMiddleProximal, animator.transform.right);
 
             //Enforce the TPose of the Fingers
-            EnforceTPoseFingers(animator, true);
-            EnforceTPoseFingers(animator, false);
+            animator.EnforceTPoseFingers(true);
+            animator.EnforceTPoseFingers(false);
         }
 
-        private static void EnforceTPose(Animator animator, QuickHumanBodyBones boneUpperID, QuickHumanBodyBones boneLowerID, Vector3 vTarget)
+        private static void EnforceTPose(this Animator animator, QuickHumanBodyBones boneUpperID, QuickHumanBodyBones boneLowerID, Vector3 vTarget)
         {
             Transform tUpper = animator.GetBoneTransform(boneUpperID);
             Transform tLower = animator.GetBoneTransform(boneLowerID);
@@ -569,7 +585,7 @@ namespace QuickVR
             }
         }
 
-        private static void EnforceTPoseFingers(Animator animator, bool isLeft)
+        private static void EnforceTPoseFingers(this Animator animator, bool isLeft)
         {
             foreach (QuickHumanFingers f in GetHumanFingers())
             {
