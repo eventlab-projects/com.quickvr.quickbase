@@ -56,7 +56,7 @@ namespace QuickVR
             if (_ikManager._showControlsBody)
             {
                 EditorGUI.indentLevel++;
-                for (IKBone ikBone = IKBone.StartBody; ikBone <= IKBone.EndBody; ikBone++)
+                for (IKBone ikBone = IKBone.Hips; ikBone <= IKBone.RightFoot; ikBone++)
                 {
                     EditorGUILayout.BeginVertical("box");
                     DrawIKSolverProperties(ikBone);
@@ -69,7 +69,7 @@ namespace QuickVR
             if (_ikManager._showControlsFingersLeftHand)
             {
                 EditorGUI.indentLevel++;
-                for (IKBone ikBone = IKBone.StartLeftHandFingers; ikBone <= IKBone.EndLeftHandFingers; ikBone++)
+                for (IKBone ikBone = IKBone.LeftThumbDistal; ikBone <= IKBone.LeftLittleDistal; ikBone++)
                 {
                     EditorGUILayout.BeginVertical("box");
                     DrawIKSolverProperties(ikBone);
@@ -82,7 +82,7 @@ namespace QuickVR
             if (_ikManager._showControlsFingersRightHand)
             {
                 EditorGUI.indentLevel++;
-                for (IKBone ikBone = IKBone.StartRightHandFingers; ikBone <= IKBone.EndRightHandFingers; ikBone++)
+                for (IKBone ikBone = IKBone.RightThumbDistal; ikBone <= IKBone.RightLittleDistal; ikBone++)
                 {
                     EditorGUILayout.BeginVertical("box");
                     DrawIKSolverProperties(ikBone);
@@ -143,9 +143,20 @@ namespace QuickVR
             //DrawIKTargets(GetIKTargetsLimb(), Handles.CubeHandleCap);
             //DrawIKTargets(GetIKTargetsMid(), Handles.SphereHandleCap);
 
-            foreach (QuickIKSolver s in _ikManager.GetIKSolversBody()) DrawIKSolver(s, false);
-            foreach (QuickIKSolver s in _ikManager.GetIKSolversHand(true)) DrawIKSolver(s, true);
-            foreach (QuickIKSolver s in _ikManager.GetIKSolversHand(false)) DrawIKSolver(s, true);
+            for (IKBone ikBone = IKBone.Hips; ikBone <= IKBone.RightFoot; ikBone++)
+            {
+                DrawIKSolver(_ikManager.GetIKSolver(ikBone), false);
+            }
+
+            for (IKBone ikBone = IKBone.LeftThumbDistal; ikBone <= IKBone.LeftLittleDistal; ikBone++)
+            {
+                DrawIKSolver(_ikManager.GetIKSolver(ikBone), true);
+            }
+
+            for (IKBone ikBone = IKBone.RightThumbDistal; ikBone <= IKBone.RightLittleDistal; ikBone++)
+            {
+                DrawIKSolver(_ikManager.GetIKSolver(ikBone), true);
+            }
         }
 
         protected virtual void DrawIKTarget(Transform t, Handles.CapFunction function, bool isSolverFinger)

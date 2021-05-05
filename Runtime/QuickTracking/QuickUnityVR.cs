@@ -58,7 +58,7 @@ namespace QuickVR {
                 if (m_IKControls == null || m_IKControls.Count == 0)
                 {
                     m_IKControls = new List<ControlType>();
-                    for (IKBone ikBone = IKBone.StartBody; ikBone <= IKBone.EndFace; ikBone++)
+                    for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++)
                     {
                         m_IKControls.Add(ControlType.Tracking);
                     }
@@ -237,7 +237,7 @@ namespace QuickVR {
 
             //Set the offset of the TrackedObject of the head
             QuickVRNode node = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
-            Vector3 offset = GetIKSolver(HumanBodyBones.Head)._targetLimb.position - node.GetTrackedObject().transform.position;
+            Vector3 offset = GetIKSolver(IKBone.Head)._targetLimb.position - node.GetTrackedObject().transform.position;
             _vrPlayArea.transform.position += offset;
 
             //Update eyeCenter
@@ -320,18 +320,18 @@ namespace QuickVR {
             if (Application.isPlaying)
             {
                 //1) Update all the IKTargets taking into consideration its ControlType. 
-                for (IKBone ikBone = IKBone.StartBody; ikBone <= IKBone.EndBody; ikBone++)
+                for (IKBone ikBone = IKBone.Hips; ikBone <= IKBone.RightFoot; ikBone++)
                 {
                     ControlType cType = GetIKControl(ikBone);
                     HumanBodyBones boneID = ToHumanBodyBones(ikBone);
                     if (cType == ControlType.Animation)
                     {
                         //This body limb is controlled by the Animation. So disable the IK
-                        GetIKSolver(boneID)._enableIK = false;
+                        GetIKSolver(ikBone)._enableIK = false;
                     }
                     else if (cType == ControlType.Tracking)
                     {
-                        GetIKSolver(boneID)._enableIK = true;
+                        GetIKSolver(ikBone)._enableIK = true;
                         QuickVRNode node = _vrPlayArea.GetVRNode(boneID);
                         if (node.IsTracked())
                         {
@@ -352,8 +352,8 @@ namespace QuickVR {
                 {
                     QuickVRNode vrNode = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
                     UpdateIKTargetPosFromCalibrationPose(vrNode, HumanBodyBones.Hips, Vector3.up);
-                    float maxY = GetIKSolver(HumanBodyBones.Hips).GetInitialLocalPosTargetLimb().y;
-                    Transform targetHips = GetIKSolver(HumanBodyBones.Hips)._targetLimb;
+                    float maxY = GetIKSolver(IKBone.Hips).GetInitialLocalPosTargetLimb().y;
+                    Transform targetHips = GetIKSolver(IKBone.Hips)._targetLimb;
                     targetHips.localPosition = new Vector3(targetHips.localPosition.x, Mathf.Min(targetHips.localPosition.y, maxY), targetHips.localPosition.z);
                 }
 
@@ -375,8 +375,8 @@ namespace QuickVR {
         {
             ////Apply the rotation to the bones
             //QuickHumanFingers[] fingers = QuickHumanTrait.GetHumanFingers();
-            //IKBone ikBoneStart = isLeft ? IKBone.StartLeftHandFingers : IKBone.EndLeftHandFingers;
-            //IKBone ikBoneEnd = isLeft ? IKBone.EndLeftHandFingers : IKBone.EndRightHandFingers;
+            //IKBone ikBoneStart = isLeft ? IKBone.LeftThumbDistal : IKBone.LeftLittleDistal;
+            //IKBone ikBoneEnd = isLeft ? IKBone.LeftLittleDistal : IKBone.RightLittleDistal;
             //for (IKBone ikBone = ikBoneStart; ikBone <= ikBoneEnd; ikBone++)
             //{
             //    ControlType cType = GetIKControl(ikBone);

@@ -12,31 +12,6 @@ namespace QuickVR
 
         public bool _enableIK = true;
 
-        public HumanBodyBones _boneID
-        {
-            get
-            {
-                if (m_BoneID == HumanBodyBones.LastBone)
-                {
-                    if (_boneLimb)
-                    {
-                        Animator animator = GetComponentInParent<Animator>();
-                        foreach (HumanBodyBones boneID in QuickHumanTrait.GetHumanBodyBones())
-                        {
-                            if (_boneLimb == animator.GetBoneTransform(boneID))
-                            {
-                                m_BoneID = boneID;
-                                break;
-                            }
-                        }
-                    }
-                }
-
-                return m_BoneID;
-            }
-        }
-        protected HumanBodyBones m_BoneID = HumanBodyBones.LastBone;
-
         public virtual Transform _boneUpper
         {
             get

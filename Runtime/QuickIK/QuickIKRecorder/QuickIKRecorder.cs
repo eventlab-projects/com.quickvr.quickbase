@@ -50,11 +50,11 @@ namespace QuickVR
             _ikManager = ikManager;
 
             _ikTargets = new Transform[6];
-            _ikTargets[(int)IkTarget.LeftHand] = _ikManager.GetIKSolver(HumanBodyBones.LeftHand)._targetLimb;
-            _ikTargets[(int)IkTarget.RightHand] = _ikManager.GetIKSolver(HumanBodyBones.RightHand)._targetLimb;
-            _ikTargets[(int)IkTarget.LeftFoot] = _ikManager.GetIKSolver(HumanBodyBones.LeftFoot)._targetLimb;
-            _ikTargets[(int)IkTarget.RightFoot] = _ikManager.GetIKSolver(HumanBodyBones.RightFoot)._targetLimb;
-            _ikTargets[(int)IkTarget.Head] = _ikManager.GetIKSolver(HumanBodyBones.Head)._targetLimb;
+            _ikTargets[(int)IkTarget.LeftHand] = _ikManager.GetIKSolver(IKBone.LeftHand)._targetLimb;
+            _ikTargets[(int)IkTarget.RightHand] = _ikManager.GetIKSolver(IKBone.RightHand)._targetLimb;
+            _ikTargets[(int)IkTarget.LeftFoot] = _ikManager.GetIKSolver(IKBone.LeftFoot)._targetLimb;
+            _ikTargets[(int)IkTarget.RightFoot] = _ikManager.GetIKSolver(IKBone.RightFoot)._targetLimb;
+            _ikTargets[(int)IkTarget.Head] = _ikManager.GetIKSolver(IKBone.Head)._targetLimb;
             _ikTargets[(int)IkTarget.Hips] = _ikManager.transform;
 
             _ikRecord = new QuickIKRecord();
