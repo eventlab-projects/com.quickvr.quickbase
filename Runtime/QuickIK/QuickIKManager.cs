@@ -10,14 +10,62 @@ namespace QuickVR {
 
 	[System.Serializable]
     
-    public enum IKLimbBones
+    //public enum IKLimbBones
+    //{
+    //    Hips,
+    //    Head,
+    //    LeftHand,
+    //    RightHand,
+    //    LeftFoot,
+    //    RightFoot,
+    //};
+
+    public enum IKBone
     {
+        //--> Main body IK bones
         Hips,
         Head,
         LeftHand,
         RightHand,
         LeftFoot,
         RightFoot,
+        //<--
+
+        //--> Left hand IK bones
+        LeftThumbDistal,
+        LeftIndexDistal,
+        LeftRingDistal,
+        LeftMiddleDistal,
+        LeftLittleDistal,
+        //<--
+
+        //--> Right hand IK bones
+        RightThumbDistal,
+        RightIndexDistal,
+        RightRingDistal,
+        RightMiddleDistal,
+        RightLittleDistal,
+        //<--
+
+        //--> Face IK bones
+        LeftEye,
+        RightEye,
+        //<--
+
+        LastBone,
+
+        //<-- QuickAccess Bones
+        StartBody = Hips,
+        EndBody = RightFoot,
+
+        StartLeftHandFingers = LeftThumbDistal,
+        EndLeftHandFingers = LeftLittleDistal,
+
+        StartRightHandFingers = RightThumbDistal,
+        EndRightHandFingers = RightLittleDistal,
+
+        StartFace = LeftEye,
+        EndFace = RightEye,
     };
 
     [ExecuteInEditMode]
@@ -111,6 +159,8 @@ namespace QuickVR {
         protected Transform m_ikTargetsFace;
 
         protected Dictionary<HumanBodyBones, QuickIKSolver> _ikSolvers = new Dictionary<HumanBodyBones, QuickIKSolver>();
+        protected static List<HumanBodyBones> _toHumanBodyBones = new List<HumanBodyBones>();
+        protected static Dictionary<HumanBodyBones, IKBone> _toIKBone = new Dictionary<HumanBodyBones, IKBone>();
 
         protected List<QuickIKSolver> _ikSolversBody = null;
         protected List<QuickIKSolver> _ikSolversLeftHand = null;
@@ -460,18 +510,49 @@ namespace QuickVR {
             }
         }
 
-        public static List<HumanBodyBones> GetIKLimbBones()
+        //public static List<HumanBodyBones> GetIKLimbBones()
+        //{
+        //    if (_ikLimbBones == null)
+        //    {
+        //        _ikLimbBones = new List<HumanBodyBones>();
+        //        foreach (IKLimbBones boneID in QuickUtils.GetEnumValues<IKLimbBones>())
+        //        {
+        //            _ikLimbBones.Add(QuickUtils.ParseEnum<HumanBodyBones>(boneID.ToString()));
+        //        }
+        //    }
+
+        //    return _ikLimbBones;
+        //}
+
+        public static HumanBodyBones ToHumanBodyBones(IKBone ikBone)
         {
-            if (_ikLimbBones == null)
+            if (_toHumanBodyBones.Count == 0)
             {
-                _ikLimbBones = new List<HumanBodyBones>();
-                foreach (IKLimbBones boneID in QuickUtils.GetEnumValues<IKLimbBones>())
+                for (IKBone b = 0; b < IKBone.LastBone; b++)
                 {
-                    _ikLimbBones.Add(QuickUtils.ParseEnum<HumanBodyBones>(boneID.ToString()));
+                    _toHumanBodyBones.Add(QuickUtils.ParseEnum<HumanBodyBones>(b.ToString()));
                 }
             }
 
-            return _ikLimbBones;
+            return _toHumanBodyBones[(int)ikBone];
+        }
+
+        public static IKBone ToIKBone(HumanBodyBones boneID)
+        {
+            if (_toIKBone.Count == 0)
+            {
+                for (IKBone b = 0; b < IKBone.LastBone; b++)
+                {
+                    _toIKBone[QuickUtils.ParseEnum<HumanBodyBones>(b.ToString())] = b;
+                }
+            }
+
+            return _toIKBone[boneID];
+        }
+
+        public virtual QuickIKSolver GetIKSolver(IKBone ikBone)
+        {
+            return GetIKSolver(ToHumanBodyBones(ikBone));
         }
 
         public virtual QuickIKSolver GetIKSolver(HumanBodyBones boneID)
@@ -491,20 +572,14 @@ namespace QuickVR {
             return result;
         }
 
-        public virtual QuickIKSolver GetIKSolver(QuickHumanFingers f, bool isLeft)
-        {
-            HumanBodyBones boneID = (HumanBodyBones)QuickHumanTrait.GetBonesFromFinger(f, isLeft)[2];
-            return GetIKSolver(boneID);
-        }
-
         public virtual List<QuickIKSolver> GetIKSolversBody()
         {
             if (_ikSolversBody == null)
             {
                 _ikSolversBody = new List<QuickIKSolver>();
-                foreach (HumanBodyBones boneID in GetIKLimbBones())
+                for (IKBone ikBone = IKBone.StartBody; ikBone <= IKBone.EndBody; ikBone++)
                 {
-                    _ikSolversBody.Add(GetIKSolver(boneID));
+                    _ikSolversBody.Add(GetIKSolver(ikBone));
                 }
             }
 
@@ -517,9 +592,12 @@ namespace QuickVR {
             if (result == null)
             {
                 result = new List<QuickIKSolver>();
-                foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
+                IKBone ikBoneStart = isLeftHand ? IKBone.StartLeftHandFingers : IKBone.StartRightHandFingers;
+                IKBone ikBoneEnd = isLeftHand ? IKBone.EndLeftHandFingers : IKBone.EndRightHandFingers;
+
+                for (IKBone ikBone = ikBoneStart; ikBone <= ikBoneEnd; ikBone++)
                 {
-                    result.Add(GetIKSolver(f, isLeftHand));
+                    result.Add(GetIKSolver(ikBone));
                 }
             }
 
@@ -593,6 +671,7 @@ namespace QuickVR {
 
         public override void UpdateTracking()
         {
+            //Update the IK for the body controllers
             QuickIKSolver ikSolverHips = GetIKSolver(HumanBodyBones.Hips);
             ikSolverHips.UpdateIK();
 
@@ -602,17 +681,12 @@ namespace QuickVR {
             ikSolverHips._targetLimb.position += GetIKTargetHipsOffset();
             ikSolverHips.UpdateIK();
 
-            List<HumanBodyBones> ikLimbBones = GetIKLimbBones();
-            for (int i = (int)IKLimbBones.LeftHand; i <= (int)IKLimbBones.RightFoot; i++)
-            {
-                QuickIKSolver ikSolver = GetIKSolver(ikLimbBones[i]);
-                if (ikSolver)
-                {
-                    ikSolver.UpdateIK();
-                }
-            }
-
-            //Update the IK for the fingers
+            GetIKSolver(HumanBodyBones.LeftHand).UpdateIK();
+            GetIKSolver(HumanBodyBones.RightHand).UpdateIK();
+            GetIKSolver(HumanBodyBones.LeftFoot).UpdateIK();
+            GetIKSolver(HumanBodyBones.RightFoot).UpdateIK();
+            
+            //Update the IK for the fingers controllers
             Transform leftHand = _animator.GetBoneTransform(HumanBodyBones.LeftHand);
             _ikTargetsLeftHand.position = leftHand.position;
             _ikTargetsLeftHand.rotation = leftHand.rotation;
@@ -621,19 +695,20 @@ namespace QuickVR {
             _ikTargetsRightHand.position = rightHand.position;
             _ikTargetsRightHand.rotation = rightHand.rotation;
 
+            for (IKBone ikBone = IKBone.StartLeftHandFingers; ikBone <= IKBone.EndLeftHandFingers; ikBone++)
+            {
+                GetIKSolver(ikBone).UpdateIK();
+            }
+
+            for (IKBone ikBone = IKBone.StartRightHandFingers; ikBone <= IKBone.EndRightHandFingers; ikBone++)
+            {
+                GetIKSolver(ikBone).UpdateIK();
+            }
+
+            //Update the IK for the face controllers
             Transform head = _animator.GetBoneTransform(HumanBodyBones.Head);
             _ikTargetsFace.position = head.position;
             _ikTargetsFace.rotation = head.rotation;
-                
-            foreach (QuickHumanFingers boneID in QuickHumanTrait.GetHumanFingers())
-            {
-                GetIKSolver(boneID, true).UpdateIK();
-            }
-
-            foreach (QuickHumanFingers boneID in QuickHumanTrait.GetHumanFingers())
-            {
-                GetIKSolver(boneID, false).UpdateIK();
-            }
         }
 
         #endregion

@@ -13,7 +13,7 @@ namespace QuickVR
         #region PROTECTED ATTRIBUTES
 
         protected QuickUnityVR _target = null;
-        protected OVRProjectConfig _projectConfig = null;
+        //protected OVRProjectConfig _projectConfig = null;
 
         #endregion
 
@@ -22,7 +22,7 @@ namespace QuickVR
         protected virtual void Awake()
         {
             _target = (QuickUnityVR)target;
-            _projectConfig = OVRProjectConfig.GetProjectConfig();
+            //_projectConfig = OVRProjectConfig.GetProjectConfig();
             UpdateHandTrackingSupport();
         }
 
@@ -30,14 +30,14 @@ namespace QuickVR
 
         #region GET AND SET
 
-        protected OVRProjectConfig.HandTrackingSupport ToOVR(QuickUnityVR.HandTrackingMode hMode)
-        {
+        //protected OVRProjectConfig.HandTrackingSupport ToOVR(QuickUnityVR.HandTrackingMode hMode)
+        //{
 
-            //if (hMode == QuickUnityVR.HandTrackingMode.Hands) return OVRProjectConfig.HandTrackingSupport.HandsOnly;
-            //return OVRProjectConfig.HandTrackingSupport.ControllersOnly;
+        //    //if (hMode == QuickUnityVR.HandTrackingMode.Hands) return OVRProjectConfig.HandTrackingSupport.HandsOnly;
+        //    //return OVRProjectConfig.HandTrackingSupport.ControllersOnly;
 
-            return OVRProjectConfig.HandTrackingSupport.ControllersAndHands;
-        }
+        //    return OVRProjectConfig.HandTrackingSupport.ControllersAndHands;
+        //}
 
         #endregion
 
@@ -45,30 +45,21 @@ namespace QuickVR
 
         protected virtual void UpdateHandTrackingSupport()
         {
-            OVRProjectConfig.HandTrackingSupport hMode = ToOVR(_target._handTrackingMode);
-            if (hMode != _projectConfig.handTrackingSupport)
-            {
-                _projectConfig.handTrackingSupport = hMode;
-                OVRProjectConfig.CommitProjectConfig(_projectConfig);
-            }
+            //OVRProjectConfig.HandTrackingSupport hMode = ToOVR(_target._handTrackingMode);
+            //if (hMode != _projectConfig.handTrackingSupport)
+            //{
+            //    _projectConfig.handTrackingSupport = hMode;
+            //    OVRProjectConfig.CommitProjectConfig(_projectConfig);
+            //}
         }
 
-        protected override void DrawIKSolverProperties(HumanBodyBones boneID)
+        protected override void DrawIKSolverProperties(IKBone ikBone)
         {
-            _target.SetControlBody(boneID, (QuickUnityVR.ControlType)EditorGUILayout.EnumPopup(boneID.ToString(), _target.GetControlBody(boneID)));
-            if (_target.GetControlBody(boneID) != QuickUnityVR.ControlType.Animation)
+            _target.SetIKControl(ikBone, (QuickUnityVR.ControlType)EditorGUILayout.EnumPopup(ikBone.ToString(), _target.GetIKControl(ikBone)));
+            if (_target.GetIKControl(ikBone) != QuickUnityVR.ControlType.Animation)
             {
-                DrawIKSolverPropertiesBase(_target.GetIKSolver(boneID));
+                DrawIKSolverPropertiesBase(_target.GetIKSolver(ikBone));
             }
-        }
-
-        protected override void DrawIKSolverProperties(QuickHumanFingers f, bool isLeft)
-        {
-            _target.SetControlFinger(f, isLeft, (QuickUnityVR.ControlType)EditorGUILayout.EnumPopup(f.ToString(), _target.GetControlFinger(f, isLeft)));
-            if (_target.GetControlFinger(f, isLeft) != QuickUnityVR.ControlType.Animation)
-            {
-                DrawIKSolverPropertiesBase(_target.GetIKSolver(f, isLeft));
-            }            
         }
 
         #endregion

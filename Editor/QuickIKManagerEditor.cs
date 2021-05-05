@@ -51,14 +51,15 @@ namespace QuickVR
 
             EditorGUI.BeginChangeCheck();
 
+            bool isActive = _ikManager.gameObject.activeInHierarchy;
             _ikManager._showControlsBody = FoldoutBolt(_ikManager._showControlsBody, "Body Controls");
             if (_ikManager._showControlsBody)
             {
                 EditorGUI.indentLevel++;
-                foreach (HumanBodyBones boneID in QuickIKManager.GetIKLimbBones())
+                for (IKBone ikBone = IKBone.StartBody; ikBone <= IKBone.EndBody; ikBone++)
                 {
                     EditorGUILayout.BeginVertical("box");
-                    DrawIKSolverProperties(boneID);
+                    DrawIKSolverProperties(ikBone);
                     EditorGUILayout.EndVertical();
                 }
                 EditorGUI.indentLevel--;
@@ -68,10 +69,10 @@ namespace QuickVR
             if (_ikManager._showControlsFingersLeftHand)
             {
                 EditorGUI.indentLevel++;
-                foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
+                for (IKBone ikBone = IKBone.StartLeftHandFingers; ikBone <= IKBone.EndLeftHandFingers; ikBone++)
                 {
                     EditorGUILayout.BeginVertical("box");
-                    DrawIKSolverProperties(f, true);
+                    DrawIKSolverProperties(ikBone);
                     EditorGUILayout.EndVertical();
                 }
                 EditorGUI.indentLevel--;
@@ -81,10 +82,10 @@ namespace QuickVR
             if (_ikManager._showControlsFingersRightHand)
             {
                 EditorGUI.indentLevel++;
-                foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
+                for (IKBone ikBone = IKBone.StartRightHandFingers; ikBone <= IKBone.EndRightHandFingers; ikBone++)
                 {
                     EditorGUILayout.BeginVertical("box");
-                    DrawIKSolverProperties(f, false);
+                    DrawIKSolverProperties(ikBone);
                     EditorGUILayout.EndVertical();
                 }
                 EditorGUI.indentLevel--;
@@ -95,21 +96,19 @@ namespace QuickVR
             if (EditorGUI.EndChangeCheck())
             {
                 //serializedObject.ApplyModifiedProperties();
-                _ikManager.UpdateTracking();
+                if (_ikManager.gameObject.activeInHierarchy)
+                {
+                    _ikManager.UpdateTracking();
+                }
                 QuickUtilsEditor.MarkSceneDirty();
             }
 
             //UpdateDebug();
         }
 
-        protected virtual void DrawIKSolverProperties(HumanBodyBones boneID)
+        protected virtual void DrawIKSolverProperties(IKBone ikBone)
         {
-            DrawIKSolverProperties(_ikManager.GetIKSolver(boneID), boneID.ToString());
-        }
-
-        protected virtual void DrawIKSolverProperties(QuickHumanFingers f, bool isLeft)
-        {
-            DrawIKSolverProperties(_ikManager.GetIKSolver(f, isLeft), f.ToString());
+            DrawIKSolverProperties(_ikManager.GetIKSolver(ikBone), ikBone.ToString());
         }
 
         protected virtual void DrawIKSolverProperties(QuickIKSolver ikSolver, string name)

@@ -51,65 +51,24 @@ namespace QuickVR {
         protected QuickVRHand _vrHandLeft = null;
         protected QuickVRHand _vrHandRight = null;
 
-        protected List<ControlType> _controlsBody
+        protected List<ControlType> _ikControls
         {
             get
             {
-                if (m_ControlsBody == null || m_ControlsBody.Count == 0)
+                if (m_IKControls == null || m_IKControls.Count == 0)
                 {
-                    m_ControlsBody = new List<ControlType>();
-                    foreach (HumanBodyBones boneID in GetIKLimbBones())
+                    m_IKControls = new List<ControlType>();
+                    for (IKBone ikBone = IKBone.StartBody; ikBone <= IKBone.EndFace; ikBone++)
                     {
-                        m_ControlsBody.Add(ControlType.Tracking);
+                        m_IKControls.Add(ControlType.Tracking);
                     }
                 }
 
-                return m_ControlsBody;
+                return m_IKControls;
             }
         }
-
         [SerializeField, HideInInspector]
-        protected List<ControlType> m_ControlsBody = null;
-
-        protected List<ControlType> _controlsFingersLeftHand
-        {
-            get
-            {
-                if (m_ControlsFingersLeftHand == null || m_ControlsFingersLeftHand.Count != 5)
-                {
-                    m_ControlsFingersLeftHand = new List<ControlType>();
-                    foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
-                    {
-                        m_ControlsFingersLeftHand.Add(ControlType.Tracking);
-                    }
-                }
-
-                return m_ControlsFingersLeftHand;
-            }
-        }
-
-        [SerializeField, HideInInspector]
-        protected List<ControlType> m_ControlsFingersLeftHand = null;
-
-        protected List<ControlType> _controlsFingersRightHand
-        {
-            get
-            {
-                if (m_ControlsFingersRightHand == null || m_ControlsFingersRightHand.Count != 5)
-                {
-                    m_ControlsFingersRightHand = new List<ControlType>();
-                    foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
-                    {
-                        m_ControlsFingersRightHand.Add(ControlType.Tracking);
-                    }
-                }
-
-                return m_ControlsFingersRightHand;
-            }
-        }
-
-        [SerializeField, HideInInspector]
-        protected List<ControlType> m_ControlsFingersRightHand = null;
+        protected List<ControlType> m_IKControls;
 
         #endregion
 
@@ -218,48 +177,14 @@ namespace QuickVR {
 
         #region GET AND SET
 
-        public virtual ControlType GetControlBody(HumanBodyBones boneID)
+        public virtual ControlType GetIKControl(IKBone ikBone)
         {
-            ControlType cType = ControlType.Tracking;
-            int i = GetIKLimbBones().IndexOf(boneID);
-            if (i != -1)
-            {
-                cType = _controlsBody[i];
-            }
-
-            return cType;
+            return _ikControls[(int)ikBone];
         }
 
-        public virtual void SetControlBody(HumanBodyBones boneID, ControlType cType)
+        public virtual void SetIKControl(IKBone ikBone, ControlType cType)
         {
-            int i = GetIKLimbBones().IndexOf(boneID);
-            if (i != -1)
-            {
-                _controlsBody[i] = cType;
-            }
-
-            GetIKSolver(boneID)._enableIK = cType != ControlType.Animation;
-        }
-
-        public virtual ControlType GetControlFinger(QuickHumanFingers f, bool isLeft)
-        {
-            int i = (int)f;
-            return isLeft ? _controlsFingersLeftHand[i] : _controlsFingersRightHand[i];
-        }
-
-        public virtual void SetControlFinger(QuickHumanFingers f, bool isLeft, ControlType cType)
-        {
-            int i = (int)f;
-            if (isLeft)
-            {
-                _controlsFingersLeftHand[i] = cType;
-            }
-            else
-            {
-                _controlsFingersRightHand[i] = cType;
-            }
-
-            GetIKSolver(f, isLeft)._enableIK = cType != ControlType.Animation;
+            _ikControls[(int)ikBone] = cType;
         }
 
         public virtual void CheckHandtrackingMode()
@@ -395,11 +320,10 @@ namespace QuickVR {
             if (Application.isPlaying)
             {
                 //1) Update all the IKTargets taking into consideration its ControlType. 
-                List<HumanBodyBones> ikLimbBones = GetIKLimbBones();
-                for (int i = 0; i < ikLimbBones.Count; i++)
+                for (IKBone ikBone = IKBone.StartBody; ikBone <= IKBone.EndBody; ikBone++)
                 {
-                    HumanBodyBones boneID = ikLimbBones[i];
-                    ControlType cType = GetControlBody(boneID);
+                    ControlType cType = GetIKControl(ikBone);
+                    HumanBodyBones boneID = ToHumanBodyBones(ikBone);
                     if (cType == ControlType.Animation)
                     {
                         //This body limb is controlled by the Animation. So disable the IK
@@ -449,67 +373,68 @@ namespace QuickVR {
 
         protected virtual void UpdateTrackingFingers(bool isLeft)
         {
-            //Apply the rotation to the bones
-            QuickHumanFingers[] fingers = QuickHumanTrait.GetHumanFingers();
-            for (int i = 0; i < fingers.Length; i++)
-            {
-                QuickHumanFingers f = fingers[i];
-                ControlType cType = GetControlFinger(f, isLeft);
-                QuickIKSolver ikSolver = GetIKSolver(f, isLeft);
-                if (cType == ControlType.Animation)
-                {
-                    //If this finger is driven by the Animation, deactivate the corresponding iksolver
-                    ikSolver._enableIK = false;
-                }
-                else
-                {
-                    //Otherwise, activate it
-                    ikSolver._enableIK = true;
-                    //ikSolver.ResetIKChain();
+            ////Apply the rotation to the bones
+            //QuickHumanFingers[] fingers = QuickHumanTrait.GetHumanFingers();
+            //IKBone ikBoneStart = isLeft ? IKBone.StartLeftHandFingers : IKBone.EndLeftHandFingers;
+            //IKBone ikBoneEnd = isLeft ? IKBone.EndLeftHandFingers : IKBone.EndRightHandFingers;
+            //for (IKBone ikBone = ikBoneStart; ikBone <= ikBoneEnd; ikBone++)
+            //{
+            //    ControlType cType = GetIKControl(ikBone);
+            //    QuickIKSolver ikSolver = GetIKSolver(ikBone);
+            //    if (cType == ControlType.Animation)
+            //    {
+            //        //If this finger is driven by the Animation, deactivate the corresponding iksolver
+            //        ikSolver._enableIK = false;
+            //    }
+            //    else
+            //    {
+            //        //Otherwise, activate it
+            //        ikSolver._enableIK = true;
+            //        //ikSolver.ResetIKChain();
 
-                    if (cType == ControlType.Tracking)
-                    {
-                        ikSolver.ResetIKChain();
+            //        if (cType == ControlType.Tracking)
+            //        {
+            //            ikSolver.ResetIKChain();
 
-                        ////Apply the tracking data to this finger
-                        //float fLength = _vrPlayArea.GetFingerLength(f, isLeft);
-                        //if (fLength > 0)
-                        //{
-                        //    List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, isLeft);
-                        //    QuickVRNode n0 = _vrPlayArea.GetVRNode(fingerBones[0]);
-                        //    QuickVRNode n1 = _vrPlayArea.GetVRNode(fingerBones[1]);
-                        //    QuickVRNode n2 = _vrPlayArea.GetVRNode(fingerBones[2]);
-                        //    QuickVRNode n3 = _vrPlayArea.GetVRNode(fingerBones[3]);
+            //            ////Apply the tracking data to this finger
+            //            //float fLength = _vrPlayArea.GetFingerLength(f, isLeft);
+            //            //if (fLength > 0)
+            //            //{
+            //            //    List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, isLeft);
+            //            //    QuickVRNode n0 = _vrPlayArea.GetVRNode(fingerBones[0]);
+            //            //    QuickVRNode n1 = _vrPlayArea.GetVRNode(fingerBones[1]);
+            //            //    QuickVRNode n2 = _vrPlayArea.GetVRNode(fingerBones[2]);
+            //            //    QuickVRNode n3 = _vrPlayArea.GetVRNode(fingerBones[3]);
 
-                        //    if (n0.IsTracked() && n1.IsTracked() && n2.IsTracked())
-                        //    {
-                        //        float sf = ikSolver.GetChainLength() / fLength;
-                        //        Vector3 v = sf * (n2.transform.position - n0.transform.position);
+            //            //    if (n0.IsTracked() && n1.IsTracked() && n2.IsTracked())
+            //            //    {
+            //            //        float sf = ikSolver.GetChainLength() / fLength;
+            //            //        Vector3 v = sf * (n2.transform.position - n0.transform.position);
 
-                        //        Transform ikTarget = ikSolver._targetLimb;
-                        //        ikTarget.position = ikSolver._boneUpper.position + v;
+            //            //        Transform ikTarget = ikSolver._targetLimb;
+            //            //        ikTarget.position = ikSolver._boneUpper.position + v;
 
-                        //        Vector3 fwd = ikTarget.forward;
-                        //        Vector3 targetFwd = Vector3.ProjectOnPlane(n3.transform.position - n2.transform.position, ikTarget.right);
-                        //        float sign = Mathf.Sign(Vector3.Dot(ikTarget.right, Vector3.Cross(fwd, targetFwd)));
+            //            //        Vector3 fwd = ikTarget.forward;
+            //            //        Vector3 targetFwd = Vector3.ProjectOnPlane(n3.transform.position - n2.transform.position, ikTarget.right);
+            //            //        float sign = Mathf.Sign(Vector3.Dot(ikTarget.right, Vector3.Cross(fwd, targetFwd)));
 
-                        //        ikTarget.Rotate(Vector3.right, sign * Vector3.Angle(fwd, targetFwd), Space.Self);
-                        //    }
-                        //}
+            //            //        ikTarget.Rotate(Vector3.right, sign * Vector3.Angle(fwd, targetFwd), Space.Self);
+            //            //    }
+            //            //}
 
-                        //Apply the tracking data to this finger
-                        List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, isLeft);
-                        for (int j = 0; j < fingerBones.Count - 1; j++)
-                        {
-                            QuickVRNode node = _vrPlayArea.GetVRNode(fingerBones[j]);
-                            if (node.IsTracked())
-                            {
-                                UpdateTrackingFingerPhalange(fingerBones[j], fingerBones[j + 1]);
-                            }
-                        }
-                    }
-                }
-            }
+            //            //Apply the tracking data to this finger
+            //            List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, isLeft);
+            //            for (int j = 0; j < fingerBones.Count - 1; j++)
+            //            {
+            //                QuickVRNode node = _vrPlayArea.GetVRNode(fingerBones[j]);
+            //                if (node.IsTracked())
+            //                {
+            //                    UpdateTrackingFingerPhalange(fingerBones[j], fingerBones[j + 1]);
+            //                }
+            //            }
+            //        }
+            //    }
+            //}
         }
 
         protected virtual void UpdateTrackingFingerPhalange(QuickHumanBodyBones boneStartID, QuickHumanBodyBones boneEndID)
