@@ -91,6 +91,19 @@ namespace QuickVR
                 EditorGUI.indentLevel--;
             }
 
+            _ikManager._showControlsFace = FoldoutBolt(_ikManager._showControlsFace, "Face Controls");
+            if (_ikManager._showControlsFace)
+            {
+                EditorGUI.indentLevel++;
+                for (IKBone ikBone = IKBone.LeftEye; ikBone <= IKBone.RightEye; ikBone++)
+                {
+                    EditorGUILayout.BeginVertical("box");
+                    DrawIKSolverProperties(ikBone);
+                    EditorGUILayout.EndVertical();
+                }
+                EditorGUI.indentLevel--;
+            }
+
             DrawPoseButtons();
 
             if (EditorGUI.EndChangeCheck())
@@ -135,6 +148,22 @@ namespace QuickVR
 
             ikSolver._weightIKPos = EditorGUILayout.Slider("IKPosWeight", ikSolver._weightIKPos, 0, 1);
             ikSolver._weightIKRot = EditorGUILayout.Slider("IKRotWeight", ikSolver._weightIKRot, 0, 1);
+
+            if (ikSolver.GetType() == typeof(QuickIKSolverEye))
+            {
+                QuickIKSolverEye ikSolverEye = (QuickIKSolverEye)ikSolver;
+                if (ikSolverEye._showAngleLimits = FoldoutBolt(ikSolverEye._showAngleLimits, "Angle Limits"))
+                {
+                    EditorGUI.indentLevel++;
+                    ikSolverEye._angleLimitLeft = EditorGUILayout.FloatField("Left", ikSolverEye._angleLimitLeft);
+                    ikSolverEye._angleLimitRight = EditorGUILayout.FloatField("Right", ikSolverEye._angleLimitRight);
+                    ikSolverEye._angleLimitDown = EditorGUILayout.FloatField("Down", ikSolverEye._angleLimitDown);
+                    ikSolverEye._angleLimitUp = EditorGUILayout.FloatField("Up", ikSolverEye._angleLimitUp);
+                    EditorGUI.indentLevel--;
+                }
+                ikSolverEye._leftRight = EditorGUILayout.Slider("Left - Right", ikSolverEye._leftRight, ikSolverEye._angleLimitLeft, ikSolverEye._angleLimitRight);
+                ikSolverEye._downUp = EditorGUILayout.Slider("Down - Up", ikSolverEye._downUp, ikSolverEye._angleLimitDown, ikSolverEye._angleLimitUp);
+            }
         }
 
         protected virtual void UpdateDebug()

@@ -53,6 +53,94 @@ namespace QuickVR
             }
         }
 
+#if UNITY_EDITOR
+
+        [SerializeField, HideInInspector]
+        public bool _showAngleLimits = false;
+
+#endif
+
+        [SerializeField, HideInInspector]
+        protected Vector4 _angleLimits = new Vector4(-35, 35, -15, 15); //Left, Right, Down, Up
+
+        public virtual float _angleLimitLeft
+        {
+            get
+            {
+                return _angleLimits.x;
+            }
+            set
+            {
+                _angleLimits.x = -1 * Mathf.Abs(value);
+            }
+        }
+
+        public virtual float _angleLimitRight
+        {
+            get
+            {
+                return _angleLimits.y;
+            }
+            set
+            {
+                _angleLimits.y = Mathf.Abs(value);
+            }
+        }
+
+        public virtual float _angleLimitDown
+        {
+            get
+            {
+                return _angleLimits.z;
+            }
+            set
+            {
+                _angleLimits.z = -1 * Mathf.Abs(value);
+            }
+        }
+
+        public virtual float _angleLimitUp
+        {
+            get
+            {
+                return _angleLimits.w;
+            }
+            set
+            {
+                _angleLimits.w = Mathf.Abs(value);
+            }
+        }
+
+        public virtual float _leftRight
+        {
+            get
+            {
+                return m_leftRight;
+            }
+            set
+            {
+                m_leftRight = Mathf.Clamp(value, _angleLimitLeft, _angleLimitRight);
+                _targetLimb.localRotation = Quaternion.identity;
+                _targetLimb.Rotate(_targetLimb.parent.right, m_downUp, Space.World);
+                _targetLimb.Rotate(_targetLimb.parent.up, m_leftRight, Space.World);
+            }
+        }
+
+        public virtual float _downUp
+        {
+            get
+            {
+                return m_downUp;
+            }
+            set
+            {
+                m_downUp = Mathf.Clamp(value, _angleLimitDown, _angleLimitUp);
+                _targetLimb.localRotation = Quaternion.identity;
+                _targetLimb.Rotate(_targetLimb.parent.right, m_downUp, Space.World);
+                _targetLimb.Rotate(_targetLimb.parent.up, m_leftRight, Space.World);
+            }
+        }
+
         #endregion
 
         #region PROTECTED PARAMETERS
@@ -70,6 +158,65 @@ namespace QuickVR
         public override void UpdateIK()
         {
             //base.UpdateIK();
+            //if (_enableIK && _boneLimb && _targetLimb) return;
+            if (_enableIK)
+            {
+                ResetIKChain();
+
+                Transform tRef = _targetLimb.parent;
+                ComputeEyeballRotation(tRef.right, _angleLimitDown, _angleLimitUp);
+                ComputeEyeballRotation(tRef.up, _angleLimitLeft, _angleLimitRight);
+
+                ////Compute Down-Up rotation
+                //Vector3 w = Vector3.ProjectOnPlane(_targetLimb.forward, tRef.right);
+                //if (w.sqrMagnitude < 0.001f)
+                //{
+                //    w = Vector3.zero;
+                //}
+                //if (Vector3.Dot(tRef.forward, w) < 0)
+                //{
+                //    w = Vector3.Scale(w, new Vector3(1, 1, -1));
+                //}
+
+                //float angleX = Mathf.Clamp(Vector3.SignedAngle(tRef.forward, w, tRef.right), _angleLimitDown, _angleLimitUp);
+                //_boneLimb.Rotate(tRef.right, angleX, Space.World);
+
+                ////Compute Left-Right rotation
+                //Vector3 v = Vector3.ProjectOnPlane(_targetLimb.forward, tRef.up);
+                //if (v.sqrMagnitude < 0.001f)
+                //{
+                //    v = Vector3.zero;
+                //}
+                //if (Vector3.Dot(tRef.forward, v) < 0)
+                //{
+                //    v = Vector3.Scale(v, new Vector3(1, 1, -1));
+                //}
+
+                //float angleY = Mathf.Clamp(Vector3.SignedAngle(tRef.forward, v, tRef.up), _angleLimitLeft, _angleLimitRight);
+                //_boneLimb.Rotate(tRef.up, angleY, Space.World);
+
+                //Debug.DrawRay(_targetLimb.position, tRef.forward, Color.blue);
+                //Debug.DrawRay(_targetLimb.position, v, Color.cyan);
+                //Debug.DrawRay(_targetLimb.position, w, Color.magenta);
+            }
+        }
+
+        protected virtual void ComputeEyeballRotation(Vector3 planeNormal, float limitMin, float limitMax)
+        {
+            Vector3 v = Vector3.ProjectOnPlane(_targetLimb.forward, planeNormal);
+            if (v.sqrMagnitude < 0.001f)
+            {
+                v = Vector3.zero;
+            }
+
+            Vector3 fwd = _targetLimb.parent.forward;
+            if (Vector3.Dot(fwd, v) < 0)
+            {
+                v = Vector3.Scale(v, new Vector3(1, 1, -1));
+            }
+
+            float angleX = Mathf.Clamp(Vector3.SignedAngle(fwd, v, planeNormal), limitMin, limitMax);
+            _boneLimb.Rotate(planeNormal, angleX, Space.World);
         }
 
         //public virtual void UpdateIK()

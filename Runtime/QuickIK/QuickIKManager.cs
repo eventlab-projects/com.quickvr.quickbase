@@ -62,6 +62,9 @@ namespace QuickVR {
         [SerializeField, HideInInspector]
         public bool _showControlsFingersRightHand = false;
 
+        [SerializeField, HideInInspector]
+        public bool _showControlsFace = false;
+
 #endif
 
         #endregion
@@ -587,7 +590,12 @@ namespace QuickVR {
             //Update the IK for the face controllers
             Transform head = _animator.GetBoneTransform(HumanBodyBones.Head);
             _ikTargetsFace.position = head.position;
-            _ikTargetsFace.rotation = head.rotation;
+            _ikTargetsFace.rotation = GetIKSolver(IKBone.Head)._targetLimb.rotation;
+
+            for (IKBone ikBone = IKBone.LeftEye; ikBone <= IKBone.RightEye; ikBone++)
+            {
+                GetIKSolver(ikBone).UpdateIK();
+            }
         }
 
         #endregion
