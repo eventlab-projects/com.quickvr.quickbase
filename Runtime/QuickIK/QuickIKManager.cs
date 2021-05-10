@@ -1,10 +1,5 @@
-using System.Collections;
 using System.Collections.Generic;
-using System;
-
 using UnityEngine;
-using UnityEngine.Animations;
-using UnityEngine.XR;
 
 namespace QuickVR {
 
@@ -356,6 +351,7 @@ namespace QuickVR {
 
             _ikTargetsFace.parent = _animator.GetBoneTransform(HumanBodyBones.Head);
             _ikTargetsFace.ResetTransformation();
+            _ikTargetsFace.rotation = transform.rotation;
 
             _animator.EnforceTPose();
 
