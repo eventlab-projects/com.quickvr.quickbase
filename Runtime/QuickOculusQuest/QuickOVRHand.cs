@@ -380,7 +380,22 @@ namespace QuickVR
                         {
                             //The finger is tracked.
                             OVRSkeleton.BoneId ovrBoneID = _ovrFingerBones[boneID];
-                            nFinger.transform.position = GetOVRBoneTransform(ovrBoneID).position;
+                            Transform ovrBone = GetOVRBoneTransform(ovrBoneID);
+                            nFinger.transform.position = ovrBone.position;
+                            nFinger.transform.rotation = ovrBone.rotation;
+
+                            //Correct the rotation
+                            if (IsLeft())
+                            {
+                                nFinger.transform.Rotate(Vector3.right, 180, Space.Self);
+                                nFinger.transform.Rotate(Vector3.up, -90, Space.Self);
+                            }
+                            else
+                            {
+                                nFinger.transform.Rotate(Vector3.up, 90, Space.Self);
+                            }
+                            
+
                             nFinger.SetTracked(true);
                         }
                         else
