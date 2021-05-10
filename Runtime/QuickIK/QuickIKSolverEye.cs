@@ -161,11 +161,19 @@ namespace QuickVR
             //if (_enableIK && _boneLimb && _targetLimb) return;
             if (_enableIK)
             {
+                Quaternion animBoneUpperRot = _boneUpper.rotation;
+                Quaternion animBoneMidRot = _boneMid.rotation;
+                Quaternion animBoneLimbRot = _boneLimb.rotation;
+
                 ResetIKChain();
 
                 Transform tRef = _targetLimb.parent;
                 ComputeEyeballRotation(tRef.right, _angleLimitDown, _angleLimitUp);
                 ComputeEyeballRotation(tRef.up, _angleLimitLeft, _angleLimitRight);
+
+                _boneUpper.rotation = animBoneUpperRot; 
+                _boneMid.rotation = animBoneMidRot;
+                //_boneLimb.rotation = Quaternion.Lerp(animBoneLimbRot, ikBoneLimbRot, _weightIKRot);
 
                 ////Compute Down-Up rotation
                 //Vector3 w = Vector3.ProjectOnPlane(_targetLimb.forward, tRef.right);
