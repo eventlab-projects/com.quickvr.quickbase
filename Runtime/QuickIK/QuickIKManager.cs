@@ -437,13 +437,29 @@ namespace QuickVR {
 
         protected virtual Transform GetBoneUpper(HumanBodyBones boneLimbID)
         {
-            if (boneLimbID == HumanBodyBones.Hips || boneLimbID == HumanBodyBones.Head) return _animator.GetBoneTransform(HumanBodyBones.Spine);
+            if (boneLimbID == HumanBodyBones.Hips || boneLimbID == HumanBodyBones.Head)
+            {
+                return _animator.GetBoneTransform(HumanBodyBones.Spine);
+            }
+            else if (boneLimbID == HumanBodyBones.LeftEye || boneLimbID == HumanBodyBones.RightEye)
+            {
+                return _animator.GetBoneTransform(HumanBodyBones.Head);
+            }
+            
             return _animator.GetBoneTransform(QuickHumanTrait.GetParentBone(QuickHumanTrait.GetParentBone(boneLimbID)));
         }
 
         protected virtual Transform GetBoneMid(HumanBodyBones boneLimbID)
         {
-            if (boneLimbID == HumanBodyBones.Hips || boneLimbID == HumanBodyBones.Head) return _animator.GetBoneTransform(HumanBodyBones.Spine);
+            if (boneLimbID == HumanBodyBones.Hips || boneLimbID == HumanBodyBones.Head)
+            {
+                return _animator.GetBoneTransform(HumanBodyBones.Spine);
+            }
+            else if (boneLimbID == HumanBodyBones.LeftEye || boneLimbID == HumanBodyBones.RightEye)
+            {
+                return _animator.GetBoneTransform(HumanBodyBones.Head);
+            }
+
             return _animator.GetBoneTransform(QuickHumanTrait.GetParentBone(boneLimbID));
         }
 

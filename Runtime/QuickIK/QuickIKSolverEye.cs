@@ -21,41 +21,6 @@ namespace QuickVR
 
         #region PUBLIC PARAMETERS
 
-        public override Transform _boneUpper
-        {
-            get
-            {
-                if (m_boneUpper == null)
-                {
-                    m_boneUpper = _boneMid;
-                }
-
-                return m_boneUpper;
-            }
-            set
-            {
-                
-            }
-        }
-
-        public override Transform _boneMid
-        {
-            get
-            {
-                if (m_boneMid == null)
-                {
-                    Animator animator = GetComponentInParent<Animator>();
-                    m_boneMid = animator.GetBoneTransform(HumanBodyBones.Head);
-                }
-
-                return m_boneMid;
-            }
-            set
-            {
-                
-            }
-        }
-
         public override Transform _targetHint
         {
             get
