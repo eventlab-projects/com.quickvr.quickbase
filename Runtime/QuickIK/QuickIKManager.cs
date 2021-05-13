@@ -219,17 +219,20 @@ namespace QuickVR {
         protected virtual T CreateIKSolver<T>(IKBone ikBone) where T : QuickIKSolver
         {
             Transform ikSolversRoot = transform.CreateChild(IK_SOLVERS_ROOT_NAME);
-            T ikSolver = ikSolversRoot.CreateChild(IK_SOLVER_PREFIX + ikBone.ToString()).GetOrCreateComponent<T>();
+            Transform t = ikSolversRoot.CreateChild(IK_SOLVER_PREFIX + ikBone.ToString());
+            T ikSolver = t.GetComponent<T>();
 
-            //And configure it according to the bone
-            HumanBodyBones boneLimb = ToHumanBodyBones(ikBone);
-            ikSolver._boneUpper = GetBoneUpper(boneLimb);
-            ikSolver._boneMid = GetBoneMid(boneLimb);
-            ikSolver._boneLimb = _animator.GetBoneTransform((QuickHumanBodyBones)boneLimb);
+            if (!ikSolver)
+            {
+                ikSolver = t.gameObject.AddComponent<T>();
 
-            ikSolver._weightIKPos = 1.0f;
-            ikSolver._weightIKRot = 1.0f;
-
+                //And configure it according to the bone
+                HumanBodyBones boneLimb = ToHumanBodyBones(ikBone);
+                ikSolver._boneUpper = GetBoneUpper(boneLimb);
+                ikSolver._boneMid = GetBoneMid(boneLimb);
+                ikSolver._boneLimb = _animator.GetBoneTransform((QuickHumanBodyBones)boneLimb);
+            }
+            
             return ikSolver;
         }
 
@@ -549,6 +552,14 @@ namespace QuickVR {
 
         public override void UpdateTracking()
         {
+            if (_animator.runtimeAnimatorController == null)
+            {
+                for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++)
+                {
+                    GetIKSolver(ikBone).ResetIKChain();
+                }
+            }
+
             //Update the IK for the body controllers
             QuickIKSolver ikSolverHips = GetIKSolver(IKBone.Hips);
             ikSolverHips.UpdateIK();
