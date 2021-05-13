@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Animations;
+using UnityEngine.XR;
 
 using System.Collections.Generic;
 
@@ -338,6 +339,17 @@ namespace QuickVR {
                             //Update the QuickVRNode's rotation
                             if (node._updateModeRot == QuickVRNode.UpdateMode.FromUser) UpdateIKTargetRotFromUser(node, boneID);
                             else UpdateIKTargetRotFromCalibrationPose(node, boneID);
+
+                            if (boneID == HumanBodyBones.LeftEye || boneID == HumanBodyBones.RightEye)
+                            {
+                                InputDevice iDevice = node._inputDevice;
+                                bool isLeftEye = boneID == HumanBodyBones.LeftEye;
+                                if (iDevice.isValid && iDevice.TryGetFeatureValue(isLeftEye ? QuickVRUsages.leftEyeOpenness : QuickVRUsages.rightEyeOpenness, out float eOpen))
+                                {
+                                    QuickIKSolverEye ikSolver = (QuickIKSolverEye)_animator.GetComponent<QuickIKManager>().GetIKSolver(boneID);
+                                    ikSolver._weightBlink = 1.0f - eOpen;
+                                }
+                            }
                         }
                     }
                 }

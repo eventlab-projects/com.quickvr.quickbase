@@ -355,6 +355,16 @@ namespace QuickVR
                 {
                     _inputDevice = InputDevices.GetDeviceAtXRNode(XRNode.RightHand);
                 }
+                else if (_role == QuickHumanBodyBones.LeftEye || _role == QuickHumanBodyBones.RightEye)
+                {
+                    List<InputDevice> devices = new List<InputDevice>();
+                    InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.EyeTracking | InputDeviceCharacteristics.HeadMounted, devices);
+
+                    if (devices.Count > 0)
+                    {
+                        _inputDevice = devices[0];
+                    }
+                }
             }
             
             if (_inputDevice.isValid)
@@ -366,6 +376,16 @@ namespace QuickVR
                 if (_inputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out Quaternion rot))
                 {
                     transform.localRotation = rot;
+                }
+
+                if (_role == QuickHumanBodyBones.LeftEye || _role == QuickHumanBodyBones.RightEye)
+                {
+                    bool isLeft = _role == QuickHumanBodyBones.LeftEye;
+                    if (_inputDevice.TryGetFeatureValue(isLeft? QuickVRUsages.leftEyeVector : QuickVRUsages.rightEyeVector, out Vector3 vEye))
+                    {
+                        transform.localRotation = Quaternion.identity;
+                        transform.LookAt(transform.position + vEye, Vector3.up);
+                    }
                 }
 
                 _inputDevice.TryGetFeatureValue(CommonUsages.isTracked, out _isTracked);
