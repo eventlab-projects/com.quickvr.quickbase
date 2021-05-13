@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.Animations;
+using UnityEngine.XR;
 
 using System.Collections.Generic;
 
@@ -38,44 +39,6 @@ namespace QuickVR {
             IK,
         }
 
-        public bool _applyHeadRotation
-        {
-            get
-            {
-                return m_ApplyHeadRotation;
-            }
-            set
-            {
-                if (value != m_ApplyHeadRotation)
-                {
-                    GetIKSolver(IKBone.Head)._weightIKRot = value ? 1 : 0;
-
-                    m_ApplyHeadRotation = value;
-                }
-            }
-        }
-        [SerializeField, HideInInspector]
-        protected bool m_ApplyHeadRotation = true;
-
-        public bool _applyHeadPosition 
-        {
-            get
-            {
-                return m_ApplyHeadPosition;
-            }
-            set
-            {
-                if (value != m_ApplyHeadPosition)
-                {
-                    GetIKSolver(IKBone.Head)._weightIKPos = value ? 1 : 0; 
-                    
-                    m_ApplyHeadPosition = value;
-                }
-            }
-        }
-        [SerializeField, HideInInspector]
-        protected bool m_ApplyHeadPosition = true;
-        
         #endregion
 
         #region PROTECTED PARAMETERS
@@ -341,7 +304,7 @@ namespace QuickVR {
 
         protected override Vector3 GetIKTargetHipsOffset()
         {
-            if (Application.isPlaying && _applyHeadPosition)
+            if (Application.isPlaying)
             {
                 return _vrPlayArea.GetVRNode(HumanBodyBones.Head).transform.position - _animator.GetEyeCenterPosition();
             }
@@ -377,16 +340,14 @@ namespace QuickVR {
                             if (node._updateModeRot == QuickVRNode.UpdateMode.FromUser) UpdateIKTargetRotFromUser(node, boneID);
                             else UpdateIKTargetRotFromCalibrationPose(node, boneID);
 
-                            if (boneID == HumanBodyBones.Head)
+                            if (boneID == HumanBodyBones.LeftEye || boneID == HumanBodyBones.RightEye)
                             {
-                                QuickIKSolver ikSolverHead = GetIKSolver(IKBone.Head);
-                                if (!_applyHeadPosition)
+                                InputDevice iDevice = node._inputDevice;
+                                bool isLeftEye = boneID == HumanBodyBones.LeftEye;
+                                if (iDevice.isValid && iDevice.TryGetFeatureValue(isLeftEye ? QuickVRUsages.leftEyeOpenness : QuickVRUsages.rightEyeOpenness, out float eOpen))
                                 {
-                                    ikSolverHead._weightIKPos = 0;
-                                }
-                                if (!_applyHeadRotation)
-                                {
-                                    ikSolverHead._weightIKRot = 0;
+                                    QuickIKSolverEye ikSolver = (QuickIKSolverEye)_animator.GetComponent<QuickIKManager>().GetIKSolver(boneID);
+                                    ikSolver._weightBlink = 1.0f - eOpen;
                                 }
                             }
                         }
@@ -395,7 +356,7 @@ namespace QuickVR {
 
                 //2) Special case: There is no tracker on the hips. So the hips position is estimated by the movement of the head
                 QuickVRNode nodeHips = _vrPlayArea.GetVRNode(HumanBodyBones.Hips);
-                if (!nodeHips.IsTracked() && _applyHeadPosition)
+                if (!nodeHips.IsTracked())
                 {
                     QuickVRNode vrNode = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
                     UpdateIKTargetPosFromCalibrationPose(vrNode, HumanBodyBones.Hips, Vector3.up);

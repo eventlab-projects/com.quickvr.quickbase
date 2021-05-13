@@ -8,42 +8,18 @@ namespace QuickVR
     public class QuickIKSolverEye : QuickIKSolver
     {
 
+        [System.Serializable]
+        public class BlinkData
+        {
+            public SkinnedMeshRenderer _renderer = null;
+            public int _blendshapeID = -1;
+
+#if UNITY_EDITOR
+            public bool _showInInspector = true;
+#endif
+        }
+
         #region PUBLIC PARAMETERS
-
-        public override Transform _boneUpper
-        {
-            get
-            {
-                if (m_boneUpper == null)
-                {
-                    m_boneUpper = _boneMid;
-                }
-
-                return m_boneUpper;
-            }
-            set
-            {
-                
-            }
-        }
-
-        public override Transform _boneMid
-        {
-            get
-            {
-                if (m_boneMid == null)
-                {
-                    Animator animator = GetComponentInParent<Animator>();
-                    m_boneMid = animator.GetBoneTransform(HumanBodyBones.Head);
-                }
-
-                return m_boneMid;
-            }
-            set
-            {
-                
-            }
-        }
 
         public override Transform _targetHint
         {
@@ -53,10 +29,28 @@ namespace QuickVR
             }
         }
 
+        public virtual float _weightBlink
+        {
+            get
+            {
+                return m_weightBlink;
+            }
+            set
+            {
+                m_weightBlink = value;
+            }
+        }
+
+        [SerializeField, Range(0.0f, 1.0f)]
+        protected float m_weightBlink = 0;
+
 #if UNITY_EDITOR
 
         [SerializeField, HideInInspector]
         public bool _showAngleLimits = false;
+
+        [SerializeField, HideInInspector]
+        public bool _showBlinking = false;
 
 #endif
 
@@ -141,6 +135,8 @@ namespace QuickVR
             }
         }
 
+        public List<BlinkData> _blinking = new List<BlinkData>();
+        
         #endregion
 
         #region PROTECTED PARAMETERS
@@ -173,6 +169,15 @@ namespace QuickVR
 
                 _boneUpper.rotation = animBoneUpperRot; 
                 _boneMid.rotation = animBoneMidRot;
+
+                foreach (BlinkData bData in _blinking)
+                {
+                    if (bData._blendshapeID >= 0)
+                    {
+                        bData._renderer.SetBlendShapeWeight(bData._blendshapeID, _weightBlink * 100.0f);
+                    }
+                    
+                }
                 //_boneLimb.rotation = Quaternion.Lerp(animBoneLimbRot, ikBoneLimbRot, _weightIKRot);
 
                 ////Compute Down-Up rotation

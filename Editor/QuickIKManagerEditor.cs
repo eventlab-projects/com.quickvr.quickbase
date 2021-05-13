@@ -163,6 +163,59 @@ namespace QuickVR
                 }
                 ikSolverEye._leftRight = EditorGUILayout.Slider("Left - Right", ikSolverEye._leftRight, ikSolverEye._angleLimitLeft, ikSolverEye._angleLimitRight);
                 ikSolverEye._downUp = EditorGUILayout.Slider("Down - Up", ikSolverEye._downUp, ikSolverEye._angleLimitDown, ikSolverEye._angleLimitUp);
+
+                if (ikSolverEye._showBlinking = FoldoutBolt(ikSolverEye._showBlinking, "Blinking"))
+                {
+                    EditorGUI.indentLevel++;
+                    EditorGUILayout.BeginHorizontal();
+                    EditorGUILayout.Space();
+                    if (DrawButton("Add"))
+                    {
+                        ikSolverEye._blinking.Add(new QuickIKSolverEye.BlinkData());
+                    }
+                    if (DrawButton("Remove Last"))
+                    {
+                        if (ikSolverEye._blinking.Count > 0)
+                        {
+                            ikSolverEye._blinking.RemoveAt(ikSolverEye._blinking.Count - 1);
+                        }
+                    }
+                    EditorGUILayout.EndHorizontal();
+                    
+                    EditorGUILayout.Space();
+                    for (int i = 0; i < ikSolverEye._blinking.Count; i++)
+                    {
+                        QuickIKSolverEye.BlinkData bData = ikSolverEye._blinking[i];
+
+                        if (bData._showInInspector = FoldoutBolt(bData._showInInspector, "Element " + i.ToString()))
+                        {
+                            EditorGUI.indentLevel++;
+
+                            bData._renderer = (SkinnedMeshRenderer)EditorGUILayout.ObjectField("Mesh", bData._renderer, typeof(SkinnedMeshRenderer), true);
+                            if (bData._renderer && bData._renderer.sharedMesh)
+                            {
+                                Mesh mesh = bData._renderer.sharedMesh;
+                                List<string> bNames = new List<string>();
+                                bNames.Add("None");
+                                for (int j = 0; j < mesh.blendShapeCount; j++)
+                                {
+                                    bNames.Add(mesh.GetBlendShapeName(j));
+                                }
+
+                                bData._blendshapeID = EditorGUILayout.Popup("Blendshape ID", bData._blendshapeID + 1, bNames.ToArray()) - 1;
+                            }
+
+                            EditorGUI.indentLevel--;
+                        }
+                    }
+
+                    EditorGUILayout.Space();
+                    
+                    EditorGUI.indentLevel--;
+                }
+
+                ikSolverEye._weightBlink = EditorGUILayout.Slider("BlinkWeight", ikSolverEye._weightBlink, 0, 1);
+
             }
         }
 
