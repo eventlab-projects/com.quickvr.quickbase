@@ -43,6 +43,14 @@ namespace QuickVR
 
         #region UPDATE
 
+        protected override void DrawIKControls()
+        {
+            _target._applyHeadRotation = EditorGUILayout.Toggle("Apply Head Rotation", _target._applyHeadRotation);
+            _target._applyHeadPosition = EditorGUILayout.Toggle("Apply Head Position", _target._applyHeadPosition);
+
+            base.DrawIKControls();
+        }
+
         protected virtual void UpdateHandTrackingSupport()
         {
             //OVRProjectConfig.HandTrackingSupport hMode = ToOVR(_target._handTrackingMode);

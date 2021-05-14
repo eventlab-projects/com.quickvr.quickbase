@@ -51,7 +51,23 @@ namespace QuickVR
 
             EditorGUI.BeginChangeCheck();
 
-            bool isActive = _ikManager.gameObject.activeInHierarchy;
+            DrawIKControls();
+
+            if (EditorGUI.EndChangeCheck())
+            {
+                //serializedObject.ApplyModifiedProperties();
+                if (_ikManager.gameObject.activeInHierarchy)
+                {
+                    _ikManager.UpdateTracking();
+                }
+                QuickUtilsEditor.MarkSceneDirty();
+            }
+
+            //UpdateDebug();
+        }
+
+        protected virtual void DrawIKControls()
+        {
             _ikManager._showControlsBody = FoldoutBolt(_ikManager._showControlsBody, "Body Controls");
             if (_ikManager._showControlsBody)
             {
@@ -105,18 +121,6 @@ namespace QuickVR
             }
 
             DrawPoseButtons();
-
-            if (EditorGUI.EndChangeCheck())
-            {
-                //serializedObject.ApplyModifiedProperties();
-                if (_ikManager.gameObject.activeInHierarchy)
-                {
-                    _ikManager.UpdateTracking();
-                }
-                QuickUtilsEditor.MarkSceneDirty();
-            }
-
-            //UpdateDebug();
         }
 
         protected virtual void DrawIKSolverProperties(IKBone ikBone)
