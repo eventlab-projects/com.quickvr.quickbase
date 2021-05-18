@@ -10,9 +10,15 @@ namespace QuickVR
     static public class QuickIKTargetsRenderer
     {
 
+        private class IKTargetData
+        {
+            public Transform _transform = null;
+            public QuickIKSolver _ikSolver = null;
+            public IKBone _ikBone = IKBone.LastBone;
+        }
+
         private static List<QuickIKManager> _ikManagers = new List<QuickIKManager>();
-        private static Transform _selectedIKTarget = null;
-        private static QuickIKSolver _selectedIKSolver = null;
+        private static IKTargetData _selectedIKTarget = new IKTargetData();
 
         static QuickIKTargetsRenderer()
         {
@@ -37,20 +43,33 @@ namespace QuickVR
 
         private static void OnSceneGUI(SceneView sView)
         {
-            DrawIKTargets(ref _selectedIKTarget, ref _selectedIKSolver);
-
-            if (_selectedIKTarget)
+            if (Selection.activeTransform != _selectedIKTarget._transform)
             {
-                if (_selectedIKTarget == _selectedIKSolver._targetLimb)
+                _selectedIKTarget._transform = null;
+            }
+
+            DrawIKTargets();
+
+            if (_selectedIKTarget._transform)
+            {
+                Transform ikTarget = _selectedIKTarget._transform;
+                QuickIKSolver ikSolver = _selectedIKTarget._ikSolver;
+                if (_selectedIKTarget._transform == ikSolver._targetLimb)
                 {
                     //The targer cannot be farther away than the chain length
-                    Vector3 v = _selectedIKTarget.position - _selectedIKSolver._boneUpper.position;
-                    _selectedIKTarget.position = _selectedIKSolver._boneUpper.position + v.normalized * Mathf.Min(v.magnitude, _selectedIKSolver.GetChainLength());
+                    Vector3 v = ikTarget.position - ikSolver._boneUpper.position;
+                    ikTarget.position = ikSolver._boneUpper.position + v.normalized * Mathf.Min(v.magnitude, ikSolver.GetChainLength());
+                }
+                else
+                {
+                    Vector3 v = ikTarget.position - ikSolver._boneMid.position;
+                    float defaultHintDistance = _selectedIKTarget._ikBone <= IKBone.RightFoot ? QuickIKManager.DEFAULT_TARGET_HINT_DISTANCE : QuickIKManager.DEFAULT_TARGET_HINT_FINGER_DISTANCE;
+                    ikTarget.position = ikSolver._boneMid.position + v.normalized * Mathf.Min(v.magnitude, defaultHintDistance);
                 }
             }
         }
 
-        private static void DrawIKTargets(ref Transform selectedIKTarget, ref QuickIKSolver selectedIKSolver)
+        private static void DrawIKTargets()
         {
             foreach (QuickIKManager ikManager in _ikManagers)
             {
@@ -70,8 +89,7 @@ namespace QuickVR
                     Handles.color = new Color(1, 0, 0, 0.5f);
                     if (Handles.Button(ikSolver._targetLimb.position, ikSolver._targetLimb.rotation, size, size, Handles.CubeHandleCap))
                     {
-                        selectedIKTarget = Selection.activeTransform = ikSolver._targetLimb;
-                        selectedIKSolver = ikSolver;
+                        SelectIKTarget(ikSolver._targetLimb, ikSolver, ikBone);
                     }
 
                     if (ikSolver._targetHint)
@@ -79,13 +97,22 @@ namespace QuickVR
                         Handles.color = new Color(0, 1, 0, 0.5f);
                         if (Handles.Button(ikSolver._targetHint.position, ikSolver._targetHint.rotation, size, size, Handles.SphereHandleCap))
                         {
-                            selectedIKTarget = Selection.activeTransform = ikSolver._targetHint;
-                            selectedIKSolver = ikSolver;
+                            SelectIKTarget(ikSolver._targetHint, ikSolver, ikBone);
                         }
                     }
                 }
             }
         }
+
+        private static void SelectIKTarget(Transform ikTarget, QuickIKSolver ikSolver, IKBone ikBone)
+        {
+            _selectedIKTarget._transform = ikTarget;
+            _selectedIKTarget._ikSolver = ikSolver;
+            _selectedIKTarget._ikBone = ikBone;
+
+            Selection.activeTransform = ikTarget;
+        }
+
     }
 
 }

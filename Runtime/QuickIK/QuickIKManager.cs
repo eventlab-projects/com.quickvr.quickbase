@@ -139,6 +139,7 @@ namespace QuickVR {
         public static string IK_SOLVER_PREFIX = "_IKSolver_";
         public static string IK_TARGET_PREFIX = "_IKTarget_";
         public static float DEFAULT_TARGET_HINT_DISTANCE = 0.25f;
+        public static float DEFAULT_TARGET_HINT_FINGER_DISTANCE = 0.1f;
 
         #endregion
 
@@ -344,11 +345,11 @@ namespace QuickVR {
                     {
                         Vector3 v = Vector3.Cross(_animator.GetBoneTransform(boneID - 1).position - _animator.GetBoneTransform(boneID).position, transform.up).normalized;
                         float sign = boneName.Contains("Left") ? 1 : -1;
-                        ikTarget.position += sign * v * 0.1f;
+                        ikTarget.position += sign * v * DEFAULT_TARGET_HINT_FINGER_DISTANCE;
                     }
                     else
                     {
-                        ikTarget.position += transform.up * 0.1f;
+                        ikTarget.position += transform.up * DEFAULT_TARGET_HINT_FINGER_DISTANCE;
                     }
                 }
             }
