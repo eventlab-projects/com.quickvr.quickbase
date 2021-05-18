@@ -142,6 +142,16 @@ namespace QuickVR {
 
         #endregion
 
+        #region EVENTS
+
+        public delegate void OnAddQuickIKManagerCallback(QuickIKManager ikManager);
+        public delegate void OnRemoveQuickIKManagerCallback(QuickIKManager ikManager);
+
+        public static OnAddQuickIKManagerCallback OnAdd;
+        public static OnRemoveQuickIKManagerCallback OnRemove;
+
+        #endregion
+
         #region CREATION AND DESTRUCTION
 
         protected override void Awake()
@@ -151,6 +161,24 @@ namespace QuickVR {
             Reset();
 
             SavePose();
+        }
+
+        protected override void OnEnable()
+        {
+            base.OnEnable();
+
+            if (OnAdd != null)
+            {
+                OnAdd(this);
+            }
+        }
+
+        protected virtual void OnDisable()
+        {
+            if (OnRemove != null)
+            {
+                OnRemove(this);
+            }
         }
 
         protected virtual void Reset()

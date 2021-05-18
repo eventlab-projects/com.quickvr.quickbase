@@ -8,19 +8,6 @@ namespace QuickVR
     public class QuickIKSolverHand : QuickIKSolver
     {
 
-        protected Animator _animator
-        {
-            get
-            {
-                if (!m_Animator)
-                {
-                    m_Animator = GetComponentInParent<Animator>();
-                }
-                return m_Animator;
-            }
-        }
-        protected Animator m_Animator = null;
-
         protected Transform _foreArmCorrector
         {
             get

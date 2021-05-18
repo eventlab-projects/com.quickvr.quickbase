@@ -115,10 +115,10 @@ namespace QuickVR {
 
         protected override void OnEnable()
         {
+            base.OnEnable();
+
             if (Application.isPlaying)
             {
-                base.OnEnable();
-
                 QuickVRNode.OnCalibrateVRNodeHead += OnCalibrateVRNodeHead;
                 QuickVRNode.OnCalibrateVRNodeHips += OnCalibrateVRNodeHips;
                 QuickVRNode.OnCalibrateVRNodeLeftHand += OnCalibrateVRNodeLeftHand;
