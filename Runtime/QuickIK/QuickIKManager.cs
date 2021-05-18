@@ -553,11 +553,12 @@ namespace QuickVR {
         {
             //Copy the hand pose
             MirrorPose(GetIKSolver(srcHandBoneID), GetIKSolver(dstHandBoneID));
+            UpdateIKTargetsRootHands();
 
             //Copy the fingers pose
             IKBone srcIKBoneStart = srcHandBoneID == IKBone.LeftHand? IKBone.LeftThumbDistal : IKBone.RightThumbDistal;
             IKBone dstIKBoneStart = dstHandBoneID == IKBone.LeftHand ? IKBone.LeftThumbDistal : IKBone.RightThumbDistal;
-            
+
             for (int i = 0; i < 5; i++)
             {
                 MirrorPose(GetIKSolver(srcIKBoneStart + i), GetIKSolver(dstIKBoneStart + i));
@@ -576,14 +577,50 @@ namespace QuickVR {
 
         protected virtual void MirrorPose(QuickIKSolver srcIKSolver, QuickIKSolver dstIKSolver)
         {
-            Vector3 srcPos = srcIKSolver._targetLimb.localPosition;
-            Quaternion srcRot = srcIKSolver._targetLimb.localRotation;
-            dstIKSolver._targetLimb.localPosition = Vector3.Scale(new Vector3(-1, 1, 1), srcPos);
-            dstIKSolver._targetLimb.localRotation = new Quaternion(srcRot.x, -srcRot.y, -srcRot.z, srcRot.w);
-            //if (dstIKSolver._targetHint && srcIKSolver._targetHint)
-            //{
-            //    dstIKSolver._targetHint.localPosition = Vector3.Scale(new Vector3(-1, 1, 1), srcIKSolver._targetHint.localPosition);
-            //}
+            Transform srcParent = srcIKSolver._targetLimb.parent;
+            Transform dstParent = dstIKSolver._targetLimb.parent;
+            srcIKSolver._targetLimb.parent = dstIKSolver._targetLimb.parent = transform;
+            
+            Transform srcHintParent = null;
+            Transform dstHintParent = null;
+
+            if (srcIKSolver._targetHint && dstIKSolver._targetHint)
+            {
+                srcHintParent = srcIKSolver._targetHint.parent;
+                dstHintParent = dstIKSolver._targetHint.parent;
+                srcIKSolver._targetHint.parent = dstIKSolver._targetHint.parent = transform;
+            }
+
+            MirrorIKTarget(srcIKSolver._targetLimb, dstIKSolver._targetLimb);
+            MirrorIKTarget(srcIKSolver._targetHint, dstIKSolver._targetHint);
+
+            srcIKSolver.UpdateIK();
+            dstIKSolver.UpdateIK();
+
+            //Restore the parent for the IKTargetLimbs
+            srcIKSolver._targetLimb.parent = srcParent;
+            dstIKSolver._targetLimb.parent = dstParent;
+            srcIKSolver._targetLimb.localScale = dstIKSolver._targetLimb.localScale = Vector3.one;
+
+            //Restore the parent for the IKTargetHints
+            if (srcIKSolver._targetHint && dstIKSolver._targetHint)
+            {
+                srcIKSolver._targetHint.parent = srcHintParent;
+                dstIKSolver._targetHint.parent = dstHintParent;
+                srcIKSolver._targetHint.localScale = dstIKSolver._targetHint.localScale = Vector3.one;
+            }
+        }
+
+        protected virtual void MirrorIKTarget(Transform srcIKTarget, Transform dstIKTarget)
+        {
+            if (srcIKTarget && dstIKTarget)
+            {
+                Vector3 srcPos = srcIKTarget.localPosition;
+                Quaternion srcRot = srcIKTarget.localRotation;
+
+                dstIKTarget.localPosition = Vector3.Scale(new Vector3(-1, 1, 1), srcPos);
+                dstIKTarget.localRotation = new Quaternion(srcRot.x, -srcRot.y, -srcRot.z, srcRot.w);
+            }
         }
 
         #endregion
@@ -619,15 +656,9 @@ namespace QuickVR {
             GetIKSolver(IKBone.RightHand).UpdateIK();
             GetIKSolver(IKBone.LeftFoot).UpdateIK();
             GetIKSolver(IKBone.RightFoot).UpdateIK();
-            
-            //Update the IK for the fingers controllers
-            Transform leftHand = _animator.GetBoneTransform(HumanBodyBones.LeftHand);
-            _ikTargetsLeftHand.position = leftHand.position;
-            _ikTargetsLeftHand.rotation = leftHand.rotation;
 
-            Transform rightHand = _animator.GetBoneTransform(HumanBodyBones.RightHand);
-            _ikTargetsRightHand.position = rightHand.position;
-            _ikTargetsRightHand.rotation = rightHand.rotation;
+            //Update the IK for the fingers controllers
+            UpdateIKTargetsRootHands();
 
             for (IKBone ikBone = IKBone.LeftThumbDistal; ikBone <= IKBone.LeftLittleDistal; ikBone++)
             {
@@ -648,6 +679,17 @@ namespace QuickVR {
             {
                 GetIKSolver(ikBone).UpdateIK();
             }
+        }
+
+        protected virtual void UpdateIKTargetsRootHands()
+        {
+            Transform leftHand = _animator.GetBoneTransform(HumanBodyBones.LeftHand);
+            _ikTargetsLeftHand.position = leftHand.position;
+            _ikTargetsLeftHand.rotation = leftHand.rotation;
+
+            Transform rightHand = _animator.GetBoneTransform(HumanBodyBones.RightHand);
+            _ikTargetsRightHand.position = rightHand.position;
+            _ikTargetsRightHand.rotation = rightHand.rotation;
         }
 
         #endregion

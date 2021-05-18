@@ -189,6 +189,14 @@ namespace QuickVR
 
         #endregion
 
+        #region EVENTS
+
+        public delegate void OnPostUpdateIKCallback(QuickIKSolver ikSolver);
+
+        public static OnPostUpdateIKCallback OnPostUpdateIK;
+
+        #endregion
+
         #region CREATION AND DESTRUCTION
 
         protected virtual void Awake()

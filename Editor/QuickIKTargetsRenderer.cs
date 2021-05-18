@@ -49,55 +49,42 @@ namespace QuickVR
             }
 
             DrawIKTargets();
-
-            if (_selectedIKTarget._transform)
-            {
-                Transform ikTarget = _selectedIKTarget._transform;
-                QuickIKSolver ikSolver = _selectedIKTarget._ikSolver;
-                if (_selectedIKTarget._transform == ikSolver._targetLimb)
-                {
-                    //The targer cannot be farther away than the chain length
-                    Vector3 v = ikTarget.position - ikSolver._boneUpper.position;
-                    ikTarget.position = ikSolver._boneUpper.position + v.normalized * Mathf.Min(v.magnitude, ikSolver.GetChainLength());
-                }
-                else
-                {
-                    Vector3 v = ikTarget.position - ikSolver._boneMid.position;
-                    float defaultHintDistance = _selectedIKTarget._ikBone <= IKBone.RightFoot ? QuickIKManager.DEFAULT_TARGET_HINT_DISTANCE : QuickIKManager.DEFAULT_TARGET_HINT_FINGER_DISTANCE;
-                    ikTarget.position = ikSolver._boneMid.position + v.normalized * Mathf.Min(v.magnitude, defaultHintDistance);
-                }
-            }
         }
 
         private static void DrawIKTargets()
         {
             foreach (QuickIKManager ikManager in _ikManagers)
             {
-                for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++)
+                if (ikManager && ikManager.gameObject.activeInHierarchy)
                 {
-                    QuickIKSolver ikSolver = ikManager.GetIKSolver(ikBone);
-                    float size;
-                    if (ikBone >= IKBone.Hips && ikBone <= IKBone.RightFoot)
+                    for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++)
                     {
-                        size = 0.05f;
-                    }
-                    else
-                    {
-                        size = 0.01f;
-                    }
-
-                    Handles.color = new Color(1, 0, 0, 0.5f);
-                    if (Handles.Button(ikSolver._targetLimb.position, ikSolver._targetLimb.rotation, size, size, Handles.CubeHandleCap))
-                    {
-                        SelectIKTarget(ikSolver._targetLimb, ikSolver, ikBone);
-                    }
-
-                    if (ikSolver._targetHint)
-                    {
-                        Handles.color = new Color(0, 1, 0, 0.5f);
-                        if (Handles.Button(ikSolver._targetHint.position, ikSolver._targetHint.rotation, size, size, Handles.SphereHandleCap))
+                        QuickIKSolver ikSolver = ikManager.GetIKSolver(ikBone);
+                        float size;
+                        if (ikBone >= IKBone.Hips && ikBone <= IKBone.RightFoot)
                         {
-                            SelectIKTarget(ikSolver._targetHint, ikSolver, ikBone);
+                            size = 0.05f;
+                        }
+                        else
+                        {
+                            size = 0.01f;
+                        }
+
+                        CheckIKTargetsDistance(ikSolver, ikBone <= IKBone.RightFoot);
+
+                        Handles.color = new Color(1, 0, 0, 0.5f);
+                        if (Handles.Button(ikSolver._targetLimb.position, ikSolver._targetLimb.rotation, size, size, Handles.CubeHandleCap))
+                        {
+                            SelectIKTarget(ikSolver._targetLimb, ikSolver, ikBone);
+                        }
+
+                        if (ikSolver._targetHint)
+                        {
+                            Handles.color = new Color(0, 1, 0, 0.5f);
+                            if (Handles.Button(ikSolver._targetHint.position, ikSolver._targetHint.rotation, size, size, Handles.SphereHandleCap))
+                            {
+                                SelectIKTarget(ikSolver._targetHint, ikSolver, ikBone);
+                            }
                         }
                     }
                 }
@@ -111,6 +98,20 @@ namespace QuickVR
             _selectedIKTarget._ikBone = ikBone;
 
             Selection.activeTransform = ikTarget;
+        }
+
+        private static void CheckIKTargetsDistance(QuickIKSolver ikSolver, bool isIKSolverBody)
+        {
+            //The targer cannot be farther away than the chain length
+            Vector3 v = ikSolver._targetLimb.position - ikSolver._boneUpper.position;
+            ikSolver._targetLimb.position = ikSolver._boneUpper.position + v.normalized * Mathf.Min(v.magnitude, ikSolver.GetChainLength());
+            
+            if (ikSolver._targetHint)
+            {
+                v = ikSolver._targetHint.position - ikSolver._boneMid.position;
+                float defaultHintDistance = isIKSolverBody ? QuickIKManager.DEFAULT_TARGET_HINT_DISTANCE : QuickIKManager.DEFAULT_TARGET_HINT_FINGER_DISTANCE;
+                ikSolver._targetHint.position = ikSolver._boneMid.position + v.normalized * Mathf.Min(v.magnitude, defaultHintDistance);
+            }
         }
 
     }

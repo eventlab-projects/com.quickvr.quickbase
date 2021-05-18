@@ -128,8 +128,10 @@ namespace QuickVR {
             }
         }
 
-        protected virtual void OnDisable()
+        protected override void OnDisable()
         {
+            base.OnDisable();
+
             if (Application.isPlaying)
             {
                 QuickVRNode.OnCalibrateVRNodeHead -= OnCalibrateVRNodeHead;
