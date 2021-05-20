@@ -380,11 +380,16 @@ namespace QuickVR
 
                 if (_role == QuickHumanBodyBones.LeftEye || _role == QuickHumanBodyBones.RightEye)
                 {
-                    bool isLeft = _role == QuickHumanBodyBones.LeftEye;
-                    if (_inputDevice.TryGetFeatureValue(isLeft? QuickVRUsages.leftEyeVector : QuickVRUsages.rightEyeVector, out Vector3 vEye))
+                    //bool isLeft = _role == QuickHumanBodyBones.LeftEye;
+                    //if (_inputDevice.TryGetFeatureValue(isLeft? QuickVRUsages.leftEyeVector : QuickVRUsages.rightEyeVector, out Vector3 vEye))
+                    if (_inputDevice.TryGetFeatureValue(QuickVRUsages.combineEyeVector, out Vector3 vEye))
                     {
-                        transform.localRotation = Quaternion.identity;
-                        transform.LookAt(transform.position + vEye, Vector3.up);
+                        //Transform target = QuickSingletonManager.GetInstance<QuickVRPlayArea>().GetVRNode(HumanBodyBones.Head).transform;
+
+                        Vector3 r = transform.TransformDirection(vEye);
+                        Vector3 rotAxis = Vector3.Cross(transform.forward, r);
+                        float rotAngle = Vector3.Angle(transform.forward, r);
+                        transform.Rotate(rotAxis, rotAngle, Space.World);
                     }
                 }
 
