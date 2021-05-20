@@ -115,8 +115,9 @@ namespace QuickVR
             {
                 m_leftRight = Mathf.Clamp(value, _angleLimitLeft, _angleLimitRight);
                 _targetLimb.localRotation = Quaternion.identity;
-                _targetLimb.Rotate(_targetLimb.parent.right, m_downUp, Space.World);
                 _targetLimb.Rotate(_targetLimb.parent.up, m_leftRight, Space.World);
+                _targetLimb.Rotate(-_targetLimb.parent.right, m_downUp, Space.World);
+                
             }
         }
 
@@ -130,8 +131,8 @@ namespace QuickVR
             {
                 m_downUp = Mathf.Clamp(value, _angleLimitDown, _angleLimitUp);
                 _targetLimb.localRotation = Quaternion.identity;
-                _targetLimb.Rotate(_targetLimb.parent.right, m_downUp, Space.World);
                 _targetLimb.Rotate(_targetLimb.parent.up, m_leftRight, Space.World);
+                _targetLimb.Rotate(-_targetLimb.parent.right, m_downUp, Space.World);
             }
         }
 
@@ -164,9 +165,9 @@ namespace QuickVR
                 ResetIKChain();
 
                 Transform tRef = _targetLimb.parent;
-                ComputeEyeballRotation(tRef.right, _angleLimitDown, _angleLimitUp);
                 ComputeEyeballRotation(tRef.up, _angleLimitLeft, _angleLimitRight);
-
+                ComputeEyeballRotation(tRef.right, _angleLimitDown, _angleLimitUp);
+                
                 _boneUpper.rotation = animBoneUpperRot; 
                 _boneMid.rotation = animBoneMidRot;
 
