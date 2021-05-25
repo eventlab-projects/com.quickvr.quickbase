@@ -42,11 +42,38 @@ namespace QuickVR
 
         protected virtual QuickVRNode CreateVRNode(QuickHumanBodyBones role)
         {
-            _vrNodes[role] = transform.CreateChild("VRNode").gameObject.GetOrCreateComponent<QuickVRNode>();
-            _vrNodes[role].SetCalibrationPose(_calibrationPoseRoot.CreateChild(QuickVRNode.CALIBRATION_POSE_PREFIX, false));
-            _vrNodes[role].SetRole(role);
+            Transform tNode = transform.CreateChild("VRNode" + role.ToString());
+            QuickVRNode n = null;
 
-            return _vrNodes[role];
+            if (role == QuickHumanBodyBones.Head)
+            {
+                n = tNode.GetOrCreateComponent<QuickVRNodeHead>();
+            }
+            else if (role == QuickHumanBodyBones.LeftHand)
+            {
+                n = tNode.GetOrCreateComponent<QuickVRNodeHand>();
+                ((QuickVRNodeHand)n)._isLeft = true;
+            }
+            else if (role == QuickHumanBodyBones.RightHand)
+            {
+                n = tNode.GetOrCreateComponent<QuickVRNodeHand>();
+                ((QuickVRNodeHand)n)._isLeft = false;
+            }
+            else if (role == QuickHumanBodyBones.LeftEye || role == QuickHumanBodyBones.RightEye)
+            {
+                n = tNode.GetOrCreateComponent<QuickVRNodeEye>();
+            }
+            else
+            {
+                n = tNode.GetOrCreateComponent<QuickVRNode>();
+            }
+
+            n.SetCalibrationPose(_calibrationPoseRoot.CreateChild(QuickVRNode.CALIBRATION_POSE_PREFIX, false));
+            n.SetRole(role);
+
+            _vrNodes[role] = n;
+
+            return n;
         }
 
         #endregion

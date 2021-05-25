@@ -119,12 +119,12 @@ namespace QuickVR {
 
             if (Application.isPlaying)
             {
-                QuickVRNode.OnCalibrateVRNodeHead += OnCalibrateVRNodeHead;
-                QuickVRNode.OnCalibrateVRNodeHips += OnCalibrateVRNodeHips;
-                QuickVRNode.OnCalibrateVRNodeLeftHand += OnCalibrateVRNodeLeftHand;
-                QuickVRNode.OnCalibrateVRNodeRightHand += OnCalibrateVRNodeRightHand;
-                QuickVRNode.OnCalibrateVRNodeLeftFoot += OnCalibrateVRNodeFoot;
-                QuickVRNode.OnCalibrateVRNodeRightFoot += OnCalibrateVRNodeFoot;
+                _vrPlayArea.GetVRNode(HumanBodyBones.Head).OnCalibrateVRNode += OnCalibrateVRNodeHead;
+                _vrPlayArea.GetVRNode(HumanBodyBones.Hips).OnCalibrateVRNode += OnCalibrateVRNodeHips;
+                _vrPlayArea.GetVRNode(HumanBodyBones.LeftHand).OnCalibrateVRNode += OnCalibrateVRNodeLeftHand;
+                _vrPlayArea.GetVRNode(HumanBodyBones.RightHand).OnCalibrateVRNode += OnCalibrateVRNodeRightHand;
+                _vrPlayArea.GetVRNode(HumanBodyBones.LeftFoot).OnCalibrateVRNode += OnCalibrateVRNodeFoot;
+                _vrPlayArea.GetVRNode(HumanBodyBones.RightFoot).OnCalibrateVRNode += OnCalibrateVRNodeFoot;
             }
         }
 
@@ -134,12 +134,12 @@ namespace QuickVR {
 
             if (Application.isPlaying)
             {
-                QuickVRNode.OnCalibrateVRNodeHead -= OnCalibrateVRNodeHead;
-                QuickVRNode.OnCalibrateVRNodeHips -= OnCalibrateVRNodeHips;
-                QuickVRNode.OnCalibrateVRNodeLeftHand -= OnCalibrateVRNodeLeftHand;
-                QuickVRNode.OnCalibrateVRNodeRightHand -= OnCalibrateVRNodeRightHand;
-                QuickVRNode.OnCalibrateVRNodeLeftFoot -= OnCalibrateVRNodeFoot;
-                QuickVRNode.OnCalibrateVRNodeRightFoot -= OnCalibrateVRNodeFoot;
+                _vrPlayArea.GetVRNode(HumanBodyBones.Head).OnCalibrateVRNode -= OnCalibrateVRNodeHead;
+                _vrPlayArea.GetVRNode(HumanBodyBones.Hips).OnCalibrateVRNode -= OnCalibrateVRNodeHips;
+                _vrPlayArea.GetVRNode(HumanBodyBones.LeftHand).OnCalibrateVRNode -= OnCalibrateVRNodeLeftHand;
+                _vrPlayArea.GetVRNode(HumanBodyBones.RightHand).OnCalibrateVRNode -= OnCalibrateVRNodeRightHand;
+                _vrPlayArea.GetVRNode(HumanBodyBones.LeftFoot).OnCalibrateVRNode -= OnCalibrateVRNodeFoot;
+                _vrPlayArea.GetVRNode(HumanBodyBones.RightFoot).OnCalibrateVRNode -= OnCalibrateVRNodeFoot;
             }
         }
 
