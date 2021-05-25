@@ -6,6 +6,7 @@ using UnityEngine;
 namespace QuickVR
 {
 
+    [DefaultExecutionOrder(-1000)]
     public class QuickVRCameraController : MonoBehaviour
     {
 
@@ -57,7 +58,7 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        protected virtual void Start()
+        protected virtual void Awake()
         {
             if (!Camera.main)
             {

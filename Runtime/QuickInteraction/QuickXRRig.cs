@@ -15,13 +15,8 @@ namespace QuickVR
 
         }
 
-        protected new IEnumerator Start()
+        protected new void Start()
         {
-            while (!QuickVRCameraController.GetCamera())
-            {
-                yield return null;
-            }
-
             Camera cam = QuickVRCameraController.GetCamera();
             cameraGameObject = cam.gameObject;
             cameraFloorOffsetObject = cam.transform.parent.gameObject;
