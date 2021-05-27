@@ -59,9 +59,15 @@ namespace QuickVR
                 n = tNode.GetOrCreateComponent<QuickVRNodeHand>();
                 ((QuickVRNodeHand)n)._isLeft = false;
             }
-            else if (role == QuickHumanBodyBones.LeftEye || role == QuickHumanBodyBones.RightEye)
+            else if (role == QuickHumanBodyBones.LeftEye)
             {
                 n = tNode.GetOrCreateComponent<QuickVRNodeEye>();
+                ((QuickVRNodeEye)n)._isLeft = true;
+            }
+            else if (role == QuickHumanBodyBones.RightEye)
+            {
+                n = tNode.GetOrCreateComponent<QuickVRNodeEye>();
+                ((QuickVRNodeEye)n)._isLeft = false;
             }
             else
             {

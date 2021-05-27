@@ -394,13 +394,8 @@ namespace QuickVR {
                             }
                             else if (boneID == HumanBodyBones.LeftEye || boneID == HumanBodyBones.RightEye)
                             {
-                                InputDevice iDevice = node._inputDevice;
-                                bool isLeftEye = boneID == HumanBodyBones.LeftEye;
-                                if (iDevice.isValid && iDevice.TryGetFeatureValue(isLeftEye ? QuickVRUsages.leftEyeOpenness : QuickVRUsages.rightEyeOpenness, out float eOpen))
-                                {
-                                    QuickIKSolverEye ikSolver = (QuickIKSolverEye)_animator.GetComponent<QuickIKManager>().GetIKSolver(boneID);
-                                    ikSolver._weightBlink = 1.0f - eOpen;
-                                }
+                                QuickIKSolverEye ikSolver = (QuickIKSolverEye)_animator.GetComponent<QuickIKManager>().GetIKSolver(boneID);
+                                ikSolver._weightBlink = ((QuickVRNodeEye)node).GetBlinkFactor();
                             }
                         }
                     }

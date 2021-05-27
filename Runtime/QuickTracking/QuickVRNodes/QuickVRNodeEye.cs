@@ -10,9 +10,24 @@ namespace QuickVR
     public class QuickVRNodeEye : QuickVRNode
     {
 
+        #region PUBLIC ATTRIBUTES
+
+        public bool _isLeft = true;
+
+        #endregion
+
+        #region PROTECTED ATTRIBUTES
+
+        protected float _blinkFactor = 0;
+
+        #endregion
+
         #region GET AND SET
 
-        
+        public virtual float GetBlinkFactor()
+        {
+            return _blinkFactor;
+        }
 
         #endregion
 
@@ -20,30 +35,29 @@ namespace QuickVR
 
         protected override InputDevice CheckDevice()
         {
-            List<InputDevice> devices = new List<InputDevice>();
-            InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.EyeTracking | InputDeviceCharacteristics.HeadMounted, devices);
-
-            return devices.Count > 0 ? devices[0] : new InputDevice();
+            return InputDevices.GetDeviceAtXRNode(_isLeft? XRNode.LeftEye : XRNode.RightEye);
         }
 
-        protected override bool GetDeviceRotation(out Quaternion rot)
+        protected override void UpdateTracking()
         {
-            if (base.GetDeviceRotation(out rot)) 
-            {
-                if (_inputDevice.TryGetFeatureValue(QuickVRUsages.combineEyeVector, out Vector3 vEye))
-                {
-                    Vector3 r = transform.TransformDirection(vEye);
-                    Vector3 rotAxis = Vector3.Cross(transform.forward, r);
-                    float rotAngle = Vector3.Angle(transform.forward, r);
-                    transform.Rotate(rotAxis, rotAngle, Space.World);
-                }
+            base.UpdateTracking();
 
-                return true;
+            //Compute eyeball rotation
+            if (_inputDevice.TryGetFeatureValue(QuickVRUsages.combineEyeVector, out Vector3 vEye))
+            {
+                Vector3 r = transform.TransformDirection(vEye);
+                Vector3 rotAxis = Vector3.Cross(transform.forward, r);
+                float rotAngle = Vector3.Angle(transform.forward, r);
+                transform.Rotate(rotAxis, rotAngle, Space.World);
             }
 
-            return false;
+            //Compute blinkFactor
+            if (_inputDevice.TryGetFeatureValue(_isLeft ? QuickVRUsages.leftEyeOpenness : QuickVRUsages.rightEyeOpenness, out float eOpen))
+            {
+                _blinkFactor = 1.0f - eOpen;
+            }
         }
-
+        
         #endregion
 
     }

@@ -265,22 +265,12 @@ namespace QuickVR
 
         protected virtual bool GetDevicePosition(out Vector3 pos)
         {
-            if (_inputDevice.TryGetFeatureValue(CommonUsages.devicePosition, out pos))
-            {
-                return true;
-            }
-
-            return false;
+            return _inputDevice.TryGetFeatureValue(CommonUsages.devicePosition, out pos);
         }
 
         protected virtual bool GetDeviceRotation(out Quaternion rot)
         {
-            if (_inputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out rot))
-            {
-                return true;
-            }
-
-            return false;
+            return _inputDevice.TryGetFeatureValue(CommonUsages.deviceRotation, out rot);
         }
 
         #endregion
@@ -302,28 +292,26 @@ namespace QuickVR
             
             if (_inputDevice.isValid)
             {
-                if (GetDevicePosition(out Vector3 pos))
-                {
-                    transform.localPosition = pos;
-                }
-                if (GetDeviceRotation(out Quaternion rot))
-                {
-                    transform.localRotation = rot;
-                }
-
-                if (_role == QuickHumanBodyBones.LeftEye || _role == QuickHumanBodyBones.RightEye)
-                {
-                    //bool isLeft = _role == QuickHumanBodyBones.LeftEye;
-                    //if (_inputDevice.TryGetFeatureValue(isLeft? QuickVRUsages.leftEyeVector : QuickVRUsages.rightEyeVector, out Vector3 vEye))
-                    
-                }
-
-                _inputDevice.TryGetFeatureValue(CommonUsages.isTracked, out _isTracked);
+                UpdateTracking();
             }
             else
             {
                 _isTracked = false;
             }
+        }
+
+        protected virtual void UpdateTracking()
+        {
+            if (GetDevicePosition(out Vector3 pos))
+            {
+                transform.localPosition = pos;
+            }
+            if (GetDeviceRotation(out Quaternion rot))
+            {
+                transform.localRotation = rot;
+            }
+
+            _inputDevice.TryGetFeatureValue(CommonUsages.isTracked, out _isTracked);
         }
 
         #endregion
