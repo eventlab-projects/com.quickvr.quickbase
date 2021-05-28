@@ -9,7 +9,9 @@ namespace QuickVR
 
     public static class QuickEyeTracking 
     {
-        
+
+        #region PRIVATE ATTRIBUTES
+
         private static QuickVRPlayArea _vrPlayArea
         {
             get
@@ -52,14 +54,47 @@ namespace QuickVR
         }
         private static QuickVRNodeEye m_VRNodeEyeRight = null;
 
+        private static Animator _animatorSource = null;
+        private static Animator _animatorTarget = null;
+
+        #endregion
+
+        #region CREATION AND DESTRUCTION
+
+        [RuntimeInitializeOnLoadMethod]
+        private static void Init()
+        {
+            QuickVRManager.OnSourceAnimatorSet += SetAnimatorSource;
+            QuickVRManager.OnTargetAnimatorSet += SetAnimatorTarget;
+        }
+
+        #endregion
+
+        #region GET AND SET
+
+        private static void SetAnimatorSource(Animator animator)
+        {
+            _animatorSource = animator;
+        }
+
+        private static void SetAnimatorTarget(Animator animator)
+        {
+            _animatorTarget = animator;
+        }
+
+        private static Quaternion GetWorldRot()
+        {
+            return _animatorTarget.transform.rotation * Quaternion.Inverse(_animatorSource.transform.rotation);
+        }
+
         public static Vector3 GetDirectionEyeLeft()
         {
-            return _vrNodeEyeLeft.transform.forward;
+            return GetWorldRot() * _vrNodeEyeLeft.transform.forward;
         }
 
         public static Vector3 GetDirectionEyeRight()
         {
-            return _vrNodeEyeRight.transform.forward;
+            return GetWorldRot() * _vrNodeEyeRight.transform.forward;
         }
 
         public static Vector3 GetDirectionEyeCombined()
@@ -91,6 +126,9 @@ namespace QuickVR
         {
             return IsEyeLeftTracked() && IsEyeRightTracked();
         }
+
+        #endregion
+
     }
 
 
