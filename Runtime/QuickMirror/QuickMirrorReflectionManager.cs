@@ -25,12 +25,7 @@ namespace QuickVR
 
         static QuickMirrorReflectionManager()
         {
-#if UNITY_EDITOR
-            UnityEditor.SceneView.beforeSceneGui += UpdateMirrorsSceneView;
-#endif
-            //QuickVRManager.OnPostCameraUpdate += UpdateMirrorsMainCamera;
             Camera.onPreCull += UpdateMirrors;
-            //Application.onBeforeRender += AllowRenderReflection;
         }
 
         #endregion
@@ -47,35 +42,32 @@ namespace QuickVR
             _mirrors.Remove(mirror);
         }
 
+        private static bool IsValidCamera(Camera cam)
+        {
+
+#if UNITY_EDITOR
+            UnityEditor.SceneView sView = UnityEditor.SceneView.currentDrawingSceneView;
+            if (sView && sView.camera == cam)
+            {
+                return true;
+            }
+#endif
+
+            return cam.enabled;
+        }
+
         #endregion
 
         #region UPDATE
 
-#if UNITY_EDITOR
-        static void UpdateMirrorsSceneView(UnityEditor.SceneView sView)
-        {
-            if (Application.isPlaying) return;
-
-            UpdateMirrors(sView.camera);
-        }
-#endif
-
         static void UpdateMirrors(Camera cam)
         {
-            if (cam.enabled)
+            if (IsValidCamera(cam))
             {
                 foreach (QuickMirrorReflectionBase mirror in _mirrors)
                 {
                     mirror.BeginCameraRendering(cam);
                 }
-            }
-        }
-
-        static void UpdateMirrorsMainCamera()
-        {
-            foreach (Camera cam in Camera.allCameras)
-            {
-                UpdateMirrors(cam);
             }
         }
 
