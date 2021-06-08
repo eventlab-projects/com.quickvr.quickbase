@@ -151,10 +151,11 @@ namespace QuickVR
 
             //3) Do the render
 #if UNITY_ANDROID && UNITY_EDITOR
-            Shader.SetGlobalInt(QuickMirrorReflectionManager.REFLECTION_INVERT_Y, 0);
+            Shader.SetGlobalInt(QuickMirrorReflectionManager.REFLECTION_INVERT_Y, Application.isPlaying ? 0 : 1);
 #else
             Shader.SetGlobalInt(QuickMirrorReflectionManager.REFLECTION_INVERT_Y, Application.isMobilePlatform ? 0 : 1);
 #endif
+
             if (_useRenderWithShader)
             {
                 Shader.SetGlobalVector("MIRROR_PLANE_POS", transform.position);
