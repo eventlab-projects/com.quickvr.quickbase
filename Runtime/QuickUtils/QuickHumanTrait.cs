@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Reflection;
+
 using UnityEngine;
 
 namespace QuickVR
@@ -597,6 +599,63 @@ namespace QuickVR
                     EnforceTPose(animator, bones[i], bones[i + 1], Vector3.ProjectOnPlane(tBoneEnd.position - tBoneStart.position, animator.transform.up));
                 }
             }
+        }
+
+        //https://forum.unity.com/threads/recording-humanoid-animations-with-foot-ik.545015/
+        public static void GetIKGoalFromBodyPose(this Animator animator, AvatarIKGoal avatarIKGoal, Vector3 bodyPosition, Quaternion bodyRotation, out Vector3 goalPos, out Quaternion goalRot, float humanScale = 1)
+        {
+            HumanBodyBones boneID = ToHumanBodyBones(avatarIKGoal);
+            if (boneID == HumanBodyBones.LastBone)
+            {
+                throw new System.InvalidOperationException("Invalid bone id.");
+            }
+
+            MethodInfo methodGetAxisLength = typeof(Avatar).GetMethod("GetAxisLength", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (methodGetAxisLength == null)
+            {
+                throw new System.InvalidOperationException("Cannot find GetAxisLength method.");
+            }
+
+            MethodInfo methodGetPostRotation = typeof(Avatar).GetMethod("GetPostRotation", BindingFlags.Instance | BindingFlags.NonPublic);
+            if (methodGetPostRotation == null)
+            {
+                throw new System.InvalidOperationException("Cannot find GetPostRotation method.");
+            }
+
+            Quaternion postRotation = (Quaternion)methodGetPostRotation.Invoke(animator.avatar, new object[] { (int)boneID });
+
+            Transform tBone = animator.GetBoneTransform(boneID);
+            goalPos = tBone.position;
+            goalRot = tBone.rotation * postRotation;
+
+            if (avatarIKGoal == AvatarIKGoal.LeftFoot || avatarIKGoal == AvatarIKGoal.RightFoot)
+            {
+                // Here you could use animator.leftFeetBottomHeight or animator.rightFeetBottomHeight rather than GetAxisLenght
+                // Both are equivalent but GetAxisLength is the generic way and work for all human bone
+                float axislength = (float)methodGetAxisLength.Invoke(animator.avatar, new object[] { (int)boneID });
+                Vector3 footBottom = new Vector3(axislength, 0, 0);
+                goalPos += (goalRot * footBottom);
+            }
+
+            // IK goal are in avatar body local space
+            Quaternion invRootQ = Quaternion.Inverse(bodyRotation);
+            goalPos = invRootQ * (goalPos - bodyPosition);
+            goalRot = invRootQ * goalRot;
+            goalPos /= humanScale;
+        }
+
+        private static HumanBodyBones ToHumanBodyBones(AvatarIKGoal avatarIKGoal)
+        {
+            HumanBodyBones boneID = HumanBodyBones.LastBone;
+            switch (avatarIKGoal)
+            {
+                case AvatarIKGoal.LeftFoot: boneID = HumanBodyBones.LeftFoot; break;
+                case AvatarIKGoal.RightFoot: boneID = HumanBodyBones.RightFoot; break;
+                case AvatarIKGoal.LeftHand: boneID = HumanBodyBones.LeftHand; break;
+                case AvatarIKGoal.RightHand: boneID = HumanBodyBones.RightHand; break;
+            }
+
+            return boneID;
         }
 
         #endregion

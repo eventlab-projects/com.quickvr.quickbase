@@ -26,6 +26,11 @@ namespace QuickVR
         public const string CURVE_BODY_POSITION = "BodyPosition";
         public const string CURVE_BODY_ROTATION = "BodyRotation";
 
+        public const string CURVE_LEFT_FOOT_IK_GOAL_POSITION = "LeftFootIKGoalPos";
+        public const string CURVE_LEFT_FOOT_IK_GOAL_ROTATION = "LeftFootIKGoalRot";
+        public const string CURVE_RIGHT_FOOT_IK_GOAL_POSITION = "RightFootIKGoalPos";
+        public const string CURVE_RIGHT_FOOT_IK_GOAL_ROTATION = "RightFootIKGoalRot";
+
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -57,8 +62,21 @@ namespace QuickVR
             if (_animator.isHuman)
             {
                 QuickHumanPoseHandler.GetHumanPose(_animator, ref _pose);
-                GetAnimationCurve(CURVE_BODY_POSITION).AddKey(time, _pose.bodyPosition);
-                GetAnimationCurve(CURVE_BODY_ROTATION).AddKey(time, _pose.bodyRotation);
+                Vector3 bodyPosition = _pose.bodyPosition;
+                Quaternion bodyRotation = _pose.bodyRotation;
+
+                GetAnimationCurve(CURVE_BODY_POSITION).AddKey(time, bodyPosition);
+                GetAnimationCurve(CURVE_BODY_ROTATION).AddKey(time, bodyRotation);
+
+                Vector3 ikGoalPos;
+                Quaternion ikGoalRot;
+                _animator.GetIKGoalFromBodyPose(AvatarIKGoal.LeftFoot, bodyPosition, bodyRotation, out ikGoalPos, out ikGoalRot);
+                GetAnimationCurve(CURVE_LEFT_FOOT_IK_GOAL_POSITION).AddKey(time, ikGoalPos);
+                GetAnimationCurve(CURVE_LEFT_FOOT_IK_GOAL_ROTATION).AddKey(time, ikGoalRot);
+
+                _animator.GetIKGoalFromBodyPose(AvatarIKGoal.RightFoot, bodyPosition, bodyRotation, out ikGoalPos, out ikGoalRot);
+                GetAnimationCurve(CURVE_RIGHT_FOOT_IK_GOAL_POSITION).AddKey(time, ikGoalPos);
+                GetAnimationCurve(CURVE_RIGHT_FOOT_IK_GOAL_ROTATION).AddKey(time, ikGoalRot);
 
                 for (int i = 0; i < _pose.muscles.Length; i++)
                 {
@@ -112,10 +130,32 @@ namespace QuickVR
             anim.SetCurve("", typeof(Animator), "RootT.z", curvePos[2]);
 
             QuickAnimationCurve curveRot = GetAnimationCurve(CURVE_BODY_ROTATION);
-            anim.SetCurve("", typeof(Animator), "RootQ.x", curvePos[0]);
-            anim.SetCurve("", typeof(Animator), "RootQ.y", curvePos[1]);
-            anim.SetCurve("", typeof(Animator), "RootQ.z", curvePos[2]);
-            anim.SetCurve("", typeof(Animator), "RootQ.w", curvePos[3]);
+            anim.SetCurve("", typeof(Animator), "RootQ.x", curveRot[0]);
+            anim.SetCurve("", typeof(Animator), "RootQ.y", curveRot[1]);
+            anim.SetCurve("", typeof(Animator), "RootQ.z", curveRot[2]);
+            anim.SetCurve("", typeof(Animator), "RootQ.w", curveRot[3]);
+
+            curvePos = GetAnimationCurve(CURVE_LEFT_FOOT_IK_GOAL_POSITION);
+            anim.SetCurve("", typeof(Animator), "LeftFootT.x", curvePos[0]);
+            anim.SetCurve("", typeof(Animator), "LeftFootT.y", curvePos[1]);
+            anim.SetCurve("", typeof(Animator), "LeftFootT.z", curvePos[2]);
+
+            curveRot = GetAnimationCurve(CURVE_LEFT_FOOT_IK_GOAL_ROTATION);
+            anim.SetCurve("", typeof(Animator), "LeftFootQ.x", curveRot[0]);
+            anim.SetCurve("", typeof(Animator), "LeftFootQ.y", curveRot[1]);
+            anim.SetCurve("", typeof(Animator), "LeftFootQ.z", curveRot[2]);
+            anim.SetCurve("", typeof(Animator), "LeftFootQ.w", curveRot[3]);
+
+            curvePos = GetAnimationCurve(CURVE_RIGHT_FOOT_IK_GOAL_POSITION);
+            anim.SetCurve("", typeof(Animator), "RightFootT.x", curvePos[0]);
+            anim.SetCurve("", typeof(Animator), "RightFootT.y", curvePos[1]);
+            anim.SetCurve("", typeof(Animator), "RightFootT.z", curvePos[2]);
+
+            curveRot = GetAnimationCurve(CURVE_RIGHT_FOOT_IK_GOAL_ROTATION);
+            anim.SetCurve("", typeof(Animator), "RightFootQ.x", curveRot[0]);
+            anim.SetCurve("", typeof(Animator), "RightFootQ.y", curveRot[1]);
+            anim.SetCurve("", typeof(Animator), "RightFootQ.z", curveRot[2]);
+            anim.SetCurve("", typeof(Animator), "RightFootQ.w", curveRot[3]);
 
             for (int i = 0; i < QuickHumanTrait.GetNumMuscles(); i++)
             {
