@@ -179,6 +179,14 @@ namespace QuickVR
             _w._evaluateMethod = evaluateMethod;
         }
 
+        public virtual void Compress(float epsilon)
+        {
+            _x.Compress(epsilon);
+            _y.Compress(epsilon);
+            _z.Compress(epsilon);
+            _w.Compress(epsilon);
+        }
+
         #endregion
 
     }

@@ -453,6 +453,28 @@ namespace QuickVR
 
         #region ANIMATOR EXTENSIONS
 
+        public static void Compress(this AnimationCurve aCurve, float epsilon)
+        {
+            Keyframe[] keyFrames = aCurve.keys;
+            if (keyFrames.Length > 0)
+            {
+                aCurve.keys = new Keyframe[] { };
+
+                aCurve.AddKey(keyFrames[0]);
+                float lastValue = keyFrames[0].value;
+
+                for (int i = 1; i < keyFrames.Length; i++)
+                {
+                    Keyframe k = keyFrames[i];
+                    if (Mathf.Abs(k.value - lastValue) > epsilon)
+                    {
+                        aCurve.AddKey(k);
+                        lastValue = k.value;
+                    }
+                }
+            }
+        }
+
         public static void CreateMissingBones(this Animator animator)
         {
             animator.CreateEyes();

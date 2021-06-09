@@ -174,6 +174,14 @@ namespace QuickVR
             }
         }
 
+        public virtual void Compress(float epsilon = 0.001f)
+        {
+            foreach (var pair in _curves)
+            {
+                pair.Value.Compress(epsilon);
+            }
+        }
+
         #endregion
 
     }
