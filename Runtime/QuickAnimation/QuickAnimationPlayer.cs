@@ -82,7 +82,7 @@ namespace QuickVR
                 _recordTimeStart = Time.time;
                 _recordTimeLastFrame = Time.time;
                 SetState(State.Recording);
-                UpdateStateRecording(0);
+                UpdateStateRecording(0, false);
             }
         }
 
@@ -90,7 +90,7 @@ namespace QuickVR
         {
             if (_state == State.Recording)
             {
-                UpdateStateRecording((Time.time - _recordTimeStart) + Time.deltaTime);
+                UpdateStateRecording((_recordTimeLastFrame - _recordTimeStart) + Time.deltaTime, true);
                 SetState(State.Idle);
 
                 return _recordedAnimation;
@@ -149,7 +149,7 @@ namespace QuickVR
                 float elapsedTime = Time.time - _recordTimeLastFrame;
                 if (elapsedTime >= _recordTimeFrame)
                 {
-                    UpdateStateRecording(Time.time - _recordTimeStart);
+                    UpdateStateRecording(Time.time - _recordTimeStart, false);
                     _recordTimeLastFrame = Time.time;
                 }
             }
@@ -159,9 +159,9 @@ namespace QuickVR
             }
         }
 
-        protected virtual void UpdateStateRecording(float time)
+        protected virtual void UpdateStateRecording(float time, bool forceAdd)
         {
-            _recordedAnimation.AddKey(time);
+            _recordedAnimation.AddKey(time, forceAdd);
         }
 
         protected virtual void UpdateStatePlaying()

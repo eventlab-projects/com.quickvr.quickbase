@@ -24,8 +24,6 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected float _lastValue = Mathf.Infinity;
-
         protected List<float> _sortedTime = new List<float>();
 
         #endregion
@@ -34,17 +32,10 @@ namespace QuickVR
 
         public new int AddKey(float time, float value)
         {
-            int index = -1;
-
-            if (!Mathf.Approximately(_lastValue, value))
+            int index = base.AddKey(time, value);
+            if (index != -1)
             {
-                index = base.AddKey(time, value);
-                if (index != -1)
-                {
-                    _lastValue = value;
-
-                    _sortedTime.Add(time);
-                }
+                _sortedTime.Add(time);
             }
 
             return index;
@@ -99,6 +90,12 @@ namespace QuickVR
 
         #endregion
 
+        #region CONSTANTS
+
+        protected static float ZERO = 0.0001f;
+
+        #endregion
+
         #region GET AND SET
 
         public QuickAnimationCurveBase this[int key]
@@ -121,29 +118,44 @@ namespace QuickVR
             return null;
         }
 
-        public virtual void AddKey(float time, float value)
+        public virtual void AddKey(float time, float value, bool forceAdd = false)
         {
-            _x.AddKey(time, value);
+            AddKey(_x, time, value, forceAdd);
         }
 
-        public virtual void AddKey(float time, bool value)
+        public virtual void AddKey(float time, bool value, bool forceAdd = false)
         {
-            _x.AddKey(time, value ? 1 : 0);
+            AddKey(_x, time, value ? 1 : 0, forceAdd);
         }
 
-        public virtual void AddKey(float time, Vector3 value)
+        public virtual void AddKey(float time, Vector3 value, bool forceAdd = false)
         {
-            _x.AddKey(time, value.x);
-            _y.AddKey(time, value.y);
-            _z.AddKey(time, value.z);
+            AddKey(_x, time, value.x, forceAdd);
+            AddKey(_y, time, value.y, forceAdd);
+            AddKey(_z, time, value.z, forceAdd);
         }
 
-        public virtual void AddKey(float time, Quaternion value)
+        public virtual void AddKey(float time, Quaternion value, bool forceAdd = false)
         {
-            _x.AddKey(time, value.x);
-            _y.AddKey(time, value.y);
-            _z.AddKey(time, value.z);
-            _w.AddKey(time, value.w);
+            AddKey(_x, time, value.x, forceAdd);
+            AddKey(_y, time, value.y, forceAdd);
+            AddKey(_z, time, value.z, forceAdd);
+            AddKey(_w, time, value.w, forceAdd);
+        }
+
+        protected virtual void AddKey(QuickAnimationCurveBase curve, float time, float value, bool forceAdd = false)
+        {
+            if (Mathf.Abs(value) < ZERO)
+            {
+                value = 0;
+            }
+
+            float lastValue = curve.length > 0 ? curve[curve.length - 1].value : Mathf.Infinity;
+
+            if (forceAdd || !Mathf.Approximately(lastValue, value))
+            {
+                curve.AddKey(time, value);
+            }
         }
 
         public virtual float Evaluate(float time)

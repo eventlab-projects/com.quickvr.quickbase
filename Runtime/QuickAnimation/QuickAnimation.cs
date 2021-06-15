@@ -54,10 +54,10 @@ namespace QuickVR
             return _curves[curveName];
         }
 
-        public virtual void AddKey(float time)
+        public virtual void AddKey(float time, bool forceAdd = false)
         {
-            GetAnimationCurve(CURVE_TRANSFORM_POSITION).AddKey(time, _animator.transform.position);
-            GetAnimationCurve(CURVE_TRANSFORM_ROTATION).AddKey(time, _animator.transform.rotation);
+            GetAnimationCurve(CURVE_TRANSFORM_POSITION).AddKey(time, _animator.transform.position, forceAdd);
+            GetAnimationCurve(CURVE_TRANSFORM_ROTATION).AddKey(time, _animator.transform.rotation, forceAdd);
 
             if (_animator.isHuman)
             {
@@ -65,23 +65,23 @@ namespace QuickVR
                 Vector3 bodyPosition = _pose.bodyPosition;
                 Quaternion bodyRotation = _pose.bodyRotation;
 
-                GetAnimationCurve(CURVE_BODY_POSITION).AddKey(time, bodyPosition);
-                GetAnimationCurve(CURVE_BODY_ROTATION).AddKey(time, bodyRotation);
+                GetAnimationCurve(CURVE_BODY_POSITION).AddKey(time, bodyPosition, forceAdd);
+                GetAnimationCurve(CURVE_BODY_ROTATION).AddKey(time, bodyRotation, forceAdd);
 
                 Vector3 ikGoalPos;
                 Quaternion ikGoalRot;
                 _animator.GetIKGoalFromBodyPose(AvatarIKGoal.LeftFoot, bodyPosition, bodyRotation, out ikGoalPos, out ikGoalRot);
-                GetAnimationCurve(CURVE_LEFT_FOOT_IK_GOAL_POSITION).AddKey(time, ikGoalPos);
-                GetAnimationCurve(CURVE_LEFT_FOOT_IK_GOAL_ROTATION).AddKey(time, ikGoalRot);
+                GetAnimationCurve(CURVE_LEFT_FOOT_IK_GOAL_POSITION).AddKey(time, ikGoalPos, forceAdd);
+                GetAnimationCurve(CURVE_LEFT_FOOT_IK_GOAL_ROTATION).AddKey(time, ikGoalRot, forceAdd);
 
                 _animator.GetIKGoalFromBodyPose(AvatarIKGoal.RightFoot, bodyPosition, bodyRotation, out ikGoalPos, out ikGoalRot);
-                GetAnimationCurve(CURVE_RIGHT_FOOT_IK_GOAL_POSITION).AddKey(time, ikGoalPos);
-                GetAnimationCurve(CURVE_RIGHT_FOOT_IK_GOAL_ROTATION).AddKey(time, ikGoalRot);
+                GetAnimationCurve(CURVE_RIGHT_FOOT_IK_GOAL_POSITION).AddKey(time, ikGoalPos, forceAdd);
+                GetAnimationCurve(CURVE_RIGHT_FOOT_IK_GOAL_ROTATION).AddKey(time, ikGoalRot, forceAdd);
 
                 for (int i = 0; i < _pose.muscles.Length; i++)
                 {
                     string muscleName = QuickHumanTrait.GetMuscleName(i);
-                    GetAnimationCurve(muscleName).AddKey(time, _pose.muscles[i]);
+                    GetAnimationCurve(muscleName).AddKey(time, _pose.muscles[i], forceAdd);
                 }
             }
 

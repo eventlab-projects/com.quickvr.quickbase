@@ -456,14 +456,14 @@ namespace QuickVR
         public static void Compress(this AnimationCurve aCurve, float epsilon)
         {
             Keyframe[] keyFrames = aCurve.keys;
-            if (keyFrames.Length > 0)
+            if (keyFrames.Length > 2)
             {
                 aCurve.keys = new Keyframe[] { };
 
                 aCurve.AddKey(keyFrames[0]);
                 float lastValue = keyFrames[0].value;
 
-                for (int i = 1; i < keyFrames.Length; i++)
+                for (int i = 1; i < keyFrames.Length - 1; i++)
                 {
                     Keyframe k = keyFrames[i];
                     if (Mathf.Abs(k.value - lastValue) > epsilon)
@@ -472,6 +472,8 @@ namespace QuickVR
                         lastValue = k.value;
                     }
                 }
+
+                aCurve.AddKey(keyFrames[keyFrames.Length - 1]);
             }
         }
 
