@@ -11,6 +11,12 @@ namespace QuickVR
         [System.Serializable]
         public struct CompressionParameters
         {
+            [Header("Compression Error Root")]
+            [Range(0.0f, 1.0f)]
+            public float _epsilonBodyPosition;
+            [Range(0.0f, 1.0f)]
+            public float _epsilonBodyRotation;
+
             [Header("Compression Error Body")]
             [Range(0.0f, 1.0f)]
             public float _epsilonSpine;
@@ -317,14 +323,6 @@ namespace QuickVR
             foreach (var pair in _curves)
             {
                 pair.Value.SetEvaluateMethod(evaluateMethod);
-            }
-        }
-
-        public virtual void Compress(float epsilon = DEFAULT_COMPRESSION_ERROR)
-        {
-            foreach (var pair in _curves)
-            {
-                pair.Value.Compress(epsilon);
             }
         }
 
