@@ -461,15 +461,21 @@ namespace QuickVR
                 aCurve.keys = new Keyframe[] { };
 
                 aCurve.AddKey(keyFrames[0]);
-                float lastValue = keyFrames[0].value;
+                int iPrev = 0;
 
                 for (int i = 1; i < keyFrames.Length - 1; i++)
                 {
                     Keyframe k = keyFrames[i];
-                    if (Mathf.Abs(k.value - lastValue) > epsilon)
+                    Keyframe kPrev = keyFrames[iPrev];
+                    Keyframe kNext = keyFrames[i + 1];
+
+                    float t = (k.time - kPrev.time) / (kNext.time - kPrev.time);
+                    float v = Mathf.Lerp(kPrev.value, kNext.value, t);
+
+                    if (Mathf.Abs(k.value - v) > epsilon)
                     {
                         aCurve.AddKey(k);
-                        lastValue = k.value;
+                        iPrev = i;
                     }
                 }
 

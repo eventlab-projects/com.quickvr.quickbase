@@ -8,6 +8,150 @@ namespace QuickVR
     public class QuickAnimation
     {
 
+        [System.Serializable]
+        public struct CompressionParameters
+        {
+            [Header("Compression Error Body")]
+            [Range(0.0f, 1.0f)]
+            public float _epsilonSpine;
+            [Range(0.0f, 1.0f)]
+            public float _epsilonLeftArm;
+            [Range(0.0f, 1.0f)]
+            public float _epsilonRightArm;
+            [Range(0.0f, 1.0f)]
+            public float _epsilonLeftLeg;
+            [Range(0.0f, 1.0f)]
+            public float _epsilonRightLeg;
+
+            [Header("Compression Error Left Hand")]
+            [Range(0.0f, 1.0f)]
+            public float _epsilonLeftThumb;
+            [Range(0.0f, 1.0f)]
+            public float _epsilonLeftIndex;
+            [Range(0.0f, 1.0f)]
+            public float _epsilonLeftMiddle;
+            [Range(0.0f, 1.0f)]
+            public float _epsilonLeftRing;
+            [Range(0.0f, 1.0f)]
+            public float _epsilonLeftLittle;
+
+            [Header("Compression Error Right Hand")]
+            [Range(0.0f, 1.0f)]
+            public float _epsilonRightThumb;
+            [Range(0.0f, 1.0f)]
+            public float _epsilonRightIndex;
+            [Range(0.0f, 1.0f)]
+            public float _epsilonRightMiddle;
+            [Range(0.0f, 1.0f)]
+            public float _epsilonRightRing;
+            [Range(0.0f, 1.0f)]
+            public float _epsilonRightLittle;
+
+            public float GetEpsilonFromBone(HumanBodyBones boneID)
+            {
+                switch (boneID)
+                {
+                    //Case Spine
+                    case HumanBodyBones.Hips:
+                    case HumanBodyBones.Spine:
+                    case HumanBodyBones.Chest:
+                    case HumanBodyBones.UpperChest:
+                    case HumanBodyBones.Neck:
+                    case HumanBodyBones.Head:
+                        return _epsilonSpine;
+
+                    //Case Left Arm
+                    case HumanBodyBones.LeftShoulder:
+                    case HumanBodyBones.LeftUpperArm:
+                    case HumanBodyBones.LeftLowerArm:
+                    case HumanBodyBones.LeftHand:
+                        return _epsilonLeftArm;
+
+                    //Case Right Arm
+                    case HumanBodyBones.RightShoulder:
+                    case HumanBodyBones.RightUpperArm:
+                    case HumanBodyBones.RightLowerArm:
+                    case HumanBodyBones.RightHand:
+                        return _epsilonRightArm;
+
+                    //Case Left Leg
+                    case HumanBodyBones.LeftUpperLeg:
+                    case HumanBodyBones.LeftLowerLeg:
+                    case HumanBodyBones.LeftFoot:
+                        return _epsilonLeftLeg;
+
+                    //Case Right Leg
+                    case HumanBodyBones.RightUpperLeg:
+                    case HumanBodyBones.RightLowerLeg:
+                    case HumanBodyBones.RightFoot:
+                        return _epsilonRightLeg;
+
+                    //Case Left Thumb
+                    case HumanBodyBones.LeftThumbProximal:
+                    case HumanBodyBones.LeftThumbIntermediate:
+                    case HumanBodyBones.LeftThumbDistal:
+                        return _epsilonLeftThumb;
+
+                    //Case Left Index
+                    case HumanBodyBones.LeftIndexProximal:
+                    case HumanBodyBones.LeftIndexIntermediate:
+                    case HumanBodyBones.LeftIndexDistal:
+                        return _epsilonLeftIndex;
+
+                    //Case Left Middle
+                    case HumanBodyBones.LeftMiddleProximal:
+                    case HumanBodyBones.LeftMiddleIntermediate:
+                    case HumanBodyBones.LeftMiddleDistal:
+                        return _epsilonLeftMiddle;
+
+                    //Case Left Ring
+                    case HumanBodyBones.LeftRingProximal:
+                    case HumanBodyBones.LeftRingIntermediate:
+                    case HumanBodyBones.LeftRingDistal:
+                        return _epsilonLeftRing;
+
+                    //Case Left Little
+                    case HumanBodyBones.LeftLittleProximal:
+                    case HumanBodyBones.LeftLittleIntermediate:
+                    case HumanBodyBones.LeftLittleDistal:
+                        return _epsilonLeftLittle;
+
+                    //Case Right Thumb
+                    case HumanBodyBones.RightThumbProximal:
+                    case HumanBodyBones.RightThumbIntermediate:
+                    case HumanBodyBones.RightThumbDistal:
+                        return _epsilonRightThumb;
+
+                    //Case Right Index
+                    case HumanBodyBones.RightIndexProximal:
+                    case HumanBodyBones.RightIndexIntermediate:
+                    case HumanBodyBones.RightIndexDistal:
+                        return _epsilonRightIndex;
+
+                    //Case Right Middle
+                    case HumanBodyBones.RightMiddleProximal:
+                    case HumanBodyBones.RightMiddleIntermediate:
+                    case HumanBodyBones.RightMiddleDistal:
+                        return _epsilonRightMiddle;
+
+                    //Case Right Ring
+                    case HumanBodyBones.RightRingProximal:
+                    case HumanBodyBones.RightRingIntermediate:
+                    case HumanBodyBones.RightRingDistal:
+                        return _epsilonRightRing;
+
+                    //Case Right Little
+                    case HumanBodyBones.RightLittleProximal:
+                    case HumanBodyBones.RightLittleIntermediate:
+                    case HumanBodyBones.RightLittleDistal:
+                        return _epsilonRightLittle;
+                }
+
+                return -1;
+            }
+                
+        }
+
         #region PROTECTED ATTRIBUTES
 
         protected float _timeLength = 0;
@@ -30,6 +174,8 @@ namespace QuickVR
         public const string CURVE_LEFT_FOOT_IK_GOAL_ROTATION = "LeftFootIKGoalRot";
         public const string CURVE_RIGHT_FOOT_IK_GOAL_POSITION = "RightFootIKGoalPos";
         public const string CURVE_RIGHT_FOOT_IK_GOAL_ROTATION = "RightFootIKGoalRot";
+
+        public const float DEFAULT_COMPRESSION_ERROR = 0.001f;
 
         #endregion
 
@@ -174,7 +320,7 @@ namespace QuickVR
             }
         }
 
-        public virtual void Compress(float epsilon = 0.001f)
+        public virtual void Compress(float epsilon = DEFAULT_COMPRESSION_ERROR)
         {
             foreach (var pair in _curves)
             {
