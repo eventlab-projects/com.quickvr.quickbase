@@ -34,20 +34,6 @@ namespace QuickVR
             }
         }
 
-        protected Keyboard _keyboard
-        {
-            get
-            {
-                if (m_Keyboard == null)
-                {
-                    m_Keyboard = Keyboard.current;
-                }
-
-                return m_Keyboard;
-            }
-        }
-        protected Keyboard m_Keyboard = null;
-
         #endregion
 
         #region ACTIONS
@@ -262,19 +248,16 @@ namespace QuickVR
 
         protected virtual void UpdateKeyboardMono()
         {
-            if (_keyboard != null)
+            if (InputManagerKeyboard.GetKeyUp(Key.LeftShift))
             {
-                if (_keyboard.shiftKey.wasReleasedThisFrame)
-                {
-                    ToggleShift();
-                }
+                ToggleShift();
+            }
 
-                foreach (QuickKeyboardKey k in _keys)
+            foreach (QuickKeyboardKey k in _keys)
+            {
+                if (k._keyCode != Key.None && InputManagerKeyboard.GetKeyDown(k._keyCode))
                 {
-                    if (k._keyCode != Key.None && _keyboard[k._keyCode].wasPressedThisFrame)
-                    {
-                        k.DoAction();
-                    }
+                    k.DoAction();
                 }
             }
         }

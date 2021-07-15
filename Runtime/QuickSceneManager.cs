@@ -185,6 +185,11 @@ namespace QuickVR
                 else
                 {
                     SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
+
+                    //Wait a frame to ensure that the load process has been finished:
+                    //https://docs.unity3d.com/ScriptReference/SceneManagement.SceneManager.LoadScene.html
+
+                    yield return null;  
                 }
             }
 

@@ -11,6 +11,12 @@ namespace QuickVR
     public class InputManagerKeyboard : InputManagerGeneric<Keyboard, BaseInputManager.DefaultCode, Key>
     {
 
+        #region PRIVATE ATTRIBUTES
+
+        private static Keyboard _keyboard = null;
+
+        #endregion
+
         #region CREATION AND DESTRUCTION
 
         protected override void ResetDefaultConfiguration()
@@ -43,6 +49,35 @@ namespace QuickVR
         protected override bool ImpGetButton(Key button)
         {
             return _inputDevice[button].isPressed;
+        }
+
+        protected static void CheckKeyboard()
+        {
+            if (_keyboard == null)
+            {
+                _keyboard = Keyboard.current;
+            }
+}
+
+        public static bool GetKeyDown(Key key)
+        {
+            CheckKeyboard();
+
+            return _keyboard != null && _keyboard[key].wasPressedThisFrame;
+        }
+
+        public static bool GetKey(Key key)
+        {
+            CheckKeyboard();
+
+            return _keyboard != null && _keyboard[key].isPressed;
+        }
+
+        public static bool GetKeyUp(Key key)
+        {
+            CheckKeyboard();
+
+            return _keyboard != null && _keyboard[key].wasReleasedThisFrame;
         }
 
         #endregion

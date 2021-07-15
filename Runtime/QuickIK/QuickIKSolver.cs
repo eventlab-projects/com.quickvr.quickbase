@@ -54,9 +54,10 @@ namespace QuickVR
             }
             set
             {
-                if (_boneLimb == null)
+                if (m_boneLimb == null)
                 {
                     _initialLocalRotationLimb = value.localRotation;
+                    _targetLimb.GetChild(0).rotation = value.rotation;
                 }
 
                 m_boneLimb = value;
@@ -70,7 +71,7 @@ namespace QuickVR
                 if (!m_targetLimb)
                 {
                     m_targetLimb = transform.CreateChild(QuickIKManager.IK_TARGET_PREFIX);
-                    m_targetLimb.CreateChild("__BoneRotation__").rotation = _boneLimb.rotation;
+                    m_targetLimb.CreateChild("__BoneRotation__");
                 }
 
                 return m_targetLimb;
