@@ -1,6 +1,7 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using TMPro;
+
+using UnityEngine.InputSystem;
 
 namespace QuickVR
 {
@@ -33,6 +34,20 @@ namespace QuickVR
             }
         }
 
+        protected Keyboard _keyboard
+        {
+            get
+            {
+                if (m_Keyboard == null)
+                {
+                    m_Keyboard = Keyboard.current;
+                }
+
+                return m_Keyboard;
+            }
+        }
+        protected Keyboard m_Keyboard = null;
+
         #endregion
 
         #region ACTIONS
@@ -44,9 +59,9 @@ namespace QuickVR
 
         #region CONSTANTS
 
-        protected KeyCode[] _keysRow1 = { KeyCode.Q, KeyCode.W, KeyCode.E, KeyCode.R, KeyCode.T, KeyCode.Y, KeyCode.U, KeyCode.I, KeyCode.O, KeyCode.P };
-        protected KeyCode[] _keysRow2 = { KeyCode.A, KeyCode.S, KeyCode.D, KeyCode.F, KeyCode.G, KeyCode.H, KeyCode.J, KeyCode.K, KeyCode.L, KeyCode.Colon };
-        protected KeyCode[] _keysRow3 = { KeyCode.LeftShift, KeyCode.Z, KeyCode.X, KeyCode.C, KeyCode.V, KeyCode.B, KeyCode.N, KeyCode.M, KeyCode.Slash, KeyCode.Period };
+        protected Key[] _keysRow1 = { Key.Q, Key.W, Key.E, Key.R, Key.T, Key.Y, Key.U, Key.I, Key.O, Key.P };
+        protected Key[] _keysRow2 = { Key.A, Key.S, Key.D, Key.F, Key.G, Key.H, Key.J, Key.K, Key.L, Key.Semicolon };
+        protected Key[] _keysRow3 = { Key.LeftShift, Key.Z, Key.X, Key.C, Key.V, Key.B, Key.N, Key.M, Key.Slash, Key.Period };
 
         protected const float KEY_WIDTH = 0.16f;
         protected const float KEY_HEIGHT = 0.16f;
@@ -91,7 +106,7 @@ namespace QuickVR
             Enable(false);
         }
 
-        protected virtual void CreateRowKeys(KeyCode[] rowKeys, int rowNum)
+        protected virtual void CreateRowKeys(Key[] rowKeys, int rowNum)
         {
             for (int i = 0; i < rowKeys.Length; i++)
             {
@@ -99,23 +114,23 @@ namespace QuickVR
                 key.transform.localPosition = Vector3.right * (KEY_WIDTH * 0.5f + KEY_WIDTH * i);
                 key.transform.localPosition += Vector3.down * ((KEY_HEIGHT * 0.5f) + (KEY_HEIGHT * rowNum));
 
-                KeyCode c = rowKeys[i];
+                Key c = rowKeys[i];
                 key._keyCode = c;
-                key._hasShiftedValue = ((int)c >= (int)KeyCode.A) && ((int)c <= (int)KeyCode.Z);
+                key._hasShiftedValue = ((int)c >= (int)Key.A) && ((int)c <= (int)Key.Z);
 
-                if (c == KeyCode.LeftShift)
+                if (c == Key.LeftShift)
                 {
                     key.SetLabel('\u25B2'.ToString());
                 }
-                else if (c == KeyCode.Colon)
+                else if (c == Key.Semicolon)
                 {
                     key.SetLabel(":");
                 }
-                else if (c == KeyCode.Period)
+                else if (c == Key.Period)
                 {
                     key.SetLabel(".");
                 }
-                else if (c == KeyCode.Slash)
+                else if (c == Key.Slash)
                 {
                     key.SetLabel("/");
                 }
@@ -247,16 +262,19 @@ namespace QuickVR
 
         protected virtual void UpdateKeyboardMono()
         {
-            if (Input.GetKeyUp(KeyCode.LeftShift))
+            if (_keyboard != null)
             {
-                ToggleShift();
-            }
-
-            foreach (QuickKeyboardKey k in _keys)
-            {
-                if (k._keyCode != KeyCode.None && Input.GetKeyDown(k._keyCode))
+                if (_keyboard.shiftKey.wasReleasedThisFrame)
                 {
-                    k.DoAction();
+                    ToggleShift();
+                }
+
+                foreach (QuickKeyboardKey k in _keys)
+                {
+                    if (k._keyCode != Key.None && _keyboard[k._keyCode].wasPressedThisFrame)
+                    {
+                        k.DoAction();
+                    }
                 }
             }
         }

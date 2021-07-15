@@ -1,4 +1,6 @@
 ﻿using UnityEngine;
+using UnityEngine.InputSystem;
+
 using TMPro;
 
 namespace QuickVR 
@@ -9,7 +11,7 @@ namespace QuickVR
 
         #region PUBLIC ATTRIBUTES
 
-		public KeyCode _keyCode = KeyCode.None;
+		public Key _keyCode = Key.None;
 		public bool _hasShiftedValue = false;
 
         #endregion
@@ -57,23 +59,23 @@ namespace QuickVR
 
 		public virtual void DoAction()
 		{
-			if (_keyCode == KeyCode.Return)
+			if (_keyCode == Key.Enter)
             {
 				_keyboard.Submit();
             }
-			else if (_keyCode == KeyCode.LeftShift)
+			else if (_keyCode == Key.LeftShift)
             {
 				_keyboard.ToggleShift();
             }
-			else if (_keyCode == KeyCode.Space)
+			else if (_keyCode == Key.Space)
             {
 				_keyboard.AddText(" ");
             }
-			else if (_keyCode == KeyCode.Backspace)
+			else if (_keyCode == Key.Backspace)
             {
 				_keyboard.Backspace();
             }
-			else if (_keyCode == KeyCode.Delete)
+			else if (_keyCode == Key.Delete)
             {
 				_keyboard.SetText("");
             }

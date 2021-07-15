@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.InputSystem;
 
 using System;
 using System.Collections.Generic;
@@ -61,6 +62,20 @@ namespace QuickVR
         protected Ray _ray;
 
         protected LineRenderer _rayRender = null;
+
+        protected Mouse _mouse
+        {
+            get
+            {
+                if (m_Mouse == null)
+                {
+                    m_Mouse = Mouse.current;
+                }
+
+                return m_Mouse;
+            }
+        }
+        protected Mouse m_Mouse = null;
 
         #endregion
 
@@ -179,7 +194,7 @@ namespace QuickVR
         {
             if ( !QuickVRManager.IsXREnabled() && GetVRCursor(Role.Head) == this)
             {
-                return QuickVRCameraController.GetCamera().ScreenPointToRay(Input.mousePosition);
+                return QuickVRCameraController.GetCamera().ScreenPointToRay(new Vector3(_mouse.position.x.ReadValue(), _mouse.position.y.ReadValue()));
             }
 
             return new Ray(transform.position, _CursorTransform.position - transform.position);
