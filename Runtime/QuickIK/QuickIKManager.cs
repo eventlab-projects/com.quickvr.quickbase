@@ -492,10 +492,12 @@ namespace QuickVR {
 
         public override void Calibrate()
         {
-            for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++)
-            {
-                GetIKSolver(ikBone).Calibrate();
-            }
+            //for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++)
+            //{
+            //    GetIKSolver(ikBone).Calibrate();
+            //}
+
+            ResetIKTargets(true);
         }
 
         public static HumanBodyBones ToHumanBodyBones(IKBone ikBone)

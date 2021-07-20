@@ -14,8 +14,6 @@ namespace QuickVR
 
         protected Dictionary<QuickHumanBodyBones, QuickVRNode> _vrNodes = new Dictionary<QuickHumanBodyBones, QuickVRNode>();
 
-        protected Transform _calibrationPoseRoot = null;
-        
         protected bool _isHandsSwaped = false;
 
         protected Vector3 _customUserForward = Vector3.zero;  //A custom user forward provided by the application. 
@@ -28,7 +26,6 @@ namespace QuickVR
 
         protected virtual void Awake()
         {
-            _calibrationPoseRoot = transform.CreateChild("__CalibrationPoseRoot__");
             foreach (QuickHumanBodyBones role in QuickVRNode.GetTypeList())
             {
                 CreateVRNode(role);
@@ -74,7 +71,6 @@ namespace QuickVR
                 n = tNode.GetOrCreateComponent<QuickVRNode>();
             }
 
-            n.SetCalibrationPose(_calibrationPoseRoot.CreateChild(QuickVRNode.CALIBRATION_POSE_PREFIX, false));
             n.SetRole(role);
 
             _vrNodes[role] = n;
@@ -103,11 +99,6 @@ namespace QuickVR
         public virtual void ResetUserForward()
         {
             _customUserForward = Vector3.zero;
-        }
-
-        public virtual Transform GetCalibrationPoseRoot()
-        {
-            return _calibrationPoseRoot;
         }
 
         public virtual QuickVRNode GetVRNodeMain()

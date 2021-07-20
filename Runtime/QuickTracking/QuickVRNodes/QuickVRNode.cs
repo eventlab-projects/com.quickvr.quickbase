@@ -89,15 +89,6 @@ namespace QuickVR
 
         public bool _showModel = false;
 
-        public enum UpdateMode
-        {
-            FromUser,
-            FromCalibrationPose,
-        }
-
-        public UpdateMode _updateModePos = UpdateMode.FromUser;
-        public UpdateMode _updateModeRot = UpdateMode.FromUser;
-
         public InputDevice _inputDevice { get; set; }
 
         #endregion
@@ -112,16 +103,8 @@ namespace QuickVR
 
         protected QuickHumanBodyBones _role = QuickHumanBodyBones.Head;
 
-        protected Transform _calibrationPose = null;
-        
         [SerializeField, ReadOnly]
         protected bool _isTracked = false;
-
-        #endregion
-
-        #region CONSTANTS
-
-        public static string CALIBRATION_POSE_PREFIX = "__CalibrationPose__";
 
         #endregion
 
@@ -184,16 +167,6 @@ namespace QuickVR
             return _isTracked;
         }
 
-        public virtual Transform GetCalibrationPose()
-        {
-            return _calibrationPose;
-        }
-
-        public virtual void SetCalibrationPose(Transform calibrationPose)
-        {
-            _calibrationPose = calibrationPose;
-        }
-
         public virtual Transform GetModel()
         {
             return _model;
@@ -212,30 +185,13 @@ namespace QuickVR
             return _role;
         }
 
-        public virtual void SetRole(QuickHumanBodyBones role, bool resetUpdateMode = true)
+        public virtual void SetRole(QuickHumanBodyBones role)
         {
             _role = role;
-            _calibrationPose.name = CALIBRATION_POSE_PREFIX + name;
 
             LoadVRModel();
 
-            if (resetUpdateMode) ResetUpdateMode();
-
             _trackedObject.Reset();
-        }
-
-        protected virtual void ResetUpdateMode()
-        {
-            if (_role == QuickHumanBodyBones.Hips)
-            {
-                _updateModePos = UpdateMode.FromCalibrationPose;
-                _updateModeRot = UpdateMode.FromCalibrationPose;
-            }
-            else if (_role == QuickHumanBodyBones.LeftFoot || _role == QuickHumanBodyBones.RightFoot)
-            {
-                _updateModePos = UpdateMode.FromCalibrationPose;
-                _updateModeRot = UpdateMode.FromUser;
-            }
         }
 
         public virtual QuickTrackedObject GetTrackedObject()
@@ -258,8 +214,6 @@ namespace QuickVR
             }
 
             //Save the calibration pose
-            _calibrationPose.position = _trackedObject.transform.position;
-            _calibrationPose.rotation = _trackedObject.transform.rotation;
             _trackedObject.Reset();
         }
 

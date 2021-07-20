@@ -17,12 +17,6 @@ namespace QuickVR
             return "pf_Generic_HMD";
         }
 
-        protected override void ResetUpdateMode()
-        {
-            _updateModePos = UpdateMode.FromCalibrationPose;
-            _updateModeRot = UpdateMode.FromUser;
-        }
-
         #endregion
 
         #region UPDATE

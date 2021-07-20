@@ -35,12 +35,6 @@ namespace QuickVR
             return modelName;
         }
 
-        protected override void ResetUpdateMode()
-        {
-            _updateModePos = UpdateMode.FromUser;
-            _updateModeRot = UpdateMode.FromUser;
-        }
-
         protected override bool GetDevicePosition(out Vector3 pos)
         {
             return _inputDevice.TryGetFeatureValue(QuickVRUsages.pointerPosition, out pos) || base.GetDevicePosition(out pos);

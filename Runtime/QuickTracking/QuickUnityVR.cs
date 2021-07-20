@@ -250,10 +250,12 @@ namespace QuickVR {
             //    else if (_displaceWithCamera) return _vrPlayArea.GetVRNode(QuickVRNode.Type.Head).GetTrackedObject().GetDisplacement();
             //}
 
-            QuickVRNode n = _vrPlayArea.GetVRNodeMain();
-            Vector3 offset = n.GetTrackedObject().transform.position - n.GetCalibrationPose().position;
+            //QuickVRNode n = _vrPlayArea.GetVRNodeMain();
+            //Vector3 offset = n.GetTrackedObject().transform.position - n.GetCalibrationPose().position;
 
-            return Vector3.Scale(offset, Vector3.right + Vector3.forward);
+            //return Vector3.Scale(offset, Vector3.right + Vector3.forward);
+
+            return Vector3.zero;
         }
 
         protected virtual float GetRotationOffset()
@@ -363,13 +365,11 @@ namespace QuickVR {
                         if (node.IsTracked())
                         {
                             //Update the QuickVRNode's position
-                            if (node._updateModePos == QuickVRNode.UpdateMode.FromUser) UpdateIKTargetPosFromUser(node, boneID);
-                            else UpdateIKTargetPosFromCalibrationPose(node, boneID);
-
+                            UpdateIKTargetPosFromUser(node, boneID);
+                            
                             //Update the QuickVRNode's rotation
-                            if (node._updateModeRot == QuickVRNode.UpdateMode.FromUser) UpdateIKTargetRotFromUser(node, boneID);
-                            else UpdateIKTargetRotFromCalibrationPose(node, boneID);
-
+                            UpdateIKTargetRotFromUser(node, boneID);
+                            
                             if (boneID == HumanBodyBones.Head)
                             {
                                 QuickIKSolver ikSolverHead = GetIKSolver(IKBone.Head);
@@ -389,17 +389,6 @@ namespace QuickVR {
                             }
                         }
                     }
-                }
-
-                //2) Special case: There is no tracker on the hips. So the hips position is estimated by the movement of the head
-                QuickVRNode nodeHips = _vrPlayArea.GetVRNode(HumanBodyBones.Hips);
-                if (!nodeHips.IsTracked() && _applyHeadPosition)
-                {
-                    QuickVRNode vrNode = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
-                    UpdateIKTargetPosFromCalibrationPose(vrNode, HumanBodyBones.Hips, Vector3.up);
-                    float maxY = GetIKSolver(IKBone.Hips).GetInitialLocalPosTargetLimb().y;
-                    Transform targetHips = GetIKSolver(IKBone.Hips)._targetLimb;
-                    targetHips.localPosition = new Vector3(targetHips.localPosition.x, Mathf.Min(targetHips.localPosition.y, maxY), targetHips.localPosition.z);
                 }
 
                 UpdateVRCursors();
@@ -444,32 +433,32 @@ namespace QuickVR {
             GetIKSolver(boneID)._targetLimb.rotation = node.GetTrackedObject().transform.rotation;
         }
 
-        protected virtual void UpdateIKTargetPosFromCalibrationPose(QuickVRNode node, HumanBodyBones boneID)
-        {
-            UpdateIKTargetPosFromCalibrationPose(node, boneID, Vector3.one);
-        }
+        //protected virtual void UpdateIKTargetPosFromCalibrationPose(QuickVRNode node, HumanBodyBones boneID)
+        //{
+        //    UpdateIKTargetPosFromCalibrationPose(node, boneID, Vector3.one);
+        //}
 
-        protected virtual void UpdateIKTargetPosFromCalibrationPose(QuickVRNode node, HumanBodyBones boneID, Vector3 offsetScale)
-        {
-            Transform t = GetIKSolver(boneID)._targetLimb;
-            Transform calibrationPose = node.GetCalibrationPose();
-            if (!t || !calibrationPose) return;
+        //protected virtual void UpdateIKTargetPosFromCalibrationPose(QuickVRNode node, HumanBodyBones boneID, Vector3 offsetScale)
+        //{
+        //    Transform t = GetIKSolver(boneID)._targetLimb;
+        //    Transform calibrationPose = node.GetCalibrationPose();
+        //    if (!t || !calibrationPose) return;
 
-            t.localPosition = GetIKSolver(boneID).GetInitialLocalPosTargetLimb();
-            Vector3 offset = Vector3.Scale(node.GetTrackedObject().transform.position - calibrationPose.position, offsetScale);
-            t.position += offset;
-        }
+        //    t.localPosition = GetIKSolver(boneID).GetInitialLocalPosTargetLimb();
+        //    Vector3 offset = Vector3.Scale(node.GetTrackedObject().transform.position - calibrationPose.position, offsetScale);
+        //    t.position += offset;
+        //}
 
-        protected virtual void UpdateIKTargetRotFromCalibrationPose(QuickVRNode node, HumanBodyBones boneID)
-        {
-            Transform t = GetIKSolver(boneID)._targetLimb;
-            Transform calibrationPose = node.GetCalibrationPose();
-            if (!t || !calibrationPose) return;
+        //protected virtual void UpdateIKTargetRotFromCalibrationPose(QuickVRNode node, HumanBodyBones boneID)
+        //{
+        //    Transform t = GetIKSolver(boneID)._targetLimb;
+        //    Transform calibrationPose = node.GetCalibrationPose();
+        //    if (!t || !calibrationPose) return;
 
-            t.localRotation = GetIKSolver(boneID).GetInitialLocalRotTargetLimb();
-            Quaternion rotOffset = node.GetTrackedObject().transform.rotation * Quaternion.Inverse(calibrationPose.rotation);
-            t.rotation = rotOffset * t.rotation;
-        }
+        //    t.localRotation = GetIKSolver(boneID).GetInitialLocalRotTargetLimb();
+        //    Quaternion rotOffset = node.GetTrackedObject().transform.rotation * Quaternion.Inverse(calibrationPose.rotation);
+        //    t.rotation = rotOffset * t.rotation;
+        //}
 
         protected virtual void UpdateVRCursors()
         {
