@@ -25,6 +25,7 @@ namespace QuickVR
             QuickIKManager.OnAdd += OnQuickIKManagerAdded;
             QuickIKManager.OnRemove += OnQuickIKManagerRemoved;
 
+            SceneView.beforeSceneGui += CheckIKTargetsDistance;
             SceneView.duringSceneGui += OnSceneGUI;
         }
 
@@ -70,8 +71,6 @@ namespace QuickVR
                             size = 0.01f;
                         }
 
-                        CheckIKTargetsDistance(ikSolver, ikBone <= IKBone.RightFoot);
-
                         Handles.color = new Color(1, 0, 0, 0.5f);
                         if (Handles.Button(ikSolver._targetLimb.position, ikSolver._targetLimb.rotation, size, size, Handles.CubeHandleCap))
                         {
@@ -100,17 +99,36 @@ namespace QuickVR
             Selection.activeTransform = ikTarget;
         }
 
-        private static void CheckIKTargetsDistance(QuickIKSolver ikSolver, bool isIKSolverBody)
+        private static void CheckIKTargetsDistance(SceneView sceneView)
+        {
+            if (!Application.isPlaying)
+            {
+                foreach (QuickIKManager ikManager in _ikManagers)
+                {
+                    if (ikManager && ikManager.gameObject.activeInHierarchy)
+                    {
+                        for (IKBone ikBone = IKBone.LeftHand; ikBone < IKBone.LastBone; ikBone++)
+                        {
+                            QuickIKSolver ikSolver = ikManager.GetIKSolver(ikBone);
+                            float ikTargetHintDistance = ikBone <= IKBone.RightFoot ? QuickIKManager.DEFAULT_TARGET_HINT_DISTANCE : QuickIKManager.DEFAULT_TARGET_HINT_FINGER_DISTANCE;
+                            CheckIKTargetsDistance(ikSolver, ikBone == IKBone.Head, ikTargetHintDistance);
+                        }
+                    }
+                }
+            }
+        }
+
+        private static void CheckIKTargetsDistance(QuickIKSolver ikSolver, bool hasFixedLength, float ikTargetHintDistance)
         {
             //The targer cannot be farther away than the chain length
             Vector3 v = ikSolver._targetLimb.position - ikSolver._boneUpper.position;
-            ikSolver._targetLimb.position = ikSolver._boneUpper.position + v.normalized * Mathf.Min(v.magnitude, ikSolver.GetChainLength());
-            
+            float d = hasFixedLength ? ikSolver.GetChainLength() : Mathf.Min(v.magnitude, ikSolver.GetChainLength());
+            ikSolver._targetLimb.position = ikSolver._boneUpper.position + v.normalized * d;
+
             if (ikSolver._targetHint)
             {
                 v = ikSolver._targetHint.position - ikSolver._boneMid.position;
-                float defaultHintDistance = isIKSolverBody ? QuickIKManager.DEFAULT_TARGET_HINT_DISTANCE : QuickIKManager.DEFAULT_TARGET_HINT_FINGER_DISTANCE;
-                ikSolver._targetHint.position = ikSolver._boneMid.position + v.normalized * Mathf.Min(v.magnitude, defaultHintDistance);
+                ikSolver._targetHint.position = ikSolver._boneMid.position + v.normalized * Mathf.Min(v.magnitude, ikTargetHintDistance);
             }
         }
 

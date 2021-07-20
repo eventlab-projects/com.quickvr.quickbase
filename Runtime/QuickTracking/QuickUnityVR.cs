@@ -342,16 +342,6 @@ namespace QuickVR {
             return null;
         }
 
-        protected override Vector3 GetIKTargetHipsOffset()
-        {
-            if (Application.isPlaying && _applyHeadPosition)
-            {
-                return _vrPlayArea.GetVRNode(HumanBodyBones.Head).transform.position - _animator.GetEyeCenterPosition();
-            }
-
-            return Vector3.zero;
-        }
-
         #endregion
 
         #region UPDATE
@@ -415,7 +405,7 @@ namespace QuickVR {
                 UpdateVRCursors();
                 _footprints.gameObject.SetActive(_useFootprints);
 
-                foreach (bool isLeft in new bool[]{ true, false}) 
+                foreach (bool isLeft in new bool[] { true, false })
                 {
                     foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
                     {

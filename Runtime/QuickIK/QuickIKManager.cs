@@ -462,11 +462,6 @@ namespace QuickVR {
             return _ikTargetsRoot;
         }
 
-        protected virtual Vector3 GetIKTargetHipsOffset()
-        {
-            return Vector3.zero;
-        }
-
         protected virtual Transform GetBoneUpper(HumanBodyBones boneLimbID)
         {
             if (boneLimbID == HumanBodyBones.Hips || boneLimbID == HumanBodyBones.Head)
@@ -642,15 +637,16 @@ namespace QuickVR {
                 }
             }
 
-            //Update the IK for the body controllers
             QuickIKSolver ikSolverHips = GetIKSolver(IKBone.Hips);
-            ikSolverHips.UpdateIK();
-
             QuickIKSolver ikSolverHead = GetIKSolver(IKBone.Head);
-            ikSolverHead.UpdateIK();
-            
-            ikSolverHips._targetLimb.position += GetIKTargetHipsOffset();
+
+            float chainLength = Vector3.Distance(_animator.GetBoneTransform(HumanBodyBones.Hips).position, _animator.GetBoneTransform(HumanBodyBones.Head).position);
+            Vector3 v = (ikSolverHips._targetLimb.position - ikSolverHead._targetLimb.position).normalized;
+            ikSolverHips._targetLimb.position = ikSolverHead._targetLimb.position + v * chainLength;
+
+            //Update the IK for the body controllers
             ikSolverHips.UpdateIK();
+            ikSolverHead.UpdateIK();
 
             GetIKSolver(IKBone.LeftHand).UpdateIK();
             GetIKSolver(IKBone.RightHand).UpdateIK();
