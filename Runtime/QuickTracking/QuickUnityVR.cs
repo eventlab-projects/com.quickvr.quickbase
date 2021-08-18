@@ -393,36 +393,98 @@ namespace QuickVR {
 
                 UpdateVRCursors();
                 _footprints.gameObject.SetActive(_useFootprints);
-
-                foreach (bool isLeft in new bool[] { true, false })
-                {
-                    foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
-                    {
-                        float fLength = _vrPlayArea.GetFingerLength(f, isLeft);
-                        if (fLength > 0)
-                        {
-                            List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, isLeft);
-                            QuickVRNode n0 = _vrPlayArea.GetVRNode(fingerBones[0]);
-                            QuickVRNode n2 = _vrPlayArea.GetVRNode(fingerBones[2]);
-
-                            QuickIKSolver ikSolver = GetIKSolver((HumanBodyBones)fingerBones[2]);
-
-                            if (n0.IsTracked() && n2.IsTracked())
-                            {
-                                float sf = ikSolver.GetChainLength() / fLength;
-                                Vector3 v = sf * (n2.transform.position - n0.transform.position);
-
-                                Transform ikTarget = ikSolver._targetLimb;
-                                ikTarget.position = ikSolver._boneUpper.position + v;
-                            }
-                        }
-                    }
-                }
             }
 
             base.UpdateTracking();
         }
 
+        protected virtual void ApplyFingerRotation(QuickHumanBodyBones boneID, QuickHumanBodyBones boneIDNext)
+        {
+            Transform bone0 = _animator.GetBoneTransform(boneID);
+            Transform bone1 = _animator.GetBoneTransform(boneIDNext);
+            Transform ovrBone0 = _vrPlayArea.GetVRNode(boneID).GetTrackedObject().transform; 
+            Transform ovrBone1 = _vrPlayArea.GetVRNode(boneIDNext).GetTrackedObject().transform;
+
+            if (bone0 && bone1 && ovrBone0 && ovrBone1)
+            {
+                Vector3 currentDir = bone1.position - bone0.position;
+                Vector3 targetDir = ovrBone1.position - ovrBone0.position;
+                float rotAngle = Vector3.Angle(currentDir, targetDir);
+                Vector3 rotAxis = Vector3.Cross(currentDir, targetDir).normalized;
+
+                bone0.Rotate(rotAxis, rotAngle, Space.World);
+            }
+        }
+
+        protected override void UpdateIKFingers()
+        {
+            if (_vrPlayArea)
+            {
+                foreach (bool b in new bool[] { true, false })
+                {
+                    foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
+                    {
+                        List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, b);
+                        List<Quaternion> initialFingerBonesLocalRotations = new List<Quaternion>();
+
+                        for (int i = 0; i < fingerBones.Count - 1; i++)
+                        {
+                            QuickHumanBodyBones fBoneID = fingerBones[i];
+                            initialFingerBonesLocalRotations.Add(_animator.GetBoneTransform(fBoneID).localRotation);
+
+                            if (_animator.GetBoneTransform(fBoneID) && _vrPlayArea.GetVRNode(fBoneID).IsTracked())
+                            {
+                                ApplyFingerRotation(fBoneID, fingerBones[i + 1]);
+                            }
+                        }
+
+                        //At this point the finger is correctly aligned. Set the targets to match this. 
+                        HumanBodyBones boneID = (HumanBodyBones)fingerBones[2];
+                        QuickIKSolver ikSolver = GetIKSolver(boneID);
+                        Transform tBone = _animator.GetBoneTransform(boneID);
+
+                        ikSolver._targetLimb.position = tBone.position;
+                        ikSolver._targetLimb.GetChild(0).rotation = tBone.rotation;
+                        ikSolver._targetHint.position = ikSolver._boneMid.position + (ikSolver._boneMid.position - ikSolver._boneUpper.position) + (ikSolver._boneMid.position - ikSolver._boneLimb.position);
+
+                        //Restore the rotation of the bone fingers
+                        ikSolver._boneUpper.localRotation = initialFingerBonesLocalRotations[0];
+                        ikSolver._boneMid.localRotation = initialFingerBonesLocalRotations[1];
+                        ikSolver._boneLimb.localRotation = initialFingerBonesLocalRotations[2];
+                    }
+                }
+
+                //foreach (bool isLeft in new bool[] { true, false })
+                //{
+                //    foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
+                //    {
+                //        float fLength = _vrPlayArea.GetFingerLength(f, isLeft);
+                //        if (fLength > 0)
+                //        {
+                //            List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, isLeft);
+                //            QuickVRNode n0 = _vrPlayArea.GetVRNode(fingerBones[0]);
+                //            QuickVRNode n1 = _vrPlayArea.GetVRNode(fingerBones[1]);
+                //            QuickVRNode n2 = _vrPlayArea.GetVRNode(fingerBones[2]);
+
+                //            QuickIKSolver ikSolver = GetIKSolver((HumanBodyBones)fingerBones[2]);
+
+                //            if (n0.IsTracked() && n2.IsTracked())
+                //            {
+                //                float sf = ikSolver.GetChainLength() / fLength;
+                //                Vector3 v = sf * (n2.transform.position - n0.transform.position);
+
+                //                ikSolver._targetLimb.position = ikSolver._boneUpper.position + v;
+                //                ikSolver._targetHint.position = ikSolver._boneMid.position + (n1.transform.position - n0.transform.position) + (n1.transform.position - n2.transform.position);
+                //            }
+                //        }
+                //    }
+                //}
+
+            }
+
+            base.UpdateIKFingers();
+        }
+        
         protected virtual void UpdateIKTargetPosFromUser(QuickVRNode node, HumanBodyBones boneID)
         {
             GetIKSolver(boneID)._targetLimb.position = node.GetTrackedObject().transform.position;

@@ -210,6 +210,16 @@ namespace QuickVR {
                 QuickIKSolver ikSolver = CreateIKSolver(ikBone);
                 ikSolver.transform.SetSiblingIndex((int)ikBone);
             }
+
+            for (IKBone ikBone = IKBone.LeftThumbDistal; ikBone <= IKBone.LeftLittleDistal; ikBone++)
+            {
+                GetIKSolver(ikBone)._targetHint.parent = _animator.GetBoneTransform(HumanBodyBones.LeftHand);
+            }
+
+            for (IKBone ikBone = IKBone.RightThumbDistal; ikBone <= IKBone.RightLittleDistal; ikBone++)
+            {
+                GetIKSolver(ikBone)._targetHint.parent = _animator.GetBoneTransform(HumanBodyBones.RightHand);
+            }
         }
 
         protected virtual void OnDestroy()
@@ -658,15 +668,7 @@ namespace QuickVR {
             //Update the IK for the fingers controllers
             UpdateIKTargetsRootHands();
 
-            for (IKBone ikBone = IKBone.LeftThumbDistal; ikBone <= IKBone.LeftLittleDistal; ikBone++)
-            {
-                GetIKSolver(ikBone).UpdateIK();
-            }
-
-            for (IKBone ikBone = IKBone.RightThumbDistal; ikBone <= IKBone.RightLittleDistal; ikBone++)
-            {
-                GetIKSolver(ikBone).UpdateIK();
-            }
+            UpdateIKFingers();
 
             //Update the IK for the face controllers
             Transform head = _animator.GetBoneTransform(HumanBodyBones.Head);
@@ -674,6 +676,19 @@ namespace QuickVR {
             _ikTargetsFace.rotation = GetIKSolver(IKBone.Head)._targetLimb.rotation;
 
             for (IKBone ikBone = IKBone.LeftEye; ikBone <= IKBone.RightEye; ikBone++)
+            {
+                GetIKSolver(ikBone).UpdateIK();
+            }
+        }
+
+        protected virtual void UpdateIKFingers()
+        {
+            for (IKBone ikBone = IKBone.LeftThumbDistal; ikBone <= IKBone.LeftLittleDistal; ikBone++)
+            {
+                GetIKSolver(ikBone).UpdateIK();
+            }
+
+            for (IKBone ikBone = IKBone.RightThumbDistal; ikBone <= IKBone.RightLittleDistal; ikBone++)
             {
                 GetIKSolver(ikBone).UpdateIK();
             }
