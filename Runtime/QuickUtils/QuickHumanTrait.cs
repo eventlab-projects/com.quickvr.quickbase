@@ -593,28 +593,36 @@ namespace QuickVR
             animator.EnforceTPose(QuickHumanBodyBones.LeftUpperArm, QuickHumanBodyBones.LeftLowerArm, -animator.transform.right);
             animator.EnforceTPose(QuickHumanBodyBones.LeftLowerArm, QuickHumanBodyBones.LeftHand, -animator.transform.right);
             animator.EnforceTPose(QuickHumanBodyBones.LeftHand, QuickHumanBodyBones.LeftMiddleProximal, -animator.transform.right);
+            animator.EnforceTPose(QuickHumanBodyBones.LeftHand, QuickHumanBodyBones.LeftLittleProximal, QuickHumanBodyBones.LeftIndexProximal, animator.transform.forward);
 
             //Enforce the TPose of the RightArm
             animator.EnforceTPose(QuickHumanBodyBones.RightUpperArm, QuickHumanBodyBones.RightLowerArm, animator.transform.right);
             animator.EnforceTPose(QuickHumanBodyBones.RightLowerArm, QuickHumanBodyBones.RightHand, animator.transform.right);
             animator.EnforceTPose(QuickHumanBodyBones.RightHand, QuickHumanBodyBones.RightMiddleProximal, animator.transform.right);
+            animator.EnforceTPose(QuickHumanBodyBones.RightHand, QuickHumanBodyBones.RightLittleProximal, QuickHumanBodyBones.RightIndexProximal, animator.transform.forward);
 
             //Enforce the TPose of the Fingers
             animator.EnforceTPoseFingers(true);
             animator.EnforceTPoseFingers(false);
         }
 
-        private static void EnforceTPose(this Animator animator, QuickHumanBodyBones boneUpperID, QuickHumanBodyBones boneLowerID, Vector3 vTarget)
+        private static void EnforceTPose(this Animator animator, QuickHumanBodyBones boneTargetID, QuickHumanBodyBones boneUpperID, QuickHumanBodyBones boneLowerID, Vector3 vTarget)
         {
+            Transform tTarget = animator.GetBoneTransform(boneTargetID);
             Transform tUpper = animator.GetBoneTransform(boneUpperID);
             Transform tLower = animator.GetBoneTransform(boneLowerID);
-            
-            if (tUpper && tLower)
+
+            if (tTarget && tUpper && tLower)
             {
                 Vector3 vUpperArm = tLower.position - tUpper.position;
 
-                tUpper.Rotate(Vector3.Cross(vUpperArm, vTarget).normalized, Vector3.Angle(vUpperArm, vTarget), Space.World);
+                tTarget.Rotate(Vector3.Cross(vUpperArm, vTarget).normalized, Vector3.Angle(vUpperArm, vTarget), Space.World);
             }
+        }
+
+        private static void EnforceTPose(this Animator animator, QuickHumanBodyBones boneUpperID, QuickHumanBodyBones boneLowerID, Vector3 vTarget)
+        {
+            animator.EnforceTPose(boneUpperID, boneUpperID, boneLowerID, vTarget);
         }
 
         private static void EnforceTPoseFingers(this Animator animator, bool isLeft)
