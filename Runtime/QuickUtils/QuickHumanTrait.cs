@@ -604,6 +604,14 @@ namespace QuickVR
             //Enforce the TPose of the Fingers
             animator.EnforceTPoseFingers(true);
             animator.EnforceTPoseFingers(false);
+
+            //Enforce the TPose of the LeftLeg
+            animator.EnforceTPose(QuickHumanBodyBones.LeftUpperLeg, QuickHumanBodyBones.LeftLowerLeg, -animator.transform.up);
+            animator.EnforceTPose(QuickHumanBodyBones.LeftLowerLeg, QuickHumanBodyBones.LeftFoot, -animator.transform.up);
+
+            //Enforce the TPose of the RightLeg
+            animator.EnforceTPose(QuickHumanBodyBones.RightUpperLeg, QuickHumanBodyBones.RightLowerLeg, -animator.transform.up);
+            animator.EnforceTPose(QuickHumanBodyBones.RightLowerLeg, QuickHumanBodyBones.RightFoot, -animator.transform.up);
         }
 
         private static void EnforceTPose(this Animator animator, QuickHumanBodyBones boneTargetID, QuickHumanBodyBones boneUpperID, QuickHumanBodyBones boneLowerID, Vector3 vTarget)
