@@ -226,7 +226,7 @@ namespace QuickVR
 
         public static string GetMuscleName(int muscleID)
         {
-            return GetMuscleNames()[muscleID];
+            return muscleID >= 0? GetMuscleNames()[muscleID] : "Undefined";
         }
 
         public static int GetRequiredBoneCount()
@@ -586,66 +586,290 @@ namespace QuickVR
 
         public static void EnforceTPose(this Animator animator)
         {
+            HumanPose pose = new HumanPose();
+            QuickHumanPoseHandler.GetHumanPose(animator, ref pose);
+
+            pose.bodyPosition = new Vector3(0.0023505474f, 0.97386265f, -0.015300978f);
+            pose.bodyRotation = Quaternion.identity;
+
+            EnforceTPoseSpine(ref pose);
+            EnforceTPoseLegs(ref pose);
+            EnforceTPoseArms(ref pose);
+            EnforceTPoseFingers(ref pose);
+            EnforceTPoseFace(ref pose);
+
+            QuickHumanPoseHandler.SetHumanPose(animator, ref pose);
+            
+            //RuntimeAnimatorController tmp = animator.runtimeAnimatorController;
+            //animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/TPose");
+            //animator.Update(0);
+            //animator.runtimeAnimatorController = tmp;
+
             //Enforce the TPose of the Spine
             //animator.EnforceTPose(QuickHumanBodyBones.Hips, QuickHumanBodyBones.Head, animator.transform.up);
 
-            //Enforce the TPose of the LeftArm
-            animator.EnforceTPose(QuickHumanBodyBones.LeftUpperArm, QuickHumanBodyBones.LeftLowerArm, -animator.transform.right);
-            animator.EnforceTPose(QuickHumanBodyBones.LeftLowerArm, QuickHumanBodyBones.LeftHand, -animator.transform.right);
-            animator.EnforceTPose(QuickHumanBodyBones.LeftHand, QuickHumanBodyBones.LeftMiddleProximal, -animator.transform.right);
-            animator.EnforceTPose(QuickHumanBodyBones.LeftHand, QuickHumanBodyBones.LeftLittleProximal, QuickHumanBodyBones.LeftIndexProximal, animator.transform.forward);
+            ////Enforce the TPose of the LeftArm
+            //animator.EnforceTPose(QuickHumanBodyBones.LeftUpperArm, QuickHumanBodyBones.LeftLowerArm, -animator.transform.right);
+            //animator.EnforceTPose(QuickHumanBodyBones.LeftLowerArm, QuickHumanBodyBones.LeftHand, -animator.transform.right);
 
-            //Enforce the TPose of the RightArm
-            animator.EnforceTPose(QuickHumanBodyBones.RightUpperArm, QuickHumanBodyBones.RightLowerArm, animator.transform.right);
-            animator.EnforceTPose(QuickHumanBodyBones.RightLowerArm, QuickHumanBodyBones.RightHand, animator.transform.right);
-            animator.EnforceTPose(QuickHumanBodyBones.RightHand, QuickHumanBodyBones.RightMiddleProximal, animator.transform.right);
-            animator.EnforceTPose(QuickHumanBodyBones.RightHand, QuickHumanBodyBones.RightLittleProximal, QuickHumanBodyBones.RightIndexProximal, animator.transform.forward);
+            ////Enforce the TPose of the RightArm
+            //animator.EnforceTPose(QuickHumanBodyBones.RightUpperArm, QuickHumanBodyBones.RightLowerArm, animator.transform.right);
+            //animator.EnforceTPose(QuickHumanBodyBones.RightLowerArm, QuickHumanBodyBones.RightHand, animator.transform.right);
 
-            //Enforce the TPose of the Fingers
-            animator.EnforceTPoseFingers(true);
-            animator.EnforceTPoseFingers(false);
+            ////Enforce the TPose of the Hands
+            //animator.EnforceTPoseHand(true);
+            //animator.EnforceTPoseHand(false);
 
-            //Enforce the TPose of the LeftLeg
-            animator.EnforceTPose(QuickHumanBodyBones.LeftUpperLeg, QuickHumanBodyBones.LeftLowerLeg, -animator.transform.up);
-            animator.EnforceTPose(QuickHumanBodyBones.LeftLowerLeg, QuickHumanBodyBones.LeftFoot, -animator.transform.up);
+            ////Enforce the TPose of the Fingers
+            //animator.EnforceTPoseFingers(true);
+            //animator.EnforceTPoseFingers(false);
 
-            //Enforce the TPose of the RightLeg
-            animator.EnforceTPose(QuickHumanBodyBones.RightUpperLeg, QuickHumanBodyBones.RightLowerLeg, -animator.transform.up);
-            animator.EnforceTPose(QuickHumanBodyBones.RightLowerLeg, QuickHumanBodyBones.RightFoot, -animator.transform.up);
+            ////Enforce the TPose of the LeftLeg
+            //animator.EnforceTPose(QuickHumanBodyBones.LeftUpperLeg, QuickHumanBodyBones.LeftLowerLeg, -animator.transform.up);
+            //animator.EnforceTPose(QuickHumanBodyBones.LeftLowerLeg, QuickHumanBodyBones.LeftFoot, -animator.transform.up);
+
+            ////Enforce the TPose of the RightLeg
+            //animator.EnforceTPose(QuickHumanBodyBones.RightUpperLeg, QuickHumanBodyBones.RightLowerLeg, -animator.transform.up);
+            //animator.EnforceTPose(QuickHumanBodyBones.RightLowerLeg, QuickHumanBodyBones.RightFoot, -animator.transform.up);
         }
 
-        private static void EnforceTPose(this Animator animator, QuickHumanBodyBones boneTargetID, QuickHumanBodyBones boneUpperID, QuickHumanBodyBones boneLowerID, Vector3 vTarget)
+        private static void EnforceTPoseSpine(ref HumanPose pose)
         {
-            Transform tTarget = animator.GetBoneTransform(boneTargetID);
-            Transform tUpper = animator.GetBoneTransform(boneUpperID);
-            Transform tLower = animator.GetBoneTransform(boneLowerID);
-
-            if (tTarget && tUpper && tLower)
+            for (HumanBodyBones boneID = HumanBodyBones.Spine; boneID <= HumanBodyBones.Head; boneID++)
             {
-                Vector3 vUpperArm = tLower.position - tUpper.position;
-
-                tTarget.Rotate(Vector3.Cross(vUpperArm, vTarget).normalized, Vector3.Angle(vUpperArm, vTarget), Space.World);
-            }
-        }
-
-        private static void EnforceTPose(this Animator animator, QuickHumanBodyBones boneUpperID, QuickHumanBodyBones boneLowerID, Vector3 vTarget)
-        {
-            animator.EnforceTPose(boneUpperID, boneUpperID, boneLowerID, vTarget);
-        }
-
-        private static void EnforceTPoseFingers(this Animator animator, bool isLeft)
-        {
-            foreach (QuickHumanFingers f in GetHumanFingers())
-            {
-                List<QuickHumanBodyBones> bones = GetBonesFromFinger(f, isLeft);
-                for (int i = 0; i < bones.Count - 1; i++)
+                for (int i = 0; i < 3; i++)
                 {
-                    Transform tBoneStart = animator.GetBoneTransform(bones[i]);
-                    Transform tBoneEnd = animator.GetBoneTransform(bones[i + 1]);
-                    EnforceTPose(animator, bones[i], bones[i + 1], Vector3.ProjectOnPlane(tBoneEnd.position - tBoneStart.position, animator.transform.up));
+                    int muscleID = GetMuscleFromBone(boneID, i);
+                    if (muscleID >= 0)
+                    {
+                        pose.muscles[muscleID] = 0;
+                    }
                 }
             }
         }
+
+        private static void EnforceTPoseLegs(ref HumanPose pose)
+        {
+            //Upper Leg
+            foreach (HumanBodyBones boneID in new HumanBodyBones[] { HumanBodyBones.LeftUpperLeg, HumanBodyBones.RightUpperLeg })
+            {
+                pose.muscles[GetMuscleFromBone(boneID, 0)] = 0;
+                pose.muscles[GetMuscleFromBone(boneID, 1)] = 0;
+                pose.muscles[GetMuscleFromBone(boneID, 2)] = 0.56844866f;
+            }
+
+            //Lower Leg
+            foreach (HumanBodyBones boneID in new HumanBodyBones[] { HumanBodyBones.LeftLowerLeg, HumanBodyBones.RightLowerLeg })
+            {
+                pose.muscles[GetMuscleFromBone(boneID, 0)] = 0;
+                pose.muscles[GetMuscleFromBone(boneID, 2)] = 0.95906335f;
+            }
+
+            //Foot
+            foreach (HumanBodyBones boneID in new HumanBodyBones[] { HumanBodyBones.LeftFoot, HumanBodyBones.RightFoot })
+            {
+                pose.muscles[GetMuscleFromBone(boneID, 1)] = 0;
+                pose.muscles[GetMuscleFromBone(boneID, 2)] = -0.03370474f;
+            }
+
+            //Toes
+            foreach (HumanBodyBones boneID in new HumanBodyBones[] { HumanBodyBones.LeftFoot, HumanBodyBones.RightFoot })
+            {
+                pose.muscles[GetMuscleFromBone(boneID, 2)] = 0;
+            }
+        }
+
+        private static void EnforceTPoseArms(ref HumanPose pose)
+        {
+            //Shoulder
+            foreach (HumanBodyBones boneID in new HumanBodyBones[] { HumanBodyBones.LeftShoulder, HumanBodyBones.RightShoulder})
+            {
+                pose.muscles[GetMuscleFromBone(boneID, 1)] = 0;
+                pose.muscles[GetMuscleFromBone(boneID, 2)] = 0;
+            }
+
+            //Upper Arm
+            foreach (HumanBodyBones boneID in new HumanBodyBones[] { HumanBodyBones.LeftUpperArm, HumanBodyBones.RightUpperArm })
+            {
+                pose.muscles[GetMuscleFromBone(boneID, 0)] = 0;
+                pose.muscles[GetMuscleFromBone(boneID, 1)] = 0.3f;
+                pose.muscles[GetMuscleFromBone(boneID, 2)] = 0.4f;
+            }
+
+            //Lower Arm
+            foreach (HumanBodyBones boneID in new HumanBodyBones[] { HumanBodyBones.LeftLowerArm, HumanBodyBones.RightLowerArm })
+            {
+                pose.muscles[GetMuscleFromBone(boneID, 0)] = -0.06501173f;
+                pose.muscles[GetMuscleFromBone(boneID, 2)] = 1;
+            }
+
+            //Hand
+            foreach (HumanBodyBones boneID in new HumanBodyBones[] { HumanBodyBones.LeftHand, HumanBodyBones.RightHand })
+            {
+                pose.muscles[GetMuscleFromBone(boneID, 1)] = 0.058751374f;
+                pose.muscles[GetMuscleFromBone(boneID, 2)] = -0.042013716f;
+            }
+        }
+
+        private static void EnforceTPoseFingers(ref HumanPose pose)
+        {
+            //Thumb Proximal
+            foreach (HumanBodyBones boneID in new HumanBodyBones[] { HumanBodyBones.LeftThumbProximal, HumanBodyBones.RightThumbProximal })
+            {
+                pose.muscles[GetMuscleFromBone(boneID, 1)] = -0.10919621f;
+                pose.muscles[GetMuscleFromBone(boneID, 2)] = -1.2577168f;
+            }
+
+            //Thumb Intermediate
+            foreach (HumanBodyBones boneID in new HumanBodyBones[] { HumanBodyBones.LeftThumbIntermediate, HumanBodyBones.RightThumbIntermediate })
+            {
+                pose.muscles[GetMuscleFromBone(boneID, 2)] = 0.7628888f;
+            }
+
+            //Thumb Distal
+            foreach (HumanBodyBones boneID in new HumanBodyBones[] { HumanBodyBones.LeftThumbDistal, HumanBodyBones.RightThumbDistal })
+            {
+                pose.muscles[GetMuscleFromBone(boneID, 2)] = 0.7313669f;
+            }
+
+            //Index to Little Stretched
+            foreach (HumanBodyBones boneID in new HumanBodyBones[]
+            {
+                HumanBodyBones.LeftIndexProximal,
+                HumanBodyBones.LeftMiddleProximal,
+                HumanBodyBones.LeftRingProximal, 
+                HumanBodyBones.LeftLittleProximal,
+
+                HumanBodyBones.RightIndexProximal, 
+                HumanBodyBones.RightMiddleProximal,
+                HumanBodyBones.RightRingProximal, 
+                HumanBodyBones.RightLittleProximal
+            })
+            {
+                pose.muscles[GetMuscleFromBone(boneID, 2)] = 0.735f;
+            }
+
+            //Index to Little Intermediate and Distal phalanges
+            foreach (HumanBodyBones boneID in new HumanBodyBones[] 
+            { 
+                HumanBodyBones.LeftIndexIntermediate, HumanBodyBones.LeftIndexDistal,
+                HumanBodyBones.LeftMiddleIntermediate, HumanBodyBones.LeftMiddleDistal,
+                HumanBodyBones.LeftRingIntermediate, HumanBodyBones.LeftRingDistal,
+                HumanBodyBones.LeftLittleIntermediate, HumanBodyBones.LeftLittleDistal,
+
+                HumanBodyBones.RightIndexIntermediate, HumanBodyBones.RightIndexDistal,
+                HumanBodyBones.RightMiddleIntermediate, HumanBodyBones.RightMiddleDistal,
+                HumanBodyBones.RightRingIntermediate, HumanBodyBones.RightRingDistal,
+                HumanBodyBones.RightLittleIntermediate, HumanBodyBones.RightLittleDistal
+            })
+            {
+                pose.muscles[GetMuscleFromBone(boneID, 2)] = 0.8116841f;
+            }
+
+            //Index Spread
+            foreach (HumanBodyBones boneID in new HumanBodyBones[] { HumanBodyBones.LeftIndexProximal, HumanBodyBones.RightIndexProximal })
+            {
+                pose.muscles[GetMuscleFromBone(boneID, 1)] = -0.32665434f;
+            }
+
+            //Middle Spread
+            foreach (HumanBodyBones boneID in new HumanBodyBones[] { HumanBodyBones.LeftMiddleProximal, HumanBodyBones.RightMiddleProximal })
+            {
+                pose.muscles[GetMuscleFromBone(boneID, 1)] = -0.26266485f;
+            }
+
+            //Ring Spread
+            foreach (HumanBodyBones boneID in new HumanBodyBones[] { HumanBodyBones.LeftRingProximal, HumanBodyBones.RightRingProximal })
+            {
+                pose.muscles[GetMuscleFromBone(boneID, 1)] = -0.9577875f;
+            }
+
+            //Little Spread
+            foreach (HumanBodyBones boneID in new HumanBodyBones[] { HumanBodyBones.LeftLittleProximal, HumanBodyBones.RightLittleProximal })
+            {
+                pose.muscles[GetMuscleFromBone(boneID, 1)] = -0.5872235f;
+            }
+        }
+
+        private static void EnforceTPoseFace(ref HumanPose pose)
+        {
+            //Jaw
+            pose.muscles[GetMuscleFromBone(HumanBodyBones.Jaw, 1)] = 0;
+            pose.muscles[GetMuscleFromBone(HumanBodyBones.Jaw, 2)] = 1;
+
+            //Eyes
+            foreach (HumanBodyBones boneID in new HumanBodyBones[] { HumanBodyBones.LeftEye, HumanBodyBones.RightEye })
+            {
+                for (int i = 0; i < 3; i++)
+                {
+                    int muscleID = GetMuscleFromBone(boneID, i);
+                    if (muscleID >= 0)
+                    {
+                        pose.muscles[muscleID] = 0;
+                    }
+                }
+            }
+        }
+
+        //private static void EnforceTPose(this Animator animator, QuickHumanBodyBones boneTargetID, QuickHumanBodyBones boneUpperID, QuickHumanBodyBones boneLowerID, Vector3 vTarget)
+        //{
+        //    Transform tTarget = animator.GetBoneTransform(boneTargetID);
+        //    Transform tUpper = animator.GetBoneTransform(boneUpperID);
+        //    Transform tLower = animator.GetBoneTransform(boneLowerID);
+
+        //    if (tTarget && tUpper && tLower)
+        //    {
+        //        Vector3 vUpperArm = tLower.position - tUpper.position;
+
+        //        tTarget.Rotate(Vector3.Cross(vUpperArm, vTarget).normalized, Vector3.Angle(vUpperArm, vTarget), Space.World);
+        //    }
+        //}
+
+        //private static void EnforceTPose(this Animator animator, QuickHumanBodyBones boneUpperID, QuickHumanBodyBones boneLowerID, Vector3 vTarget)
+        //{
+        //    animator.EnforceTPose(boneUpperID, boneUpperID, boneLowerID, vTarget);
+        //}
+
+        //private static void EnforceTPoseHand(this Animator animator, bool isLeft)
+        //{
+        //    Transform tHand = animator.GetBoneTransform(isLeft? HumanBodyBones.LeftHand : HumanBodyBones.RightHand);
+        //    Transform tIndex = animator.GetBoneTransform(isLeft ? HumanBodyBones.LeftIndexProximal : HumanBodyBones.RightIndexProximal);
+        //    Transform tMiddle = animator.GetBoneTransform(isLeft ? HumanBodyBones.LeftMiddleProximal : HumanBodyBones.RightMiddleProximal);
+        //    Transform tLittle = animator.GetBoneTransform(isLeft ? HumanBodyBones.LeftLittleProximal : HumanBodyBones.RightLittleProximal);
+
+        //    Transform tPose = tHand.CreateChild("__TPose__");
+        //    Vector3 v = tIndex.position - tHand.position;
+        //    Vector3 w = tLittle.position - tHand.position;
+        //    Vector3 n = Vector3.Cross(v, w);
+            
+        //    if (isLeft)
+        //    {
+        //        n *= -1;
+        //    }
+            
+        //    tPose.LookAt(tMiddle.position, n);
+
+        //    //Align the forward vector
+        //    float sign = isLeft ? -1 : 1;
+        //    tHand.Rotate(Vector3.Cross(tPose.forward, sign * animator.transform.right), Vector3.Angle(tPose.forward, sign * animator.transform.right), Space.World);
+
+        //    //Align the up vector
+        //    tHand.Rotate(Vector3.Cross(tPose.up, animator.transform.up), Vector3.Angle(tPose.up, animator.transform.up), Space.World);
+        //}
+
+        //private static void EnforceTPoseFingers(this Animator animator, bool isLeft)
+        //{
+        //    foreach (QuickHumanFingers f in GetHumanFingers())
+        //    {
+        //        List<QuickHumanBodyBones> bones = GetBonesFromFinger(f, isLeft);
+        //        for (int i = 0; i < bones.Count - 1; i++)
+        //        {
+        //            Transform tBoneStart = animator.GetBoneTransform(bones[i]);
+        //            Transform tBoneEnd = animator.GetBoneTransform(bones[i + 1]);
+        //            EnforceTPose(animator, bones[i], bones[i + 1], Vector3.ProjectOnPlane(tBoneEnd.position - tBoneStart.position, animator.transform.up));
+        //        }
+        //    }
+        //}
 
         //https://forum.unity.com/threads/recording-humanoid-animations-with-foot-ik.545015/
         public static void GetIKGoalFromBodyPose(this Animator animator, AvatarIKGoal avatarIKGoal, Vector3 bodyPosition, Quaternion bodyRotation, out Vector3 goalPos, out Quaternion goalRot, float humanScale = 1)
