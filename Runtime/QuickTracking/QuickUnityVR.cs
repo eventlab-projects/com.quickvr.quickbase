@@ -328,7 +328,12 @@ namespace QuickVR {
 
         #region UPDATE
 
-        public override void UpdateTracking()
+        protected override void LateUpdate()
+        {
+            
+        }
+
+        public virtual void UpdateIKTargets()
         {
             if (Application.isPlaying)
             {
@@ -374,8 +379,6 @@ namespace QuickVR {
                 UpdateVRCursors();
                 _footprints.gameObject.SetActive(_useFootprints);
             }
-
-            base.UpdateTracking();
         }
 
         protected virtual void ApplyFingerRotation(QuickHumanBodyBones boneID, QuickHumanBodyBones boneIDNext)

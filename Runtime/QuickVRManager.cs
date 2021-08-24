@@ -61,6 +61,9 @@ namespace QuickVR
         public static event QuickVRManagerAction OnPreUpdateVRNodes;
         public static event QuickVRManagerAction OnPostUpdateVRNodes;
 
+        public static event QuickVRManagerAction OnPreUpdateIKTargets;
+        public static event QuickVRManagerAction OnPostUpdateIKTargets;
+
         public static event QuickVRManagerAction OnPreUpdateTracking;
         public static event QuickVRManagerAction OnPostUpdateTracking;
 
@@ -286,9 +289,17 @@ namespace QuickVR
             _vrPlayArea.UpdateVRNodes();
             if (OnPostUpdateVRNodes != null) OnPostUpdateVRNodes();
 
+            //Update the IKTargets with the tracking information
+            if (OnPreUpdateIKTargets != null) OnPreUpdateIKTargets();
+            if (_unityVR)
+            {
+                _unityVR.UpdateIKTargets();
+            }
+            if (OnPostUpdateIKTargets != null) OnPostUpdateIKTargets();
+            
             //Apply the tracking of the VRNodes
             if (OnPreUpdateTracking != null) OnPreUpdateTracking();
-            if (_unityVR && _unityVR.enabled)
+            if (_unityVR)
             {
                 _unityVR.UpdateTracking();
             }

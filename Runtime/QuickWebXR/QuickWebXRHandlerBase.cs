@@ -38,12 +38,12 @@ namespace QuickVR
 
         protected virtual void OnEnable()
         {
-            QuickVRManager.OnPreUpdateTracking += UpdateVRNodeRequest;
+            QuickVRManager.OnPostUpdateVRNodes += UpdateVRNodeRequest;
         }
 
         protected virtual void OnDisable()
         {
-            QuickVRManager.OnPreUpdateTracking -= UpdateVRNodeRequest;
+            QuickVRManager.OnPostUpdateVRNodes -= UpdateVRNodeRequest;
         }
 
         #endregion

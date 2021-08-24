@@ -60,7 +60,10 @@ namespace QuickVR
 
         protected virtual void LateUpdate()
         {
-            _ikManager.UpdateTracking();
+            if (!Application.isPlaying)
+            {
+                _ikManager.UpdateTracking();
+            }
         }
 
         #endregion
