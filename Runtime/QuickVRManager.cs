@@ -179,7 +179,9 @@ namespace QuickVR
                 _animatorTarget.transform.parent = null;
             }
             _animatorTarget = animator;
-            
+
+            animator.CreateMissingBones();
+
             QuickCameraZNearDefiner zNearDefiner = _animatorTarget.GetComponent<QuickCameraZNearDefiner>();
             if (zNearDefiner)
             {

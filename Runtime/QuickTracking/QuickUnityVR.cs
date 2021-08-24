@@ -117,57 +117,42 @@ namespace QuickVR {
         {
             base.OnEnable();
 
-            if (Application.isPlaying)
-            {
-                _vrPlayArea.GetVRNode(HumanBodyBones.Head).OnCalibrateVRNode += OnCalibrateVRNodeHead;
-                _vrPlayArea.GetVRNode(HumanBodyBones.Hips).OnCalibrateVRNode += OnCalibrateVRNodeHips;
-                _vrPlayArea.GetVRNode(HumanBodyBones.LeftHand).OnCalibrateVRNode += OnCalibrateVRNodeLeftHand;
-                _vrPlayArea.GetVRNode(HumanBodyBones.RightHand).OnCalibrateVRNode += OnCalibrateVRNodeRightHand;
-                _vrPlayArea.GetVRNode(HumanBodyBones.LeftFoot).OnCalibrateVRNode += OnCalibrateVRNodeFoot;
-                _vrPlayArea.GetVRNode(HumanBodyBones.RightFoot).OnCalibrateVRNode += OnCalibrateVRNodeFoot;
-            }
+            _vrPlayArea.GetVRNode(HumanBodyBones.Head).OnCalibrateVRNode += OnCalibrateVRNodeHead;
+            _vrPlayArea.GetVRNode(HumanBodyBones.Hips).OnCalibrateVRNode += OnCalibrateVRNodeHips;
+            _vrPlayArea.GetVRNode(HumanBodyBones.LeftHand).OnCalibrateVRNode += OnCalibrateVRNodeLeftHand;
+            _vrPlayArea.GetVRNode(HumanBodyBones.RightHand).OnCalibrateVRNode += OnCalibrateVRNodeRightHand;
+            _vrPlayArea.GetVRNode(HumanBodyBones.LeftFoot).OnCalibrateVRNode += OnCalibrateVRNodeFoot;
+            _vrPlayArea.GetVRNode(HumanBodyBones.RightFoot).OnCalibrateVRNode += OnCalibrateVRNodeFoot;
         }
 
-        protected override void OnDisable()
+        protected virtual void OnDisable()
         {
-            base.OnDisable();
-
-            if (Application.isPlaying)
-            {
-                _vrPlayArea.GetVRNode(HumanBodyBones.Head).OnCalibrateVRNode -= OnCalibrateVRNodeHead;
-                _vrPlayArea.GetVRNode(HumanBodyBones.Hips).OnCalibrateVRNode -= OnCalibrateVRNodeHips;
-                _vrPlayArea.GetVRNode(HumanBodyBones.LeftHand).OnCalibrateVRNode -= OnCalibrateVRNodeLeftHand;
-                _vrPlayArea.GetVRNode(HumanBodyBones.RightHand).OnCalibrateVRNode -= OnCalibrateVRNodeRightHand;
-                _vrPlayArea.GetVRNode(HumanBodyBones.LeftFoot).OnCalibrateVRNode -= OnCalibrateVRNodeFoot;
-                _vrPlayArea.GetVRNode(HumanBodyBones.RightFoot).OnCalibrateVRNode -= OnCalibrateVRNodeFoot;
-            }
+            _vrPlayArea.GetVRNode(HumanBodyBones.Head).OnCalibrateVRNode -= OnCalibrateVRNodeHead;
+            _vrPlayArea.GetVRNode(HumanBodyBones.Hips).OnCalibrateVRNode -= OnCalibrateVRNodeHips;
+            _vrPlayArea.GetVRNode(HumanBodyBones.LeftHand).OnCalibrateVRNode -= OnCalibrateVRNodeLeftHand;
+            _vrPlayArea.GetVRNode(HumanBodyBones.RightHand).OnCalibrateVRNode -= OnCalibrateVRNodeRightHand;
+            _vrPlayArea.GetVRNode(HumanBodyBones.LeftFoot).OnCalibrateVRNode -= OnCalibrateVRNodeFoot;
+            _vrPlayArea.GetVRNode(HumanBodyBones.RightFoot).OnCalibrateVRNode -= OnCalibrateVRNodeFoot;
         }
 
         protected override void Awake()
         {
             base.Awake();
 
-            if (Application.isPlaying)
-            {
-                _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
-                _vrPlayArea.transform.parent = transform;
+            _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
+            _vrPlayArea.transform.parent = transform;
 
-                CreateVRHands();
-                CreateVRCursors();
-                CreateFootPrints();
-            }
+            CreateVRHands();
+            CreateVRCursors();
+            CreateFootPrints();
         }
 
         protected virtual void Start()
         {
             _headOffset = Quaternion.Inverse(transform.rotation) * (_animator.GetBoneTransform(HumanBodyBones.Head).position - _animator.GetEyeCenterPosition());
-
-            if (Application.isPlaying)
-            {
-                CheckHandtrackingMode();
-
-                _vrManager.AddUnityVRTrackingSystem(this);
-            }
+            
+            CheckHandtrackingMode();
+            _vrManager.AddUnityVRTrackingSystem(this);
         }
 
         protected virtual void CreateFootPrints()
@@ -282,11 +267,6 @@ namespace QuickVR {
             QuickVRNode node = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
             Vector3 offset = GetIKSolver(IKBone.Head)._targetLimb.position - node.GetTrackedObject().transform.position;
             _vrPlayArea.transform.position += offset;
-
-            //Update eyeCenter
-            Transform tEyeCenter = _animator.GetEyeCenter();
-            tEyeCenter.rotation = transform.rotation;
-            tEyeCenter.position = Vector3.Lerp(_animator.GetEye(true).position, _animator.GetEye(false).position, 0.5f);
         }
 
         protected virtual void OnCalibrateVRNodeHead(QuickVRNode node)

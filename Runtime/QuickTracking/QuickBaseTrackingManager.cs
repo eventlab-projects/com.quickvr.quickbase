@@ -16,8 +16,6 @@ namespace QuickVR {
                 if (!m_animator)
                 {
                     m_animator = GetComponent<Animator>();
-                    m_animator.CreateMissingBones();
-                    m_animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
                 }
 
                 return m_animator;
@@ -44,7 +42,7 @@ namespace QuickVR {
 
         protected virtual void Awake()
         {
-            _animator.CreateMissingBones();
+            _animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
         }
 
         protected virtual void OnEnable()

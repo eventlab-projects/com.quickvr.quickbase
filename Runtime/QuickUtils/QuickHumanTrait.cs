@@ -485,14 +485,18 @@ namespace QuickVR
 
         public static void CreateMissingBones(this Animator animator)
         {
+            animator.EnforceTPose();
+
             animator.CreateEyes();
             animator.CreateFingerTips();
         }
 
         private static void CreateEyes(this Animator animator)
         {
-            CreateEye(animator, true);
-            CreateEye(animator, false);
+            animator.CreateEye(true);
+            animator.CreateEye(false);
+
+            animator.CreateEyeCenter();
         }
 
         private static void CreateEye(this Animator animator, bool eyeLeft)
@@ -558,18 +562,20 @@ namespace QuickVR
             return eye;
         }
 
-        public static Transform GetEyeCenter(this Animator animator)
+        private static Transform CreateEyeCenter(this Animator animator)
         {
             Transform tHead = animator.GetBoneTransform(HumanBodyBones.Head);
-            Transform tResult = tHead.Find("__EyeCenter__");
-            if (!tResult)
-            {
-                tResult = tHead.CreateChild("__EyeCenter__");
-                tResult.rotation = animator.transform.rotation;
-                tResult.position = Vector3.Lerp(animator.GetEye(true).position, animator.GetEye(false).position, 0.5f);
-            }
+            Transform tResult = tHead.CreateChild("__EyeCenter__");
+            
+            tResult.rotation = animator.transform.rotation;
+            tResult.position = Vector3.Lerp(animator.GetEye(true).position, animator.GetEye(false).position, 0.5f);
 
             return tResult;
+        }
+
+        public static Transform GetEyeCenter(this Animator animator)
+        {
+            return animator.GetBoneTransform(HumanBodyBones.Head).Find("__EyeCenter__");
         }
 
         public static Vector3 GetEyeCenterPosition(this Animator animator)
@@ -586,8 +592,10 @@ namespace QuickVR
 
         public static void EnforceTPose(this Animator animator)
         {
+            HumanPoseHandler poseHandler = new HumanPoseHandler(animator.avatar, animator.transform);
+
             HumanPose pose = new HumanPose();
-            QuickHumanPoseHandler.GetHumanPose(animator, ref pose);
+            poseHandler.GetHumanPose(ref pose);
 
             pose.bodyPosition = new Vector3(0.0023505474f, 0.97386265f, -0.015300978f);
             pose.bodyRotation = Quaternion.identity;
@@ -598,8 +606,8 @@ namespace QuickVR
             EnforceTPoseFingers(ref pose);
             EnforceTPoseFace(ref pose);
 
-            QuickHumanPoseHandler.SetHumanPose(animator, ref pose);
-            
+            poseHandler.SetHumanPose(ref pose);
+
             //RuntimeAnimatorController tmp = animator.runtimeAnimatorController;
             //animator.runtimeAnimatorController = Resources.Load<RuntimeAnimatorController>("Animations/TPose");
             //animator.Update(0);

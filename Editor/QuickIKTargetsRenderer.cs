@@ -17,19 +17,19 @@ namespace QuickVR
             public IKBone _ikBone = IKBone.LastBone;
         }
 
-        private static List<QuickIKManager> _ikManagers = new List<QuickIKManager>();
+        private static List<QuickIKManagerExecuteInEditMode> _ikManagers = new List<QuickIKManagerExecuteInEditMode>();
         private static IKTargetData _selectedIKTarget = new IKTargetData();
 
         static QuickIKTargetsRenderer()
         {
-            QuickIKManager.OnAdd += OnQuickIKManagerAdded;
-            QuickIKManager.OnRemove += OnQuickIKManagerRemoved;
+            QuickIKManagerExecuteInEditMode.OnIKManagerAdded += OnQuickIKManagerAdded;
+            QuickIKManagerExecuteInEditMode.OnIKManagerRemoved += OnQuickIKManagerRemoved;
 
             SceneView.beforeSceneGui += CheckIKTargetsDistance;
             SceneView.duringSceneGui += OnSceneGUI;
         }
 
-        private static void OnQuickIKManagerAdded(QuickIKManager ikManager)
+        private static void OnQuickIKManagerAdded(QuickIKManagerExecuteInEditMode ikManager)
         {
             if (!_ikManagers.Contains(ikManager))
             {
@@ -37,7 +37,7 @@ namespace QuickVR
             }
         }
 
-        private static void OnQuickIKManagerRemoved(QuickIKManager ikManager)
+        private static void OnQuickIKManagerRemoved(QuickIKManagerExecuteInEditMode ikManager)
         {
             _ikManagers.Remove(ikManager);
         }
@@ -54,8 +54,9 @@ namespace QuickVR
 
         private static void DrawIKTargets()
         {
-            foreach (QuickIKManager ikManager in _ikManagers)
+            foreach (QuickIKManagerExecuteInEditMode ikManagerEditor in _ikManagers)
             {
+                QuickIKManager ikManager = ikManagerEditor._ikManager;
                 if (ikManager && ikManager.gameObject.activeInHierarchy)
                 {
                     for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++)
@@ -103,8 +104,9 @@ namespace QuickVR
         {
             if (!Application.isPlaying)
             {
-                foreach (QuickIKManager ikManager in _ikManagers)
+                foreach (QuickIKManagerExecuteInEditMode ikManagerEditor in _ikManagers)
                 {
+                    QuickIKManager ikManager = ikManagerEditor._ikManager;
                     if (ikManager && ikManager.gameObject.activeInHierarchy)
                     {
                         for (IKBone ikBone = IKBone.LeftHand; ikBone < IKBone.LastBone; ikBone++)
