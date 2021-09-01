@@ -47,29 +47,6 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        [MenuItem("QuickVR/PlayerPrefs")]
-        public static void ShowWindow()
-        {
-            GetWindow<QuickPlayerPrefsWindowEditor>();
-
-            string path = "Assets/QuickVRCfg/Resources/QuickSettingsCustom.asset";
-            QuickSettingsAsset settings = AssetDatabase.LoadAssetAtPath<QuickSettingsAsset>(path);
-            if (!settings)
-            {
-                settings = ScriptableObject.CreateInstance<QuickSettingsAsset>();
-                QuickUtilsEditor.CreateDataFolder("QuickVRCfg/Resources");
-                AssetDatabase.CreateAsset(settings, path);
-                AssetDatabase.SaveAssets();
-            }
-
-            QuickPlayerPrefs.Init();
-
-            //Check if the base settings are defined
-            SettingsBase.SetSubjectID(SettingsBase.GetSubjectID());
-            SettingsBase.SetGender(SettingsBase.GetGender());
-            SettingsBase.SetLanguage(SettingsBase.GetLanguage());
-        }
-
         protected virtual bool CreateNewSetting(out object value)
         {
             //Create a new playerpref with the specified key and type

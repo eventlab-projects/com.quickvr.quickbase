@@ -21,13 +21,6 @@ namespace AltProg.CleanEmptyDir
 
         const float DIR_LABEL_HEIGHT = 21;
 
-        [MenuItem("QuickVR/Clean Empty Dir")]
-        public static void ShowWindow()
-        {
-            var w = GetWindow<MainWindow>();
-            w.titleContent.text = "Clean";
-        }
-
         void OnEnable()
         {
             lastCleanOnSave = Core.CleanOnSave;

@@ -5,80 +5,71 @@ using UnityEditor;
 
 using System.IO;
 
-public class QuickMetallicMapFixerMenu
+namespace QuickVR
 {
-    #region CREATION AND DESTRUCTION
-
-    [MenuItem("QuickVR/QuickMetallicMapFixer")]
-    public static void ShowWindow()
+    public class QuickMetallicMapFixer : EditorWindow
     {
-        EditorWindow.GetWindow(typeof(QuickMetallicMapFixer));
-    }
 
-    #endregion
-}
+        #region PROTECTED ATTRIBUTES
 
-public class QuickMetallicMapFixer : EditorWindow
-{
+        protected Texture2D _texture = null;
 
-    #region PROTECTED ATTRIBUTES
+        #endregion
 
-    protected Texture2D _texture = null;
+        #region UPDATE
 
-    #endregion
-
-    #region UPDATE
-
-    protected virtual void OnGUI()
-    {
-        _texture = EditorGUILayout.ObjectField("Texture", _texture, typeof(Texture2D), true) as Texture2D;
-
-        if (_texture && GUILayout.Button("Fix"))
+        protected virtual void OnGUI()
         {
-            Fix();
-        }
-    }
+            _texture = EditorGUILayout.ObjectField("Texture", _texture, typeof(Texture2D), true) as Texture2D;
 
-    protected virtual void Fix()
-    {
-        Texture2D result = new Texture2D(_texture.width, _texture.height);
-        for (int mip = 0; mip < _texture.mipmapCount; ++mip)
-        {
-            Color[] cols = _texture.GetPixels(mip);
-            for (int i = 0; i < cols.Length; ++i)
+            if (_texture && GUILayout.Button("Fix"))
             {
-                cols[i] = new Color(cols[i].r, cols[i].g, cols[i].b, 1.0f - cols[i].a);
+                Fix();
             }
-            result.SetPixels(cols, mip);
         }
-        result.Apply(false);
 
-        string pathSrc = AssetDatabase.GetAssetPath(_texture);
-        string pathDst = Path.GetDirectoryName(pathSrc) + Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(pathSrc) + "_FIXED" + Path.GetExtension(pathSrc);
-        string extension = Path.GetExtension(pathSrc).ToLower();
+        protected virtual void Fix()
+        {
+            Texture2D result = new Texture2D(_texture.width, _texture.height);
+            for (int mip = 0; mip < _texture.mipmapCount; ++mip)
+            {
+                Color[] cols = _texture.GetPixels(mip);
+                for (int i = 0; i < cols.Length; ++i)
+                {
+                    cols[i] = new Color(cols[i].r, cols[i].g, cols[i].b, 1.0f - cols[i].a);
+                }
+                result.SetPixels(cols, mip);
+            }
+            result.Apply(false);
 
-        byte[] bytes;
-        if (extension == ".png") bytes = result.EncodeToPNG();
-        else if (extension == ".jpg") bytes = result.EncodeToJPG();
-        else if (extension == ".tga") bytes = result.EncodeToTGA();
-        else if (extension == ".exr") bytes = result.EncodeToEXR();
-        else return;
+            string pathSrc = AssetDatabase.GetAssetPath(_texture);
+            string pathDst = Path.GetDirectoryName(pathSrc) + Path.DirectorySeparatorChar + Path.GetFileNameWithoutExtension(pathSrc) + "_FIXED" + Path.GetExtension(pathSrc);
+            string extension = Path.GetExtension(pathSrc).ToLower();
 
-        string filePath = Path.Combine(Directory.GetCurrentDirectory(), pathSrc);
-        filePath.Replace("/", "\\");
+            byte[] bytes;
+            if (extension == ".png") bytes = result.EncodeToPNG();
+            else if (extension == ".jpg") bytes = result.EncodeToJPG();
+            else if (extension == ".tga") bytes = result.EncodeToTGA();
+            else if (extension == ".exr") bytes = result.EncodeToEXR();
+            else return;
 
-        FileStream fStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write);
-        BinaryWriter writer = new BinaryWriter(fStream);
-        writer.Write(bytes);
-        writer.Close();
-        fStream.Close();
+            string filePath = Path.Combine(Directory.GetCurrentDirectory(), pathSrc);
+            filePath.Replace("/", "\\");
 
-        AssetDatabase.ImportAsset(pathSrc);
-        AssetDatabase.Refresh();
+            FileStream fStream = new FileStream(filePath, FileMode.OpenOrCreate, FileAccess.Write);
+            BinaryWriter writer = new BinaryWriter(fStream);
+            writer.Write(bytes);
+            writer.Close();
+            fStream.Close();
 
-        //Debug.Log(Directory.GetCurrentDirectory());
+            AssetDatabase.ImportAsset(pathSrc);
+            AssetDatabase.Refresh();
+
+            //Debug.Log(Directory.GetCurrentDirectory());
+        }
+
+        #endregion
+
     }
-
-    #endregion
 
 }
