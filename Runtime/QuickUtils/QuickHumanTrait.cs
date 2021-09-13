@@ -350,6 +350,20 @@ namespace QuickVR
             return Vector3.zero;
         }
 
+        public static HumanBodyBones ToHumanBodyBones(this Animator animator, Transform tBone)
+        {
+            HumanBodyBones result = HumanBodyBones.LastBone;
+            for (HumanBodyBones boneID = 0; result == HumanBodyBones.LastBone && boneID < HumanBodyBones.LastBone; boneID++)
+            {
+                if (tBone == animator.GetBoneTransform(boneID))
+                {
+                    result = boneID;
+                }
+            }
+
+            return result;
+        }
+
         public static Transform GetBoneTransform(this Animator animator, QuickHumanBodyBones boneID)
         {
             Transform result = null;
