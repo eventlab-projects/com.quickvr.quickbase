@@ -103,7 +103,7 @@ namespace QuickVR
             }
         }
 
-        protected virtual void Start()
+        public virtual void Init()
         {
             if (_fingerPoses == null || _fingerPoses.Length != 5) Reset();
 
@@ -122,6 +122,11 @@ namespace QuickVR
 
                 _fingerPoses[i].SetAxisFinger(axisFinger);
             }
+        }
+
+        protected virtual void Start()
+        {
+            Init();
         }
 
         protected virtual void CreateAxisHand()
@@ -156,7 +161,7 @@ namespace QuickVR
 
         #region UPDATE
 
-        protected virtual void Update()
+        public virtual void Update()
         {
             foreach (FingerPose fPose in _fingerPoses)
             {

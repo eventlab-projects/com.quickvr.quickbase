@@ -74,14 +74,15 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected Dictionary<AxisCode, string[]> _toAxisControl = new Dictionary<AxisCode, string[]>();
-        protected Dictionary<ButtonCodes, string[]> _toButtonControl = new Dictionary<ButtonCodes, string[]>();
+        private static Dictionary<AxisCode, string[]> _toAxisControl = new Dictionary<AxisCode, string[]>();
+        private static Dictionary<ButtonCodes, string[]> _toButtonControl = new Dictionary<ButtonCodes, string[]>();
 
         #endregion
 
         #region CREATION AND DESTRUCTION
 
-        protected override void Awake()
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
+        private static void Init()
         {
             //Axis controls
             _toAxisControl[AxisCode.LeftStick_Horizontal] = _toAxisControl[AxisCode.RightStick_Horizontal] = new string[]{ "thumbstick", "trackpad"};
@@ -106,8 +107,6 @@ namespace QuickVR
 
             _toButtonControl[ButtonCodes.LeftGripPress] = _toButtonControl[ButtonCodes.RightGripPress] = new string[] { "grippressed", "gripbutton" };
             _toButtonControl[ButtonCodes.LeftGripTouch] = _toButtonControl[ButtonCodes.RightGripTouch] = new string[] { "grippressed" };
-
-            base.Awake();
         }
 
         protected override void ResetDefaultConfiguration()
@@ -140,33 +139,33 @@ namespace QuickVR
             _inputDevice = (button <= ButtonCodes.LeftGripTouch) ? XRController.leftHand : XRController.rightHand;
         }
 
-        protected virtual InputControl GetInputControlAxis(AxisCode axis)
+        private static InputControl GetInputControlAxis(XRController controller, AxisCode axis)
         {
             InputControl result = null;
             string[] values = _toAxisControl[axis];
             for (int i = 0; result == null && i < values.Length; i++)
             {
-                result = _inputDevice.TryGetChildControl(values[i]);
+                result = controller.TryGetChildControl(values[i]);
             }
 
             return result;
         }
 
-        protected virtual InputControl GetInputControlButton(ButtonCodes button)
+        private static ButtonControl GetInputControlButton(XRController controller, ButtonCodes button)
         {
             InputControl result = null;
             string[] values = _toButtonControl[button];
             for (int i = 0; result == null && i < values.Length; i++)
             {
-                result = _inputDevice.TryGetChildControl(values[i]);
+                result = controller.TryGetChildControl(values[i]);
             }
 
-            return result;
+            return (ButtonControl)result;
         }
 
         protected override float ImpGetAxis(AxisCode axis)
         {
-            InputControl tmp = GetInputControlAxis(axis);
+            InputControl tmp = GetInputControlAxis(_inputDevice, axis);
             float aValue = 0;
             float dZone = 0;
 
@@ -198,9 +197,53 @@ namespace QuickVR
 
         protected override bool ImpGetButton(ButtonCodes button)
         {
-            InputControl tmp = GetInputControlButton(button);
+            InputControl tmp = GetInputControlButton(_inputDevice, button);
 
             return tmp != null ? ((ButtonControl)tmp).isPressed : false;
+        }
+
+        private static XRController GetXRController(ButtonCodes key)
+        {
+            return key <= ButtonCodes.LeftGripTouch ? XRController.leftHand : XRController.rightHand;
+        }
+
+        public static bool GetKeyDown(ButtonCodes key)
+        {
+            XRController controller = GetXRController(key);
+
+            if (controller != null)
+            {
+                ButtonControl bControl = GetInputControlButton(controller, key);
+                return bControl != null && bControl.wasPressedThisFrame;
+            }
+
+            return false;
+        }
+
+        public static bool GetKey(ButtonCodes key)
+        {
+            XRController controller = GetXRController(key);
+
+            if (controller != null)
+            {
+                ButtonControl bControl = GetInputControlButton(controller, key);
+                return bControl != null && bControl.isPressed;
+            }
+
+            return false;
+        }
+
+        public static bool GetKeyUp(ButtonCodes key)
+        {
+            XRController controller = GetXRController(key);
+
+            if (controller != null)
+            {
+                ButtonControl bControl = GetInputControlButton(controller, key);
+                return bControl != null && bControl.wasReleasedThisFrame;
+            }
+
+            return false;
         }
 
         #endregion

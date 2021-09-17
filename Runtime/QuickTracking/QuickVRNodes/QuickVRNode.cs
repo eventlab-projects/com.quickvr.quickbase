@@ -142,13 +142,13 @@ namespace QuickVR
 
             string pfName = GetVRModelName();
 
-            //if (pfName.Length != 0)
-            //{
-            //    _model = Instantiate<Transform>(Resources.Load<Transform>("Prefabs/" + pfName));
-            //    _model.parent = transform;
-            //    _model.ResetTransformation();
-            //    _model.name = "Model";
-            //}
+            if (pfName.Length != 0)
+            {
+                _model = Instantiate(Resources.Load<Transform>("Prefabs/" + pfName));
+                _model.parent = transform;
+                _model.ResetTransformation();
+                _model.name = "Model";
+            }
 
             SetModelVisible(_showModel);
         }
@@ -238,6 +238,11 @@ namespace QuickVR
 
         public virtual void UpdateState()
         {
+            if (!_model)
+            {
+                LoadVRModel();
+            }
+
             //try to find a valid inputdevice for the key roles
             if (!_inputDevice.isValid)
             {
@@ -254,15 +259,25 @@ namespace QuickVR
             }
         }
 
+        protected virtual void UpdateTrackedPosition(Vector3 localPos)
+        {
+            transform.localPosition = localPos;
+        }
+
+        protected virtual void UpdateTrackedRotation(Quaternion localRot)
+        {
+            transform.localRotation = localRot;
+        }
+
         protected virtual void UpdateTracking()
         {
             if (GetDevicePosition(out Vector3 pos))
             {
-                transform.localPosition = pos;
+                UpdateTrackedPosition(pos);
             }
             if (GetDeviceRotation(out Quaternion rot))
             {
-                transform.localRotation = rot;
+                UpdateTrackedRotation(rot);
             }
 
             _inputDevice.TryGetFeatureValue(CommonUsages.isTracked, out _isTracked);
