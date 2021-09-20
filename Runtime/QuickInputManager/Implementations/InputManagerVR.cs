@@ -202,9 +202,42 @@ namespace QuickVR
             return tmp != null ? ((ButtonControl)tmp).isPressed : false;
         }
 
+        private static XRController GetXRController(AxisCode axis)
+        {
+            return axis <= AxisCode.LeftGrip ? XRController.leftHand : XRController.rightHand;
+        }
+
         private static XRController GetXRController(ButtonCodes key)
         {
             return key <= ButtonCodes.LeftGripTouch ? XRController.leftHand : XRController.rightHand;
+        }
+
+        public static float GetAxis(AxisCode axis)
+        {
+            XRController controller = GetXRController(axis);
+
+            if (controller != null)
+            {
+                InputControl tmp = GetInputControlAxis(controller, axis);
+                AxisControl aControl = null;
+
+                if (axis == AxisCode.LeftStick_Horizontal || axis == AxisCode.RightStick_Horizontal)
+                {
+                    aControl = ((Vector2Control)tmp).x;
+                }
+                else if (axis == AxisCode.LeftStick_Vertical || axis == AxisCode.RightStick_Vertical)
+                {
+                    aControl = ((Vector2Control)tmp).y;
+                }
+                else
+                {
+                    aControl = (AxisControl)tmp;
+                }
+
+                return aControl.ReadValue();
+            }
+
+            return 0;
         }
 
         public static bool GetKeyDown(ButtonCodes key)

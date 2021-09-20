@@ -18,7 +18,9 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected QuickVRHandAnimator _handAnimator = null;
+        protected OVRTouchSample.Hand _handAnimator = null;
+        
+        protected const int NUM_BONES_PER_FINGER = 4;
 
         #endregion
 
@@ -33,55 +35,25 @@ namespace QuickVR
 
         protected virtual void OnEnable()
         {
-            QuickVRManager.OnSourceAnimatorSet += OnSourceAnimatorSet;
-            QuickVRManager.OnPostUpdateTracking += OnPostUpdateTracking;
-        }
-
-        private void OnPostUpdateTracking()
-        {
-            if (!_isLeft)
-            {
-                _handAnimator._fingerPoses[0]._close = 0.25f;
-                _handAnimator._fingerPoses[0]._separation = 0.5f;
-
-                _handAnimator._fingerPoses[1]._close = InputManagerVR.GetKey(InputManagerVR.ButtonCodes.RightTriggerTouch)? 0.25f : 0f;
-                //_handAnimator._fingerPoses[1]._separation = 0;
-
-                _handAnimator._fingerPoses[2]._close = 0.65f;
-                //_handAnimator._fingerPoses[2]._separation = 0;
-
-                _handAnimator._fingerPoses[3]._close = 0.8f;
-                //_handAnimator._fingerPoses[3]._separation = 0;
-
-                _handAnimator._fingerPoses[4]._close = 0.8f;
-                //_handAnimator._fingerPoses[4]._separation = 0;
-                //Debug.Log(InputManagerVR.GetKey(InputManagerVR.ButtonCodes.RightTriggerTouch));
-            }
-
-            _handAnimator.Update();
-
-            
+            QuickVRManager.OnPostUpdateVRNodes += UpdateVRNodeFingers;
         }
 
         protected virtual void OnDisable()
         {
-            QuickVRManager.OnSourceAnimatorSet -= OnSourceAnimatorSet;
-        }
-
-        private void OnSourceAnimatorSet(Animator animator)
-        {
-            if (animator)
-            {
-                _handAnimator = animator.gameObject.AddComponent<QuickVRHandAnimator>(); 
-                _handAnimator._isLeftHand = _isLeft;
-                _handAnimator.enabled = false;
-                _handAnimator.Init();
-            }
+            QuickVRManager.OnPostUpdateVRNodes -= UpdateVRNodeFingers;
         }
 
         #endregion
 
         #region GET AND SET
+
+        public override void SetRole(QuickHumanBodyBones role)
+        {
+            base.SetRole(role);
+
+            _handAnimator = Instantiate(Resources.Load<OVRTouchSample.Hand>("Prefabs/" + (role == QuickHumanBodyBones.LeftHand ? "pf_HandLeft" : "pf_HandRight")), transform);
+            _handAnimator.transform.localPosition = Vector3.zero;
+        }
 
         protected override string GetVRModelName()
         {
@@ -127,10 +99,8 @@ namespace QuickVR
         {
             base.UpdateTrackedPosition(localPos);
 
-            if (_model && _model.Find("HandBone"))
-            {
-                _trackedObject.transform.position = _model.Find("HandBone").position;
-            }
+            //_trackedObject.transform.position = _model.Find("HandBone").position;
+            _trackedObject.transform.position = _handAnimator._handOrigin.position;
         }
 
         protected override void UpdateTrackedRotation(Quaternion localRot)
@@ -141,6 +111,45 @@ namespace QuickVR
             {
                 _trackedObject.transform.rotation = _model.Find("HandBone").rotation;
             }
+
+            //_trackedObject.transform.rotation = _handAnimator._handOrigin.rotation;
+            //_trackedObject.transform.Rotate(_trackedObject.transform.up, _isLeft? 90 : -90, Space.World);
+            //_trackedObject.transform.Rotate(_trackedObject.transform.forward, -90, Space.World);
+        }
+
+        protected virtual void UpdateVRNodeFingers()
+        {
+
+            //Update the nodes of the fingers
+            const int numBonesPerFinger = 4;
+            foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
+            {
+                List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, _isLeft);
+                for (int i = 0; i < numBonesPerFinger; i++)
+                {
+                    int boneID = ((int)f) * numBonesPerFinger + i;
+                    QuickVRNode nFinger = QuickSingletonManager.GetInstance<QuickVRPlayArea>().GetVRNode(fingerBones[i]);
+
+                    //The finger is tracked.
+                    Transform t = _handAnimator.GetBoneFingerTransform(f, i);
+                    nFinger.transform.position = t.position;
+                    nFinger.transform.rotation = t.rotation;
+
+                    //Correct the rotation
+                    //if (IsLeft())
+                    //{
+                    //    nFinger.transform.Rotate(Vector3.right, 180, Space.Self);
+                    //    nFinger.transform.Rotate(Vector3.up, -90, Space.Self);
+                    //}
+                    //else
+                    //{
+                    //    nFinger.transform.Rotate(Vector3.up, 90, Space.Self);
+                    //}
+
+                    nFinger.SetTracked(true);
+                }
+            }
+            
         }
 
         #endregion
