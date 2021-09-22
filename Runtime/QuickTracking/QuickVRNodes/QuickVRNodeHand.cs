@@ -95,12 +95,15 @@ namespace QuickVR
 
         protected override void UpdateTracking()
         {
-            foreach (SkinnedMeshRenderer r in _handAnimator.GetComponentsInChildren<SkinnedMeshRenderer>())
+            if (QuickVRManager._handTrackingMode == QuickVRManager.HandTrackingMode.Controllers)
             {
-                r.enabled = true;
+                foreach (SkinnedMeshRenderer r in _handAnimator.GetComponentsInChildren<SkinnedMeshRenderer>())
+                {
+                    r.enabled = true;
+                }
+
+                base.UpdateTracking();
             }
-            
-            base.UpdateTracking();
         }
 
         protected override void UpdateTrackedPosition(Vector3 localPos)
