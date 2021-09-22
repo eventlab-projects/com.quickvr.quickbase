@@ -20,6 +20,8 @@ namespace QuickVR
             InternetConnectionRequired,
         }
 
+        public bool _autoUpdateHint = true;
+
         #endregion
 
         #region PROTECTED ATTRIBUTES
@@ -91,7 +93,7 @@ namespace QuickVR
 
         #region GET AND SET
 
-        public virtual void SetCalibrationInstructions(CalibrationStep step, QuickUnityVR.HandTrackingMode handTrackingMode)
+        public virtual void SetCalibrationInstructions(CalibrationStep step)
         {
             //Fill the instructions field
             bool isEnglish = SettingsBase.GetLanguage() == SettingsBase.Languages.English;
@@ -115,24 +117,32 @@ namespace QuickVR
             {
                 SetTextInstructions(isEnglish ? INSTRUCTIONS_INTERNET_CONNECTION_REQUIRED_EN : INSTRUCTIONS_INTERNET_CONNECTION_REQUIRED_ES);
             }
-
-            //Fill the hint field
-            string hint = "";
-            if (handTrackingMode == QuickUnityVR.HandTrackingMode.Controllers)
-            {
-                hint = isEnglish ? HINT_CONTROLLERS_EN : HINT_CONTROLLERS_ES;
-            }
-            else
-            {
-                hint = isEnglish ? HINT_HANDS_EN : HINT_HANDS_ES;
-            }
-            
-            SetTextHint(hint);
         }
 
         public virtual void SetTextHint(string text)
         {
             _hint.text = text;
+        }
+
+        protected override void ActionPostCameraUpdate()
+        {
+            base.ActionPostCameraUpdate();
+
+            if (_autoUpdateHint)
+            {
+                string hint = "";
+                bool isEnglish = SettingsBase.GetLanguage() == SettingsBase.Languages.English;
+                if (QuickVRManager._handTrackingMode == QuickVRManager.HandTrackingMode.Controllers)
+                {
+                    hint = isEnglish ? HINT_CONTROLLERS_EN : HINT_CONTROLLERS_ES;
+                }
+                else
+                {
+                    hint = isEnglish ? HINT_HANDS_EN : HINT_HANDS_ES;
+                }
+
+                SetTextHint(hint);
+            }
         }
 
         #endregion

@@ -15,8 +15,6 @@ namespace QuickVR {
         protected static float HUMAN_HEADS_TALL_EYES = HUMAN_HEADS_TALL - 0.5f;
         protected static float HUMAN_HEADS_TALL_HEAD = HUMAN_HEADS_TALL - 1.0f;
 
-        public static Vector3 HAND_CONTROLLER_POSITION_OFFSET = new Vector3(0, 0, -0.1f);
-
         #endregion
 
         #region PUBLIC ATTRIBUTES
@@ -24,13 +22,6 @@ namespace QuickVR {
         public bool _useFootprints = true;
 
         public static bool _handsSwaped = false;
-
-        public enum HandTrackingMode
-        {
-            Controllers,
-            Hands,
-        }
-        public HandTrackingMode _handTrackingMode = HandTrackingMode.Hands;
 
         public enum ControlType
         {
@@ -150,8 +141,6 @@ namespace QuickVR {
         protected virtual void Start()
         {
             _headOffset = Quaternion.Inverse(transform.rotation) * (_animator.GetBoneTransform(HumanBodyBones.Head).position - _animator.GetEyeCenterPosition());
-            
-            CheckHandtrackingMode();
             _vrManager.AddUnityVRTrackingSystem(this);
         }
 
@@ -211,14 +200,6 @@ namespace QuickVR {
         public virtual void SetIKControl(IKBone ikBone, ControlType cType)
         {
             _ikControls[(int)ikBone] = cType;
-        }
-
-        public virtual void CheckHandtrackingMode()
-        {
-            if (_handTrackingMode == HandTrackingMode.Hands && !QuickVRManager.IsHandTrackingSupported())
-            {
-                _handTrackingMode = HandTrackingMode.Controllers;
-            }
         }
 
         public virtual int GetNumExtraTrackers()
@@ -283,30 +264,12 @@ namespace QuickVR {
 
         protected virtual void OnCalibrateVRNodeLeftHand(QuickVRNode node)
         {
-            QuickTrackedObject tObject = node.GetTrackedObject();
-            if (_handTrackingMode == HandTrackingMode.Controllers)
-            {
-                tObject.transform.Rotate(tObject.transform.forward, 90.0f, Space.World);
-                tObject.transform.localPosition = HAND_CONTROLLER_POSITION_OFFSET;
-            }
-            else
-            {
-                tObject.transform.LookAt(tObject.transform.position + node.transform.right, -node.transform.up);
-            }
+            
         }
 
         protected virtual void OnCalibrateVRNodeRightHand(QuickVRNode node)
         {
-            QuickTrackedObject tObject = node.GetTrackedObject();
-            if (_handTrackingMode == HandTrackingMode.Controllers)
-            {
-                tObject.transform.Rotate(tObject.transform.forward, -90.0f, Space.World);
-                tObject.transform.localPosition = HAND_CONTROLLER_POSITION_OFFSET;
-            }
-            else
-            {
-                tObject.transform.LookAt(tObject.transform.position - node.transform.right, node.transform.up);
-            }
+            
         }
 
         protected virtual void OnCalibrateVRNodeFoot(QuickVRNode node)
@@ -422,18 +385,18 @@ namespace QuickVR {
                         }
 
                         //At this point the finger is correctly aligned. Set the targets to match this. 
-                        HumanBodyBones boneID = (HumanBodyBones)fingerBones[2];
-                        QuickIKSolver ikSolver = GetIKSolver(boneID);
-                        Transform tBone = _animator.GetBoneTransform(boneID);
+                        //HumanBodyBones boneID = (HumanBodyBones)fingerBones[2];
+                        //QuickIKSolver ikSolver = GetIKSolver(boneID);
+                        //Transform tBone = _animator.GetBoneTransform(boneID);
 
-                        ikSolver._targetLimb.position = tBone.position;
-                        ikSolver._targetLimb.GetChild(0).rotation = tBone.rotation;
-                        ikSolver._targetHint.position = ikSolver._boneMid.position + (ikSolver._boneMid.position - ikSolver._boneUpper.position) + (ikSolver._boneMid.position - ikSolver._boneLimb.position);
+                        //ikSolver._targetLimb.position = tBone.position;
+                        //ikSolver._targetLimb.GetChild(0).rotation = tBone.rotation;
+                        //ikSolver._targetHint.position = ikSolver._boneMid.position + (ikSolver._boneMid.position - ikSolver._boneUpper.position) + (ikSolver._boneMid.position - ikSolver._boneLimb.position);
 
-                        //Restore the rotation of the bone fingers
-                        ikSolver._boneUpper.localRotation = initialFingerBonesLocalRotations[0];
-                        ikSolver._boneMid.localRotation = initialFingerBonesLocalRotations[1];
-                        ikSolver._boneLimb.localRotation = initialFingerBonesLocalRotations[2];
+                        ////Restore the rotation of the bone fingers
+                        //ikSolver._boneUpper.localRotation = initialFingerBonesLocalRotations[0];
+                        //ikSolver._boneMid.localRotation = initialFingerBonesLocalRotations[1];
+                        //ikSolver._boneLimb.localRotation = initialFingerBonesLocalRotations[2];
                     }
                 }
 
@@ -465,7 +428,7 @@ namespace QuickVR {
 
             }
 
-            base.UpdateIKFingers();
+            //base.UpdateIKFingers();
         }
         
         protected virtual void UpdateIKTargetPosFromUser(QuickVRNode node, HumanBodyBones boneID)

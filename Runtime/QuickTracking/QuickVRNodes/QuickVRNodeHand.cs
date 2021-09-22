@@ -26,13 +26,6 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        protected override void Awake()
-        {
-            base.Awake();
-
-            //_showModel = true;
-        }
-
         protected virtual void OnEnable()
         {
             QuickVRManager.OnPostUpdateVRNodes += UpdateVRNodeFingers;
@@ -53,6 +46,11 @@ namespace QuickVR
 
             _handAnimator = Instantiate(Resources.Load<OVRTouchSample.Hand>("Prefabs/" + (role == QuickHumanBodyBones.LeftHand ? "pf_HandLeft" : "pf_HandRight")), transform);
             _handAnimator.transform.localPosition = Vector3.zero;
+
+            foreach (SkinnedMeshRenderer r in _handAnimator.GetComponentsInChildren<SkinnedMeshRenderer>())
+            {
+                r.sharedMesh = null;
+            }
         }
 
         protected override string GetVRModelName()
@@ -95,11 +93,20 @@ namespace QuickVR
             return InputDevices.GetDeviceAtXRNode(_isLeft? XRNode.LeftHand : XRNode.RightHand);
         }
 
+        protected override void UpdateTracking()
+        {
+            foreach (SkinnedMeshRenderer r in _handAnimator.GetComponentsInChildren<SkinnedMeshRenderer>())
+            {
+                r.enabled = true;
+            }
+            
+            base.UpdateTracking();
+        }
+
         protected override void UpdateTrackedPosition(Vector3 localPos)
         {
             base.UpdateTrackedPosition(localPos);
 
-            //_trackedObject.transform.position = _model.Find("HandBone").position;
             _trackedObject.transform.position = _handAnimator._handOrigin.position;
         }
 
@@ -107,19 +114,11 @@ namespace QuickVR
         {
             base.UpdateTrackedRotation(localRot);
 
-            if (_model && _model.Find("HandBone"))
-            {
-                _trackedObject.transform.rotation = _model.Find("HandBone").rotation;
-            }
-
-            //_trackedObject.transform.rotation = _handAnimator._handOrigin.rotation;
-            //_trackedObject.transform.Rotate(_trackedObject.transform.up, _isLeft? 90 : -90, Space.World);
-            //_trackedObject.transform.Rotate(_trackedObject.transform.forward, -90, Space.World);
+            _trackedObject.transform.rotation = _handAnimator._handOrigin.rotation;
         }
 
         protected virtual void UpdateVRNodeFingers()
         {
-
             //Update the nodes of the fingers
             const int numBonesPerFinger = 4;
             foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
@@ -149,7 +148,6 @@ namespace QuickVR
                     nFinger.SetTracked(true);
                 }
             }
-            
         }
 
         #endregion

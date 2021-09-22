@@ -17,18 +17,18 @@ namespace QuickVR
             if (QuickVRManager.IsXREnabled())
             {
 
-#if UNITY_ANDROID
-                if (_hTracking._handTrackingMode == QuickUnityVR.HandTrackingMode.Hands)
-                {
-                    _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.HandTrackingMode, _hTracking._handTrackingMode);
+//#if UNITY_ANDROID
+//                if (_hTracking._handTrackingMode == QuickUnityVR.HandTrackingMode.Hands)
+//                {
+//                    _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.HandTrackingMode);
 
-                    while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE))
-                    {
-                        yield return null;
-                    }
-                }
-#endif
-                _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.HMDAdjustment, _hTracking._handTrackingMode);
+//                    while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE))
+//                    {
+//                        yield return null;
+//                    }
+//                }
+//#endif
+                _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.HMDAdjustment);
                 yield return new WaitForSeconds(0.5f);
 
                 //HMD Adjustment

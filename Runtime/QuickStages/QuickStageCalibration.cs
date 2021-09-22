@@ -85,7 +85,7 @@ namespace QuickVR
         {
             //HMD Forward Direction calibration
             _instructionsManager.Play(_headTrackingCalibrationInstructions);
-            _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.ForwardDirection, _hTracking._handTrackingMode);
+            _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.ForwardDirection);
 
             while (_instructionsManager.IsPlaying() && !InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE)) yield return null;
 

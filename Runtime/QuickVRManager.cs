@@ -29,14 +29,49 @@ namespace QuickVR
             HTCVive,
         }
 
+        public enum HandTrackingMode
+        {
+            Controllers,
+            Hands,
+        }
+        public static HandTrackingMode _handTrackingMode { get; set; }
+
         #endregion
 
         #region PROTECTED PARAMETERS
 
         public static HMDModel _hmdModel
         {
-            get; private set;
+            get 
+            {
+                
+                if (IsXREnabled() && m_HMDModel == HMDModel.None)
+                {
+                    List<InputDevice> devices = new List<InputDevice>();
+                    InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.HeadMounted, devices);
+
+                    string hmdName = devices.Count > 0 ? devices[0].name.Replace(" ", "").ToLower() : "";
+                    if (hmdName.Contains("quest"))
+                    {
+                        if (hmdName.Contains("2"))
+                        {
+                            m_HMDModel = HMDModel.OculusQuest2;
+                        }
+                        else
+                        {
+                            m_HMDModel = HMDModel.OculusQuest;
+                        }
+                    }
+                    else if (hmdName.Contains("vive"))
+                    {
+                        m_HMDModel = HMDModel.HTCVive;
+                    }
+                }
+
+                return m_HMDModel;
+            } 
         }
+        private static HMDModel m_HMDModel = HMDModel.None;
 
         protected Animator _animatorTarget = null;
         protected Animator _animatorSource = null;
@@ -145,7 +180,6 @@ namespace QuickVR
             //#endif
 
             //            return isQuest;
-
             return _hmdModel == HMDModel.OculusQuest || _hmdModel == HMDModel.OculusQuest2;
         }
 
@@ -252,29 +286,6 @@ namespace QuickVR
 
         protected virtual void Update()
         {
-            if (IsXREnabled() && _hmdModel == HMDModel.None)
-            {
-                List<InputDevice> devices = new List<InputDevice>();
-                InputDevices.GetDevicesWithCharacteristics(InputDeviceCharacteristics.HeadMounted, devices);
-
-                string hmdName = devices.Count > 0 ? devices[0].name.Replace(" ", "").ToLower() : "";
-                if (hmdName.Contains("quest"))
-                {
-                    if (hmdName.Contains("2"))
-                    {
-                        _hmdModel = HMDModel.OculusQuest2;
-                    }
-                    else
-                    {
-                        _hmdModel = HMDModel.OculusQuest;
-                    }
-                }
-                else if (hmdName.Contains("vive")) 
-                {
-                    _hmdModel = HMDModel.HTCVive;
-                }
-            }
-
             //Update the InputState
             _inputManager.UpdateState();
 

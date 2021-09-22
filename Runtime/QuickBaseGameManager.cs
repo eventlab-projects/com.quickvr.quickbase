@@ -156,7 +156,6 @@ namespace QuickVR {
             if (_hTracking)
             {
                 QuickSingletonManager.GetInstance<CameraFade>().SetColor(Color.black);
-                _hTracking.CheckHandtrackingMode();
                 StartCoroutine(CoUpdate());
             }
             else
@@ -279,7 +278,7 @@ namespace QuickVR {
             {
                 if (!QuickUtils.IsInternetConnection())
                 {
-                    _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.InternetConnectionRequired, _hTracking._handTrackingMode);
+                    _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.InternetConnectionRequired);
                     gameExpired = true;
                 }
                 else
@@ -290,7 +289,7 @@ namespace QuickVR {
                     DateTime timeExp = new DateTime(_expirationYear, _expirationMonth, _expirationDay);
                     if (timeNow >= timeExp)
                     {
-                        _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.TimeExpired, _hTracking._handTrackingMode);
+                        _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.TimeExpired);
                         gameExpired = true;
                         Debug.Log("GAME DATE EXPIRED!!!");
                     }
