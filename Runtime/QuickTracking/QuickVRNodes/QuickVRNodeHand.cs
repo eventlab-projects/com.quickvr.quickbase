@@ -122,33 +122,35 @@ namespace QuickVR
 
         protected virtual void UpdateVRNodeFingers()
         {
-            //Update the nodes of the fingers
-            const int numBonesPerFinger = 4;
-            foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
+            if (IsTracked() && QuickVRManager._handTrackingMode == QuickVRManager.HandTrackingMode.Controllers)
             {
-                List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, _isLeft);
-                for (int i = 0; i < numBonesPerFinger; i++)
+                //Update the nodes of the fingers
+                const int numBonesPerFinger = 4;
+                foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
                 {
-                    int boneID = ((int)f) * numBonesPerFinger + i;
-                    QuickVRNode nFinger = QuickSingletonManager.GetInstance<QuickVRPlayArea>().GetVRNode(fingerBones[i]);
+                    List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, _isLeft);
+                    for (int i = 0; i < numBonesPerFinger; i++)
+                    {
+                        QuickVRNode nFinger = QuickSingletonManager.GetInstance<QuickVRPlayArea>().GetVRNode(fingerBones[i]);
 
-                    //The finger is tracked.
-                    Transform t = _handAnimator.GetBoneFingerTransform(f, i);
-                    nFinger.transform.position = t.position;
-                    nFinger.transform.rotation = t.rotation;
+                        //The finger is tracked.
+                        Transform t = _handAnimator.GetBoneFingerTransform(f, i);
+                        nFinger.transform.position = t.position;
+                        nFinger.transform.rotation = t.rotation;
 
-                    //Correct the rotation
-                    //if (IsLeft())
-                    //{
-                    //    nFinger.transform.Rotate(Vector3.right, 180, Space.Self);
-                    //    nFinger.transform.Rotate(Vector3.up, -90, Space.Self);
-                    //}
-                    //else
-                    //{
-                    //    nFinger.transform.Rotate(Vector3.up, 90, Space.Self);
-                    //}
+                        //Correct the rotation
+                        //if (IsLeft())
+                        //{
+                        //    nFinger.transform.Rotate(Vector3.right, 180, Space.Self);
+                        //    nFinger.transform.Rotate(Vector3.up, -90, Space.Self);
+                        //}
+                        //else
+                        //{
+                        //    nFinger.transform.Rotate(Vector3.up, 90, Space.Self);
+                        //}
 
-                    nFinger.SetTracked(true);
+                        nFinger.SetTracked(true);
+                    }
                 }
             }
         }
