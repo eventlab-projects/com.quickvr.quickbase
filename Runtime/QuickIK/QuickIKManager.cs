@@ -156,6 +156,7 @@ namespace QuickVR {
 
         protected virtual void Reset()
         {
+            InitAnimator();
             _animator.CreateMissingBones();
 
             CreateIKSolvers();

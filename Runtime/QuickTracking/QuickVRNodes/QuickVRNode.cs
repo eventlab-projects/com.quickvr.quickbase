@@ -238,11 +238,6 @@ namespace QuickVR
 
         public virtual void UpdateState()
         {
-            if (!_model)
-            {
-                LoadVRModel();
-            }
-
             //try to find a valid inputdevice for the key roles
             if (!_inputDevice.isValid)
             {

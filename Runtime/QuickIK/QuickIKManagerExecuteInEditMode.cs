@@ -62,6 +62,7 @@ namespace QuickVR
         {
             if (!Application.isPlaying)
             {
+                _ikManager.InitAnimator();
                 _ikManager.UpdateTracking();
             }
         }

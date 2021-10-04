@@ -24,9 +24,13 @@ namespace QuickVR
         public enum HMDModel
         {
             None, 
+
             OculusQuest,
             OculusQuest2,
+
             HTCVive,
+
+            PicoNeo2,
         }
 
         public enum HandTrackingMode
@@ -44,7 +48,7 @@ namespace QuickVR
         {
             get 
             {
-                
+
                 if (IsXREnabled() && m_HMDModel == HMDModel.None)
                 {
                     List<InputDevice> devices = new List<InputDevice>();
@@ -65,6 +69,10 @@ namespace QuickVR
                     else if (hmdName.Contains("vive"))
                     {
                         m_HMDModel = HMDModel.HTCVive;
+                    }
+                    else if (hmdName.Contains("piconeo2"))
+                    {
+                        m_HMDModel = HMDModel.PicoNeo2;
                     }
                 }
 
@@ -169,28 +177,6 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
-
-        public static bool IsOculusQuest()
-        {
-            //            string hmdName = GetHMDName();
-            //            bool isQuest = hmdName.Contains("quest");
-
-            //#if UNITY_ANDROID
-            //            isQuest = isQuest || hmdName.Contains("oculus");
-            //#endif
-
-            //            return isQuest;
-            return _hmdModel == HMDModel.OculusQuest || _hmdModel == HMDModel.OculusQuest2;
-        }
-
-        public static bool IsHandTrackingSupported()
-        {
-#if UNITY_WEBGL
-            return false;
-#else
-            return IsOculusQuest();
-#endif
-        }
 
         public static bool IsXREnabled()
         {

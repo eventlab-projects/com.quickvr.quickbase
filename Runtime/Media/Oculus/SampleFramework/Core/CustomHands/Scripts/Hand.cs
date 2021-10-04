@@ -13,10 +13,6 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-#if UNITY_EDITOR
-using UnityEngine.SceneManagement;
-#endif
-
 using QuickVR;
 
 namespace OVRTouchSample
@@ -88,8 +84,34 @@ namespace OVRTouchSample
             InputManagerVR.ButtonCodes.RightStickTouch,
         };
 
+        protected QuickVRManager _vrManager = null;
+
+        protected QuickHandGestureSettings _handGestureSettings
+        {
+            get
+            {
+                QuickHandGestureSettings result = null;
+                if (_vrManager != null)
+                {
+                    Animator animatorSrc = _vrManager.GetAnimatorSource();
+                    if (animatorSrc)
+                    {
+                        QuickUnityVR unityVR = animatorSrc.GetComponent<QuickUnityVR>();
+                        result = _isLeft ? unityVR._gestureSettingsLeftHand : unityVR._gestureSettingsRightHand;
+                    }
+                }
+
+                return result;
+            }
+
+        }
+
+        #region CREATION AND DESTRUCTION
+
         protected virtual void Awake()
         {
+            _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
+
             _fingerBoneTransforms = new Dictionary<QuickHumanFingers, Transform[]>();
             _fingerBoneTransforms[QuickHumanFingers.Thumb] = _fingerBonesThumb;
             _fingerBoneTransforms[QuickHumanFingers.Index] = _fingerBonesIndex;
@@ -97,6 +119,8 @@ namespace OVRTouchSample
             _fingerBoneTransforms[QuickHumanFingers.Ring] = _fingerBonesRing;
             _fingerBoneTransforms[QuickHumanFingers.Little] = _fingerBonesLittle;
         }
+
+        #endregion
 
         public virtual Transform GetBoneFingerTransform(QuickHumanFingers f, int i)
         {
@@ -141,15 +165,19 @@ namespace OVRTouchSample
         // debouncing.
         private void UpdateCapTouchStates()
         {
-            InputManagerVR.ButtonCodes kPoint = _isLeft ? InputManagerVR.ButtonCodes.LeftTriggerTouch : InputManagerVR.ButtonCodes.RightTriggerTouch;
-            m_isPointing = !InputManagerVR.GetKey(kPoint);
+            //InputManagerVR.ButtonCodes kPoint = _isLeft ? InputManagerVR.ButtonCodes.LeftTriggerTouch : InputManagerVR.ButtonCodes.RightTriggerTouch;
+            //m_isPointing = !InputManagerVR.GetKey(kPoint);
 
-            InputManagerVR.ButtonCodes[] thumbButtons = _isLeft? _thumbButtonsLeft : _thumbButtonsRight;
-            m_isGivingThumbsUp = true;//!OVRInput.Get(OVRInput.NearTouch.PrimaryThumbButtons, m_controller);
-            for (int i = 0; i < thumbButtons.Length && m_isGivingThumbsUp; i++)
-            {
-                m_isGivingThumbsUp &= !InputManagerVR.GetKey(thumbButtons[i]);
-            }
+            m_isPointing = _handGestureSettings.IsPointing();
+
+            //InputManagerVR.ButtonCodes[] thumbButtons = _isLeft? _thumbButtonsLeft : _thumbButtonsRight;
+            //m_isGivingThumbsUp = true;//!OVRInput.Get(OVRInput.NearTouch.PrimaryThumbButtons, m_controller);
+            //for (int i = 0; i < thumbButtons.Length && m_isGivingThumbsUp; i++)
+            //{
+            //    m_isGivingThumbsUp &= !InputManagerVR.GetKey(thumbButtons[i]);
+            //}
+
+            m_isGivingThumbsUp = _handGestureSettings.IsThumbUp();
         }
 
         private void LateUpdate()
