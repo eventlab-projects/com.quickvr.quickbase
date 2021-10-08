@@ -16,6 +16,10 @@ This work is funded by the European Research Council (ERC) Advanced Grant Moment
 
 # Install
 
+First of all you need to install __XR Plug-in Management__ if you have not installed it yet on your project. Go to _Edit > Project Settings > XR Plug-in Management_ and select _Install XR Plug-in Management_. 
+
+![](/Documentation~/img/install/000.png)
+
 Go to _Window > Package Manager_ and click on the ‘+’ symbol in the top left corner of the new window. Select _Add package from git URL…_
 
 ![](/Documentation~/img/install/00.png)
