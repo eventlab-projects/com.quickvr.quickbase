@@ -176,7 +176,7 @@ namespace QuickVR
             _isHandsSwaped = false;
             List<InputDevice> bodyTrackers = GetBodyTrackers();
             int numTrackers = bodyTrackers.Count;
-            Debug.Log("NUM BODY TRACKERS = " + numTrackers);
+            QuickVRManager.Log("NUM BODY TRACKERS = " + numTrackers);
 
             //Try to assign the default nodes for Head and Hands
             QuickVRNode nodeHMD = GetVRNode(HumanBodyBones.Head);
@@ -237,12 +237,12 @@ namespace QuickVR
             }
             else
             {
-                Debug.LogWarning("BAD NUMBER OF BODY TRACKERS!!!");
+                QuickVRManager.LogWarning("BAD NUMBER OF BODY TRACKERS!!!");
             }
 
             UpdateVRNodes();
             _isHandsSwaped = IsVRNodesSwaped(HumanBodyBones.LeftHand, HumanBodyBones.RightHand);
-            Debug.Log("handsSwaped = " + _isHandsSwaped);
+            QuickVRManager.Log("handsSwaped = " + _isHandsSwaped);
 
             foreach (HumanBodyBones t in QuickVRNode.GetTypeList())
             {
@@ -255,7 +255,7 @@ namespace QuickVR
         {
             if (bodyTrackers.Count != 3)
             {
-                Debug.LogError("BODY TRACKERS LIST MUST CONTAIN EXACTLY 3 ELEMENTS");
+                QuickVRManager.LogError("BODY TRACKERS LIST MUST CONTAIN EXACTLY 3 ELEMENTS");
                 return;
             }
 

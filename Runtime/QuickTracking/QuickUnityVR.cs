@@ -81,9 +81,6 @@ namespace QuickVR {
 
         protected PositionConstraint _footprints = null;
 
-        protected QuickVRHand _vrHandLeft = null;
-        protected QuickVRHand _vrHandRight = null;
-
         protected List<ControlType> _ikControls
         {
             get
@@ -138,7 +135,6 @@ namespace QuickVR {
             _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
             _vrPlayArea.transform.parent = transform;
 
-            CreateVRHands();
             CreateVRCursors();
             CreateFootPrints();
         }
@@ -147,6 +143,35 @@ namespace QuickVR {
         {
             _headOffset = Quaternion.Inverse(transform.rotation) * (_animator.GetBoneTransform(HumanBodyBones.Head).position - _animator.GetEyeCenterPosition());
             _vrManager.AddUnityVRTrackingSystem(this);
+
+            if (_gestureSettingsLeftHand == null)
+            {
+                _gestureSettingsLeftHand = LoadHandGestureSettings(true);
+            }
+            if (_gestureSettingsRightHand == null)
+            {
+                _gestureSettingsRightHand = LoadHandGestureSettings(false);
+            }
+        }
+
+        protected virtual QuickHandGestureSettings LoadHandGestureSettings(bool isLeft)
+        {
+            string s = "";
+            const string infix = "_HandGestureSettings_";
+
+            switch (QuickVRManager._hmdModel)
+            {
+                case QuickVRManager.HMDModel.OculusQuest:
+                case QuickVRManager.HMDModel.OculusQuest2:
+                    s = "Touch";
+                    break;
+
+                default:
+                    s = "Default";
+                    break;
+            }
+
+            return Resources.Load<QuickHandGestureSettings>("HandGestureSettings/" + s + infix + (isLeft ? "Left" : "Right"));
         }
 
         protected virtual void CreateFootPrints()
@@ -162,8 +187,8 @@ namespace QuickVR {
 
         protected virtual void CreateVRCursors()
         {
-            CreateVRCursorHand(QuickUICursor.Role.LeftHand, _vrHandLeft._handBone, _vrHandLeft._handBoneIndexDistal);
-            CreateVRCursorHand(QuickUICursor.Role.RightHand, _vrHandRight._handBone, _vrHandRight._handBoneIndexDistal);
+            CreateVRCursorHand(QuickUICursor.Role.LeftHand, _animator.GetBoneTransform(HumanBodyBones.LeftHand), _animator.GetBoneTransform(HumanBodyBones.LeftIndexDistal));
+            CreateVRCursorHand(QuickUICursor.Role.RightHand, _animator.GetBoneTransform(HumanBodyBones.RightHand), _animator.GetBoneTransform(HumanBodyBones.RightIndexDistal));
         }
 
         protected virtual void CreateVRCursorHand(QuickUICursor.Role cType, Transform tHand, Transform tDistal)
@@ -177,20 +202,6 @@ namespace QuickVR {
             cursorOrigin.position = tProximal.position + cursorOrigin.forward * (l1 + l2 + (l2 - l1));
 
             QuickUICursor.CreateVRCursor(cType, cursorOrigin);
-        }
-
-        protected virtual void CreateVRHands()
-        {
-            _vrHandLeft = gameObject.AddComponent<QuickVRHand>();
-            _vrHandLeft._handBone = _animator.GetBoneTransform(HumanBodyBones.LeftHand);
-            _vrHandLeft._handBoneIndexDistal = _animator.GetBoneTransform(HumanBodyBones.LeftIndexDistal);
-
-            _vrHandRight = gameObject.AddComponent<QuickVRHand>();
-            _vrHandRight._handBone = _animator.GetBoneTransform(HumanBodyBones.RightHand);
-            _vrHandRight._handBoneIndexDistal = _animator.GetBoneTransform(HumanBodyBones.RightIndexDistal);
-
-            if (_vrHandLeft._axisAnim == "") _vrHandLeft._axisAnim = "LeftTrigger";
-            if (_vrHandRight._axisAnim == "") _vrHandRight._axisAnim = "RightTrigger";
         }
 
         #endregion
@@ -212,8 +223,6 @@ namespace QuickVR {
                     }
                 }
             }
-
-            Debug.Log("numBoneFingers = " + _boneFingers.Count);
         }
 
         public virtual ControlType GetIKControl(IKBone ikBone)
@@ -301,14 +310,6 @@ namespace QuickVR {
             Transform ikTarget = GetIKSolver((HumanBodyBones)node.GetRole())._targetLimb;
             QuickTrackedObject tObject = node.GetTrackedObject();
             tObject.transform.rotation = ikTarget.rotation;
-        }
-
-        public virtual QuickVRHand GetVRHand(QuickVRNode.Type nType)
-        {
-            if (nType == QuickVRNode.Type.LeftHand) return _vrHandLeft;
-            if (nType == QuickVRNode.Type.RightHand) return _vrHandRight;
-
-            return null;
         }
 
         #endregion
@@ -545,8 +546,8 @@ namespace QuickVR {
 
         protected virtual void UpdateVRCursors()
         {
-            QuickUICursor.GetVRCursor(QuickUICursor.Role.LeftHand).transform.position = _vrHandLeft._handBoneIndexDistal.position;
-            QuickUICursor.GetVRCursor(QuickUICursor.Role.RightHand).transform.position = _vrHandRight._handBoneIndexDistal.position;
+            QuickUICursor.GetVRCursor(QuickUICursor.Role.LeftHand).transform.position = _animator.GetBoneTransform(HumanBodyBones.LeftIndexDistal).position;
+            QuickUICursor.GetVRCursor(QuickUICursor.Role.RightHand).transform.position = _animator.GetBoneTransform(HumanBodyBones.RightIndexDistal).position;
         }
 
         #endregion

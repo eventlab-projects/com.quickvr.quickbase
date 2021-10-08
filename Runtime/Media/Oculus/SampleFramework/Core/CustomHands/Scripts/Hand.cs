@@ -70,20 +70,6 @@ namespace OVRTouchSample
 
         protected Dictionary<QuickHumanFingers, Transform[]> _fingerBoneTransforms = null;
 
-        protected static InputManagerVR.ButtonCodes[] _thumbButtonsLeft = 
-        {
-            InputManagerVR.ButtonCodes.LeftPrimaryTouch,
-            InputManagerVR.ButtonCodes.LeftSecondaryTouch,
-            InputManagerVR.ButtonCodes.LeftStickTouch,
-        };
-
-        protected static InputManagerVR.ButtonCodes[] _thumbButtonsRight =
-        {
-            InputManagerVR.ButtonCodes.RightPrimaryTouch,
-            InputManagerVR.ButtonCodes.RightSecondaryTouch,
-            InputManagerVR.ButtonCodes.RightStickTouch,
-        };
-
         protected QuickVRManager _vrManager = null;
 
         protected QuickHandGestureSettings _handGestureSettings

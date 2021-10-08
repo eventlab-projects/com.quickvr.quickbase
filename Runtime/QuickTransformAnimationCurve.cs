@@ -37,7 +37,7 @@ namespace QuickVR
         {
             if (positions.Count != timeStamps.Count || rotations.Count != timeStamps.Count)
             {
-                Debug.LogWarning("Lists of positions, rotations and timeStamps have different size");
+                QuickVRManager.LogWarning("Lists of positions, rotations and timeStamps have different size");
                 return;
             }
 

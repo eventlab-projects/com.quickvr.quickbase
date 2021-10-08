@@ -160,7 +160,7 @@ namespace QuickVR {
             }
             else
             {
-                Debug.LogError("NO HEAD TRACKING FOUND!!! APPLICATION IS CLOSED");
+                QuickVRManager.LogError("NO HEAD TRACKING FOUND!!! APPLICATION IS CLOSED");
                 QuickUtils.CloseApplication();
             }
         }
@@ -262,7 +262,7 @@ namespace QuickVR {
 
                 QuickStageBase.ClearStackStages();
 
-                Debug.Log("Elapsed Time = " + _timeRunning.ToString("f3") + " seconds");
+                QuickVRManager.Log("Elapsed Time = " + _timeRunning.ToString("f3") + " seconds");
                 _stagesPost.Init();
             }
         }
@@ -291,7 +291,7 @@ namespace QuickVR {
                     {
                         _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.TimeExpired);
                         gameExpired = true;
-                        Debug.Log("GAME DATE EXPIRED!!!");
+                        QuickVRManager.Log("GAME DATE EXPIRED!!!");
                     }
                 }
             }
@@ -317,8 +317,8 @@ namespace QuickVR {
         {
             _state = State.StagesMain;
 
-            Debug.Log("APPLICATION READY");
-            Debug.Log("Time.time = " + Time.time);
+            QuickVRManager.Log("APPLICATION READY");
+            QuickVRManager.Log("Time.time = " + Time.time);
 
             if (OnRunning != null) OnRunning();
 

@@ -140,7 +140,7 @@ namespace QuickVR
             }
             catch
             {
-                Debug.Log("NO INTERNET CONNECTION!!!");
+                QuickVRManager.Log("NO INTERNET CONNECTION!!!");
                 return new DateTime();
             }
         }
@@ -337,7 +337,7 @@ namespace QuickVR
         {
             System.Reflection.MethodInfo m = obj.GetType().GetMethod(methodName);
             if (m != null) m.Invoke(obj, parameters);
-            else Debug.LogError("Invoke failed!!! The method " + methodName + " does not exist on class " + obj.GetType().FullName);
+            else QuickVRManager.LogError("Invoke failed!!! The method " + methodName + " does not exist on class " + obj.GetType().FullName);
 
             return m != null;
         }
@@ -431,7 +431,7 @@ namespace QuickVR
 
             if (primMesh == null)
             {
-                Debug.LogError("Couldn't load Unity Primitive Mesh: " + primitiveType);
+                QuickVRManager.LogError("Couldn't load Unity Primitive Mesh: " + primitiveType);
             }
 
             return primMesh;

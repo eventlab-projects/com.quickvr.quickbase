@@ -6,7 +6,7 @@ using UnityEngine;
 namespace QuickVR
 {
 
-    [DefaultExecutionOrder(-1000)]
+    [DefaultExecutionOrder(-500)]
     public class QuickVRCameraController : MonoBehaviour
     {
 

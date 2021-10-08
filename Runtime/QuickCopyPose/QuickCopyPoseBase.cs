@@ -159,34 +159,39 @@ namespace QuickVR {
         {
             if (_source && _dest && _source != _dest)
             {
-                //For some obscure reason, we have to set source and dest to null parent in order to work. 
-                QuickHumanPoseHandler.GetHumanPose(_source, ref _poseSource);
-                QuickHumanPoseHandler.GetHumanPose(_dest, ref _poseDest);
+                CopyPoseImp();
+            }
+        }
 
-                foreach (QuickHumanBodyBones boneID in _allJoints)
+        protected virtual void CopyPoseImp()
+        {
+            //For some obscure reason, we have to set source and dest to null parent in order to work. 
+            QuickHumanPoseHandler.GetHumanPose(_source, ref _poseSource);
+            QuickHumanPoseHandler.GetHumanPose(_dest, ref _poseDest);
+
+            foreach (QuickHumanBodyBones boneID in _allJoints)
+            {
+                if (!IsTrackedJoint(boneID))
                 {
-                    if (!IsTrackedJoint(boneID))
+                    for (int i = 0; i < 3; i++)
                     {
-                        for (int i = 0; i < 3; i++)
+                        int m = QuickHumanTrait.GetMuscleFromBone(boneID, i);
+                        if (m != -1)
                         {
-                            int m = QuickHumanTrait.GetMuscleFromBone(boneID, i);
-                            if (m != -1)
-                            {
-                                _poseSource.muscles[m] = _poseDest.muscles[m];
-                            }
+                            _poseSource.muscles[m] = _poseDest.muscles[m];
                         }
                     }
                 }
-
-                //The hips is a special case, it modifies the bodyPosition and bodyRotation fields
-                if (!IsTrackedJointBody(TrackedJointBody.Hips))
-                {
-                    _poseSource.bodyPosition = _poseDest.bodyPosition;
-                    _poseSource.bodyRotation = _poseDest.bodyRotation;
-                }
-                
-                QuickHumanPoseHandler.SetHumanPose(_dest, ref _poseSource);
             }
+
+            //The hips is a special case, it modifies the bodyPosition and bodyRotation fields
+            if (!IsTrackedJointBody(TrackedJointBody.Hips))
+            {
+                _poseSource.bodyPosition = _poseDest.bodyPosition;
+                _poseSource.bodyRotation = _poseDest.bodyRotation;
+            }
+
+            QuickHumanPoseHandler.SetHumanPose(_dest, ref _poseSource);
         }
 
         #endregion

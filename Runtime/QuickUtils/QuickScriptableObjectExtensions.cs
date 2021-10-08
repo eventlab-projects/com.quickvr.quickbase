@@ -127,7 +127,7 @@ namespace QuickVR
             XmlDocument doc = new XmlDocument();
             doc.Load(path);
 
-            Debug.Log("path = " + path);
+            QuickVRManager.Log("path = " + path);
 
             LoadClass(obj, (XmlElement)doc.FirstChild.FirstChild);
         }

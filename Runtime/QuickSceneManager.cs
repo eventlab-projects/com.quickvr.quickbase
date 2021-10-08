@@ -129,7 +129,7 @@ namespace QuickVR
             }
             else
             {
-                Debug.LogWarning(sceneName + " is already " + SceneState.Loaded + ". Please, unload it first");
+                QuickVRManager.LogWarning(sceneName + " is already " + SceneState.Loaded + ". Please, unload it first");
             }
         }
 
@@ -141,7 +141,7 @@ namespace QuickVR
             }
             else
             {
-                Debug.LogWarning(sceneName + " cannot be the Active scene because it is " + SceneState.Unloading);
+                QuickVRManager.LogWarning(sceneName + " cannot be the Active scene because it is " + SceneState.Unloading);
             }
         }
 

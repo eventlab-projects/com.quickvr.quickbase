@@ -132,8 +132,6 @@ namespace QuickVR
                 {
                     _trackedObject = tObject;
 
-                    Debug.Log("tObject = " + _trackedObject.transform.parent.name);
-
                     Init();
                 }
             }

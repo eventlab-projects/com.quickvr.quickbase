@@ -7,10 +7,52 @@ using System.Collections.Generic;
 namespace QuickVR
 {
 
+    [DefaultExecutionOrder(-1000)]
     public class QuickVRManager : MonoBehaviour
     {
 
+        //#region EXECUTION ORDER MANAGERS
+
+        //[DefaultExecutionOrder(-1000)] //Execute as soon as possible
+        //protected class QuickVRManagerEarly : MonoBehaviour
+        //{
+        //    public static event QuickVRManagerAction OnUpdate;
+
+        //    protected virtual void Update()
+        //    {
+        //        if (OnUpdate != null)
+        //        {
+        //            OnUpdate();
+        //        }
+        //    }
+        //}
+
+        //[DefaultExecutionOrder(1000)] //Execute as late as possible
+        //protected class QuickVRManagerLate : MonoBehaviour
+        //{
+        //    public static event QuickVRManagerAction OnLateUpdate;
+
+        //    protected virtual void LateUpdate()
+        //    {
+        //        if (OnLateUpdate != null)
+        //        {
+        //            OnLateUpdate();
+        //        }
+        //    }
+        //}
+
+        //#endregion
+
         #region PUBLIC ATTRIBUTES
+
+        public enum LogMode
+        {
+            Message,
+            Warning,
+            Error,
+        }
+        [BitMask(typeof(LogMode))]
+        public int _logMode = -1;
 
         public bool _showFPS = false;
 
@@ -43,6 +85,20 @@ namespace QuickVR
         #endregion
 
         #region PROTECTED PARAMETERS
+
+        protected static QuickVRManager _instance
+        {
+            get
+            {
+                if (!m_Instance)
+                {
+                    m_Instance = QuickSingletonManager.GetInstance<QuickVRManager>();
+                }
+
+                return m_Instance;
+            }
+        }
+        private static QuickVRManager m_Instance = null;
 
         public static HMDModel _hmdModel
         {
@@ -128,25 +184,6 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        protected virtual void Awake()
-        {
-            Reset();
-
-            _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
-            _cameraController = QuickSingletonManager.GetInstance<QuickVRCameraController>();
-            _inputManager = QuickSingletonManager.GetInstance<InputManager>();
-            _fpsCounter = QuickSingletonManager.GetInstance<PerformanceFPS>();
-            
-            _copyPose = gameObject.GetOrCreateComponent<QuickCopyPoseBase>();
-            _copyPose.enabled = false;
-
-            //Legacy XR Mode is deprecated on 2020 onwards. 
-#if UNITY_2020_1_OR_NEWER
-            _XRMode = XRMode.XRPlugin;
-#endif
-
-        }
-
         protected virtual void OnEnable()
         {
             //If we are in the Editor, the UpdateTracking function is called on LateUpdate, as onBeforeRender seems
@@ -157,6 +194,10 @@ namespace QuickVR
             {
                 Application.onBeforeRender += UpdateTracking;
             }
+
+            //QuickVRManagerEarly.OnUpdate += UpdateEarly;
+            //QuickVRManagerLate.OnLateUpdate += UpdateTracking;
+            //Application.onBeforeRender += UpdateCamera;
         }
 
         protected virtual void OnDisable()
@@ -165,6 +206,29 @@ namespace QuickVR
             {
                 Application.onBeforeRender -= UpdateTracking;
             }
+
+            //QuickVRManagerEarly.OnUpdate -= UpdateEarly;
+            //QuickVRManagerLate.OnLateUpdate -= UpdateTracking;
+            //Application.onBeforeRender -= UpdateCamera;
+        }
+
+        protected virtual void Awake()
+        {
+            Reset();
+
+            _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
+            _cameraController = QuickSingletonManager.GetInstance<QuickVRCameraController>();
+            _inputManager = QuickSingletonManager.GetInstance<InputManager>();
+            _fpsCounter = QuickSingletonManager.GetInstance<PerformanceFPS>();
+
+            _copyPose = gameObject.GetOrCreateComponent<QuickCopyPoseBase>();
+            //_copyPose = gameObject.GetOrCreateComponent<QuickCopyPoseDirect>();
+            _copyPose.enabled = false;
+
+            //Legacy XR Mode is deprecated on 2020 onwards. 
+#if UNITY_2020_1_OR_NEWER
+            _XRMode = XRMode.XRPlugin;
+#endif
         }
 
         protected virtual void Reset()
@@ -236,14 +300,6 @@ namespace QuickVR
             SetAnimatorTarget(animator);
         }
 
-        protected virtual List<QuickBaseTrackingManager> GetAllTrackingSystems()
-        {
-            List<QuickBaseTrackingManager> result = new List<QuickBaseTrackingManager>();
-            result.Add(_unityVR);
-            
-            return result;
-        }
-
         public virtual void RequestCalibration()
         {
             _isCalibrationRequired = true;
@@ -253,12 +309,9 @@ namespace QuickVR
         {
             if (OnPreCalibrate != null) OnPreCalibrate();
 
-            foreach (QuickBaseTrackingManager tm in GetAllTrackingSystems())
+            if (_unityVR)
             {
-                if (tm.gameObject.activeInHierarchy)
-                {
-                    tm.Calibrate();
-                }
+                _unityVR.Calibrate();
             }
 
             _isCalibrationRequired = false;
@@ -271,12 +324,16 @@ namespace QuickVR
         #region UPDATE
 
         protected virtual void Update()
+        //protected virtual void UpdateEarly()
         {
             //Update the InputState
             _inputManager.UpdateState();
 
-            _fpsCounter.gameObject.SetActive(_showFPS);
-
+            if (_fpsCounter.gameObject.activeSelf != _showFPS)
+            {
+                _fpsCounter.gameObject.SetActive(_showFPS);
+            }
+            
             //Calibrate the TrackingManagers that needs to be calibrated. 
             if (InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CALIBRATE) || _isCalibrationRequired)
             {
@@ -284,13 +341,12 @@ namespace QuickVR
             }
         }
 
+#if UNITY_EDITOR
         protected virtual void LateUpdate()
         {
-            if (Application.isEditor)
-            {
-                UpdateTracking();
-            }
+            UpdateTracking();
         }
+#endif
 
         protected virtual void UpdateTracking()
         {
@@ -324,6 +380,11 @@ namespace QuickVR
             _copyPose.CopyPose();
             if (OnPostCopyPose != null) OnPostCopyPose();
 
+            UpdateCamera();
+        }
+
+        protected virtual void UpdateCamera()
+        {
             //Update the Camera position
             if (OnPreCameraUpdate != null) OnPreCameraUpdate();
             _cameraController.UpdateCameraPosition(_animatorTarget);
@@ -331,6 +392,30 @@ namespace QuickVR
         }
 
         #endregion
+
+        public static void Log(object message)
+        {
+            if ((_instance._logMode & (1 << (int)LogMode.Message)) != 0)
+            {
+                Debug.Log(message);
+            }
+        }
+
+        public static void LogWarning(object message)
+        {
+            if ((_instance._logMode & (1 << (int)LogMode.Warning)) != 0)
+            {
+                Debug.LogWarning(message);
+            }
+        }
+
+        public static void LogError(object message)
+        {
+            if ((_instance._logMode & (1 << (int)LogMode.Error)) != 0)
+            {
+                Debug.LogError(message);
+            }
+        }
 
     }
 

@@ -115,6 +115,7 @@ namespace QuickVR
 
         private static Dictionary<QuickHumanBodyBones, QuickHumanBodyBones> _parentBone = null;
         private static Dictionary<int, List<int>> _childBones = null;
+        private static Dictionary<QuickHumanBodyBones, QuickHumanBodyBones> _nextBoneInChain = null;
 
         private static string[] _muscleNames = null;
 
@@ -189,6 +190,44 @@ namespace QuickVR
             _parentBone[QuickHumanBodyBones.RightMiddleTip] = QuickHumanBodyBones.RightMiddleDistal;
             _parentBone[QuickHumanBodyBones.RightRingTip] = QuickHumanBodyBones.RightRingDistal;
             _parentBone[QuickHumanBodyBones.RightLittleTip] = QuickHumanBodyBones.RightLittleDistal;
+        }
+
+        private static void InitNextBones()
+        {
+            _nextBoneInChain = new Dictionary<QuickHumanBodyBones, QuickHumanBodyBones>();
+
+            //Spine chain
+            _nextBoneInChain[QuickHumanBodyBones.Hips] = QuickHumanBodyBones.Spine;
+            _nextBoneInChain[QuickHumanBodyBones.Spine] = QuickHumanBodyBones.Head;
+
+            //Left arm chain
+            _nextBoneInChain[QuickHumanBodyBones.LeftUpperArm] = QuickHumanBodyBones.LeftLowerArm;
+            _nextBoneInChain[QuickHumanBodyBones.LeftLowerArm] = QuickHumanBodyBones.LeftHand;
+
+            //Right arm chain
+            _nextBoneInChain[QuickHumanBodyBones.RightUpperArm] = QuickHumanBodyBones.RightLowerArm;
+            _nextBoneInChain[QuickHumanBodyBones.RightLowerArm] = QuickHumanBodyBones.RightHand;
+
+            //Left leg chain
+            _nextBoneInChain[QuickHumanBodyBones.LeftUpperLeg] = QuickHumanBodyBones.LeftLowerLeg;
+            _nextBoneInChain[QuickHumanBodyBones.LeftLowerLeg] = QuickHumanBodyBones.LeftFoot;
+
+            //Right leg chain
+            _nextBoneInChain[QuickHumanBodyBones.RightUpperLeg] = QuickHumanBodyBones.RightLowerLeg;
+            _nextBoneInChain[QuickHumanBodyBones.RightLowerLeg] = QuickHumanBodyBones.RightFoot;
+
+            //Hands chains
+            foreach (bool b in new bool[]{ true, false}) 
+            {
+                foreach (QuickHumanFingers f in GetHumanFingers())
+                {
+                    List<QuickHumanBodyBones> fingerBones = GetBonesFromFinger(f, b);
+                    for (int i = 0; i < fingerBones.Count - 1; i++)
+                    {
+                        _nextBoneInChain[fingerBones[i]] = fingerBones[i + 1];
+                    }
+                }
+            }
         }
 
         #endregion
@@ -299,6 +338,18 @@ namespace QuickVR
             }
 
             return _parentBone[boneID];
+        }
+
+        public static QuickHumanBodyBones GetNextBoneInChain(QuickHumanBodyBones boneID)
+        {
+            if (_nextBoneInChain == null)
+            {
+                InitNextBones();
+            }
+
+            bool b = _nextBoneInChain.TryGetValue(boneID, out QuickHumanBodyBones result);
+
+            return b? result : QuickHumanBodyBones.LastBone;
         }
 
         public static List<HumanBodyBones> GetChildBones(HumanBodyBones boneID)
@@ -503,6 +554,8 @@ namespace QuickVR
 
             animator.CreateEyes();
             animator.CreateFingerTips();
+
+            animator.CreateRotationReferences();
         }
 
         private static void CreateEyes(this Animator animator)
@@ -561,6 +614,37 @@ namespace QuickVR
                     Transform tBoneTip = tBoneDistal.CreateChild("__FingerTip__");
                     tBoneTip.position = tBoneDistal.position + v;
                 }
+            }
+        }
+
+        private static void CreateRotationReferences(this Animator animator)
+        {
+            animator.CreateRotationReference(QuickHumanBodyBones.Head);
+            animator.CreateRotationReference(QuickHumanBodyBones.LeftHand);
+            animator.CreateRotationReference(QuickHumanBodyBones.RightHand);
+            animator.CreateRotationReference(QuickHumanBodyBones.LeftFoot);
+            animator.CreateRotationReference(QuickHumanBodyBones.RightFoot);
+        }
+
+        public static Transform GetRotationReference(this Animator animator, QuickHumanBodyBones boneID)
+        {
+            return animator.GetBoneTransform(boneID).Find("__RotationReference__");
+        }
+
+        private static void CreateRotationReference(this Animator animator, QuickHumanBodyBones boneID)
+        {
+            Transform t = animator.GetBoneTransform(boneID).CreateChild("__RotationReference__");
+            if (boneID == QuickHumanBodyBones.Head || boneID == QuickHumanBodyBones.LeftFoot || boneID == QuickHumanBodyBones.RightFoot)
+            {
+                t.LookAt(t.position + animator.transform.forward, animator.transform.up);
+            }
+            else if (boneID == QuickHumanBodyBones.LeftHand)
+            {
+                t.LookAt(t.position - animator.transform.right, animator.transform.up);
+            }
+            else if (boneID == QuickHumanBodyBones.RightHand)
+            {
+                t.LookAt(t.position + animator.transform.right, animator.transform.up);
             }
         }
 
@@ -978,13 +1062,13 @@ namespace QuickVR
         public static void GetHumanPose(Animator animator, ref HumanPose result)
         {
             //Save the current transform properties
-            //Transform tmpParent = animator.transform.parent;
+            Transform tmpParent = animator.transform.parent;
             Vector3 tmpPos = animator.transform.position;
             Quaternion tmpRot = animator.transform.rotation;
             Vector3 tmpScale = animator.transform.localScale;
 
             //Set the transform to the world origin
-            //animator.transform.parent = null;
+            animator.transform.parent = null;
             animator.transform.position = Vector3.zero;
             animator.transform.rotation = Quaternion.identity;
 
@@ -992,7 +1076,7 @@ namespace QuickVR
             GetHumanPoseHandler(animator).GetHumanPose(ref result);
 
             //Restore the transform properties
-            //animator.transform.parent = tmpParent;
+            animator.transform.parent = tmpParent;
             animator.transform.position = tmpPos;
             animator.transform.rotation = tmpRot;
             animator.transform.localScale = tmpScale;

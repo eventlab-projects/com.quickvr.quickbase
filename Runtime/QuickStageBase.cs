@@ -70,7 +70,7 @@ namespace QuickVR {
             enabled = true;
 
             _timeStart = Time.time;
-            Debug.Log("RUNNING STAGE: " + GetName());
+            QuickVRManager.Log("RUNNING STAGE: " + GetName());
 
             if (OnInit != null)
             {
@@ -119,7 +119,7 @@ namespace QuickVR {
 
             _instructionsManager.Stop();
             float totalTime = Time.time - _timeStart;
-            Debug.Log("STAGE FINISHED: " + GetName() + " " + totalTime.ToString("f3"));
+            QuickVRManager.Log("STAGE FINISHED: " + GetName() + " " + totalTime.ToString("f3"));
 
             _coManager.StopCoroutineSet(_coSet);
             StopAllCoroutines();
@@ -224,12 +224,12 @@ namespace QuickVR {
 
         public static void PrintStackStages()
         {
-            Debug.Log("======================================");
+            QuickVRManager.Log("======================================");
             foreach (QuickStageBase stage in _stackStages)
             {
-                Debug.Log(stage.name);
+                QuickVRManager.Log(stage.name);
             }
-            Debug.Log("======================================");
+            QuickVRManager.Log("======================================");
         }
 
         #endregion
