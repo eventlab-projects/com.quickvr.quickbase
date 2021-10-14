@@ -400,6 +400,13 @@ namespace QuickVR {
                     {
                         for (int i = 0; i < 3; i++)
                         {
+                            if ((i == 0 && (j == 0 || j == 20)) && QuickVRManager._handTrackingMode == QuickVRManager.HandTrackingMode.Controllers)
+                            {
+                                //HACK
+                                //Avoid applying the rotation to the thumb distal fingers as the results look weird. Look for a better method 
+                                //of transfering the bone rotations when using the controllers. 
+                                continue;
+                            }
                             ApplyFingerRotation(_boneFingers[j + i], _boneFingers[j + i + 1]);
                         }
                     }
