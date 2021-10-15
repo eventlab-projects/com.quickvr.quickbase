@@ -5,147 +5,121 @@ using UnityEngine;
 namespace QuickVR
 {
 
+    [ExecuteInEditMode]
+    [System.Serializable]
     public class QuickVRHandAnimator : MonoBehaviour
     {
 
         #region PUBLIC ATTRIBUTES
 
-        public bool _isLeftHand = true;
+        public QuickHandPose _handPose = null;
 
         [System.Serializable]
-        public class FingerPose
+        public class FingerBones
         {
+            public Transform _proximal = null;
+            public Transform _intermediate = null;
+            public Transform _distal = null;
+            public Transform _tip = null;
 
-            #region PUBLIC ATTRIBUTES
-
-            public QuickHumanFingers _finger;
-
-            [Range(0.0f, 1.0f)]
-            public float _close = 0;
-
-            [Range(-1.0f, 1.0f)]
-            public float _separation = 0;
-
-            #endregion
-
-            #region CREATION AND DESTRUCTION
-
-            public FingerPose(QuickHumanFingers finger)
+            public enum RotAxis
             {
-                _finger = finger;
+                Right,
+                Up,
+                Forward,
+                Left,
+                Down,
+                Back
             }
 
-            #endregion
+            public RotAxis _axisClose;
+            public RotAxis _axisSeparate;
 
-            #region PROTECTED ATTRIBUTES
+            private static Vector3[] _rotAxisToVector3 = { Vector3.right, Vector3.up, Vector3.forward, Vector3.left, Vector3.down, Vector3.back };
 
-            protected Transform _axisFinger = null;
-
-            #endregion
-
-            #region GET AND SET
-
-            public virtual Transform GetAxisFinger()
+            public virtual Transform this[int boneIndex]
             {
-                return _axisFinger;
+                get
+                {
+                    if (boneIndex == 0) return _proximal;
+                    if (boneIndex == 1) return _intermediate;
+                    if (boneIndex == 2) return _distal;
+                    if (boneIndex == 3) return _tip;
+
+                    return null;
+                }
             }
 
-            public virtual void SetAxisFinger(Transform aFinger)
+            public virtual Transform[] ToArray()
             {
-                _axisFinger = aFinger;
+                return new Transform[] { _proximal, _intermediate, _distal, _tip };
             }
 
             public virtual Vector3 GetRotAxisClose()
             {
-                return _finger == QuickHumanFingers.Thumb? -_axisFinger.up : _axisFinger.right;
+                return _rotAxisToVector3[(int)_axisClose];
             }
 
-            public virtual Vector3 GetRotAxisSeparation()
+            public virtual Vector3 GetRotAxisSeparate()
             {
-                return _finger == QuickHumanFingers.Thumb? _axisFinger.right : _axisFinger.up;
+                return _rotAxisToVector3[(int)_axisSeparate];
             }
 
-            #endregion
+            public virtual bool CheckTransforms()
+            {
+                return _proximal && _intermediate && _distal && _tip;
+            }
 
         }
 
-        public FingerPose[] _fingerPoses = null;
+        public FingerBones _fingerBonesThumb = new FingerBones();
+        public FingerBones _fingerBonesIndex = new FingerBones();
+        public FingerBones _fingerBonesMiddle = new FingerBones();
+        public FingerBones _fingerBonesRing = new FingerBones();
+        public FingerBones _fingerBonesLittle = new FingerBones();
 
         #endregion
 
         #region PROTECTED ATTRIBUTES
 
-        protected Animator _animator = null;
+        protected static QuickHumanFingers[] _humanFingers
+        {
+            get
+            {
+                if (m_Fingers == null)
+                {
+                    m_Fingers = QuickHumanTrait.GetHumanFingers();
+                }
 
-        protected Transform _axisHand = null;
+                return m_Fingers;
+            }
+            
+        }
+        protected static QuickHumanFingers[] m_Fingers = null;
 
-        #endregion
+        protected Dictionary<QuickHumanFingers, FingerBones> _fingerBoneTransforms 
+        {
+            get 
+            {
+                if (m_FingerBoneTransforms == null)
+                {
+                    m_FingerBoneTransforms = new Dictionary<QuickHumanFingers, FingerBones>();
+                    m_FingerBoneTransforms[QuickHumanFingers.Thumb] = _fingerBonesThumb;
+                    m_FingerBoneTransforms[QuickHumanFingers.Index] = _fingerBonesIndex;
+                    m_FingerBoneTransforms[QuickHumanFingers.Middle] = _fingerBonesMiddle;
+                    m_FingerBoneTransforms[QuickHumanFingers.Ring] = _fingerBonesRing;
+                    m_FingerBoneTransforms[QuickHumanFingers.Little] = _fingerBonesLittle;
+                }
 
-        #region CONSTANTS
+                return m_FingerBoneTransforms;
+            }
+        }
 
-        protected const string AXIS_HAND_NAME = "__AxisHand__";
-        protected const string AXIS_FINGER_NAME = "__AxisFinger__";
-        
+        protected Dictionary<QuickHumanFingers, FingerBones> m_FingerBoneTransforms = null;
+
         #endregion
 
         #region CREATION AND DESTRUCTION
-
-        protected virtual void Reset()
-        {
-            QuickHumanFingers[] fingers = QuickHumanTrait.GetHumanFingers();
-
-            int numFingers = fingers.Length;
-            _fingerPoses = new FingerPose[numFingers];
-            
-            for (int i = 0; i < numFingers; i++)
-            {
-                _fingerPoses[i] = new FingerPose(fingers[i]);
-            }
-        }
-
-        public virtual void Init()
-        {
-            if (_fingerPoses == null || _fingerPoses.Length != 5) Reset();
-
-            _animator = GetComponent<Animator>();
-
-            CreateAxisHand();
-
-            QuickHumanFingers[] fingers = QuickHumanTrait.GetHumanFingers();
-            for (int i = 0; i < fingers.Length; i++)
-            {
-                List<QuickHumanBodyBones> boneFingers = QuickHumanTrait.GetBonesFromFinger(fingers[i], _isLeftHand);
-                Transform tBoneProximal = _animator.GetBoneTransform(boneFingers[0]);
-                Transform tBoneIntermediate = _animator.GetBoneTransform(boneFingers[1]);
-                Transform axisFinger = tBoneProximal.CreateChild(AXIS_FINGER_NAME);
-                axisFinger.LookAt(tBoneIntermediate.position, _axisHand.up);
-
-                _fingerPoses[i].SetAxisFinger(axisFinger);
-            }
-        }
-
-        protected virtual void Start()
-        {
-            Init();
-        }
-
-        protected virtual void CreateAxisHand()
-        {
-            HumanBodyBones boneHandID = _isLeftHand ? HumanBodyBones.LeftHand : HumanBodyBones.RightHand;
-
-            _axisHand = _animator.GetBoneTransform(boneHandID).CreateChild(AXIS_HAND_NAME);
-            QuickIKManager iKManager = GetComponent<QuickIKManager>();
-            if (iKManager)
-            {
-                _axisHand.rotation = iKManager.GetIKSolver(boneHandID)._targetLimb.rotation;
-            }
-            else
-            {
-                float sign = _isLeftHand ? -1.0f : 1.0f;
-                _axisHand.rotation = transform.rotation;
-                _axisHand.Rotate(transform.up, sign * 90.0f, Space.World);
-            }
-        }
 
         protected virtual float GetMaxAngleClose(QuickHumanFingers finger)
         {
@@ -163,79 +137,82 @@ namespace QuickVR
 
         public virtual void Update()
         {
-            foreach (FingerPose fPose in _fingerPoses)
+            if (_handPose)
             {
-                ResetFingerRotation(fPose);
-                UpdateFingerClose(fPose);
-                UpdateFingerSeparation(fPose);
+                for (int i = 0; i < 5; i++)
+                {
+                    QuickHumanFingers f = _humanFingers[i];
+                    FingerBones fBones = _fingerBoneTransforms[f];
+                    QuickFingerPose fPose = _handPose[i];
+
+                    if (fBones.CheckTransforms())
+                    {
+                        ResetFingerRotation(fBones);
+                        UpdateFingerClose(f, fPose, fBones);
+                        UpdateFingerSeparation(f, fPose, fBones);
+                    }
+                }
             }
         }
 
-        protected virtual void ResetFingerRotation(FingerPose fPose)
+        protected virtual void ResetFingerRotation(FingerBones fBones)
         {
-            //Align each finger's Axis with AxisHand
-            Transform axisFinger = fPose.GetAxisFinger();
-
-            List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(fPose._finger, _isLeftHand);
-            AlignFingerBone(axisFinger.up, _axisHand.up, _animator.GetBoneTransform(fingerBones[0]));
-
-            Vector3 targetDir = _axisHand.forward;
-            if (fPose._finger == QuickHumanFingers.Thumb)
+            foreach (Transform t in fBones.ToArray())
             {
-                targetDir = Vector3.Lerp((_isLeftHand? 1 : -1) * _axisHand.right, _axisHand.forward, 0.5f);
-            }
-
-            for (int i = 0; i < 3; i++)
-            {
-                Transform tBone = _animator.GetBoneTransform(fingerBones[i]);
-                Transform tBoneNext = _animator.GetBoneTransform(fingerBones[i + 1]);
-
-                AlignFingerBone(tBoneNext.position - tBone.position, targetDir, _animator.GetBoneTransform(fingerBones[i]));
+                t.localRotation = Quaternion.identity;
             }
         }
 
-        protected virtual void AlignFingerBone(Vector3 currentDir, Vector3 targetDir, Transform tBone)
+        protected virtual void UpdateFingerClose(QuickHumanFingers f, QuickFingerPose fPose, FingerBones fBones)
         {
-            Vector3 rotAxis = Vector3.Cross(currentDir, targetDir);
-            float rotAngle = Vector3.Angle(currentDir, targetDir);
-
-            tBone.Rotate(rotAxis, rotAngle, Space.World);
-        }
-
-        protected virtual void UpdateFingerClose(FingerPose fPose)
-        {
-            Vector3 rotAxis = fPose.GetRotAxisClose();
-            if (!_isLeftHand && fPose._finger == QuickHumanFingers.Thumb)
-            {
-                rotAxis *= -1;
-            }
-            float maxAngle = GetMaxAngleClose(fPose._finger);
+            Vector3 rotAxis = fBones.GetRotAxisClose();
             
-            List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(fPose._finger, _isLeftHand);
+            float maxAngle = GetMaxAngleClose(f);
+            
             for (int i = 0; i < 3; i++)
             {
-                float rotAngle = Mathf.Lerp(0.0f, maxAngle, fPose._close);
-                if (i == 0 && fPose._finger == QuickHumanFingers.Thumb)
+                float rotAngle = Mathf.Lerp(0.0f, maxAngle, fPose.GetCloseFactor(i));
+                if (i == 0 && f == QuickHumanFingers.Thumb)
                 {
                     rotAngle = Mathf.Min(25.0f, rotAngle);
                 }
 
-                Transform tBone = _animator.GetBoneTransform(fingerBones[i]);
-                tBone.Rotate(rotAxis, rotAngle, Space.World);
+                fBones[i].Rotate(rotAxis, rotAngle, Space.Self);
             }
         }
 
-        protected virtual void UpdateFingerSeparation(FingerPose fPose)
+        protected virtual void UpdateFingerSeparation(QuickHumanFingers f, QuickFingerPose fPose, FingerBones fBones)
         {
-            Vector3 rotAxis = fPose.GetRotAxisSeparation();
+            Vector3 rotAxis = fBones.GetRotAxisSeparate();
             float t = (fPose._separation + 1) / 2.0f;
-            float maxAngle = GetMaxAngleSeparation(fPose._finger);            
+            float maxAngle = GetMaxAngleSeparation(f);
             float rotAngle = Mathf.Lerp(-maxAngle, maxAngle, t);
 
-            List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(fPose._finger, _isLeftHand);
-            Transform tBone = _animator.GetBoneTransform(fingerBones[0]);
+            fBones[0].Rotate(rotAxis, rotAngle, Space.Self);
+        }
 
-            tBone.Rotate(rotAxis, rotAngle, Space.World);
+        #endregion
+
+        #region DEBUG
+
+        protected virtual void OnDrawGizmos()
+        {
+            Gizmos.color = Color.magenta;
+            foreach (var pair in _fingerBoneTransforms)
+            {
+                if (pair.Value.CheckTransforms())
+                {
+                    DebugFinger(pair.Value.ToArray());
+                }
+            }
+        }
+
+        protected virtual void DebugFinger(Transform[] fBones)
+        {
+            for (int i = 1; i < fBones.Length; i++)
+            {
+                Gizmos.DrawLine(fBones[i - 1].position, fBones[i].position);
+            }
         }
 
         #endregion

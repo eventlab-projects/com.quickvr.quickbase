@@ -296,5 +296,24 @@ namespace OVRTouchSample
                 }
             }
         }
+
+        protected virtual void OnDrawGizmos()
+        {
+            Gizmos.color = Color.magenta;
+            DebugFinger(_fingerBonesThumb);
+            DebugFinger(_fingerBonesIndex);
+            DebugFinger(_fingerBonesMiddle);
+            DebugFinger(_fingerBonesRing);
+            DebugFinger(_fingerBonesLittle);
+        }
+
+        protected virtual void DebugFinger(Transform[] fBones)
+        {
+            for (int i = 1; i < fBones.Length; i++)
+            {
+                Gizmos.DrawLine(fBones[i - 1].position, fBones[i].position);
+            }
+        }
+
     }
 }
