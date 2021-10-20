@@ -128,6 +128,12 @@ namespace QuickVR
 
         #endregion
 
+        #region CONSTANTS
+
+        public const int NUM_BONES_PER_FINGER = 4;
+
+        #endregion
+
         #region CREATION AND DESTRUCTION
 
         private static Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> InitHumanFingers(bool isLeft)

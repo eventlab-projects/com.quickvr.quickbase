@@ -12,7 +12,17 @@ namespace QuickVR
 
         #region PUBLIC ATTRIBUTES
 
-        public QuickHandPose _handPose = null;
+        public bool _isLeft = false;
+
+        public QuickHandPose _handPoseNeutral = null;
+        public QuickHandPose _handPoseClosed = null;
+        public QuickHandPose _handPoseThumbUp = null;
+
+        [Range(0.0f, 1.0f)]
+        public float _closeFactor = 0;
+
+        public bool _isPointing = false;
+        public bool _isThumbUp = false;
 
         [System.Serializable]
         public class FingerBones
@@ -50,11 +60,6 @@ namespace QuickVR
                 }
             }
 
-            public virtual Transform[] ToArray()
-            {
-                return new Transform[] { _proximal, _intermediate, _distal, _tip };
-            }
-
             public virtual Vector3 GetRotAxisClose()
             {
                 return _rotAxisToVector3[(int)_axisClose];
@@ -72,11 +77,19 @@ namespace QuickVR
 
         }
 
+        public Transform _handOrigin = null;
+
         public FingerBones _fingerBonesThumb = new FingerBones();
         public FingerBones _fingerBonesIndex = new FingerBones();
         public FingerBones _fingerBonesMiddle = new FingerBones();
         public FingerBones _fingerBonesRing = new FingerBones();
         public FingerBones _fingerBonesLittle = new FingerBones();
+
+        #endregion
+
+        #region CONSTANTS
+
+        protected const float INPUT_RATE_CHANGE = 20.0f;
 
         #endregion
 
@@ -117,13 +130,88 @@ namespace QuickVR
 
         protected Dictionary<QuickHumanFingers, FingerBones> m_FingerBoneTransforms = null;
 
+        protected QuickHandGestureSettings _handGestureSettings
+        {
+            get
+            {
+                QuickHandGestureSettings result = null;
+                if (Application.isPlaying)
+                {
+                    Animator animatorSrc = QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource();
+                    if (animatorSrc)
+                    {
+                        QuickUnityVR unityVR = animatorSrc.GetComponent<QuickUnityVR>();
+                        result = _isLeft ? unityVR._gestureSettingsLeftHand : unityVR._gestureSettingsRightHand;
+                    }
+                }
+
+                return result;
+            }
+
+        }
+
+        protected float _blendPoint = 0;
+        protected float _blendThumbUp = 0;
+
         #endregion
 
         #region CREATION AND DESTRUCTION
 
-        protected virtual float GetMaxAngleClose(QuickHumanFingers finger)
+        protected virtual void Awake()
         {
-            return finger == QuickHumanFingers.Thumb? 45.0f : 90.0f;
+            Reset();
+        }
+
+        protected virtual void Reset()
+        {
+            if (_handPoseNeutral == null)
+            {
+                _handPoseNeutral = Resources.Load<QuickHandPose>("HandPoses/HandPose_Neutral");
+            }
+            if (_handPoseClosed == null)
+            {
+                _handPoseClosed = Resources.Load<QuickHandPose>("HandPoses/HandPose_Closed");
+            }
+            if (_handPoseThumbUp == null)
+            {
+                _handPoseThumbUp = Resources.Load<QuickHandPose>("HandPoses/HandPose_ThumbUp");
+            }
+        }
+
+        #endregion
+
+        #region GET AND SET
+
+        protected virtual bool CheckHandPoses()
+        {
+            return _handPoseNeutral && _handPoseClosed && _handPoseThumbUp;
+        }
+
+        public FingerBones this[int i]
+        {
+            get
+            {
+                if (i == 0) return _fingerBonesThumb;
+                if (i == 1) return _fingerBonesIndex;
+                if (i == 2) return _fingerBonesMiddle;
+                if (i == 3) return _fingerBonesRing;
+
+                return _fingerBonesLittle;
+            }
+        }
+
+        protected virtual void GetAngleLimitsClose(QuickHumanFingers finger, out float min, out float max)
+        {
+            if (finger == QuickHumanFingers.Thumb)
+            {
+                min = -45;
+                max = 45;
+            }
+            else
+            {
+                min = 0;
+                max = 90;
+            }
         }
 
         protected virtual float GetMaxAngleSeparation(QuickHumanFingers finger)
@@ -137,46 +225,94 @@ namespace QuickVR
 
         public virtual void Update()
         {
-            if (_handPose)
+            if (CheckHandPoses())
             {
-                for (int i = 0; i < 5; i++)
-                {
-                    QuickHumanFingers f = _humanFingers[i];
-                    FingerBones fBones = _fingerBoneTransforms[f];
-                    QuickFingerPose fPose = _handPose[i];
+                UpdateInputStates();
+                UpdateFingers();
+            }
+        }
 
-                    if (fBones.CheckTransforms())
+        protected virtual void UpdateInputStates()
+        {
+            if (_handGestureSettings != null)
+            {
+                _isPointing = _handGestureSettings.IsPointing();
+                _isThumbUp = _handGestureSettings.IsThumbUp();
+                _closeFactor = InputManagerVR.GetAxis(_isLeft ? InputManagerVR.AxisCode.LeftGrip : InputManagerVR.AxisCode.RightGrip);
+            }
+
+            _blendPoint = InputValueRateChange(_isPointing, _blendPoint);
+            _blendThumbUp = InputValueRateChange(_isThumbUp, _blendThumbUp);
+        }
+
+        private float InputValueRateChange(bool isDown, float value)
+        {
+            float rateDelta = Time.deltaTime * INPUT_RATE_CHANGE;
+            float sign = isDown ? 1.0f : -1.0f;
+            return Mathf.Clamp01(value + rateDelta * sign);
+        }
+
+        protected virtual void UpdateFingers()
+        {
+            for (int i = 0; i < 5; i++)
+            {
+                QuickHumanFingers f = _humanFingers[i];
+                FingerBones fBones = _fingerBoneTransforms[f];
+                QuickFingerPose fPose = new QuickFingerPose();
+
+                //Close factor
+                for (int j = 0; j < 3; j++)
+                {
+                    if (i == 0 && _blendThumbUp > 0)
                     {
-                        ResetFingerRotation(fBones);
-                        UpdateFingerClose(f, fPose, fBones);
-                        UpdateFingerSeparation(f, fPose, fBones);
+                        fPose.SetCloseFactor(j, Mathf.Lerp(_handPoseNeutral[i].GetCloseFactor(j), _handPoseThumbUp[i].GetCloseFactor(j), _blendThumbUp));
                     }
+                    else if (i == 1 && _blendPoint > 0)
+                    {
+                        fPose.SetCloseFactor(j, Mathf.Lerp(_handPoseNeutral[i].GetCloseFactor(j), 0, _blendPoint));
+                    }
+                    else
+                    {
+                        fPose.SetCloseFactor(j, Mathf.Lerp(_handPoseNeutral[i].GetCloseFactor(j), _handPoseClosed[i].GetCloseFactor(j), _closeFactor));
+                    }
+                }
+
+                //Separation factor
+                if (i == 0 && _blendThumbUp > 0)
+                {
+                    fPose._separation = Mathf.Lerp(_handPoseNeutral[i]._separation, _handPoseThumbUp[i]._separation, _blendThumbUp);
+                }
+                else
+                {
+                    fPose._separation = Mathf.Lerp(_handPoseNeutral[i]._separation, _handPoseClosed[i]._separation, _closeFactor);
+                }
+
+                if (fBones.CheckTransforms())
+                {
+                    ResetFingerRotation(fBones);
+                    UpdateFingerClose(f, fPose, fBones);
+                    UpdateFingerSeparation(f, fPose, fBones);
                 }
             }
         }
 
         protected virtual void ResetFingerRotation(FingerBones fBones)
         {
-            foreach (Transform t in fBones.ToArray())
+            for (int i = 0; i < QuickHumanTrait.NUM_BONES_PER_FINGER; i++)
             {
-                t.localRotation = Quaternion.identity;
+                fBones[i].localRotation = Quaternion.identity;
             }
         }
 
         protected virtual void UpdateFingerClose(QuickHumanFingers f, QuickFingerPose fPose, FingerBones fBones)
         {
             Vector3 rotAxis = fBones.GetRotAxisClose();
-            
-            float maxAngle = GetMaxAngleClose(f);
+
+            GetAngleLimitsClose(f, out float minAngle, out float maxAngle);
             
             for (int i = 0; i < 3; i++)
             {
-                float rotAngle = Mathf.Lerp(0.0f, maxAngle, fPose.GetCloseFactor(i));
-                if (i == 0 && f == QuickHumanFingers.Thumb)
-                {
-                    rotAngle = Mathf.Min(25.0f, rotAngle);
-                }
-
+                float rotAngle = Mathf.Lerp(minAngle, maxAngle, fPose.GetCloseFactor(i));
                 fBones[i].Rotate(rotAxis, rotAngle, Space.Self);
             }
         }
@@ -202,16 +338,11 @@ namespace QuickVR
             {
                 if (pair.Value.CheckTransforms())
                 {
-                    DebugFinger(pair.Value.ToArray());
+                    for (int i = 1; i < QuickHumanTrait.NUM_BONES_PER_FINGER; i++)
+                    {
+                        Gizmos.DrawLine(pair.Value[i - 1].position, pair.Value[i].position);
+                    }
                 }
-            }
-        }
-
-        protected virtual void DebugFinger(Transform[] fBones)
-        {
-            for (int i = 1; i < fBones.Length; i++)
-            {
-                Gizmos.DrawLine(fBones[i - 1].position, fBones[i].position);
             }
         }
 

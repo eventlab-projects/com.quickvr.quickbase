@@ -10,12 +10,12 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 87ddac07b2e31d341a75dac41ce7ea12, type: 3}
-  m_Name: HandPose
+  m_Name: HandPose_Zero
   m_EditorClassIdentifier: 
   _thumbPose:
-    _close0: 0
-    _close1: 0
-    _close2: 0
+    _close0: 0.5
+    _close1: 0.5
+    _close2: 0.5
     _separation: 0
   _indexPose:
     _close0: 0

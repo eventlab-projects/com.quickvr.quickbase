@@ -18,7 +18,7 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected OVRTouchSample.Hand _handAnimator = null;
+        protected QuickVRHandAnimator _handAnimator = null;
         
         protected const int NUM_BONES_PER_FINGER = 4;
 
@@ -44,7 +44,7 @@ namespace QuickVR
         {
             base.SetRole(role);
 
-            _handAnimator = Instantiate(Resources.Load<OVRTouchSample.Hand>("Prefabs/" + (role == QuickHumanBodyBones.LeftHand ? "pf_HandLeft" : "pf_HandRight")), transform);
+            _handAnimator = Instantiate(Resources.Load<QuickVRHandAnimator>("Prefabs/" + (role == QuickHumanBodyBones.LeftHand ? "pf_HandLeft" : "pf_HandRight")), transform);
             _handAnimator.transform.localPosition = Vector3.zero;
 
             foreach (SkinnedMeshRenderer r in _handAnimator.GetComponentsInChildren<SkinnedMeshRenderer>())
@@ -97,11 +97,6 @@ namespace QuickVR
         {
             if (QuickVRManager._handTrackingMode == QuickVRManager.HandTrackingMode.Controllers)
             {
-                foreach (SkinnedMeshRenderer r in _handAnimator.GetComponentsInChildren<SkinnedMeshRenderer>())
-                {
-                    r.enabled = true;
-                }
-
                 base.UpdateTracking();
             }
         }
@@ -125,16 +120,15 @@ namespace QuickVR
             if (IsTracked() && QuickVRManager._handTrackingMode == QuickVRManager.HandTrackingMode.Controllers)
             {
                 //Update the nodes of the fingers
-                const int numBonesPerFinger = 4;
                 foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
                 {
                     List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, _isLeft);
-                    for (int i = 0; i < numBonesPerFinger; i++)
+                    for (int i = 0; i < QuickHumanTrait.NUM_BONES_PER_FINGER; i++)
                     {
                         QuickVRNode nFinger = QuickSingletonManager.GetInstance<QuickVRPlayArea>().GetVRNode(fingerBones[i]);
 
                         //The finger is tracked.
-                        Transform t = _handAnimator.GetBoneFingerTransform(f, i);
+                        Transform t = _handAnimator[(int)f][i]; // .GetBoneFingerTransform(f, i);
                         nFinger.transform.position = t.position;
                         nFinger.transform.rotation = t.rotation;
 

@@ -5,33 +5,40 @@ using UnityEngine;
 namespace QuickVR
 {
     [System.Serializable]
-    public class QuickFingerPose
+    public struct QuickFingerPose
     {
 
         #region PUBLIC ATTRIBUTES
 
         [Range(0.0f, 1.0f)]
-        public float _close0 = 0;
+        public float _close0;
 
         [Range(0.0f, 1.0f)]
-        public float _close1 = 0;
+        public float _close1;
 
         [Range(0.0f, 1.0f)]
-        public float _close2 = 0;
+        public float _close2;
 
         [Range(-1.0f, 1.0f)]
-        public float _separation = 0;
+        public float _separation;
 
         #endregion
 
         #region GET AND SET
 
-        public virtual float GetCloseFactor(int i)
+        public float GetCloseFactor(int i)
         {
             if (i == 0) return _close0;
             if (i == 1) return _close1;
 
             return _close2;
+        }
+
+        public void SetCloseFactor(int i , float value)
+        {
+            if (i == 0) _close0 = value;
+            else if (i == 1) _close1 = value;
+            else _close2 = value;
         }
 
         #endregion
@@ -58,9 +65,8 @@ namespace QuickVR
                 if (i == 1) return _indexPose;
                 if (i == 2) return _middlePose;
                 if (i == 3) return _ringPose;
-                if (i == 4) return _littlePose;
 
-                return null;
+                return _littlePose;
             }
         }
 
