@@ -624,6 +624,46 @@ namespace QuickVR
             return action != null && action.bindings.Count > 0;
         }
 
+        public static Mesh GetMesh(this Renderer r)
+        {
+            Mesh result = null;
+            if (r.GetType() == typeof(SkinnedMeshRenderer))
+            {
+                result = ((SkinnedMeshRenderer)r).sharedMesh;
+            }
+            else
+            {
+                MeshFilter mFilter = r.GetComponent<MeshFilter>();
+                if (mFilter)
+                {
+                    result = mFilter.sharedMesh;
+                }
+            }
+
+            return result;
+        }
+
+        public static void SetMesh(this Renderer r, Mesh mesh)
+        {
+            if (r.GetType() == typeof(SkinnedMeshRenderer))
+            {
+                ((SkinnedMeshRenderer)r).sharedMesh = mesh;
+            }
+            else
+            {
+                MeshFilter mFilter = r.GetComponent<MeshFilter>();
+                if (mFilter)
+                {
+                    mFilter.sharedMesh = mesh;
+                }
+            }
+        }
+
+        public static int GetNumTriangles(this Mesh m)
+        {
+            return m.triangles.Length / 3;
+        }
+
         #endregion
 
     }
