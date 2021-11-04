@@ -59,6 +59,24 @@ namespace QuickVR
                 Debug.Log("DIRECTORY EXISTS!!!" + path);
             }
         }
+
+        public static GUID CreateAssetFolder(string path)
+        {
+            string[] folders = path.Split('/');
+            string parentFolder = folders[0];
+            for (int i = 1; i < folders.Length; i++)
+            {
+                string s = folders[i];
+                string tmp = parentFolder + '/' + s;
+                if (!AssetDatabase.IsValidFolder(parentFolder + '/' + s))
+                {
+                    AssetDatabase.CreateFolder(parentFolder, s);
+                }
+                parentFolder = tmp;
+            }
+
+            return AssetDatabase.GUIDFromAssetPath(path);
+        }
     }
 
 }
