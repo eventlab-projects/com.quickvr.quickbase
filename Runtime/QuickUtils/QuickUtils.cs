@@ -241,19 +241,32 @@ namespace QuickVR
             return result;
         }
 
-        public static string GetDataPath()
+        public static string dataPath
         {
-            string dataPath = Application.dataPath;
-            dataPath = dataPath.Remove(dataPath.LastIndexOf("/"));
-            dataPath = dataPath.Replace(@"/", @"\");
-            return dataPath;
+            get
+            {
+                return Application.dataPath;
+            }
+        }
+
+        public static string projectPath
+        {
+            get
+            {
+                string dPath = dataPath;
+                return dPath.Substring(0, dataPath.Length - "/Assets".Length);
+            }
         }
 
         public static string GetUsersFolder()
         {
 #if !UNITY_ANDROID
             //Check if the global Users directory exists
-            string usersFolder = GetDataPath() + @"\Users";
+            string dPath = Application.dataPath;
+            dPath = dPath.Remove(dataPath.LastIndexOf("/"));
+            dPath = dPath.Replace(@"/", @"\");
+
+            string usersFolder = dPath + @"\Users";
             if (!Directory.Exists(usersFolder))
             {
                 Debug.Log("Creating Users Folder = " + usersFolder);

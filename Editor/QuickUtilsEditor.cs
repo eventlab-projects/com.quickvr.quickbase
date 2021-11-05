@@ -11,8 +11,9 @@ namespace QuickVR
 {
 
     [InitializeOnLoad]
-    public class QuickUtilsEditor
+    public static class QuickUtilsEditor
     {
+
         static QuickUtilsEditor()
         {
             QuickPlayerPrefs.OnSetValue += SaveSettingsAsset;
@@ -60,22 +61,37 @@ namespace QuickVR
             }
         }
 
-        public static GUID CreateAssetFolder(string path)
+        public static string CreateAssetFolder(string path)
         {
             string[] folders = path.Split('/');
-            string parentFolder = folders[0];
-            for (int i = 1; i < folders.Length; i++)
+            string assetFolderPath;
+
+            if (folders.Length > 1)
             {
-                string s = folders[i];
-                string tmp = parentFolder + '/' + s;
-                if (!AssetDatabase.IsValidFolder(parentFolder + '/' + s))
+                string parentFolder = folders[0];
+
+                //Create all the intermediate parent folders if necessary
+                for (int i = 1; i < folders.Length - 1; i++)
                 {
-                    AssetDatabase.CreateFolder(parentFolder, s);
+                    string s = folders[i];
+                    string tmp = parentFolder + '/' + s;
+                    if (!AssetDatabase.IsValidFolder(parentFolder + '/' + s))
+                    {
+                        AssetDatabase.CreateFolder(parentFolder, s);
+                    }
+                    parentFolder = tmp;
                 }
-                parentFolder = tmp;
+
+                //Create the last folder in the path
+                assetFolderPath = AssetDatabase.GUIDToAssetPath(AssetDatabase.CreateFolder(parentFolder, folders[folders.Length - 1]));
+            }
+            else
+            {
+                assetFolderPath = path;
             }
 
-            return AssetDatabase.GUIDFromAssetPath(path);
+
+            return assetFolderPath;
         }
     }
 
