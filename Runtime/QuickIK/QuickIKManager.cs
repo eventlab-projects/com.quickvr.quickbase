@@ -150,8 +150,6 @@ namespace QuickVR {
             base.Awake();
 
             Reset();
-
-            SavePose();
         }
 
         protected virtual void Reset()
@@ -270,10 +268,9 @@ namespace QuickVR {
             }
         }
 
-        public virtual void ResetIKTarget(HumanBodyBones boneID)
+        protected virtual void ResetIKTarget(HumanBodyBones boneID)
         {
             QuickIKSolver ikSolver = GetIKSolver(boneID);
-            ikSolver.ResetIKChain();
             ResetIKTarget(boneID, ikSolver._targetLimb);
             if (ikSolver._targetHint)
             {
@@ -352,11 +349,6 @@ namespace QuickVR {
                 
         public virtual void ResetIKTargets(bool applyAnim)
         {
-            for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++ )
-            {
-                GetIKSolver(ikBone).ResetIKChain();
-            }
-
             //Restore the TPose
             _ikTargetsRoot.ResetTransformation();
             
@@ -377,9 +369,13 @@ namespace QuickVR {
             for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++)
             {
                 QuickIKSolver ikSolver = GetIKSolver(ikBone);
-                ikSolver.SaveInitialBoneRotations();
                 ResetIKTarget(ToHumanBodyBones(ikBone));
                 ikSolver._targetLimb.parent = ikSolver._boneLimb;
+            }
+
+            for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++)
+            {
+                GetIKSolver(ikBone).ResetIKChain();
             }
 
             //If we have an animatorcontroller defined, the targets are moved at the position of the 

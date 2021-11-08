@@ -84,10 +84,20 @@ namespace QuickVR
 
         #region GET AND SET
 
+        public override void SaveInitialBoneRotations()
+        {
+            base.SaveInitialBoneRotations();
+
+            if (_boneLimb)
+            {
+                _hipsInitialLocalPos = _boneLimb.localPosition;
+            }
+        }
+
         public override void SavePose()
         {
             base.SavePose();
-            
+
             _hipsInitialLocalPos = _boneLimb.localPosition;
         }
 

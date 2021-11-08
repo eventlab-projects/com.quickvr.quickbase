@@ -202,10 +202,8 @@ namespace QuickVR
 
         protected virtual void Awake()
         {
-            if (_boneUpper) _initialLocalRotationUpper = _boneUpper.localRotation;
-            if (_boneMid) _initialLocalRotationMid = _boneMid.localRotation;
-            if (_boneLimb) _initialLocalRotationLimb = _boneLimb.localRotation;
-
+            SaveInitialBoneRotations();
+            
             SavePose();
 
             _ikManager = GetComponentInParent<QuickIKManager>();
