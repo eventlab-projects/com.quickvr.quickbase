@@ -341,20 +341,20 @@ namespace QuickVR
 
         protected abstract void RenderVirtualImage(Camera.StereoscopicEye eye, float stereoSeparation = 0.0f);
 
-        protected virtual void OnDrawGizmos()
-        {
-            if (_currentCamera && _reflectionCamera)
-            {
-                Gizmos.color = Color.red;
-                Gizmos.matrix = Matrix4x4.TRS(_currentCamera.transform.position, _currentCamera.transform.rotation, Vector3.one);
-                Gizmos.DrawFrustum(Vector3.zero, _currentCamera.fieldOfView, _currentCamera.farClipPlane, _currentCamera.nearClipPlane, _currentCamera.aspect);
+        //protected virtual void OnDrawGizmos()
+        //{
+        //    if (_currentCamera && _reflectionCamera)
+        //    {
+        //        Gizmos.color = Color.red;
+        //        Gizmos.matrix = Matrix4x4.TRS(_currentCamera.transform.position, _currentCamera.transform.rotation, Vector3.one);
+        //        Gizmos.DrawFrustum(Vector3.zero, _currentCamera.fieldOfView, _currentCamera.farClipPlane, _currentCamera.nearClipPlane, _currentCamera.aspect);
 
-                Gizmos.color = Color.blue;
-                Gizmos.matrix = Matrix4x4.TRS(_reflectionCamera.transform.position, _reflectionCamera.transform.rotation, Vector3.one);
-                Gizmos.DrawFrustum(Vector3.zero, _reflectionCamera.fieldOfView, _reflectionCamera.farClipPlane, _reflectionCamera.nearClipPlane, _reflectionCamera.aspect);
-            }
+        //        Gizmos.color = Color.blue;
+        //        Gizmos.matrix = Matrix4x4.TRS(_reflectionCamera.transform.position, _reflectionCamera.transform.rotation, Vector3.one);
+        //        Gizmos.DrawFrustum(Vector3.zero, _reflectionCamera.fieldOfView, _reflectionCamera.farClipPlane, _reflectionCamera.nearClipPlane, _reflectionCamera.aspect);
+        //    }
 
-        }
+        //}
 
 #endregion
 

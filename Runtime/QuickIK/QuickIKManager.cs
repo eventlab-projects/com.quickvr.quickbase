@@ -94,7 +94,12 @@ namespace QuickVR {
         {
             get
             {
-                if (!m_ikTargetsLeftHand) m_ikTargetsLeftHand = transform.CreateChild("__IKTargetsLeftHand__");
+                if (!m_ikTargetsLeftHand)
+                {
+                    m_ikTargetsLeftHand = transform.CreateChild("__IKTargetsLeftHand__");
+                    m_ikTargetsLeftHand.position = _animator.GetBoneTransform(HumanBodyBones.LeftHand).position;
+                    m_ikTargetsLeftHand.rotation = _animator.GetBoneTransform(HumanBodyBones.LeftHand).rotation;
+                }
                 return m_ikTargetsLeftHand;
             }
         }
@@ -104,7 +109,12 @@ namespace QuickVR {
         {
             get
             {
-                if (!m_ikTargetsRightHand) m_ikTargetsRightHand = transform.CreateChild("__IKTargetsRightHand__");
+                if (!m_ikTargetsRightHand)
+                {
+                    m_ikTargetsRightHand = transform.CreateChild("__IKTargetsRightHand__");
+                    m_ikTargetsRightHand.position = _animator.GetBoneTransform(HumanBodyBones.RightHand).position;
+                    m_ikTargetsRightHand.rotation = _animator.GetBoneTransform(HumanBodyBones.RightHand).rotation;
+                } 
                 return m_ikTargetsRightHand;
             }
         }
@@ -114,7 +124,12 @@ namespace QuickVR {
         {
             get
             {
-                if (!m_ikTargetsFace) m_ikTargetsFace = transform.CreateChild("__IKTargetsFace__");
+                if (!m_ikTargetsFace)
+                {
+                    m_ikTargetsFace = transform.CreateChild("__IKTargetsFace__");
+                    m_ikTargetsFace.position = _animator.GetBoneTransform(HumanBodyBones.Head).position;
+                    m_ikTargetsFace.rotation = transform.rotation;
+                }
                 return m_ikTargetsFace;
             }
         }
@@ -268,26 +283,11 @@ namespace QuickVR {
             }
         }
 
-        protected virtual void ResetIKTarget(HumanBodyBones boneID)
-        {
-            QuickIKSolver ikSolver = GetIKSolver(boneID);
-            ResetIKTarget(boneID, ikSolver._targetLimb);
-            if (ikSolver._targetHint)
-            {
-                ResetIKTarget(QuickHumanTrait.GetParentBone(boneID), ikSolver._targetHint);
-            }
-            if (ikSolver._targetLimb.childCount > 0)
-            {
-                ikSolver._targetLimb.GetChild(0).rotation = _animator.GetBoneTransform((QuickHumanBodyBones)boneID).rotation;
-            }
-        }
-
         protected virtual void ResetIKTarget(HumanBodyBones boneID, Transform ikTarget)
         {
             if ((int)boneID != -1)
             {
                 ikTarget.name = IK_TARGET_PREFIX + boneID;
-
                 Transform bone = _animator.GetBoneTransform((QuickHumanBodyBones)boneID);
                 string boneName = boneID.ToString();
 
@@ -339,19 +339,42 @@ namespace QuickVR {
 
         public virtual void LoadTPose()
         {
-            ResetIKTargets(false);
+            _animator.EnforceTPose();
+
+            _ikTargetsLeftHand.position = _animator.GetBoneTransform(HumanBodyBones.LeftHand).position;
+            _ikTargetsLeftHand.rotation = _animator.GetBoneTransform(HumanBodyBones.LeftHand).rotation;
+
+            _ikTargetsRightHand.position = _animator.GetBoneTransform(HumanBodyBones.RightHand).position;
+            _ikTargetsRightHand.rotation = _animator.GetBoneTransform(HumanBodyBones.RightHand).rotation;
+
+            _ikTargetsFace.position = _animator.GetBoneTransform(HumanBodyBones.Head).position;
+            _ikTargetsFace.rotation = transform.rotation;
+
+            //Reset the IKTargets 
+            for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++)
+            {
+                QuickIKSolver ikSolver = GetIKSolver(ikBone);
+                HumanBodyBones boneID = ToHumanBodyBones(ikBone);
+                ResetIKTarget(boneID, ikSolver._targetLimb);
+                ikSolver._targetLimb.parent = GetIKTargetParent(boneID);
+
+                if (ikSolver._targetLimb.childCount > 0)
+                {
+                    ikSolver._targetLimb.GetChild(0).rotation = ikSolver._boneLimb.rotation;
+                }
+                
+                if (ikSolver._targetHint)
+                {
+                    ResetIKTarget(QuickHumanTrait.GetParentBone(boneID), ikSolver._targetHint);
+                }
+            }
         }
 
         public virtual void LoadAnimPose()
         {
-            ResetIKTargets(true);
-        }
-                
-        public virtual void ResetIKTargets(bool applyAnim)
-        {
             //Restore the TPose
             _ikTargetsRoot.ResetTransformation();
-            
+
             _ikTargetsLeftHand.parent = _animator.GetBoneTransform(HumanBodyBones.LeftHand);
             _ikTargetsLeftHand.ResetTransformation();
 
@@ -362,25 +385,17 @@ namespace QuickVR {
             _ikTargetsFace.ResetTransformation();
             _ikTargetsFace.rotation = transform.rotation;
 
-            _animator.EnforceTPose();
-
             //Temporally set the parent of each ikTargetLimb to be the boneLimb. This way, the 
             //target is automatically moved to the bone position when the animation is applied. 
             for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++)
             {
                 QuickIKSolver ikSolver = GetIKSolver(ikBone);
-                ResetIKTarget(ToHumanBodyBones(ikBone));
                 ikSolver._targetLimb.parent = ikSolver._boneLimb;
-            }
-
-            for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++)
-            {
-                GetIKSolver(ikBone).ResetIKChain();
             }
 
             //If we have an animatorcontroller defined, the targets are moved at the position of the 
             //initial frame of the current animation in such controller. 
-            if (applyAnim && _animator.runtimeAnimatorController)
+            if (_animator.runtimeAnimatorController)
             {
                 Quaternion jawLocalRot = Quaternion.identity;
                 Transform tJaw = _animator.GetBoneTransform(HumanBodyBones.Jaw);
@@ -412,7 +427,7 @@ namespace QuickVR {
                 t.LookAt(_animator.GetBoneTransform(boneID - 1), transform.up);
             }
 
-            //Restore the ikTargetLimb real parent. 
+            //Restore the ikTargetLimb real parent and recalculate the hint position. 
             for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++)
             {
                 HumanBodyBones boneID = ToHumanBodyBones(ikBone);
@@ -421,7 +436,15 @@ namespace QuickVR {
                 ikSolver._targetLimb.localScale = Vector3.one;
                 if (QuickHumanTrait.IsBoneFingerLeft(boneID) || QuickHumanTrait.IsBoneFingerRight(boneID))
                 {
-                    ikSolver._targetLimb.localRotation = Quaternion.identity;
+                    //ikSolver._targetLimb.localRotation = Quaternion.identity;
+                }
+
+                if (ikSolver._targetHint)
+                {
+                    Vector3 u = (ikSolver._boneMid.position - ikSolver._boneLimb.position).normalized;
+                    Vector3 v = (ikSolver._boneMid.position - ikSolver._boneUpper.position).normalized;
+
+                    ikSolver._targetHint.position = ikSolver._boneMid.position + (u + v);
                 }
             }
 
@@ -434,7 +457,7 @@ namespace QuickVR {
             _ikTargetsFace.parent = transform;
             _ikTargetsFace.localScale = Vector3.one;
         }
-
+                
         protected virtual Transform GetIKTargetParent(HumanBodyBones boneID)
         {
             if (boneID == HumanBodyBones.LeftEye || boneID == HumanBodyBones.RightEye) return _ikTargetsFace;
@@ -473,12 +496,7 @@ namespace QuickVR {
 
         public override void Calibrate()
         {
-            //for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++)
-            //{
-            //    GetIKSolver(ikBone).Calibrate();
-            //}
-
-            ResetIKTargets(true);
+            LoadPose();
         }
 
         public static HumanBodyBones ToHumanBodyBones(IKBone ikBone)

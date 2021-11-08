@@ -84,9 +84,9 @@ namespace QuickVR
 
         #region GET AND SET
 
-        public override void SaveInitialBoneRotations()
+        public override void SavePose()
         {
-            base.SaveInitialBoneRotations();
+            base.SavePose();
 
             if (_boneLimb)
             {
@@ -94,18 +94,14 @@ namespace QuickVR
             }
         }
 
-        public override void SavePose()
-        {
-            base.SavePose();
-
-            _hipsInitialLocalPos = _boneLimb.localPosition;
-        }
-
         public override void LoadPose()
         {
             base.LoadPose();
 
-            _boneLimb.localPosition = _hipsInitialLocalPos;
+            if (_boneLimb)
+            {
+                _boneLimb.localPosition = _hipsInitialLocalPos;
+            }
         }
 
         public override void ResetIKChain()

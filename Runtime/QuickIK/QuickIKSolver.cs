@@ -202,8 +202,6 @@ namespace QuickVR
 
         protected virtual void Awake()
         {
-            SaveInitialBoneRotations();
-            
             SavePose();
 
             _ikManager = GetComponentInParent<QuickIKManager>();
@@ -212,22 +210,6 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
-
-        public virtual void SaveInitialBoneRotations()
-        {
-            if (_boneUpper)
-            {
-                _initialLocalRotationUpper = _boneUpper.localRotation;
-            }
-            if (_boneMid)
-            {
-                _initialLocalRotationMid = _boneMid.localRotation;
-            }
-            if (_boneLimb)
-            {
-                _initialLocalRotationLimb = _boneLimb.localRotation;
-            }
-        }
 
         public virtual void SavePose()
         {
