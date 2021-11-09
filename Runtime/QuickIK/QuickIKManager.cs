@@ -373,6 +373,8 @@ namespace QuickVR {
         public virtual void LoadAnimPose()
         {
             //Restore the TPose
+            LoadTPose();
+
             _ikTargetsRoot.ResetTransformation();
 
             _ikTargetsLeftHand.parent = _animator.GetBoneTransform(HumanBodyBones.LeftHand);
@@ -427,24 +429,28 @@ namespace QuickVR {
                 t.LookAt(_animator.GetBoneTransform(boneID - 1), transform.up);
             }
 
-            //Restore the ikTargetLimb real parent and recalculate the hint position. 
+            //Restore the ikTargetLimb real parent. 
             for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++)
             {
                 HumanBodyBones boneID = ToHumanBodyBones(ikBone);
                 QuickIKSolver ikSolver = GetIKSolver(ikBone);
                 ikSolver._targetLimb.parent = GetIKTargetParent(boneID);
                 ikSolver._targetLimb.localScale = Vector3.one;
-                if (QuickHumanTrait.IsBoneFingerLeft(boneID) || QuickHumanTrait.IsBoneFingerRight(boneID))
-                {
-                    //ikSolver._targetLimb.localRotation = Quaternion.identity;
-                }
+            }
 
+            //Recalculate the ikTargetHint position of the arms and legs
+            for (IKBone ikBone = IKBone.LeftHand; ikBone <= IKBone.RightFoot; ikBone++)
+            {
+                QuickIKSolver ikSolver = GetIKSolver(ikBone);
                 if (ikSolver._targetHint)
                 {
                     Vector3 u = (ikSolver._boneMid.position - ikSolver._boneLimb.position).normalized;
                     Vector3 v = (ikSolver._boneMid.position - ikSolver._boneUpper.position).normalized;
 
-                    ikSolver._targetHint.position = ikSolver._boneMid.position + (u + v);
+                    if (Vector3.Angle(u, v) < 175)
+                    {
+                        ikSolver._targetHint.position = ikSolver._boneMid.position + (u + v);
+                    }
                 }
             }
 
