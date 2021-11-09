@@ -641,9 +641,9 @@ namespace QuickVR {
             QuickIKSolver ikSolverHips = GetIKSolver(IKBone.Hips);
             QuickIKSolver ikSolverHead = GetIKSolver(IKBone.Head);
 
-            float chainLength = Vector3.Distance(_animator.GetBoneTransform(HumanBodyBones.Hips).position, _animator.GetBoneTransform(HumanBodyBones.Head).position);
-            Vector3 v = (ikSolverHips._targetLimb.position - ikSolverHead._targetLimb.position).normalized;
-            ikSolverHips._targetLimb.position = ikSolverHead._targetLimb.position + v * chainLength;
+            //float chainLength = Vector3.Distance(_animator.GetBoneTransform(HumanBodyBones.Hips).position, _animator.GetBoneTransform(HumanBodyBones.Head).position);
+            //Vector3 v = (ikSolverHips._targetLimb.position - ikSolverHead._targetLimb.position).normalized;
+            //ikSolverHips._targetLimb.position = ikSolverHead._targetLimb.position + v * chainLength;
 
             //Update the IK for the body controllers
             ikSolverHips.UpdateIK();

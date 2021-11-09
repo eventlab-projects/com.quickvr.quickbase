@@ -364,6 +364,17 @@ namespace QuickVR {
                     }
                 }
 
+                //2) Special case. If the Hips is set to Tracking mode, we need to adjust the IKTarget position of the hips
+                //in a way that the head will match the position of the camera provided by the HMD
+                if (GetIKControl(IKBone.Hips) == ControlType.Tracking)
+                {
+                    QuickIKSolver ikSolverHips = GetIKSolver(IKBone.Hips);
+                    QuickIKSolver ikSolverHead = GetIKSolver(IKBone.Head);
+                    float chainLength = Vector3.Distance(_animator.GetBoneTransform(HumanBodyBones.Hips).position, _animator.GetBoneTransform(HumanBodyBones.Head).position);
+                    Vector3 v = (ikSolverHips._targetLimb.position - ikSolverHead._targetLimb.position).normalized;
+                    ikSolverHips._targetLimb.position = ikSolverHead._targetLimb.position + v * chainLength;
+                }
+
                 UpdateVRCursors();
                 _footprints.gameObject.SetActive(_useFootprints);
             }
