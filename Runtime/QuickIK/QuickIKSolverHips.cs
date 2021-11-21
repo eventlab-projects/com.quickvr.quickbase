@@ -87,15 +87,21 @@ namespace QuickVR
         public override void SavePose()
         {
             base.SavePose();
-            
-            _hipsInitialLocalPos = _boneLimb.localPosition;
+
+            if (_boneLimb)
+            {
+                _hipsInitialLocalPos = _boneLimb.localPosition;
+            }
         }
 
         public override void LoadPose()
         {
             base.LoadPose();
 
-            _boneLimb.localPosition = _hipsInitialLocalPos;
+            if (_boneLimb)
+            {
+                _boneLimb.localPosition = _hipsInitialLocalPos;
+            }
         }
 
         public override void ResetIKChain()

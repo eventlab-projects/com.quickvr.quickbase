@@ -109,7 +109,7 @@ namespace QuickVR
                     QuickIKManager ikManager = ikManagerEditor._ikManager;
                     if (ikManager && ikManager.gameObject.activeInHierarchy)
                     {
-                        for (IKBone ikBone = IKBone.LeftHand; ikBone < IKBone.LastBone; ikBone++)
+                        for (IKBone ikBone = IKBone.Head; ikBone < IKBone.LastBone; ikBone++)
                         {
                             QuickIKSolver ikSolver = ikManager.GetIKSolver(ikBone);
                             float ikTargetHintDistance = ikBone <= IKBone.RightFoot ? QuickIKManager.DEFAULT_TARGET_HINT_DISTANCE : QuickIKManager.DEFAULT_TARGET_HINT_FINGER_DISTANCE;

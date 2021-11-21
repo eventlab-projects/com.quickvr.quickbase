@@ -148,28 +148,28 @@ namespace QuickVR
 
 #region DEBUG
 
-        protected override void OnDrawGizmos()
-        {
-            float r = 0.05f;
+        //protected override void OnDrawGizmos()
+        //{
+        //    float r = 0.05f;
 
-            Gizmos.color = Color.blue;
-            Vector3 pa = GetCornerPosition(Corner.BOTTOM_LEFT);
-            Gizmos.DrawSphere(pa, r);
+        //    Gizmos.color = Color.blue;
+        //    Vector3 pa = GetCornerPosition(Corner.BOTTOM_LEFT);
+        //    Gizmos.DrawSphere(pa, r);
 
-            Gizmos.color = Color.yellow;
-            Vector3 pb = GetCornerPosition(Corner.BOTTOM_RIGHT);
-            Gizmos.DrawSphere(pb, r);
+        //    Gizmos.color = Color.yellow;
+        //    Vector3 pb = GetCornerPosition(Corner.BOTTOM_RIGHT);
+        //    Gizmos.DrawSphere(pb, r);
 
-            Gizmos.color = Color.red;
-            Vector3 pc = GetCornerPosition(Corner.TOP_LEFT);
-            Gizmos.DrawSphere(pc, r);
+        //    Gizmos.color = Color.red;
+        //    Vector3 pc = GetCornerPosition(Corner.TOP_LEFT);
+        //    Gizmos.DrawSphere(pc, r);
 
-            Gizmos.color = Color.green;
-            Vector3 pd = GetCornerPosition(Corner.TOP_RIGHT);
-            Gizmos.DrawSphere(pd, r);
+        //    Gizmos.color = Color.green;
+        //    Vector3 pd = GetCornerPosition(Corner.TOP_RIGHT);
+        //    Gizmos.DrawSphere(pd, r);
 
-            DebugExtension.DrawCoordinatesSystem(transform.position, transform.right, transform.up, transform.forward);
-        }
+        //    DebugExtension.DrawCoordinatesSystem(transform.position, transform.right, transform.up, transform.forward);
+        //}
 
         protected virtual void DrawReflectionCamera(Camera reflectionCamera)
         {
