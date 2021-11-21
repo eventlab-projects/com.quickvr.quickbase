@@ -584,6 +584,14 @@ namespace QuickVR
             if (c) GameObject.DestroyImmediate(c.gameObject);
         }
 
+        public static void DestroyImmediate(UnityEngine.Object[] objects)
+        {
+            for (int i = objects.Length - 1; i >= 0; i--)
+            {
+                UnityEngine.Object.DestroyImmediate(objects[i]);
+            }
+        }
+
         public static void DestroyChild(this Transform transform, int childID)
         {
             if ((transform.childCount == 0) || (childID >= transform.childCount)) return;
