@@ -77,6 +77,69 @@ namespace QuickVR
         private static Dictionary<AxisCode, string[]> _toAxisControl = new Dictionary<AxisCode, string[]>();
         private static Dictionary<ButtonCodes, string[]> _toButtonControl = new Dictionary<ButtonCodes, string[]>();
 
+        private class QuickButtonControl
+        {
+            //This is a hack. For some reason, on Unity 2020.2.x (and possibly other Unity versions), the InputControl
+            //corresponding to the "triggertouched" is an AxisControl instead of a ButtonControl. This produces
+            //a cast exception when trying to cast it to a ButtonControl as it is required GetInputControlButton. 
+            //This class is used just to bypass this problem. It basically replicates the behavior of ButtonControl. 
+
+            protected AxisControl _axisControl = null;
+
+            protected InputDevice device
+            {
+                get
+                {
+                    return _axisControl.device;
+                }
+            }
+
+            /// <summary>
+            /// Whether the button is currently pressed.
+            /// </summary>
+            /// <value>True if button is currently pressed.</value>
+            /// <remarks>
+            /// A button is considered press if it's value is equal to or greater
+            /// than its button press threshold (<see cref="pressPointOrDefault"/>).
+            /// </remarks>
+            /// <seealso cref="InputSettings.defaultButtonPressPoint"/>
+            /// <seealso cref="pressPoint"/>
+            /// <seealso cref="InputSystem.onAnyButtonPress"/>
+            public bool isPressed => IsValueConsideredPressed(ReadValue());
+
+            public bool wasPressedThisFrame => device.wasUpdatedThisFrame && IsValueConsideredPressed(ReadValue()) && !IsValueConsideredPressed(ReadValueFromPreviousFrame());
+
+            public bool wasReleasedThisFrame => device.wasUpdatedThisFrame && !IsValueConsideredPressed(ReadValue()) && IsValueConsideredPressed(ReadValueFromPreviousFrame());
+
+            #region CREATION AND DESTRUCTION
+
+            public QuickButtonControl(AxisControl aControl)
+            {
+                _axisControl = aControl;
+            }
+
+            #endregion
+
+            #region GET AND SET
+
+            protected virtual bool IsValueConsideredPressed(float value)
+            {
+                return value >= 0.1f;
+            }
+
+            protected virtual float ReadValue()
+            {
+                return _axisControl.ReadValue();
+            }
+
+            protected virtual float ReadValueFromPreviousFrame()
+            {
+                return _axisControl.ReadValueFromPreviousFrame();
+            }
+
+            #endregion
+        }
+
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -151,16 +214,16 @@ namespace QuickVR
             return result;
         }
 
-        private static ButtonControl GetInputControlButton(XRController controller, ButtonCodes button)
+        private static QuickButtonControl GetInputControlButton(XRController controller, ButtonCodes button)
         {
-            InputControl result = null;
+            InputControl iControl = null;
             string[] values = _toButtonControl[button];
-            for (int i = 0; result == null && i < values.Length; i++)
+            for (int i = 0; iControl == null && i < values.Length; i++)
             {
-                result = controller.TryGetChildControl(values[i]);
+                iControl = controller.TryGetChildControl(values[i]);
             }
 
-            return (ButtonControl)result;
+            return iControl == null ? null : new QuickButtonControl((AxisControl)iControl);
         }
 
         protected override float ImpGetAxis(AxisCode axis)
@@ -197,9 +260,9 @@ namespace QuickVR
 
         protected override bool ImpGetButton(ButtonCodes button)
         {
-            InputControl tmp = GetInputControlButton(_inputDevice, button);
+            QuickButtonControl tmp = GetInputControlButton(_inputDevice, button);
 
-            return tmp != null ? ((ButtonControl)tmp).isPressed : false;
+            return tmp != null ? tmp.isPressed : false;
         }
 
         private static XRController GetXRController(AxisCode axis)
@@ -246,7 +309,7 @@ namespace QuickVR
 
             if (controller != null)
             {
-                ButtonControl bControl = GetInputControlButton(controller, key);
+                QuickButtonControl bControl = GetInputControlButton(controller, key);
                 return bControl != null && bControl.wasPressedThisFrame;
             }
 
@@ -259,7 +322,7 @@ namespace QuickVR
 
             if (controller != null)
             {
-                ButtonControl bControl = GetInputControlButton(controller, key);
+                QuickButtonControl bControl = GetInputControlButton(controller, key);
                 return bControl != null && bControl.isPressed;
             }
 
@@ -272,7 +335,7 @@ namespace QuickVR
 
             if (controller != null)
             {
-                ButtonControl bControl = GetInputControlButton(controller, key);
+                QuickButtonControl bControl = GetInputControlButton(controller, key);
                 return bControl != null && bControl.wasReleasedThisFrame;
             }
 
