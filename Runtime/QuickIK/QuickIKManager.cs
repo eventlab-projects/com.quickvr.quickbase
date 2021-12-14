@@ -225,8 +225,15 @@ namespace QuickVR {
         protected virtual QuickIKSolver CreateIKSolver(IKBone ikBone)
         {
             QuickIKSolver result;
-            
-            if (ikBone == IKBone.Hips) result = CreateIKSolver<QuickIKSolverHips>(ikBone);
+
+            if (ikBone == IKBone.Hips)
+            {
+                result = CreateIKSolver<QuickIKSolverHips>(ikBone);
+            }
+            else if (ikBone == IKBone.Head)
+            {
+                result = CreateIKSolver<QuickIKSolverHead>(ikBone);
+            }
             else if (ikBone == IKBone.LeftHand || ikBone == IKBone.RightHand)
             {
                 result = CreateIKSolver<QuickIKSolverHand>(ikBone);
@@ -449,7 +456,7 @@ namespace QuickVR {
 
                     if (Vector3.Angle(u, v) < 175)
                     {
-                        ikSolver._targetHint.position = ikSolver._boneMid.position + (u + v);
+                        ikSolver._targetHint.position = ikSolver._boneMid.position + (u + v).normalized * DEFAULT_TARGET_HINT_DISTANCE;
                     }
                 }
             }
@@ -467,8 +474,8 @@ namespace QuickVR {
         protected virtual Transform GetIKTargetParent(HumanBodyBones boneID)
         {
             if (boneID == HumanBodyBones.LeftEye || boneID == HumanBodyBones.RightEye) return _ikTargetsFace;
-            if (QuickHumanTrait.IsBoneFingerLeft(boneID)) return _ikTargetsLeftHand.CreateChild("_Axis_" + boneID.ToString());
-            if (QuickHumanTrait.IsBoneFingerRight(boneID)) return _ikTargetsRightHand.CreateChild("_Axis_" + boneID.ToString());
+            if (QuickHumanTrait.IsBoneFingerLeft(boneID)) return _ikTargetsLeftHand;
+            if (QuickHumanTrait.IsBoneFingerRight(boneID)) return _ikTargetsRightHand;
             return _ikTargetsRoot;
         }
 
@@ -689,7 +696,7 @@ namespace QuickVR {
             }
         }
 
-        protected virtual void UpdateIKTargetsRootHands()
+        public virtual void UpdateIKTargetsRootHands()
         {
             Transform leftHand = _animator.GetBoneTransform(HumanBodyBones.LeftHand);
             _ikTargetsLeftHand.position = leftHand.position;

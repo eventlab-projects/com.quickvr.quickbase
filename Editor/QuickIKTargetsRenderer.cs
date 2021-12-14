@@ -25,7 +25,6 @@ namespace QuickVR
             QuickIKManagerExecuteInEditMode.OnIKManagerAdded += OnQuickIKManagerAdded;
             QuickIKManagerExecuteInEditMode.OnIKManagerRemoved += OnQuickIKManagerRemoved;
 
-            SceneView.beforeSceneGui += CheckIKTargetsDistance;
             SceneView.duringSceneGui += OnSceneGUI;
         }
 
@@ -98,40 +97,6 @@ namespace QuickVR
             _selectedIKTarget._ikBone = ikBone;
 
             Selection.activeTransform = ikTarget;
-        }
-
-        private static void CheckIKTargetsDistance(SceneView sceneView)
-        {
-            if (!Application.isPlaying)
-            {
-                foreach (QuickIKManagerExecuteInEditMode ikManagerEditor in _ikManagers)
-                {
-                    QuickIKManager ikManager = ikManagerEditor._ikManager;
-                    if (ikManager && ikManager.gameObject.activeInHierarchy)
-                    {
-                        for (IKBone ikBone = IKBone.Head; ikBone < IKBone.LastBone; ikBone++)
-                        {
-                            QuickIKSolver ikSolver = ikManager.GetIKSolver(ikBone);
-                            float ikTargetHintDistance = ikBone <= IKBone.RightFoot ? QuickIKManager.DEFAULT_TARGET_HINT_DISTANCE : QuickIKManager.DEFAULT_TARGET_HINT_FINGER_DISTANCE;
-                            CheckIKTargetsDistance(ikSolver, ikBone == IKBone.Head, ikTargetHintDistance);
-                        }
-                    }
-                }
-            }
-        }
-
-        private static void CheckIKTargetsDistance(QuickIKSolver ikSolver, bool hasFixedLength, float ikTargetHintDistance)
-        {
-            //The targer cannot be farther away than the chain length
-            Vector3 v = ikSolver._targetLimb.position - ikSolver._boneUpper.position;
-            float d = hasFixedLength ? ikSolver.GetChainLength() : Mathf.Min(v.magnitude, ikSolver.GetChainLength());
-            ikSolver._targetLimb.position = ikSolver._boneUpper.position + v.normalized * d;
-
-            if (ikSolver._targetHint)
-            {
-                v = ikSolver._targetHint.position - ikSolver._boneMid.position;
-                ikSolver._targetHint.position = ikSolver._boneMid.position + v.normalized * Mathf.Min(v.magnitude, ikTargetHintDistance);
-            }
         }
 
     }
