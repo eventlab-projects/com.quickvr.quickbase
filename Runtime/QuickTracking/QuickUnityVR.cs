@@ -400,29 +400,29 @@ namespace QuickVR {
             if (_vrPlayArea)
             {
 
-                if (_boneFingers == null)
-                {
-                    InitBoneFingers();
-                }
+                //if (_boneFingers == null)
+                //{
+                //    InitBoneFingers();
+                //}
 
-                for (int j = 0; j < _boneFingers.Count; j+= 4)
-                {
-                    if (_boneFingers[j].Key != null)
-                    {
-                        for (int i = 0; i < 3; i++)
-                        {
-                            if ((i == 0 && (j == 0 || j == 20)) && QuickVRManager._handTrackingMode == QuickVRManager.HandTrackingMode.Controllers)
-                            {
-                                //HACK
-                                //Avoid applying the rotation to the thumb distal fingers as the results look weird. Look for a better method 
-                                //of transfering the bone rotations when using the controllers. 
-                                continue;
-                            }
-                            ApplyFingerRotation(_boneFingers[j + i], _boneFingers[j + i + 1]);
-                        }
-                    }
-                }
-                
+                //for (int j = 0; j < _boneFingers.Count; j+= 4)
+                //{
+                //    if (_boneFingers[j].Key != null)
+                //    {
+                //        for (int i = 0; i < 3; i++)
+                //        {
+                //            if ((i == 0 && (j == 0 || j == 20)) && QuickVRManager._handTrackingMode == QuickVRManager.HandTrackingMode.Controllers)
+                //            {
+                //                //HACK
+                //                //Avoid applying the rotation to the thumb distal fingers as the results look weird. Look for a better method 
+                //                //of transfering the bone rotations when using the controllers. 
+                //                continue;
+                //            }
+                //            ApplyFingerRotation(_boneFingers[j + i], _boneFingers[j + i + 1]);
+                //        }
+                //    }
+                //}
+
 
                 //foreach (bool b in new bool[] { true, false })
                 //{
@@ -520,9 +520,33 @@ namespace QuickVR {
                 //    }
                 //}
 
+                foreach (bool isLeft in new bool[] { true, false })
+                {
+                    foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
+                    {
+                        List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, isLeft);
+                        QuickVRNode n0 = _vrPlayArea.GetVRNode(fingerBones[0]);
+                        QuickVRNode n1 = _vrPlayArea.GetVRNode(fingerBones[1]);
+                        QuickVRNode n2 = _vrPlayArea.GetVRNode(fingerBones[2]);
+
+                        if (n0.IsTracked() && n1.IsTracked() && n2.IsTracked())
+                        {
+                            QuickIKSolver ikSolver = GetIKSolver((HumanBodyBones)fingerBones[2]);
+
+                            Vector3 v = (n1.transform.position - n0.transform.position).normalized;
+                            Vector3 w = (n2.transform.position - n1.transform.position).normalized;
+
+                            ikSolver._targetLimb.position = ikSolver._boneUpper.position + v * ikSolver.GetUpperLength() + w * ikSolver.GetMidLength();
+                            ikSolver._targetLimb.rotation = n2.transform.rotation;
+                            ikSolver._targetHint.position = ikSolver._boneMid.position + n1.transform.up * DEFAULT_TARGET_HINT_FINGER_DISTANCE;
+                            //ikSolver._targetHint.position = ikSolver._boneMid.position + (n1.transform.position - n0.transform.position) + (n1.transform.position - n2.transform.position);
+                        }
+                    }
+                }
+
             }
 
-            //base.UpdateIKFingers();
+            base.UpdateIKFingers();
         }
         
         protected virtual void UpdateIKTargetPosFromUser(QuickVRNode node, HumanBodyBones boneID)
