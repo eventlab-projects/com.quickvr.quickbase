@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
+using TMPro;
+
 namespace QuickVR
 {
 
@@ -19,6 +21,7 @@ namespace QuickVR
         #region PROTECTED ATTRIBUTES
 
         protected Image _buttonBG = null;
+        protected TextMeshProUGUI _label = null;
 
         #endregion
 
@@ -34,6 +37,8 @@ namespace QuickVR
 
             Rigidbody rBody = gameObject.GetOrCreateComponent<Rigidbody>();
             rBody.isKinematic = true;
+
+            //CreateLabel();
         }
 
         public override void Over()
@@ -49,6 +54,15 @@ namespace QuickVR
 
             _buttonBG.color = _colorNormal;
         }
+
+        //#region GET AND SET
+
+        //public virtual void SetText()
+        //{
+
+        //}
+
+        //#endregion
 
     }
 
