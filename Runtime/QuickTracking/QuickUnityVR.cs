@@ -15,6 +15,10 @@ namespace QuickVR {
         protected static float HUMAN_HEADS_TALL_EYES = HUMAN_HEADS_TALL - 0.5f;
         protected static float HUMAN_HEADS_TALL_HEAD = HUMAN_HEADS_TALL - 1.0f;
 
+        //Rotation limits for CameraMono
+        const float MAX_HORIZONTAL_ANGLE = 80;
+        const float MAX_VERTICAL_ANGLE = 45;
+
         #endregion
 
         #region PUBLIC ATTRIBUTES
@@ -71,6 +75,8 @@ namespace QuickVR {
         [SerializeField, HideInInspector]
         protected bool m_ApplyHeadPosition = true;
 
+        public bool _rotateCameraMono = true;
+
         #endregion
 
         #region PROTECTED PARAMETERS
@@ -100,7 +106,13 @@ namespace QuickVR {
         [SerializeField, HideInInspector]
         protected List<ControlType> m_IKControls;
 
-        protected List<KeyValuePair<Transform, Transform>> _boneFingers = null; 
+        protected List<KeyValuePair<Transform, Transform>> _boneFingers = null;
+
+        //Rotation attributes for CameraMono
+        protected float _speedH = 2.0f;
+        protected float _speedV = 2.0f;
+        protected float _offsetH = 0;
+        protected float _offsetV = 0;
 
         #endregion
 
@@ -116,6 +128,11 @@ namespace QuickVR {
             _vrPlayArea.GetVRNode(HumanBodyBones.RightHand).OnCalibrateVRNode += OnCalibrateVRNodeRightHand;
             _vrPlayArea.GetVRNode(HumanBodyBones.LeftFoot).OnCalibrateVRNode += OnCalibrateVRNodeFoot;
             _vrPlayArea.GetVRNode(HumanBodyBones.RightFoot).OnCalibrateVRNode += OnCalibrateVRNodeFoot;
+
+            if (!QuickVRManager.IsXREnabled())
+            {
+                QuickVRManager.OnPostUpdateIKTargets += UpdateHeadRotationMono;
+            }
         }
 
         protected virtual void OnDisable()
@@ -126,6 +143,11 @@ namespace QuickVR {
             _vrPlayArea.GetVRNode(HumanBodyBones.RightHand).OnCalibrateVRNode -= OnCalibrateVRNodeRightHand;
             _vrPlayArea.GetVRNode(HumanBodyBones.LeftFoot).OnCalibrateVRNode -= OnCalibrateVRNodeFoot;
             _vrPlayArea.GetVRNode(HumanBodyBones.RightFoot).OnCalibrateVRNode -= OnCalibrateVRNodeFoot;
+
+            if (!QuickVRManager.IsXREnabled())
+            {
+                QuickVRManager.OnPostUpdateIKTargets -= UpdateHeadRotationMono;
+            }
         }
 
         protected override void Awake()
@@ -377,6 +399,27 @@ namespace QuickVR {
 
                 UpdateVRCursors();
                 _footprints.gameObject.SetActive(_useFootprints);
+            }
+        }
+
+        protected virtual void UpdateHeadRotationMono()
+        {
+            if (_rotateCameraMono)
+            {
+                float x = InputManager.GetAxis(InputManager.DEFAULT_AXIS_HORIZONTAL);
+                float y = InputManager.GetAxis(InputManager.DEFAULT_AXIS_VERTICAL);
+                _offsetH += _speedH * x;
+                _offsetV -= _speedV * y;
+
+                _offsetH = Mathf.Clamp(_offsetH, -MAX_HORIZONTAL_ANGLE, MAX_HORIZONTAL_ANGLE);
+                _offsetV = Mathf.Clamp(_offsetV, -MAX_VERTICAL_ANGLE, MAX_VERTICAL_ANGLE);
+
+                Transform t = GetIKSolver(HumanBodyBones.Head)._targetLimb;
+                t.localRotation = Quaternion.identity;
+                t.Rotate(t.up, _offsetH, Space.World);
+                t.Rotate(t.right, _offsetV, Space.World);
+
+                _vrPlayArea.GetVRNode(HumanBodyBones.Head).transform.localRotation = t.localRotation;
             }
         }
 
