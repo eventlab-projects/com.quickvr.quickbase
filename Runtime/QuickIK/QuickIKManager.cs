@@ -278,7 +278,13 @@ namespace QuickVR {
                 else if (boneName.Contains("Distal"))
                 {
                     ikTarget.up = transform.up;
-                    ikTarget.forward = _animator.GetBoneTransform(boneID).position - _animator.GetBoneTransform(boneID - 1).position;
+                    //ikTarget.forward = _animator.GetBoneTransform(boneID).position - _animator.GetBoneTransform(boneID - 1).position;
+                    ikTarget.forward = _animator.GetBoneTransformFingerTip(boneID).position - _animator.GetBoneTransform(boneID).position;
+                    if (boneName.Contains("Thumb"))
+                    {
+                        float sign = boneName.Contains("Left") ? -1 : 1;
+                        ikTarget.Rotate(ikTarget.forward, sign * 90, Space.World);
+                    }
                 }
                 else if (boneName.Contains("Intermediate"))
                 {

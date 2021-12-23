@@ -582,6 +582,7 @@ namespace QuickVR {
                             ikSolver._targetLimb.position = ikSolver._boneUpper.position + v * ikSolver.GetUpperLength() + w * ikSolver.GetMidLength();
                             ikSolver._targetLimb.rotation = n2.transform.rotation;
                             ikSolver._targetHint.position = ikSolver._boneMid.position + n1.transform.up * DEFAULT_TARGET_HINT_FINGER_DISTANCE;
+                            ikSolver._targetHint.rotation = n1.transform.rotation;
                             //ikSolver._targetHint.position = ikSolver._boneMid.position + (n1.transform.position - n0.transform.position) + (n1.transform.position - n2.transform.position);
                         }
                     }
