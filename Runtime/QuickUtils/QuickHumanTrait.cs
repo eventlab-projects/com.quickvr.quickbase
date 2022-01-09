@@ -421,6 +421,18 @@ namespace QuickVR
             return result;
         }
 
+        public static Transform GetBoneTransformFingerTip(this Animator animator, HumanBodyBones boneID)
+        {
+            Transform result = null;
+            if (boneID >= HumanBodyBones.LeftThumbProximal && boneID <= HumanBodyBones.RightLittleDistal)
+            {
+                bool isLeft = boneID < HumanBodyBones.RightThumbProximal;
+                result = animator.GetBoneTransform(GetBonesFromFinger(GetFingerFromBone((QuickHumanBodyBones)boneID), isLeft)[3]);
+            }
+
+            return result;
+        }
+
         public static Transform GetBoneTransform(this Animator animator, QuickHumanBodyBones boneID)
         {
             Transform result = null;
@@ -485,6 +497,12 @@ namespace QuickVR
 
         public static QuickHumanFingers GetFingerFromBone(QuickHumanBodyBones bone)
         {
+            if (_fingerFromBone.Count == 0)
+            {
+                _bonesFromFingerLeft = InitHumanFingers(true);
+                _bonesFromFingerRight = InitHumanFingers(false);
+            }
+
             return _fingerFromBone[bone];
         }
 

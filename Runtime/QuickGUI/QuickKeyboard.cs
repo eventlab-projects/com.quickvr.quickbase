@@ -1,7 +1,9 @@
 ﻿using UnityEngine;
+using UnityEngine.InputSystem;
+
 using TMPro;
 
-using UnityEngine.InputSystem;
+using System.Collections;
 
 namespace QuickVR
 {
@@ -34,6 +36,8 @@ namespace QuickVR
             }
         }
 
+        protected Coroutine _coUpdateTextHintError = null;
+
         #endregion
 
         #region ACTIONS
@@ -45,6 +49,7 @@ namespace QuickVR
 
         #region CONSTANTS
 
+        protected Key[] _keysRowNum = { Key.Digit1, Key.Digit2, Key.Digit3, Key.Digit4, Key.Digit5, Key.Digit6, Key.Digit7, Key.Digit8, Key.Digit9, Key.Digit0 };
         protected Key[] _keysRow1 = { Key.Q, Key.W, Key.E, Key.R, Key.T, Key.Y, Key.U, Key.I, Key.O, Key.P };
         protected Key[] _keysRow2 = { Key.A, Key.S, Key.D, Key.F, Key.G, Key.H, Key.J, Key.K, Key.L, Key.Semicolon };
         protected Key[] _keysRow3 = { Key.LeftShift, Key.Z, Key.X, Key.C, Key.V, Key.B, Key.N, Key.M, Key.Slash, Key.Period };
@@ -54,6 +59,9 @@ namespace QuickVR
 
         protected const string TEXT_INPUT_NAME = "__TextInput__";
         protected const string TEXT_HINT_NAME = "__TextInputHint__";
+
+        protected Color DEFAULT_COLOR_TEXT_HINT = new Color(0.0f, 0.043f, 1.0f);
+        protected Color DEFAULT_COLOR_TEXT_HINT_ERROR = new Color(1.0f, 0.043f, 0.0f);
 
         #endregion
 
@@ -75,6 +83,7 @@ namespace QuickVR
             _textInput = transform.Find(TEXT_INPUT_NAME).GetComponentInChildren<TextMeshProUGUI>();
             _textHint = transform.Find(TEXT_HINT_NAME).GetComponentInChildren<TextMeshProUGUI>();
 
+            CreateRowKeys(_keysRowNum, 0);
             CreateRowKeys(_keysRow1, 1);
             CreateRowKeys(_keysRow2, 2);
             CreateRowKeys(_keysRow3, 3);
@@ -119,6 +128,14 @@ namespace QuickVR
                 else if (c == Key.Slash)
                 {
                     key.SetLabel("/");
+                }
+                else if (c == Key.Digit0)
+                {
+                    key.SetLabel("0");
+                }
+                else if (c >= Key.Digit1 && c <= Key.Digit9)
+                {
+                    key.SetLabel(((int)c - (int)Key.Digit1 + 1).ToString());
                 }
                 else
                 {
@@ -177,7 +194,28 @@ namespace QuickVR
 
         public virtual void SetTextHint(string txt)
         {
+            SetTextHint(txt, DEFAULT_COLOR_TEXT_HINT);
+        }
+
+        public virtual void SetTextHint(string txt, Color color)
+        {
+            if (_coUpdateTextHintError != null)
+            {
+                StopCoroutine(_coUpdateTextHintError);
+            }
+
             _textHint.text = txt;
+            _textHint.faceColor = color;
+        }
+
+        public virtual void SetTextHintError(string txt)
+        {
+            SetTextHintError(txt, DEFAULT_COLOR_TEXT_HINT_ERROR);
+        }
+
+        public virtual void SetTextHintError(string txt, Color color)
+        {
+            _coUpdateTextHintError = StartCoroutine(CoUpdateTextHintError(txt, color));
         }
 
         public virtual void SetText(string txt)
@@ -260,6 +298,18 @@ namespace QuickVR
                     k.DoAction();
                 }
             }
+        }
+
+        protected virtual IEnumerator CoUpdateTextHintError(string text, Color color)
+        {
+            string prevText = _textHint.text;
+            Color prevColor = _textHint.faceColor;
+            _textHint.text = text;
+            _textHint.faceColor = color;
+
+            yield return new WaitForSeconds(5);
+
+            SetTextHint(prevText, prevColor);
         }
 
         #endregion

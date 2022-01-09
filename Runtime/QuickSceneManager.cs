@@ -162,6 +162,11 @@ namespace QuickVR
             }
         }
 
+        public virtual Scene GetActiveScene()
+        {
+            return SceneManager.GetActiveScene();
+        }
+
         #endregion
 
         #region UPDATE

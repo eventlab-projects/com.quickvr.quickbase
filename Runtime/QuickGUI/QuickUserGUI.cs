@@ -95,19 +95,24 @@ namespace QuickVR
 
         protected virtual Text CreateInstructionsText()
         {
-            Text result = transform.CreateChild(NAME_INSTRUCTIONS_TRANSFORM).GetOrCreateComponent<Text>();
-            RectTransform t = result.GetComponent<RectTransform>();
-            t.sizeDelta = new Vector2(15, 12);
-            t.anchorMin = new Vector2(0.5f, 1.0f);
-            t.anchorMax = new Vector2(0.5f, 1.0f);
-            t.pivot = new Vector2(0.5f, 1.0f);
+            Transform tInstructions = transform.CreateChild(NAME_INSTRUCTIONS_TRANSFORM);
+            Text result = tInstructions.GetComponent<Text>();
+            if (!result)
+            {
+                result = tInstructions.gameObject.AddComponent<Text>();
+                RectTransform t = result.GetComponent<RectTransform>();
+                t.sizeDelta = new Vector2(15, 12);
+                t.anchorMin = new Vector2(0.5f, 1.0f);
+                t.anchorMax = new Vector2(0.5f, 1.0f);
+                t.pivot = new Vector2(0.5f, 1.0f);
+
+                t.localScale = Vector3.one * 0.25f;
+
+                result.font = Resources.Load<Font>("Fonts/arial");
+                result.fontSize = 1;
+                result.material = Instantiate(Resources.Load<Material>("Materials/GUIText"));
+            }
             
-            t.localScale = Vector3.one * 0.25f;
-
-            result.font = Resources.Load<Font>("Fonts/arial");
-            result.fontSize = 1;
-            result.material = Instantiate(Resources.Load<Material>("Materials/GUIText"));
-
             return result;
         }
 

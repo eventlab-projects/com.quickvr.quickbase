@@ -18,11 +18,6 @@ namespace QuickVR
         public float _cameraNearPlane = DEFAULT_NEAR_CLIP_PLANE;
         public float _cameraFarPlane = DEFAULT_FAR_CLIP_PLANE;
 
-        [Header("Camera Mono Options:")]
-        public bool _rotateCamera = true;
-        public float _speedH = 2.0f;
-        public float _speedV = 2.0f;
-
         #endregion
 
         #region PROTECTED ATTRIBUTES
@@ -39,8 +34,6 @@ namespace QuickVR
 
         protected static Camera _camera = null;
         
-        protected float _offsetH = 0;
-        protected float _offsetV = 0;
         protected Quaternion _initialLocalRotationHead = Quaternion.identity;
 
         #endregion
@@ -49,10 +42,6 @@ namespace QuickVR
 
         public const float DEFAULT_NEAR_CLIP_PLANE = 0.05f;
         public const float DEFAULT_FAR_CLIP_PLANE = 500.0f;
-
-        //Rotation limits for CameraMono
-        const float MAX_HORIZONTAL_ANGLE = 80;
-        const float MAX_VERTICAL_ANGLE = 45;
 
         #endregion
 
@@ -146,36 +135,36 @@ namespace QuickVR
             }
         }
 
-        protected virtual void UpdateCameraRotationMono()
-        {
-            if (_rotateCamera)
-            {
-                float x = InputManager.GetAxis(InputManager.DEFAULT_AXIS_HORIZONTAL);
-                float y = InputManager.GetAxis(InputManager.DEFAULT_AXIS_VERTICAL);
-                _offsetH += _speedH * x;
-                _offsetV -= _speedV * y;
+        //protected virtual void UpdateCameraRotationMono()
+        //{
+        //    if (_rotateCamera)
+        //    {
+        //        float x = InputManager.GetAxis(InputManager.DEFAULT_AXIS_HORIZONTAL);
+        //        float y = InputManager.GetAxis(InputManager.DEFAULT_AXIS_VERTICAL);
+        //        _offsetH += _speedH * x;
+        //        _offsetV -= _speedV * y;
 
-                _offsetH = Mathf.Clamp(_offsetH, -MAX_HORIZONTAL_ANGLE, MAX_HORIZONTAL_ANGLE);
-                _offsetV = Mathf.Clamp(_offsetV, -MAX_VERTICAL_ANGLE, MAX_VERTICAL_ANGLE);
-            }
+        //        _offsetH = Mathf.Clamp(_offsetH, -MAX_HORIZONTAL_ANGLE, MAX_HORIZONTAL_ANGLE);
+        //        _offsetV = Mathf.Clamp(_offsetV, -MAX_VERTICAL_ANGLE, MAX_VERTICAL_ANGLE);
+        //    }
 
-            //Reset the rotation of the head
-            _head.localRotation = _initialLocalRotationHead;
+        //    //Reset the rotation of the head
+        //    _head.localRotation = _initialLocalRotationHead;
 
-            //Align the Camera with the avatar
-            _camera.transform.rotation = _animatorSource.transform.rotation;
+        //    //Align the Camera with the avatar
+        //    _camera.transform.rotation = _animatorSource.transform.rotation;
 
-            //Temporaly make the Camera to be child of the head
-            Transform tmpParent = _camera.transform.parent;
-            _camera.transform.parent = _head;
+        //    //Temporaly make the Camera to be child of the head
+        //    Transform tmpParent = _camera.transform.parent;
+        //    _camera.transform.parent = _head;
 
-            //Rotate the head of the avatar
-            _head.Rotate(_camera.transform.up, _offsetH, Space.World);
-            _head.Rotate(_camera.transform.right, _offsetV, Space.World);
+        //    //Rotate the head of the avatar
+        //    _head.Rotate(_camera.transform.up, _offsetH, Space.World);
+        //    _head.Rotate(_camera.transform.right, _offsetV, Space.World);
 
-            //Restore Camera's parent
-            _camera.transform.parent = tmpParent;
-        }
+        //    //Restore Camera's parent
+        //    _camera.transform.parent = tmpParent;
+        //}
 
         #endregion
 

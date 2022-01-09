@@ -128,7 +128,7 @@ namespace QuickVR
         {
             base.ActionPostCameraUpdate();
 
-            if (_autoUpdateHint)
+            if (_autoUpdateHint && _instructions.text.Length > 0)
             {
                 string hint = "";
                 bool isEnglish = SettingsBase.GetLanguage() == SettingsBase.Languages.English;
