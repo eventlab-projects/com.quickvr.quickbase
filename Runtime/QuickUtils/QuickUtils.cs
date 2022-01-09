@@ -681,10 +681,12 @@ namespace QuickVR
             else
             {
                 MeshFilter mFilter = r.GetComponent<MeshFilter>();
-                if (mFilter)
+                if (!mFilter)
                 {
-                    mFilter.sharedMesh = mesh;
+                    mFilter = r.gameObject.AddComponent<MeshFilter>();
                 }
+                
+                mFilter.sharedMesh = mesh;
             }
         }
 
