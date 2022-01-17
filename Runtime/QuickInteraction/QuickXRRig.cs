@@ -21,7 +21,10 @@ namespace QuickVR
             cameraGameObject = cam.gameObject;
             cameraFloorOffsetObject = cam.transform.parent.gameObject;
 
-            rig = gameObject;
+            if (!rig)
+            {
+                rig = gameObject;
+            }
         }
 
         protected override void OnDrawGizmos()
