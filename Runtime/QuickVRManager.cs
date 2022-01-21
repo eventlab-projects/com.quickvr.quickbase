@@ -73,6 +73,7 @@ namespace QuickVR
             HTCVive,
 
             PicoNeo2,
+            PicoNeo3,
         }
 
         public enum HandTrackingMode
@@ -126,9 +127,16 @@ namespace QuickVR
                     {
                         m_HMDModel = HMDModel.HTCVive;
                     }
-                    else if (hmdName.Contains("piconeo2"))
+                    else if (hmdName.Contains("piconeo"))
                     {
-                        m_HMDModel = HMDModel.PicoNeo2;
+                        if (hmdName.Contains("2"))
+                        {
+                            m_HMDModel = HMDModel.PicoNeo2;
+                        }
+                        else
+                        {
+                            m_HMDModel = HMDModel.PicoNeo3;
+                        }
                     }
                 }
 
