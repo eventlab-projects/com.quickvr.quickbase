@@ -78,18 +78,22 @@ namespace QuickVR
 
         protected virtual Canvas CreateCanvas()
         {
-            Canvas result = gameObject.GetOrCreateComponent<Canvas>();
-            RectTransform t = result.GetComponent<RectTransform>();
-            t.localPosition = new Vector3(0.0f, 1.5f, 3.0f);
-            t.sizeDelta = new Vector2(5.0f, 3.0f);
-            result.renderMode = RenderMode.WorldSpace;
+            Canvas result = gameObject.GetComponent<Canvas>();
+            if (!result)
+            {
+                result = gameObject.AddComponent<Canvas>();
+                RectTransform t = result.GetComponent<RectTransform>();
+                t.localPosition = new Vector3(0.0f, 1.5f, 3.0f);
+                t.sizeDelta = new Vector2(5.0f, 3.0f);
+                result.renderMode = RenderMode.WorldSpace;
 
-            CanvasScaler cScaler = gameObject.GetOrCreateComponent<CanvasScaler>();
-            cScaler.dynamicPixelsPerUnit = 1;
-            cScaler.referencePixelsPerUnit = 10;
+                CanvasScaler cScaler = gameObject.GetOrCreateComponent<CanvasScaler>();
+                cScaler.dynamicPixelsPerUnit = 1;
+                cScaler.referencePixelsPerUnit = 10;
 
-            GraphicRaycaster rCaster = gameObject.GetOrCreateComponent<GraphicRaycaster>();
-
+                GraphicRaycaster rCaster = gameObject.GetOrCreateComponent<GraphicRaycaster>();
+            }
+            
             return result;
         }
 

@@ -328,6 +328,8 @@ namespace QuickVR
 
         protected virtual void ComputeIKPosition(out Quaternion boneUpperRot, out Quaternion boneMidRot)
         {
+            _targetLimb.position = _boneUpper.position + (_targetLimb.position - _boneUpper.position).normalized * CheckIKTargetDistance();
+
             float upperLength = GetUpperLength();
             float midLength = GetMidLength();
             float chainLength = GetChainLength() * 0.9999f;
@@ -344,8 +346,9 @@ namespace QuickVR
             if (_targetHint)
             {
                 //Apply the ikAngle to the boneUpper. The ikAngle is computed using the cosine rule
-                float targetDistance = CheckIKTargetDistance(v);
-                
+                //float targetDistance = CheckIKTargetDistance(v);
+                float targetDistance = Mathf.Min(Vector3.Distance(bUpperPos, ikTargetLimbPos), chainLength);
+
                 float cos = (Mathf.Pow(midLength, 2) - Mathf.Pow(upperLength, 2) - Mathf.Pow(targetDistance, 2)) / (-2 * upperLength * targetDistance);
                 float ikAngle = Mathf.Acos(cos) * Mathf.Rad2Deg;
                 v = _boneMid.position - bUpperPos;
@@ -363,16 +366,9 @@ namespace QuickVR
             boneMidRot = _boneMid.rotation;
         }
 
-        protected virtual float CheckIKTargetDistance(Vector3 v)
+        protected virtual float CheckIKTargetDistance()
         {
-            float targetDistance = Mathf.Min(v.magnitude, GetChainLength());
-
-            //Quaternion q = Quaternion.FromToRotation(Vector3.forward, v);
-            //_targetLimb.position = _boneUpper.position + (q * Vector3.forward) * targetDistance;
-
-            _targetLimb.position = _boneUpper.position + v.normalized * targetDistance;
-
-            return targetDistance;
+            return Mathf.Min(Vector3.Distance(_boneUpper.position, _targetLimb.position), GetChainLength());
         }
 
         protected virtual void ComputeIKRotation(out Quaternion boneLimbRot)

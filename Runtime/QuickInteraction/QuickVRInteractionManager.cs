@@ -55,6 +55,8 @@ namespace QuickVR
         protected ActionBasedContinuousTurnProvider _continousRotationProvider = null;
 
         protected CharacterController _characterController = null;
+        protected QuickVRHandAnimator _handAnimatorLeft = null;
+        protected QuickVRHandAnimator _handAnimatorRight = null;
         protected List<XRGrabInteractable> _grabInteractables = new List<XRGrabInteractable>();
 
         #endregion
@@ -108,6 +110,13 @@ namespace QuickVR
                     g.attachTransform = g.transform.Find(GRAB_PIVOT_NAME);
                 }
             }
+        }
+
+        protected virtual void Start()
+        {
+            QuickVRPlayArea playArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
+            _handAnimatorLeft = ((QuickVRNodeHand)playArea.GetVRNode(HumanBodyBones.LeftHand)).GetHandAnimator();
+            _handAnimatorRight = ((QuickVRNodeHand)playArea.GetVRNode(HumanBodyBones.RightHand)).GetHandAnimator();
         }
 
         protected virtual void Reset()
@@ -204,6 +213,16 @@ namespace QuickVR
             }
         }
 
+        public virtual QuickVRInteractor GetVRInteractorHandLeft()
+        {
+            return _interactorHandLeft;
+        }
+
+        public virtual QuickVRInteractor GetVRInteractorHandRight()
+        {
+            return _interactorHandRight;
+        }
+
         #endregion
 
         #region UPDATE
@@ -213,6 +232,16 @@ namespace QuickVR
             foreach (Collider c in args.interactable.colliders)
             {
                 Physics.IgnoreCollision(_characterController, c, true);
+
+                foreach (Collider cHand in _handAnimatorLeft.GetColliders())
+                {
+                    Physics.IgnoreCollision(cHand, c, true);
+                }
+
+                foreach (Collider cHand in _handAnimatorRight.GetColliders())
+                {
+                    Physics.IgnoreCollision(cHand, c, true);
+                }
             }
         }
 
@@ -221,6 +250,16 @@ namespace QuickVR
             foreach (Collider c in args.interactable.colliders)
             {
                 Physics.IgnoreCollision(_characterController, c, false);
+
+                foreach (Collider cHand in _handAnimatorLeft.GetColliders())
+                {
+                    Physics.IgnoreCollision(cHand, c, false);
+                }
+
+                foreach (Collider cHand in _handAnimatorRight.GetColliders())
+                {
+                    Physics.IgnoreCollision(cHand, c, false);
+                }
             }
         }
 

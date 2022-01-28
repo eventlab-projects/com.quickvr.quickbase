@@ -74,8 +74,11 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        private static Dictionary<AxisCode, string[]> _toAxisControl = new Dictionary<AxisCode, string[]>();
-        private static Dictionary<ButtonCodes, string[]> _toButtonControl = new Dictionary<ButtonCodes, string[]>();
+        private static Dictionary<AxisCode, string[]> _toAxisControlNames = new Dictionary<AxisCode, string[]>();
+        private static Dictionary<ButtonCodes, string[]> _toButtonControlNames = new Dictionary<ButtonCodes, string[]>();
+
+        private static Dictionary<AxisCode, InputControl> _axisControl = new Dictionary<AxisCode, InputControl>();
+        private static Dictionary<ButtonCodes, QuickButtonControl> _buttonControl = new Dictionary<ButtonCodes, QuickButtonControl>();
 
         private class QuickButtonControl
         {
@@ -148,28 +151,28 @@ namespace QuickVR
         private static void Init()
         {
             //Axis controls
-            _toAxisControl[AxisCode.LeftStick_Horizontal] = _toAxisControl[AxisCode.RightStick_Horizontal] = new string[]{ "thumbstick", "trackpad"};
-            _toAxisControl[AxisCode.LeftStick_Vertical] = _toAxisControl[AxisCode.RightStick_Vertical] = new string[] { "thumbstick", "trackpad" };
+            _toAxisControlNames[AxisCode.LeftStick_Horizontal] = _toAxisControlNames[AxisCode.RightStick_Horizontal] = new string[]{ "thumbstick", "trackpad"};
+            _toAxisControlNames[AxisCode.LeftStick_Vertical] = _toAxisControlNames[AxisCode.RightStick_Vertical] = new string[] { "thumbstick", "trackpad" };
 
-            _toAxisControl[AxisCode.LeftTrigger] = _toAxisControl[AxisCode.RightTrigger] = new string[] { "trigger" };
+            _toAxisControlNames[AxisCode.LeftTrigger] = _toAxisControlNames[AxisCode.RightTrigger] = new string[] { "trigger" };
 
-            _toAxisControl[AxisCode.LeftGrip] = _toAxisControl[AxisCode.RightGrip] = new string[] { "grip" };
+            _toAxisControlNames[AxisCode.LeftGrip] = _toAxisControlNames[AxisCode.RightGrip] = new string[] { "grip" };
 
             //Buton controls
-            _toButtonControl[ButtonCodes.LeftPrimaryPress] = _toButtonControl[ButtonCodes.RightPrimaryPress] = new string[] { "primarybutton" };
-            _toButtonControl[ButtonCodes.LeftPrimaryTouch] = _toButtonControl[ButtonCodes.RightPrimaryTouch] = new string[] { "primarytouched" };
+            _toButtonControlNames[ButtonCodes.LeftPrimaryPress] = _toButtonControlNames[ButtonCodes.RightPrimaryPress] = new string[] { "primarybutton" };
+            _toButtonControlNames[ButtonCodes.LeftPrimaryTouch] = _toButtonControlNames[ButtonCodes.RightPrimaryTouch] = new string[] { "primarytouched" };
 
-            _toButtonControl[ButtonCodes.LeftSecondaryPress] = _toButtonControl[ButtonCodes.RightSecondaryPress] = new string[] { "secondarybutton" };
-            _toButtonControl[ButtonCodes.LeftSecondaryTouch] = _toButtonControl[ButtonCodes.RightSecondaryTouch] = new string[] { "secondarytouched" };
+            _toButtonControlNames[ButtonCodes.LeftSecondaryPress] = _toButtonControlNames[ButtonCodes.RightSecondaryPress] = new string[] { "secondarybutton" };
+            _toButtonControlNames[ButtonCodes.LeftSecondaryTouch] = _toButtonControlNames[ButtonCodes.RightSecondaryTouch] = new string[] { "secondarytouched" };
 
-            _toButtonControl[ButtonCodes.LeftStickPress] = _toButtonControl[ButtonCodes.RightStickPress] = new string[] { "thumbstickclicked", "trackpadclicked" };
-            _toButtonControl[ButtonCodes.LeftStickTouch] = _toButtonControl[ButtonCodes.RightStickTouch] = new string[] { "thumbsticktouched", "trackpadtouched" };
+            _toButtonControlNames[ButtonCodes.LeftStickPress] = _toButtonControlNames[ButtonCodes.RightStickPress] = new string[] { "thumbstickclicked", "trackpadclicked" };
+            _toButtonControlNames[ButtonCodes.LeftStickTouch] = _toButtonControlNames[ButtonCodes.RightStickTouch] = new string[] { "thumbsticktouched", "trackpadtouched" };
 
-            _toButtonControl[ButtonCodes.LeftTriggerPress] = _toButtonControl[ButtonCodes.RightTriggerPress] = new string[] { "triggerpressed" };
-            _toButtonControl[ButtonCodes.LeftTriggerTouch] = _toButtonControl[ButtonCodes.RightTriggerTouch] = new string[] { "triggertouched" };
+            _toButtonControlNames[ButtonCodes.LeftTriggerPress] = _toButtonControlNames[ButtonCodes.RightTriggerPress] = new string[] { "triggerpressed" };
+            _toButtonControlNames[ButtonCodes.LeftTriggerTouch] = _toButtonControlNames[ButtonCodes.RightTriggerTouch] = new string[] { "triggertouched" };
 
-            _toButtonControl[ButtonCodes.LeftGripPress] = _toButtonControl[ButtonCodes.RightGripPress] = new string[] { "grippressed", "gripbutton" };
-            _toButtonControl[ButtonCodes.LeftGripTouch] = _toButtonControl[ButtonCodes.RightGripTouch] = new string[] { "grippressed" };
+            _toButtonControlNames[ButtonCodes.LeftGripPress] = _toButtonControlNames[ButtonCodes.RightGripPress] = new string[] { "grippressed", "gripbutton" };
+            _toButtonControlNames[ButtonCodes.LeftGripTouch] = _toButtonControlNames[ButtonCodes.RightGripTouch] = new string[] { "grippressed" };
         }
 
         protected override void ResetDefaultConfiguration()
@@ -204,26 +207,36 @@ namespace QuickVR
 
         private static InputControl GetInputControlAxis(XRController controller, AxisCode axis)
         {
-            InputControl result = null;
-            string[] values = _toAxisControl[axis];
-            for (int i = 0; result == null && i < values.Length; i++)
+            if (!_axisControl.ContainsKey(axis))
             {
-                result = controller.TryGetChildControl(values[i]);
+                InputControl iControl = null;
+                string[] values = _toAxisControlNames[axis];
+                for (int i = 0; iControl == null && i < values.Length; i++)
+                {
+                    iControl = controller.TryGetChildControl(values[i]);
+                }
+
+                _axisControl[axis] = iControl;
             }
 
-            return result;
+            return _axisControl[axis];
         }
 
         private static QuickButtonControl GetInputControlButton(XRController controller, ButtonCodes button)
         {
-            InputControl iControl = null;
-            string[] values = _toButtonControl[button];
-            for (int i = 0; iControl == null && i < values.Length; i++)
+            if (!_buttonControl.ContainsKey(button))
             {
-                iControl = controller.TryGetChildControl(values[i]);
+                InputControl iControl = null;
+                string[] values = _toButtonControlNames[button];
+                for (int i = 0; iControl == null && i < values.Length; i++)
+                {
+                    iControl = controller.TryGetChildControl(values[i]);
+                }
+
+                _buttonControl[button] = iControl == null ? null : new QuickButtonControl((AxisControl)iControl); 
             }
 
-            return iControl == null ? null : new QuickButtonControl((AxisControl)iControl);
+            return _buttonControl[button];
         }
 
         protected override float ImpGetAxis(AxisCode axis)

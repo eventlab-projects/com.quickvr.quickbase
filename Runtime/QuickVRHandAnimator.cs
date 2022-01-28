@@ -153,6 +153,8 @@ namespace QuickVR
         protected float _blendPoint = 0;
         protected float _blendThumbUp = 0;
 
+        protected Collider[] _colliders = null;
+
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -160,6 +162,8 @@ namespace QuickVR
         protected virtual void Awake()
         {
             Reset();
+
+            _colliders = GetComponentsInChildren<Collider>(true);
         }
 
         protected virtual void Reset()
@@ -217,6 +221,11 @@ namespace QuickVR
         protected virtual float GetMaxAngleSeparation(QuickHumanFingers finger)
         {
             return finger == QuickHumanFingers.Thumb ? 60.0f : 10.0f;
+        }
+
+        public virtual Collider[] GetColliders()
+        {
+            return _colliders;
         }
 
         #endregion

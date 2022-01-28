@@ -53,6 +53,11 @@ namespace QuickVR
             }
         }
 
+        public virtual QuickVRHandAnimator GetHandAnimator()
+        {
+            return _handAnimator;
+        }
+
         protected override string GetVRModelName()
         {
             string modelName = "";

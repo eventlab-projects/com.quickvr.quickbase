@@ -11,12 +11,9 @@ namespace QuickVR
 
         #region UPDATE
 
-        protected override float CheckIKTargetDistance(Vector3 v)
+        protected override float CheckIKTargetDistance()
         {
-            float targetDistance = GetChainLength();
-            _targetLimb.position = _boneUpper.position + v.normalized * targetDistance;
-
-            return targetDistance;
+            return GetChainLength();
         }
 
         #endregion
