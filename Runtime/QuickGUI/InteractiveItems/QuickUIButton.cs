@@ -31,8 +31,12 @@ namespace QuickVR
             _buttonBG.color = _colorNormal;
 
             RectTransform t = GetComponent<RectTransform>();
-            BoxCollider collider = gameObject.GetOrCreateComponent<BoxCollider>();
-            collider.size = new Vector3(t.rect.width, t.rect.height, 0);
+            BoxCollider collider = gameObject.GetComponent<BoxCollider>();
+            if (!collider)
+            {
+                collider = gameObject.GetOrCreateComponent<BoxCollider>();
+                collider.size = new Vector3(t.rect.width, t.rect.height, 0);
+            }
             //collider.center = new Vector3(t.rect.width / 2, -t.rect.height / 2, 0);
 
             Rigidbody rBody = gameObject.GetOrCreateComponent<Rigidbody>();
