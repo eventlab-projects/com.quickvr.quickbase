@@ -230,6 +230,34 @@ namespace QuickVR
             _interactorUIRay.gameObject.SetActive(enable);
         }
 
+        public virtual void UpdateNewAnimatorTarget(Animator animator)
+        {
+            bool isLeft = _xrNode == XRNode.LeftHand;
+            Transform tHand = animator.GetBoneTransform(isLeft ? HumanBodyBones.LeftHand : HumanBodyBones.RightHand);
+            Transform tMiddle = animator.GetBoneTransform(isLeft ? HumanBodyBones.LeftMiddleProximal : HumanBodyBones.RightMiddleProximal);
+
+            //Set this interactor to be child of the corresponding hand. 
+            transform.parent = tHand;
+            transform.ResetTransformation();
+            transform.LookAt(tMiddle, transform.up);
+
+            //Configure the DirectInteractor
+            Transform tAttach = _interactorGrabDirect.GetComponent<XRDirectInteractor>().attachTransform;
+            tAttach.position = Vector3.Lerp(tHand.position, tMiddle.position, 0.5f);
+
+            Transform tIndex = animator.GetBoneTransform(isLeft ? HumanBodyBones.LeftIndexProximal : HumanBodyBones.RightIndexProximal);
+            Transform tLittle = animator.GetBoneTransform(isLeft ? HumanBodyBones.LeftLittleProximal : HumanBodyBones.RightLittleProximal);
+            CapsuleCollider collider = _interactorGrabDirect.GetComponent<CapsuleCollider>();
+            collider.height = Vector3.Distance(tIndex.position, tLittle.position);
+            collider.center = tAttach.localPosition;
+            collider.radius = Vector3.Distance(tHand.position, tMiddle.position) * 0.5f;
+
+            //Define the radius
+            //SphereCollider sCollider = _interactorGrabDirect.GetComponent<SphereCollider>();
+            //sCollider.center = tAttach.localPosition;
+            //sCollider.radius = Vector3.Distance(tHand.position, tMiddle.position) * 0.5f;
+        }
+
         #endregion
 
     }

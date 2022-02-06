@@ -11,9 +11,9 @@ GameObject:
   - component: {fileID: 2822379204095001559}
   - component: {fileID: -7075726209783637494}
   - component: {fileID: 2822379204095001557}
-  - component: {fileID: 2822379204095001556}
+  - component: {fileID: 234506255795805857}
   m_Layer: 0
-  m_Name: pf_InteractorDirect
+  m_Name: pf_InteractorGrabDirect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -216,8 +216,8 @@ MonoBehaviour:
   m_PlayHapticsOnHoverCanceled: 0
   m_HapticHoverCancelIntensity: 0
   m_HapticHoverCancelDuration: 0
---- !u!135 &2822379204095001556
-SphereCollider:
+--- !u!136 &234506255795805857
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -226,6 +226,7 @@ SphereCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
-  serializedVersion: 2
-  m_Radius: 0.2
+  m_Radius: 0.04
+  m_Height: 1
+  m_Direction: 0
   m_Center: {x: 0, y: 0, z: 0}

@@ -131,6 +131,9 @@ namespace QuickVR
         #region CONSTANTS
 
         public const int NUM_BONES_PER_FINGER = 4;
+        public const string VR_EYE_LEFT = "__VREyeLeft__";
+        public const string VR_EYE_RIGHT = "__VREyeRight__";
+        public const string VR_EYE_CENTER = "__VREyeCenter__";
 
         #endregion
 
@@ -584,30 +587,23 @@ namespace QuickVR
 
         private static void CreateEyes(this Animator animator)
         {
-            animator.CreateEye(true);
-            animator.CreateEye(false);
+            animator.CreateEyeVR(true);
+            animator.CreateEyeVR(false);
 
-            animator.CreateEyeCenter();
+            animator.CreateEyeCenterVR();
         }
 
-        private static void CreateEye(this Animator animator, bool eyeLeft)
+        private static void CreateEyeVR(this Animator animator, bool eyeLeft)
         {
-            if (!animator.GetEye(eyeLeft))
-            {
-                HumanBodyBones eyeBoneID = eyeLeft ? HumanBodyBones.LeftEye : HumanBodyBones.RightEye;
-                if (!animator.GetBoneTransform(eyeBoneID))
-                {
-                    Transform tHead = animator.GetBoneTransform(HumanBodyBones.Head);
-                    Transform tEye = tHead.CreateChild(eyeBoneID.ToString());
+            Transform tHead = animator.GetBoneTransform(HumanBodyBones.Head);
+            Transform tEye = tHead.CreateChild(eyeLeft? VR_EYE_LEFT : VR_EYE_RIGHT);
 
-                    //The eye center position
-                    tEye.position = tHead.position + animator.transform.forward * 0.15f + animator.transform.up * 0.13f;
+            //The eye center position
+            tEye.position = tHead.position + animator.transform.forward * 0.15f + animator.transform.up * 0.13f;
 
-                    //Account for the Eye Separation
-                    float sign = eyeLeft ? -1.0f : 1.0f;
-                    tEye.position += sign * animator.transform.right * 0.032f;
-                }
-            }
+            //Account for the Eye Separation
+            float sign = eyeLeft ? -1.0f : 1.0f;
+            tEye.position += sign * animator.transform.right * 0.032f;
         }
 
         private static void CreateFingerTips(this Animator animator)
@@ -678,39 +674,45 @@ namespace QuickVR
             Transform eye = animator.GetBoneTransform(eyeBoneID);
             if (!eye)
             {
-                eye = animator.GetBoneTransform(HumanBodyBones.Head).Find(eyeBoneID.ToString());
+                eye = animator.GetEyeVR(eyeLeft); 
             }
 
             return eye;
         }
 
-        private static Transform CreateEyeCenter(this Animator animator)
+        public static Transform GetEyeVR(this Animator animator, bool eyeLeft)
+        {
+            return animator.GetBoneTransform(HumanBodyBones.Head).Find(eyeLeft? VR_EYE_LEFT : VR_EYE_RIGHT);
+        }
+
+        private static Transform CreateEyeCenterVR(this Animator animator)
         {
             Transform tHead = animator.GetBoneTransform(HumanBodyBones.Head);
-            Transform tResult = tHead.CreateChild("__EyeCenter__");
+            Transform tResult = tHead.CreateChild(VR_EYE_CENTER);
             
             tResult.rotation = animator.transform.rotation;
-            tResult.position = Vector3.Lerp(animator.GetEye(true).position, animator.GetEye(false).position, 0.5f);
+            tResult.position = Vector3.Lerp(animator.GetEyeVR(true).position, animator.GetEyeVR(false).position, 0.5f);
 
             return tResult;
         }
 
-        public static Transform GetEyeCenter(this Animator animator)
+        public static Transform GetEyeCenterVR(this Animator animator)
         {
-            return animator.GetBoneTransform(HumanBodyBones.Head).Find("__EyeCenter__");
+            return animator.GetBoneTransform(HumanBodyBones.Head).Find(VR_EYE_CENTER);
         }
 
-        public static Vector3 GetEyeCenterPosition(this Animator animator)
-        {
-            Transform lEye = animator.GetEye(true);
-            Transform rEye = animator.GetEye(false);
-            if (lEye && rEye)
-            {
-                return Vector3.Lerp(lEye.position, rEye.position, 0.5f);
-            }
+        //public static Vector3 GetEyeCenterPosition(this Animator animator)
+        //{
+            
+        //    Transform lEye = animator.GetEye(true);
+        //    Transform rEye = animator.GetEye(false);
+        //    if (lEye && rEye)
+        //    {
+        //        return Vector3.Lerp(lEye.position, rEye.position, 0.5f);
+        //    }
 
-            return animator.transform.position;
-        }
+        //    return animator.transform.position;
+        //}
 
         public static void EnforceTPose(this Animator animator)
         {

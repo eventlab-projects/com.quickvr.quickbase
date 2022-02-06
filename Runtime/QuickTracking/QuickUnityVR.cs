@@ -163,7 +163,7 @@ namespace QuickVR {
 
         protected virtual void Start()
         {
-            _headOffset = Quaternion.Inverse(transform.rotation) * (_animator.GetBoneTransform(HumanBodyBones.Head).position - _animator.GetEyeCenterPosition());
+            _headOffset = Quaternion.Inverse(transform.rotation) * (_animator.GetBoneTransform(HumanBodyBones.Head).position - _animator.GetEyeCenterVR().position);
             _vrManager.AddUnityVRTrackingSystem(this);
 
             if (_gestureSettingsLeftHand == null)

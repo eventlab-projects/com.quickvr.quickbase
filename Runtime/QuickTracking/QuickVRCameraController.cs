@@ -96,7 +96,7 @@ namespace QuickVR
             
             if (animator)
             {
-                Transform tEyeCenter = animator.GetEyeCenter();
+                Transform tEyeCenter = animator.GetEyeCenterVR();
                 if (transform.parent != animator.transform)
                 {
                     transform.parent = animator.transform;

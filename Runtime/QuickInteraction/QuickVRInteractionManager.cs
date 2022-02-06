@@ -213,6 +213,25 @@ namespace QuickVR
             }
         }
 
+        public virtual bool IsEnabledLocomotionSystem(DefaultLocomotionProvider lProvider)
+        {
+            bool result = false;
+            if (lProvider == DefaultLocomotionProvider.Teleport)
+            {
+                result = _teleportProvider.enabled;
+            }
+            else if (lProvider == DefaultLocomotionProvider.ContinuousMove)
+            {
+                result = _continousMoveProvider.enabled;
+            }
+            else if (lProvider == DefaultLocomotionProvider.ContinuousTurn)
+            {
+                result = _continousRotationProvider.enabled;
+            }
+
+            return result;
+        }
+
         public virtual QuickVRInteractor GetVRInteractorHandLeft()
         {
             return _interactorHandLeft;
@@ -310,15 +329,34 @@ namespace QuickVR
                 }
             }
 
-            _interactorHandLeft.transform.parent = animator.GetBoneTransform(HumanBodyBones.LeftHand);
-            _interactorHandLeft.transform.ResetTransformation();
-            _interactorHandLeft.transform.LookAt(animator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal), transform.up);
+            _interactorHandLeft.UpdateNewAnimatorTarget(animator);
+            _interactorHandRight.UpdateNewAnimatorTarget(animator);
 
-            _interactorHandRight.transform.parent = animator.GetBoneTransform(HumanBodyBones.RightHand);
-            _interactorHandRight.transform.ResetTransformation();
-            _interactorHandRight.transform.LookAt(animator.GetBoneTransform(HumanBodyBones.RightMiddleProximal), transform.up);
+            //_interactorHandLeft.transform.parent = animator.GetBoneTransform(HumanBodyBones.LeftHand);
+            //_interactorHandLeft.transform.ResetTransformation();
+            //_interactorHandLeft.transform.LookAt(animator.GetBoneTransform(HumanBodyBones.LeftMiddleProximal), transform.up);
+
+            //_interactorHandRight.transform.parent = animator.GetBoneTransform(HumanBodyBones.RightHand);
+            //_interactorHandRight.transform.ResetTransformation();
+            //_interactorHandRight.transform.LookAt(animator.GetBoneTransform(HumanBodyBones.RightMiddleProximal), transform.up);
 
             _continousMoveProvider.forwardSource = animator.transform;
+        }
+
+        protected virtual void SetHandInteractorPosition(Animator animator, bool isLeft)
+        {
+            Transform tInteractor = isLeft ? _interactorHandLeft.transform : _interactorHandRight.transform;
+            Transform tHand = animator.GetBoneTransform(isLeft ? HumanBodyBones.LeftHand : HumanBodyBones.RightHand);
+            Transform tMiddle = animator.GetBoneTransform(isLeft ? HumanBodyBones.LeftMiddleProximal : HumanBodyBones.RightMiddleProximal);
+
+            //Define the position of the interactor
+            tInteractor.parent = tHand;
+            tInteractor.transform.ResetTransformation();
+            tInteractor.transform.LookAt(tMiddle, transform.up);
+            tInteractor.transform.position = Vector3.Lerp(tHand.position, tMiddle.position, 0.5f);
+
+            //Define the radius
+            tInteractor.GetComponent<SphereCollider>().radius = Vector3.Distance(tHand.position, tMiddle.position) * 0.5f;
         }
         
         protected virtual void UpdateCharacterController()
@@ -328,7 +366,7 @@ namespace QuickVR
                 Animator animator = _vrManager.GetAnimatorTarget();
 
                 //Compute the height of the collider
-                float h = animator.GetEyeCenterPosition().y - animator.transform.position.y;
+                float h = animator.GetEyeCenterVR().position.y - animator.transform.position.y;
                 _characterController.height = h;
                 _characterController.center = new Vector3(0, h * 0.5f + _characterController.skinWidth, 0);
 
