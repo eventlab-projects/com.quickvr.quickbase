@@ -1,5 +1,10 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.AddressableAssets;
+using UnityEngine.AddressableAssets.ResourceLocators;
+using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.ResourceManagement.ResourceLocations;
+using UnityEngine.ResourceManagement.ResourceProviders;
 
 using System.Collections;
 using System.Collections.Generic;
@@ -183,19 +188,33 @@ namespace QuickVR
             else
             {
                 SetSceneState(sceneName, SceneState.Loading);
-                if (isAsync)
+                //if (isAsync)
                 {
-                    yield return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
-                }
-                else
-                {
-                    SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
+                    //yield return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+                    AsyncOperationHandle<IList<IResourceLocation>> test = Addressables.LoadResourceLocationsAsync(sceneName);
+                    Debug.Log("URL = " + AddressablesManager.URL);
+                    yield return test;
+                    if (test.Result.Count > 0)
+                    {
+                        yield return Addressables.LoadSceneAsync(test.Result[0], LoadSceneMode.Additive);
+                    }
+                    else
+                    {
+                        Debug.Log("PEPITO FAIL!!!");
+                    }
 
-                    //Wait a frame to ensure that the load process has been finished:
-                    //https://docs.unity3d.com/ScriptReference/SceneManagement.SceneManager.LoadScene.html
-
-                    yield return null;  
+                    //AsyncOperationHandle<IList<IResourceLocation>> test = Addressables.LoadResourceLocationsAsync(sceneName);
+                    //Debug.Log("PEPITO = " + test.Result.Count);
                 }
+                //else
+                //{
+                //    SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
+
+                //    //Wait a frame to ensure that the load process has been finished:
+                //    //https://docs.unity3d.com/ScriptReference/SceneManagement.SceneManager.LoadScene.html
+
+                //    yield return null;  
+                //}
             }
 
             SetSceneState(sceneName, allowSceneActivation ? SceneState.Loaded : SceneState.Preloaded);
