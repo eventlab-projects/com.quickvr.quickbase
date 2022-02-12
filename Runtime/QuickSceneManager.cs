@@ -33,7 +33,7 @@ namespace QuickVR
 
         protected class SceneData
         {
-
+            public Scene _scene;
             public SceneState _state;
             public List<bool> _rootGOActive = new List<bool>();
         }
@@ -48,6 +48,7 @@ namespace QuickVR
             for (int i = 0; i < SceneManager.sceneCount; i++)
             {
                 SceneData sData = new SceneData();
+                sData._scene = SceneManager.GetSceneAt(i);
                 sData._state = SceneState.Loaded;
                 _loadedScenes[SceneManager.GetSceneAt(i).name] = sData;
             }
@@ -67,15 +68,22 @@ namespace QuickVR
             return null;
         }
 
+        public virtual Scene GetSceneByName(string sceneName)
+        {
+            Scene result = new Scene();
+            if (_loadedScenes.TryGetValue(sceneName, out SceneData sData))
+            {
+                result = sData._scene;
+            }
+
+            return result;
+        }
+
         protected virtual void SetSceneState(string sceneName, SceneState newState)
         {
-            if (newState == SceneState.Loading)
+            if (newState == SceneState.Preloaded)
             {
-                _loadedScenes[sceneName] = new SceneData();
-            }
-            else if (newState == SceneState.Preloaded)
-            {
-                Scene scene = SceneManager.GetSceneByName(sceneName);
+                Scene scene = GetSceneByName(sceneName);
                 foreach (GameObject go in scene.GetRootGameObjects())
                 {
                     _loadedScenes[sceneName]._rootGOActive.Add(go.activeSelf);
@@ -84,7 +92,7 @@ namespace QuickVR
             }
             else if (newState == SceneState.Loaded)
             {
-                Scene scene = SceneManager.GetSceneByName(sceneName);
+                Scene scene = GetSceneByName(sceneName);
                 GameObject[] rootObjects = scene.GetRootGameObjects();
                 List<bool> preloadObjectsState = _loadedScenes[sceneName]._rootGOActive;
 
@@ -187,21 +195,27 @@ namespace QuickVR
             }
             else
             {
-                SetSceneState(sceneName, SceneState.Loading);
+                SceneData sData = new SceneData();
+                _loadedScenes[sceneName] = sData;
+
                 //if (isAsync)
                 {
                     //yield return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
                     AsyncOperationHandle<IList<IResourceLocation>> test = Addressables.LoadResourceLocationsAsync(sceneName);
-                    Debug.Log("URL = " + AddressablesManager.URL);
                     yield return test;
                     if (test.Result.Count > 0)
                     {
-                        yield return Addressables.LoadSceneAsync(test.Result[0], LoadSceneMode.Additive);
+                        AsyncOperationHandle<SceneInstance> opLoadScene = Addressables.LoadSceneAsync(test.Result[0], LoadSceneMode.Additive);
+                        yield return opLoadScene;
+
+                        sData._scene = opLoadScene.Result.Scene;
                     }
                     else
                     {
                         Debug.Log("PEPITO FAIL!!!");
                     }
+
+                    
 
                     //AsyncOperationHandle<IList<IResourceLocation>> test = Addressables.LoadResourceLocationsAsync(sceneName);
                     //Debug.Log("PEPITO = " + test.Result.Count);
@@ -237,7 +251,7 @@ namespace QuickVR
             SetSceneState(sceneName, SceneState.Loaded);
 
             //At this point, the scene is loaded. Activate it. 
-            Scene scene = SceneManager.GetSceneByName(sceneName);
+            Scene scene = GetSceneByName(sceneName);
             SceneManager.SetActiveScene(scene);
             LightProbes.Tetrahedralize();
 

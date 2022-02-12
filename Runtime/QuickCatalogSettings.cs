@@ -11,6 +11,8 @@ namespace QuickVR
     public class QuickCatalogSettings : ScriptableObject
     {
 
+        public static string URL = "";
+
         #region PUBLIC ATTRIBUTES
 
         public string _catalogAndroid = "";

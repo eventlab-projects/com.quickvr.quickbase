@@ -1,10 +1,11 @@
 using System.Collections;
 using System.Collections.Generic;
-//
+
 using UnityEngine;
 using UnityEngine.AddressableAssets;
 using UnityEngine.AddressableAssets.ResourceLocators;
 using UnityEngine.ResourceManagement.AsyncOperations;
+using UnityEngine.AddressableAssets.Initialization;
 
 namespace QuickVR
 {
@@ -14,7 +15,6 @@ namespace QuickVR
 
         #region PUBLIC ATTRIBUTES
 
-        public static string URL = "";
         public List<QuickCatalogSettings> _catalogs = new List<QuickCatalogSettings>();
 
         #endregion
@@ -54,7 +54,9 @@ namespace QuickVR
             _progressInitialize = 1;
             Debug.Log("Adressables: Initialize Async COMPLETED!!!");
 
-            //Load the Avatars catalog
+            //Load the Avatars catalog. 
+            AddressablesRuntimeProperties.ClearCachedPropertyValues();
+            QuickCatalogSettings.URL = _catalogs[0].GetServerDataPath();
             op = Addressables.LoadContentCatalogAsync(GetCatalogPathAvatars());
             while (!op.IsDone)
             {
@@ -64,6 +66,9 @@ namespace QuickVR
             _progressInitialize = 1;
             Debug.Log("Avatars catalog loaded!!!");
 
+            //Load the ModernOffice catalog. 
+            AddressablesRuntimeProperties.ClearCachedPropertyValues();
+            QuickCatalogSettings.URL = _catalogs[1].GetServerDataPath();
             op = Addressables.LoadContentCatalogAsync(GetCatalogPathModernOffice());
             while (!op.IsDone)
             {
@@ -72,7 +77,11 @@ namespace QuickVR
             }
             _progressInitialize = 1;
             Debug.Log("ModernOffice catalog loaded!!!");
+            yield return null;
 
+            //Load the Restaurant catalog. 
+            AddressablesRuntimeProperties.ClearCachedPropertyValues();
+            QuickCatalogSettings.URL = _catalogs[2].GetServerDataPath();
             op = Addressables.LoadContentCatalogAsync(GetCatalogPathRestaurant());
             while (!op.IsDone)
             {
@@ -81,6 +90,7 @@ namespace QuickVR
             }
             _progressInitialize = 1;
             Debug.Log("Restaurant catalog loaded!!!");
+            yield return null;
 
             StartCoroutine(CoLoadCharacters());
         }
@@ -152,13 +162,11 @@ namespace QuickVR
 
         protected virtual string GetCatalogPathModernOffice()
         {
-            URL = _catalogs[1].GetServerDataPath();
             return _catalogs[1].GetCatalogPath();
         }
 
         protected virtual string GetCatalogPathRestaurant()
         {
-            URL = _catalogs[2].GetServerDataPath();
             return _catalogs[2].GetCatalogPath();
         }
 
@@ -190,6 +198,18 @@ namespace QuickVR
         }
 
         #endregion
+
+        [ButtonMethod]
+        public virtual void Test()
+        {
+            List<string> cachedPaths = new List<string>();
+            Caching.GetAllCachePaths(cachedPaths);
+
+            foreach (string s in cachedPaths)
+            {
+                Debug.Log(s);
+            }
+        }
 
         [ButtonMethod]
         public virtual void GenerateCharacterCode()
