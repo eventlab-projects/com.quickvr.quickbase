@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -30,18 +32,145 @@ namespace QuickVR
 
         protected bool _isCharactersLoaded = false;
 
+        protected enum BuildPlatform
+        {
+            Undefined = -1,
+
+            StandaloneWindows64,
+            Android,
+        }
+
+        protected static BuildPlatform _buildPlatform
+        {
+            get
+            {
+                if (m_BuildPlatform == BuildPlatform.Undefined)
+                {
+                    m_BuildPlatform = BuildPlatform.Undefined;
+#if UNITY_EDITOR || UNITY_STANDALONE_WIN
+                    m_BuildPlatform = BuildPlatform.StandaloneWindows64;
+#elif UNITY_ANDROID
+                    m_BuildPlatform = BuildPlatform.Android;
+#endif
+                }
+
+                return m_BuildPlatform;
+            }
+        }
+
+        protected static BuildPlatform m_BuildPlatform = BuildPlatform.Undefined;
+
         #endregion
 
         #region CREATION AND DESTRUCTION
 
-        //[ButtonMethod]
-        //public virtual void Test()
-        //{
-        //    m_UseLocalAssets = false;
-        //    Debug.Log(GetAvatarsCatalogPath());
-        //    m_UseLocalAssets = true;
-        //    Debug.Log(GetAvatarsCatalogPath());
-        //}
+        [ButtonMethod]
+        public virtual void Test()
+        {
+            string pathScenes = "../VRUnited_Scenes";
+            Debug.Log(Path.GetFullPath(pathScenes));
+            if (Directory.Exists(pathScenes))
+            {
+                foreach (string s in Directory.GetDirectories(pathScenes))
+                {
+                    string dir = s + "/ServerData/" + _buildPlatform.ToString();
+
+                    if (Directory.Exists(dir))
+                    {
+                        List<string> files = new List<string>(Directory.EnumerateFiles(dir, "*.json"));
+
+                        string catalogPath = "";
+                        DateTime dTimeLast = new DateTime();
+                        foreach (string f in files)
+                        {
+                            DateTime dTime = File.GetLastWriteTime(f);
+                            if (dTime > dTimeLast)
+                            {
+                                catalogPath = f;
+                                dTimeLast = dTime;
+                            }
+                        }
+
+                        if (catalogPath.Length > 0)
+                        {
+                            Debug.Log(catalogPath);
+                        }
+                    }
+                    
+                }
+            }
+        }
+
+        protected virtual IEnumerator CoLoadAvatarsCatalogs()
+        {
+            string pathAvatars = "../VRunited_Avatars";
+            string dir = pathAvatars + "/ServerData/" + _buildPlatform.ToString();
+
+            yield return StartCoroutine(CoLoadContentCatalog(dir));
+        }
+
+        protected virtual IEnumerator CoLoadScenesCatalogs()
+        {
+            string pathScenes = "../VRUnited_Scenes";
+            //Debug.Log(Path.GetFullPath(pathScenes));
+            if (Directory.Exists(pathScenes))
+            {
+                foreach (string s in Directory.GetDirectories(pathScenes))
+                {
+                    string dir = s + "/ServerData/" + _buildPlatform.ToString();
+
+                    if (Directory.Exists(dir))
+                    {
+                        yield return StartCoroutine(CoLoadContentCatalog(dir));
+                    }
+                }
+            }
+        }
+
+        protected virtual IEnumerator CoLoadContentCatalog(string serverDataPath)
+        {
+            string catalogPath = GetCatalogPath(serverDataPath);
+            if (catalogPath.Length > 0)
+            {
+                //Debug.Log("Loading catalog " + catalogPath);
+                
+                AddressablesRuntimeProperties.ClearCachedPropertyValues();
+                QuickCatalogSettings.URL = serverDataPath;
+                AsyncOperationHandle<IResourceLocator> op = Addressables.LoadContentCatalogAsync(catalogPath);
+                while (!op.IsDone)
+                {
+                    _progressInitialize = op.PercentComplete / 100.0f;
+                    yield return null;
+                }
+
+                //Debug.Log(catalogPath + " loaded!");
+            }
+            
+            _progressInitialize = 1;
+        }
+
+        protected virtual string GetCatalogPath(string serverDataPath)
+        {
+            string catalogPath = "";
+
+            if (Directory.Exists(serverDataPath))
+            {
+                List<string> files = new List<string>(Directory.EnumerateFiles(serverDataPath, "*.json"));
+                DateTime dTimeLast = new DateTime();
+
+                foreach (string f in files)
+                {
+                    DateTime dTime = File.GetLastWriteTime(f);
+                    if (dTime > dTimeLast)
+                    {
+                        catalogPath = f;
+                        dTimeLast = dTime;
+                    }
+                }
+            }
+
+            return catalogPath;
+        }
 
         protected virtual IEnumerator Start()
         {
@@ -54,44 +183,14 @@ namespace QuickVR
             _progressInitialize = 1;
             Debug.Log("Adressables: Initialize Async COMPLETED!!!");
 
-            //Load the Avatars catalog. 
-            AddressablesRuntimeProperties.ClearCachedPropertyValues();
-            QuickCatalogSettings.URL = _catalogs[0].GetServerDataPath();
-            op = Addressables.LoadContentCatalogAsync(GetCatalogPathAvatars());
-            while (!op.IsDone)
-            {
-                _progressInitialize = op.PercentComplete / 100.0f;
-                yield return null;
-            }
-            _progressInitialize = 1;
-            Debug.Log("Avatars catalog loaded!!!");
+            //Load the catalogs defining the avatars.  
+            yield return StartCoroutine(CoLoadAvatarsCatalogs());
+            Debug.Log("Avatars catalogs loaded!!!");
 
-            //Load the ModernOffice catalog. 
-            AddressablesRuntimeProperties.ClearCachedPropertyValues();
-            QuickCatalogSettings.URL = _catalogs[1].GetServerDataPath();
-            op = Addressables.LoadContentCatalogAsync(GetCatalogPathModernOffice());
-            while (!op.IsDone)
-            {
-                _progressInitialize = op.PercentComplete / 100.0f;
-                yield return null;
-            }
-            _progressInitialize = 1;
-            Debug.Log("ModernOffice catalog loaded!!!");
-            yield return null;
-
-            //Load the Restaurant catalog. 
-            AddressablesRuntimeProperties.ClearCachedPropertyValues();
-            QuickCatalogSettings.URL = _catalogs[2].GetServerDataPath();
-            op = Addressables.LoadContentCatalogAsync(GetCatalogPathRestaurant());
-            while (!op.IsDone)
-            {
-                _progressInitialize = op.PercentComplete / 100.0f;
-                yield return null;
-            }
-            _progressInitialize = 1;
-            Debug.Log("Restaurant catalog loaded!!!");
-            yield return null;
-
+            //Load the catalogs defining the scenes. 
+            yield return StartCoroutine(CoLoadScenesCatalogs());
+            Debug.Log("Scenes catalogs loaded!!!");
+            
             StartCoroutine(CoLoadCharacters());
         }
 
@@ -155,21 +254,6 @@ namespace QuickVR
 
         #region GET AND SET
 
-        protected virtual string GetCatalogPathAvatars()
-        {
-            return _catalogs[0].GetCatalogPath();
-        }
-
-        protected virtual string GetCatalogPathModernOffice()
-        {
-            return _catalogs[1].GetCatalogPath();
-        }
-
-        protected virtual string GetCatalogPathRestaurant()
-        {
-            return _catalogs[2].GetCatalogPath();
-        }
-
         public virtual GameObject GetCharacter(string address)
         {
             _loadedCharacters.TryGetValue(address, out GameObject result);
@@ -200,24 +284,12 @@ namespace QuickVR
         #endregion
 
         [ButtonMethod]
-        public virtual void Test()
-        {
-            List<string> cachedPaths = new List<string>();
-            Caching.GetAllCachePaths(cachedPaths);
-
-            foreach (string s in cachedPaths)
-            {
-                Debug.Log(s);
-            }
-        }
-
-        [ButtonMethod]
         public virtual void GenerateCharacterCode()
         {
             string code = "";
             for (int i = 0; i < 6; i++)
             {
-                code += Random.Range(0, 9).ToString();
+                code += UnityEngine.Random.Range(0, 9).ToString();
             }
 
             Debug.Log(code);
