@@ -15,12 +15,6 @@ namespace QuickVR
     public class AddressablesManager : MonoBehaviour
     {
 
-        #region PUBLIC ATTRIBUTES
-
-        public List<QuickCatalogSettings> _catalogs = new List<QuickCatalogSettings>();
-
-        #endregion
-
         #region PROTECTED ATTRIBUTES
 
         private string[] _keys = null;
