@@ -12,8 +12,23 @@ using UnityEngine.AddressableAssets.Initialization;
 namespace QuickVR
 {
 
-    public class AddressablesManager : MonoBehaviour
+    public class QuickAddressablesManager : MonoBehaviour
     {
+
+        #region PUBLIC ATTRIBUTES
+
+        public static bool _isInitialized
+        {
+            get
+            {
+                return m_IsInitialized;
+            }
+        }
+        protected static bool m_IsInitialized;
+
+        public static string URL = "";
+
+        #endregion
 
         #region PROTECTED ATTRIBUTES
 
@@ -129,7 +144,7 @@ namespace QuickVR
                 //Debug.Log("Loading catalog " + catalogPath);
                 
                 AddressablesRuntimeProperties.ClearCachedPropertyValues();
-                QuickCatalogSettings.URL = serverDataPath;
+                URL = serverDataPath;
                 AsyncOperationHandle<IResourceLocator> op = Addressables.LoadContentCatalogAsync(catalogPath);
                 while (!op.IsDone)
                 {
@@ -175,6 +190,7 @@ namespace QuickVR
                 yield return null;
             }
             _progressInitialize = 1;
+            m_IsInitialized = true;
             Debug.Log("Adressables: Initialize Async COMPLETED!!!");
 
             //Load the catalogs defining the avatars.  
