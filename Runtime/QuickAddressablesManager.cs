@@ -2,6 +2,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Net;
 
 using UnityEngine;
 using UnityEngine.AddressableAssets;
@@ -23,6 +24,8 @@ namespace QuickVR
             public string _name = "Addressables Catalog";
             public List<string> _paths = new List<string>();
             public bool _lookSubfolders = true;
+
+            public bool _ignore = false;
         }
 
         public List<QuickCatalogSettings> _catalogs = new List<QuickCatalogSettings>();
@@ -83,6 +86,25 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
+        public string _testWeb = "http://www.google.com";
+
+        [ButtonMethod]
+        public virtual void TestWeb()
+        {
+            try
+            {
+                using (var client = new WebClient())
+                using (var stream = client.OpenRead(_testWeb))
+                {
+                    Debug.Log("WEB OK!!!");
+                }
+            }
+            catch
+            {
+                Debug.Log("WEB FAIL!!!");
+            }
+        }
+
         [ButtonMethod]
         public virtual void Test()
         {
@@ -120,21 +142,35 @@ namespace QuickVR
             }
         }
 
+        protected virtual bool IsLocalPath(string path)
+        {
+            return !path.Contains("http://") && !path.Contains("www.");
+        }
+
+        protected virtual bool PathExists(string path)
+        {
+            if (IsLocalPath(path)) return Directory.Exists(path);
+
+            return true;
+        }
+
         protected virtual IEnumerator CoLoadContentCatalog(QuickCatalogSettings catalogSettings)
         {
             int i = 0; 
-            for (; i < catalogSettings._paths.Count && !Directory.Exists(catalogSettings._paths[i]); i++);
+            for (; i < catalogSettings._paths.Count && !PathExists(catalogSettings._paths[i]); i++);
             
             if (i < catalogSettings._paths.Count)
             {
                 string catalogPath = catalogSettings._paths[i];
+                string sufix = (IsLocalPath(catalogPath) ? "/ServerData/" : "/") + _buildPlatform.ToString();
+
                 if (catalogSettings._lookSubfolders)
                 {
                     foreach (string s in Directory.GetDirectories(catalogPath))
                     {
-                        string dir = s + "/ServerData/" + _buildPlatform.ToString();
+                        string dir = s + sufix;
 
-                        if (Directory.Exists(dir))
+                        if (PathExists(dir))
                         {
                             yield return StartCoroutine(CoLoadContentCatalog(dir));
                         }
@@ -142,8 +178,8 @@ namespace QuickVR
                 }
                 else
                 {
-                    string dir = catalogPath + "/ServerData/" + _buildPlatform.ToString();
-                    if (Directory.Exists(dir))
+                    string dir = catalogPath + sufix;
+                    if (PathExists(dir))
                     {
                         yield return StartCoroutine(CoLoadContentCatalog(dir));
                     }
@@ -153,7 +189,9 @@ namespace QuickVR
 
         protected virtual IEnumerator CoLoadContentCatalog(string serverDataPath)
         {
+            Debug.Log("SERVER DATA PATH = " + serverDataPath);
             string catalogPath = GetCatalogPath(serverDataPath);
+            Debug.Log("CATALOG PATH = " + catalogPath);
             if (catalogPath.Length > 0)
             {
                 //Debug.Log("Loading catalog " + catalogPath);
@@ -175,6 +213,11 @@ namespace QuickVR
 
         protected virtual string GetCatalogPath(string serverDataPath)
         {
+            if (!IsLocalPath(serverDataPath))
+            {
+                return serverDataPath + "/catalog.json";
+            }
+
             string catalogPath = "";
 
             if (Directory.Exists(serverDataPath))
@@ -210,7 +253,10 @@ namespace QuickVR
 
             foreach (QuickCatalogSettings c in _catalogs)
             {
-                yield return StartCoroutine(CoLoadContentCatalog(c));
+                if (!c._ignore)
+                {
+                    yield return StartCoroutine(CoLoadContentCatalog(c));
+                }
             }
 
             StartCoroutine(CoLoadCharacters());
