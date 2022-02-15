@@ -17,6 +17,16 @@ namespace QuickVR
 
         #region PUBLIC ATTRIBUTES
 
+        [System.Serializable]
+        public class QuickCatalogSettings
+        {
+            public string _name = "Addressables Catalog";
+            public List<string> _paths = new List<string>();
+            public bool _lookSubfolders = true;
+        }
+
+        public List<QuickCatalogSettings> _catalogs = new List<QuickCatalogSettings>();
+
         public static bool _isInitialized
         {
             get
@@ -110,24 +120,29 @@ namespace QuickVR
             }
         }
 
-        protected virtual IEnumerator CoLoadAvatarsCatalogs()
+        protected virtual IEnumerator CoLoadContentCatalog(QuickCatalogSettings catalogSettings)
         {
-            string pathAvatars = "../VRunited_Avatars";
-            string dir = pathAvatars + "/ServerData/" + _buildPlatform.ToString();
-
-            yield return StartCoroutine(CoLoadContentCatalog(dir));
-        }
-
-        protected virtual IEnumerator CoLoadScenesCatalogs()
-        {
-            string pathScenes = "../VRUnited_Scenes";
-            //Debug.Log(Path.GetFullPath(pathScenes));
-            if (Directory.Exists(pathScenes))
+            int i = 0; 
+            for (; i < catalogSettings._paths.Count && !Directory.Exists(catalogSettings._paths[i]); i++);
+            
+            if (i < catalogSettings._paths.Count)
             {
-                foreach (string s in Directory.GetDirectories(pathScenes))
+                string catalogPath = catalogSettings._paths[i];
+                if (catalogSettings._lookSubfolders)
                 {
-                    string dir = s + "/ServerData/" + _buildPlatform.ToString();
+                    foreach (string s in Directory.GetDirectories(catalogPath))
+                    {
+                        string dir = s + "/ServerData/" + _buildPlatform.ToString();
 
+                        if (Directory.Exists(dir))
+                        {
+                            yield return StartCoroutine(CoLoadContentCatalog(dir));
+                        }
+                    }
+                }
+                else
+                {
+                    string dir = catalogPath + "/ServerData/" + _buildPlatform.ToString();
                     if (Directory.Exists(dir))
                     {
                         yield return StartCoroutine(CoLoadContentCatalog(dir));
@@ -193,14 +208,11 @@ namespace QuickVR
             m_IsInitialized = true;
             Debug.Log("Adressables: Initialize Async COMPLETED!!!");
 
-            //Load the catalogs defining the avatars.  
-            yield return StartCoroutine(CoLoadAvatarsCatalogs());
-            Debug.Log("Avatars catalogs loaded!!!");
+            foreach (QuickCatalogSettings c in _catalogs)
+            {
+                yield return StartCoroutine(CoLoadContentCatalog(c));
+            }
 
-            //Load the catalogs defining the scenes. 
-            yield return StartCoroutine(CoLoadScenesCatalogs());
-            Debug.Log("Scenes catalogs loaded!!!");
-            
             StartCoroutine(CoLoadCharacters());
         }
 
