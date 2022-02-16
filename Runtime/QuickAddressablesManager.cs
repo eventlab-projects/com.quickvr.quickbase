@@ -89,6 +89,20 @@ namespace QuickVR
         public string _testWeb = "http://www.google.com";
 
         [ButtonMethod]
+        public virtual void ClearCache()
+        {
+            List<string> cachePaths = new List<string>();
+            Caching.GetAllCachePaths(cachePaths);
+
+            foreach (string s in cachePaths)
+            {
+                Debug.Log(s);
+            }
+
+            Caching.ClearCache();
+        }
+
+        [ButtonMethod]
         public virtual void TestWeb()
         {
             try
