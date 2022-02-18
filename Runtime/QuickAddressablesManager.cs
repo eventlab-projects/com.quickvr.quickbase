@@ -10,6 +10,8 @@ using UnityEngine.AddressableAssets.ResourceLocators;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.AddressableAssets.Initialization;
 
+using UnityEngine.Networking;
+
 namespace QuickVR
 {
 
@@ -84,6 +86,12 @@ namespace QuickVR
 
         #endregion
 
+        #region CONSTANTS
+
+        protected const string PHP_DISCOVER_CATALOGS = "discovercatalogs.php";
+
+        #endregion
+
         #region CREATION AND DESTRUCTION
 
         public string _testWeb = "http://www.google.com";
@@ -151,7 +159,7 @@ namespace QuickVR
                             Debug.Log(catalogPath);
                         }
                     }
-                    
+
                 }
             }
         }
@@ -163,55 +171,93 @@ namespace QuickVR
 
         protected virtual bool PathExists(string path)
         {
-            if (IsLocalPath(path)) return Directory.Exists(path);
+            bool exists = false;
 
-            return true;
+            if (IsLocalPath(path))
+            {
+                exists = Directory.Exists(path);
+            }
+            else
+            {
+                try
+                {
+                    using (var client = new WebClient())
+                    using (var stream = client.OpenRead(_testWeb))
+                    {
+                        //Debug.Log("WEB OK!!!");
+                        exists = true;
+                    }
+                }
+                catch
+                {
+                    //Debug.Log("WEB FAIL!!!");
+                    exists = false;
+                }
+            }
+
+            return exists;
         }
 
         protected virtual IEnumerator CoLoadContentCatalog(QuickCatalogSettings catalogSettings)
         {
-            int i = 0; 
-            for (; i < catalogSettings._paths.Count && !PathExists(catalogSettings._paths[i]); i++);
-            
+            int i = 0;
+            for (; i < catalogSettings._paths.Count && !PathExists(catalogSettings._paths[i]); i++) ;
+
             if (i < catalogSettings._paths.Count)
             {
                 string catalogPath = catalogSettings._paths[i];
-                string sufix = (IsLocalPath(catalogPath) ? "/ServerData/" : "/") + _buildPlatform.ToString();
-
-                if (catalogSettings._lookSubfolders)
+                if (IsLocalPath(catalogPath))
                 {
-                    foreach (string s in Directory.GetDirectories(catalogPath))
-                    {
-                        string dir = s + sufix;
+                    string sufix = "/ServerData/" + _buildPlatform.ToString();
 
+                    if (catalogSettings._lookSubfolders)
+                    {
+                        foreach (string s in Directory.GetDirectories(catalogPath))
+                        {
+                            string dir = s + sufix;
+
+                            if (PathExists(dir))
+                            {
+                                yield return StartCoroutine(CoLoadContentCatalog(GetCatalogPath(dir)));
+                            }
+                        }
+                    }
+                    else
+                    {
+                        string dir = catalogPath + sufix;
                         if (PathExists(dir))
                         {
-                            yield return StartCoroutine(CoLoadContentCatalog(dir));
+                            yield return StartCoroutine(CoLoadContentCatalog(GetCatalogPath(dir)));
                         }
                     }
                 }
                 else
                 {
-                    string dir = catalogPath + sufix;
-                    if (PathExists(dir))
-                    {
-                        yield return StartCoroutine(CoLoadContentCatalog(dir));
-                    }
+                    yield return StartCoroutine(CoLoadContentCatalogRemote(catalogPath));
                 }
             }
         }
 
-        protected virtual IEnumerator CoLoadContentCatalog(string serverDataPath)
+        protected virtual IEnumerator CoLoadContentCatalogRemote(string catalogPath)
         {
-            Debug.Log("SERVER DATA PATH = " + serverDataPath);
-            string catalogPath = GetCatalogPath(serverDataPath);
-            Debug.Log("CATALOG PATH = " + catalogPath);
+            UnityWebRequest web = UnityWebRequest.Get(catalogPath + "/" + PHP_DISCOVER_CATALOGS);
+            yield return web.SendWebRequest();
+
+            string[] catalogFiles = web.downloadHandler.text.Split(';');
+            foreach (string c in catalogFiles)
+            {
+                yield return CoLoadContentCatalog(catalogPath + c.Substring(1));
+            }
+        }
+
+        protected virtual IEnumerator CoLoadContentCatalog(string catalogPath)
+        {
             if (catalogPath.Length > 0)
             {
-                //Debug.Log("Loading catalog " + catalogPath);
-                
+                Debug.Log("Loading catalog " + catalogPath);
+
                 AddressablesRuntimeProperties.ClearCachedPropertyValues();
-                URL = serverDataPath;
+                URL = GetCatalogDirectory(catalogPath);
                 AsyncOperationHandle<IResourceLocator> op = Addressables.LoadContentCatalogAsync(catalogPath);
                 while (!op.IsDone)
                 {
@@ -221,8 +267,20 @@ namespace QuickVR
 
                 //Debug.Log(catalogPath + " loaded!");
             }
-            
+
             _progressInitialize = 1;
+        }
+
+        protected virtual string GetCatalogDirectory(string catalogPath)
+        {
+            string directory = "";
+
+            int i = catalogPath.Length - 1;
+            for (; i >= 0 && catalogPath[i] != '/' && catalogPath[i] != '\\'; i--) ;
+
+            directory = catalogPath.Substring(0, i);
+
+            return directory;
         }
 
         protected virtual string GetCatalogPath(string serverDataPath)
