@@ -25,7 +25,6 @@ namespace QuickVR
         {
             public string _name = "Addressables Catalog";
             public List<string> _paths = new List<string>();
-            public bool _lookSubfolders = true;
 
             public bool _ignore = false;
         }
@@ -94,108 +93,39 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        public string _testWeb = "http://www.google.com";
+        protected virtual IEnumerator Start()
+        {
+            AsyncOperationHandle<IResourceLocator> op = Addressables.InitializeAsync();
+            while (!op.IsDone)
+            {
+                _progressInitialize = op.PercentComplete / 100.0f;
+                yield return null;
+            }
+            _progressInitialize = 1;
+            m_IsInitialized = true;
+            Debug.Log("Adressables: Initialize Async COMPLETED!!!");
 
+            foreach (QuickCatalogSettings c in _catalogs)
+            {
+                if (!c._ignore)
+                {
+                    yield return StartCoroutine(CoLoadContentCatalog(c));
+                }
+            }
+
+            StartCoroutine(CoLoadCharacters());
+        }
+
+        public string _testCatalog = "";
         [ButtonMethod]
-        public virtual void ClearCache()
+        public virtual void TestDiscoverCatalogs()
         {
-            List<string> cachePaths = new List<string>();
-            Caching.GetAllCachePaths(cachePaths);
-
-            foreach (string s in cachePaths)
+            List<string> result = new List<string>();
+            DiscoverCatalogsLocal(_testCatalog, result);
+            foreach (string r in result)
             {
-                Debug.Log(s);
+                Debug.Log(r);
             }
-
-            Caching.ClearCache();
-        }
-
-        [ButtonMethod]
-        public virtual void TestWeb()
-        {
-            try
-            {
-                using (var client = new WebClient())
-                using (var stream = client.OpenRead(_testWeb))
-                {
-                    Debug.Log("WEB OK!!!");
-                }
-            }
-            catch
-            {
-                Debug.Log("WEB FAIL!!!");
-            }
-        }
-
-        [ButtonMethod]
-        public virtual void Test()
-        {
-            string pathScenes = "../VRUnited_Scenes";
-            Debug.Log(Path.GetFullPath(pathScenes));
-            if (Directory.Exists(pathScenes))
-            {
-                foreach (string s in Directory.GetDirectories(pathScenes))
-                {
-                    string dir = s + "/ServerData/" + _buildPlatform.ToString();
-
-                    if (Directory.Exists(dir))
-                    {
-                        List<string> files = new List<string>(Directory.EnumerateFiles(dir, "*.json"));
-
-                        string catalogPath = "";
-                        DateTime dTimeLast = new DateTime();
-                        foreach (string f in files)
-                        {
-                            DateTime dTime = File.GetLastWriteTime(f);
-                            if (dTime > dTimeLast)
-                            {
-                                catalogPath = f;
-                                dTimeLast = dTime;
-                            }
-                        }
-
-                        if (catalogPath.Length > 0)
-                        {
-                            Debug.Log(catalogPath);
-                        }
-                    }
-
-                }
-            }
-        }
-
-        protected virtual bool IsLocalPath(string path)
-        {
-            return !path.Contains("http://") && !path.Contains("www.");
-        }
-
-        protected virtual bool PathExists(string path)
-        {
-            bool exists = false;
-
-            if (IsLocalPath(path))
-            {
-                exists = Directory.Exists(path);
-            }
-            else
-            {
-                try
-                {
-                    using (var client = new WebClient())
-                    using (var stream = client.OpenRead(_testWeb))
-                    {
-                        //Debug.Log("WEB OK!!!");
-                        exists = true;
-                    }
-                }
-                catch
-                {
-                    //Debug.Log("WEB FAIL!!!");
-                    exists = false;
-                }
-            }
-
-            return exists;
         }
 
         protected virtual IEnumerator CoLoadContentCatalog(QuickCatalogSettings catalogSettings)
@@ -205,48 +135,75 @@ namespace QuickVR
 
             if (i < catalogSettings._paths.Count)
             {
-                string catalogPath = catalogSettings._paths[i];
-                if (IsLocalPath(catalogPath))
+                string serverPath = catalogSettings._paths[i];
+                List<string> catalogPaths = new List<string>();
+                if (IsLocalPath(serverPath))
                 {
-                    string sufix = "/ServerData/" + _buildPlatform.ToString();
-
-                    if (catalogSettings._lookSubfolders)
-                    {
-                        foreach (string s in Directory.GetDirectories(catalogPath))
-                        {
-                            string dir = s + sufix;
-
-                            if (PathExists(dir))
-                            {
-                                yield return StartCoroutine(CoLoadContentCatalog(GetCatalogPath(dir)));
-                            }
-                        }
-                    }
-                    else
-                    {
-                        string dir = catalogPath + sufix;
-                        if (PathExists(dir))
-                        {
-                            yield return StartCoroutine(CoLoadContentCatalog(GetCatalogPath(dir)));
-                        }
-                    }
+                    DiscoverCatalogsLocal(serverPath, catalogPaths);
                 }
                 else
                 {
-                    yield return StartCoroutine(CoLoadContentCatalogRemote(catalogPath));
+                    yield return StartCoroutine(CoDiscoverCatalogsRemote(serverPath, catalogPaths));
+                }
+
+                foreach (string cPath in catalogPaths)
+                {
+                    yield return CoLoadContentCatalog(cPath);
                 }
             }
         }
 
-        protected virtual IEnumerator CoLoadContentCatalogRemote(string catalogPath)
+        protected virtual void DiscoverCatalogsLocal(string dir, List<string> result)
         {
-            UnityWebRequest web = UnityWebRequest.Get(catalogPath + "/" + PHP_DISCOVER_CATALOGS);
+            string[] subDirs = Directory.GetDirectories(dir);
+            int i = 0;
+            for (; i < subDirs.Length && !subDirs[i].Contains("ServerData"); i++) ;
+
+            if (i < subDirs.Length)
+            {
+                //We have found the ServerData subfolder, which by convention, it contains the catalogs. 
+                //Look for the catalog file on that folder
+                string serverDataPath = subDirs[i] + "/" + _buildPlatform.ToString();
+                if (Directory.Exists(serverDataPath))
+                {
+                    List<string> files = new List<string>(Directory.EnumerateFiles(serverDataPath, "*.json"));
+                    DateTime dTimeLast = new DateTime();
+                    string catalogPath = "";
+
+                    foreach (string f in files)
+                    {
+                        DateTime dTime = File.GetLastWriteTime(f);
+                        if (dTime > dTimeLast)
+                        {
+                            catalogPath = f;
+                            dTimeLast = dTime;
+                        }
+                    }
+
+                    if (catalogPath.Length > 0)
+                    {
+                        result.Add(catalogPath);
+                    }
+                }
+            }
+            else
+            {
+                foreach (string s in subDirs)
+                {
+                    DiscoverCatalogsLocal(s, result);
+                }
+            }
+        }
+
+        protected virtual IEnumerator CoDiscoverCatalogsRemote(string serverPath, List<string> catalogPaths)
+        {
+            UnityWebRequest web = UnityWebRequest.Get(serverPath + "/" + PHP_DISCOVER_CATALOGS);
             yield return web.SendWebRequest();
 
             string[] catalogFiles = web.downloadHandler.text.Split(';');
             foreach (string c in catalogFiles)
             {
-                yield return CoLoadContentCatalog(catalogPath + c.Substring(1));
+                catalogPaths.Add(serverPath + c.Substring(1));
             }
         }
 
@@ -273,65 +230,10 @@ namespace QuickVR
 
         protected virtual string GetCatalogDirectory(string catalogPath)
         {
-            string directory = "";
-
             int i = catalogPath.Length - 1;
             for (; i >= 0 && catalogPath[i] != '/' && catalogPath[i] != '\\'; i--) ;
 
-            directory = catalogPath.Substring(0, i);
-
-            return directory;
-        }
-
-        protected virtual string GetCatalogPath(string serverDataPath)
-        {
-            if (!IsLocalPath(serverDataPath))
-            {
-                return serverDataPath + "/catalog.json";
-            }
-
-            string catalogPath = "";
-
-            if (Directory.Exists(serverDataPath))
-            {
-                List<string> files = new List<string>(Directory.EnumerateFiles(serverDataPath, "*.json"));
-                DateTime dTimeLast = new DateTime();
-
-                foreach (string f in files)
-                {
-                    DateTime dTime = File.GetLastWriteTime(f);
-                    if (dTime > dTimeLast)
-                    {
-                        catalogPath = f;
-                        dTimeLast = dTime;
-                    }
-                }
-            }
-
-            return catalogPath;
-        }
-
-        protected virtual IEnumerator Start()
-        {
-            AsyncOperationHandle<IResourceLocator> op = Addressables.InitializeAsync();
-            while (!op.IsDone)
-            {
-                _progressInitialize = op.PercentComplete / 100.0f;
-                yield return null;
-            }
-            _progressInitialize = 1;
-            m_IsInitialized = true;
-            Debug.Log("Adressables: Initialize Async COMPLETED!!!");
-
-            foreach (QuickCatalogSettings c in _catalogs)
-            {
-                if (!c._ignore)
-                {
-                    yield return StartCoroutine(CoLoadContentCatalog(c));
-                }
-            }
-
-            StartCoroutine(CoLoadCharacters());
+            return catalogPath.Substring(0, i);
         }
 
         protected virtual IEnumerator CoLoadCharacters()
@@ -419,6 +321,40 @@ namespace QuickVR
         public virtual float GetProgressAvatars()
         {
             return _progressAvatars;
+        }
+
+        protected virtual bool IsLocalPath(string path)
+        {
+            return !path.Contains("http://") && !path.Contains("www.");
+        }
+
+        protected virtual bool PathExists(string path)
+        {
+            bool exists = false;
+
+            if (IsLocalPath(path))
+            {
+                exists = Directory.Exists(path);
+            }
+            else
+            {
+                try
+                {
+                    using (var client = new WebClient())
+                    using (var stream = client.OpenRead(path + "/" + PHP_DISCOVER_CATALOGS))
+                    {
+                        //Debug.Log("WEB OK!!!");
+                        exists = true;
+                    }
+                }
+                catch
+                {
+                    //Debug.Log("WEB FAIL!!!");
+                    exists = false;
+                }
+            }
+
+            return exists;
         }
 
         #endregion
