@@ -9,6 +9,7 @@ using UnityEngine.AddressableAssets;
 using UnityEngine.AddressableAssets.ResourceLocators;
 using UnityEngine.ResourceManagement.AsyncOperations;
 using UnityEngine.AddressableAssets.Initialization;
+using UnityEngine.ResourceManagement.ResourceLocations;
 
 using UnityEngine.Networking;
 
@@ -45,8 +46,6 @@ namespace QuickVR
         #endregion
 
         #region PROTECTED ATTRIBUTES
-
-        private string[] _keys = null;
 
         protected Dictionary<string, GameObject> _loadedCharacters = new Dictionary<string, GameObject>();
         protected float _progressInitialize = 0;
@@ -197,7 +196,9 @@ namespace QuickVR
 
         protected virtual IEnumerator CoDiscoverCatalogsRemote(string serverPath, List<string> catalogPaths)
         {
-            UnityWebRequest web = UnityWebRequest.Get(serverPath + "/" + PHP_DISCOVER_CATALOGS);
+            WWWForm form = new WWWForm();
+            form.AddField("BuildPlatform", _buildPlatform.ToString());
+            UnityWebRequest web = UnityWebRequest.Post(serverPath + "/" + PHP_DISCOVER_CATALOGS, form);
             yield return web.SendWebRequest();
 
             string[] catalogFiles = web.downloadHandler.text.Split(';');
@@ -238,58 +239,34 @@ namespace QuickVR
 
         protected virtual IEnumerator CoLoadCharacters()
         {
-            //Load the characters keys
-            //foreach (IResourceLocator rLocator in Addressables.ResourceLocators)
-            //{
-            //    Debug.Log(rLocator.);
-            //    rLocator.
-            //}
-
-            AsyncOperationHandle<TextAsset> opKeys = Addressables.LoadAssetAsync<TextAsset>("__KEYS__");
-            while (!opKeys.IsDone)
+            //Look for the IResourceLocations of all the objects tagged as VRUAvatar
+            AsyncOperationHandle<IList<IResourceLocation>> handle = Addressables.LoadResourceLocationsAsync("VRUAvatar");
+            while (!handle.IsDone)
             {
-                _progressAvatarKeys = (float)(opKeys.GetDownloadStatus().DownloadedBytes / (double)opKeys.GetDownloadStatus().TotalBytes);
+                _progressAvatarKeys = handle.GetDownloadStatus().DownloadedBytes / handle.GetDownloadStatus().TotalBytes;
                 yield return null;
             }
             _progressAvatarKeys = 1;
-
-            Debug.Log("CHARACTER KEYS LOADED!!!");
-            string[] tmp = opKeys.Result.text.Split('\n');
-            _keys = new string[tmp.Length];
-
-            int numAvatars = tmp.Length;
-            for (int i = 0; i < tmp.Length; i++)
+            
+            int numAvatars = handle.Result.Count;
+            for (int i = 0; i < numAvatars; i++)
             {
                 _progressAvatars = i / (float)numAvatars;
-                string s = tmp[i];
-                for (int j = 0; j < s.Length; j++)
-                {
-                    if (s[j] >= '0' && s[j] <= '9')
-                    {
-                        _keys[i] += s[j];
-                    }
-                }
-
-                //Debug.Log(_keys[i]);
-                string key = _keys[i];
-                AsyncOperationHandle<GameObject> op = Addressables.LoadAssetAsync<GameObject>(key);
-                if (op.IsValid())
-                {
-                    while (!op.IsDone)
-                    {
-                        yield return null;
-                    }
-
-                    _loadedCharacters[key] = op.Result;
-                    QuickAddress address = op.Result.GetOrCreateComponent<QuickAddress>();
-                    address._address = key;
-
-                    //yield return StartCoroutine(CoInstantiateCharacter(op, _keys[i]));
-                }
+                IResourceLocation rLocation = handle.Result[i];
+                string key = rLocation.PrimaryKey;
+                AsyncOperationHandle<GameObject> op = Addressables.LoadAssetAsync<GameObject>(rLocation);
+                yield return op;
+                
+                _loadedCharacters[key] = op.Result;
+                QuickAddress address = op.Result.GetOrCreateComponent<QuickAddress>();
+                address._address = key;
             }
+
             _progressAvatars = 1;
 
             _isCharactersLoaded = true;
+
+            Addressables.Release(handle);
         }
 
         #endregion
