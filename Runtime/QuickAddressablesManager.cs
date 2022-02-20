@@ -115,17 +115,17 @@ namespace QuickVR
             StartCoroutine(CoLoadCharacters());
         }
 
-        public string _testCatalog = "";
-        [ButtonMethod]
-        public virtual void TestDiscoverCatalogs()
-        {
-            List<string> result = new List<string>();
-            DiscoverCatalogsLocal(_testCatalog, result);
-            foreach (string r in result)
-            {
-                Debug.Log(r);
-            }
-        }
+        //public string _testCatalog = "";
+        //[ButtonMethod]
+        //public virtual void TestDiscoverCatalogs()
+        //{
+        //    List<string> result = new List<string>();
+        //    DiscoverCatalogsLocal(_testCatalog, result);
+        //    foreach (string r in result)
+        //    {
+        //        Debug.Log(r);
+        //    }
+        //}
 
         protected virtual IEnumerator CoLoadContentCatalog(QuickCatalogSettings catalogSettings)
         {
@@ -336,17 +336,17 @@ namespace QuickVR
 
         #endregion
 
-        [ButtonMethod]
-        public virtual void GenerateCharacterCode()
-        {
-            string code = "";
-            for (int i = 0; i < 6; i++)
-            {
-                code += UnityEngine.Random.Range(0, 9).ToString();
-            }
+        //[ButtonMethod]
+        //public virtual void GenerateCharacterCode()
+        //{
+        //    string code = "";
+        //    for (int i = 0; i < 6; i++)
+        //    {
+        //        code += UnityEngine.Random.Range(0, 9).ToString();
+        //    }
 
-            Debug.Log(code);
-        }
+        //    Debug.Log(code);
+        //}
     }
 
 }
