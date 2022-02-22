@@ -21,16 +21,7 @@ namespace QuickVR
 
         #region PUBLIC ATTRIBUTES
 
-        [System.Serializable]
-        public class QuickCatalogSettings
-        {
-            public string _name = "Addressables Catalog";
-            public List<string> _paths = new List<string>();
-
-            public bool _ignore = false;
-        }
-
-        public List<QuickCatalogSettings> _catalogs = new List<QuickCatalogSettings>();
+        public List<string> _addressableServerPaths = new List<string>();
 
         public static bool _isInitialized
         {
@@ -104,11 +95,25 @@ namespace QuickVR
             m_IsInitialized = true;
             Debug.Log("Adressables: Initialize Async COMPLETED!!!");
 
-            foreach (QuickCatalogSettings c in _catalogs)
+            int i = 0;
+            for (; i < _addressableServerPaths.Count && !PathExists(_addressableServerPaths[i]); i++) ;
+
+            if (i < _addressableServerPaths.Count)
             {
-                if (!c._ignore)
+                string serverPath = _addressableServerPaths[i];
+                List<string> catalogPaths = new List<string>();
+                if (IsLocalPath(serverPath))
                 {
-                    yield return StartCoroutine(CoLoadContentCatalog(c));
+                    DiscoverCatalogsLocal(serverPath, catalogPaths);
+                }
+                else
+                {
+                    yield return StartCoroutine(CoDiscoverCatalogsRemote(serverPath, catalogPaths));
+                }
+
+                foreach (string cPath in catalogPaths)
+                {
+                    yield return CoLoadContentCatalog(cPath);
                 }
             }
 
@@ -126,31 +131,6 @@ namespace QuickVR
         //        Debug.Log(r);
         //    }
         //}
-
-        protected virtual IEnumerator CoLoadContentCatalog(QuickCatalogSettings catalogSettings)
-        {
-            int i = 0;
-            for (; i < catalogSettings._paths.Count && !PathExists(catalogSettings._paths[i]); i++) ;
-
-            if (i < catalogSettings._paths.Count)
-            {
-                string serverPath = catalogSettings._paths[i];
-                List<string> catalogPaths = new List<string>();
-                if (IsLocalPath(serverPath))
-                {
-                    DiscoverCatalogsLocal(serverPath, catalogPaths);
-                }
-                else
-                {
-                    yield return StartCoroutine(CoDiscoverCatalogsRemote(serverPath, catalogPaths));
-                }
-
-                foreach (string cPath in catalogPaths)
-                {
-                    yield return CoLoadContentCatalog(cPath);
-                }
-            }
-        }
 
         protected virtual void DiscoverCatalogsLocal(string dir, List<string> result)
         {
