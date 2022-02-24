@@ -40,8 +40,6 @@ namespace QuickVR
 
         protected Dictionary<string, GameObject> _loadedCharacters = new Dictionary<string, GameObject>();
         protected float _progressInitialize = 0;
-        protected float _progressAvatarKeys = 0;
-        protected float _progressAvatars = 0;
 
         protected bool _isCharactersLoaded = false;
 
@@ -196,17 +194,10 @@ namespace QuickVR
 
                 AddressablesRuntimeProperties.ClearCachedPropertyValues();
                 URL = GetCatalogDirectory(catalogPath);
-                AsyncOperationHandle<IResourceLocator> op = Addressables.LoadContentCatalogAsync(catalogPath);
-                while (!op.IsDone)
-                {
-                    _progressInitialize = op.PercentComplete / 100.0f;
-                    yield return null;
-                }
+                yield return Addressables.LoadContentCatalogAsync(catalogPath);
 
-                //Debug.Log(catalogPath + " loaded!");
+                Debug.Log(catalogPath + " loaded!");
             }
-
-            _progressInitialize = 1;
         }
 
         protected virtual string GetCatalogDirectory(string catalogPath)
@@ -221,28 +212,44 @@ namespace QuickVR
         {
             //Look for the IResourceLocations of all the objects tagged as VRUAvatar
             AsyncOperationHandle<IList<IResourceLocation>> handle = Addressables.LoadResourceLocationsAsync("VRUAvatar");
-            while (!handle.IsDone)
+            yield return handle;
+
+            Debug.Log("HANDLE DONE!!!");
+            if (handle.Result.Count > 0)
             {
-                _progressAvatarKeys = handle.GetDownloadStatus().DownloadedBytes / handle.GetDownloadStatus().TotalBytes;
-                yield return null;
-            }
-            _progressAvatarKeys = 1;
-            
-            int numAvatars = handle.Result.Count;
-            for (int i = 0; i < numAvatars; i++)
-            {
-                _progressAvatars = i / (float)numAvatars;
-                IResourceLocation rLocation = handle.Result[i];
-                string key = rLocation.PrimaryKey;
-                AsyncOperationHandle<GameObject> op = Addressables.LoadAssetAsync<GameObject>(rLocation);
-                yield return op;
-                
+                //Load the first avatar. This will produce to download the whole avatars catalog if it has not been downloaded yet. 
+                AsyncOperationHandle<GameObject> op = Addressables.LoadAssetAsync<GameObject>(handle.Result[0]);
+                while (!op.IsDone)
+                {
+                    _progressInitialize = op.GetDownloadStatus().Percent; 
+                    yield return null;
+                }
+
+                string key = handle.Result[0].PrimaryKey;
                 _loadedCharacters[key] = op.Result;
                 QuickAddress address = op.Result.GetOrCreateComponent<QuickAddress>();
                 address._address = key;
+
+                //Load the other avatars
+                int numAvatars = handle.Result.Count;
+                for (int i = 1; i < numAvatars; i++)
+                {
+                    _progressInitialize = i / (float)numAvatars;
+                    IResourceLocation rLocation = handle.Result[i];
+                    key = rLocation.PrimaryKey;
+                    op = Addressables.LoadAssetAsync<GameObject>(rLocation);
+                    while (!op.IsDone)
+                    {
+                        yield return null;
+                    }
+
+                    _loadedCharacters[key] = op.Result;
+                    address = op.Result.GetOrCreateComponent<QuickAddress>();
+                    address._address = key;
+                }
             }
 
-            _progressAvatars = 1;
+            _progressInitialize = 1;
 
             _isCharactersLoaded = true;
 
@@ -268,16 +275,6 @@ namespace QuickVR
         public virtual float GetProgressInitialize()
         {
             return _progressInitialize;
-        }
-
-        public virtual float GetProgressAvatarKeys()
-        {
-            return _progressAvatarKeys;
-        }
-
-        public virtual float GetProgressAvatars()
-        {
-            return _progressAvatars;
         }
 
         protected virtual bool IsLocalPath(string path)

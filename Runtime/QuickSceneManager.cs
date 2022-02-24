@@ -205,7 +205,15 @@ namespace QuickVR
                     yield return test;
                     if (test.Result.Count > 0)
                     {
-                        AsyncOperationHandle<SceneInstance> opLoadScene = Addressables.LoadSceneAsync(test.Result[0], LoadSceneMode.Additive);
+                        Debug.Log("LOAD SCENE: SCENE FOUND!!!" + sceneName);
+                        Debug.Log("COUNT = " + test.Result.Count);
+                        for (int i = 0; i < test.Result.Count; i++)
+                        {
+                            Debug.Log(test.Result[i].PrimaryKey);
+                            Debug.Log("rType = " + test.Result[i].ResourceType);
+                        }
+                        Debug.Log(test.Result[0].PrimaryKey);
+                        AsyncOperationHandle<SceneInstance> opLoadScene = Addressables.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
                         yield return opLoadScene;
 
                         sData._scene = opLoadScene.Result.Scene;
