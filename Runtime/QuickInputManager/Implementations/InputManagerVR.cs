@@ -207,48 +207,74 @@ namespace QuickVR
 
         private static InputControl GetInputControlAxis(XRController controller, AxisCode axis)
         {
-            if (!_axisControl.ContainsKey(axis))
-            {
-                InputControl iControl = null;
-                string[] values = _toAxisControlNames[axis];
-                for (int i = 0; iControl == null && i < values.Length; i++)
-                {
-                    iControl = controller.TryGetChildControl(values[i]);
-                }
+            //if (!_axisControl.ContainsKey(axis))
+            //{
+            //    InputControl iControl = null;
+            //    string[] values = _toAxisControlNames[axis];
+            //    for (int i = 0; iControl == null && i < values.Length; i++)
+            //    {
+            //        iControl = controller.TryGetChildControl(values[i]);
+            //    }
 
-                _axisControl[axis] = iControl;
+            //    _axisControl[axis] = iControl;
+            //}
+
+            //return _axisControl[axis];
+
+            
+            InputControl iControl = null;
+            string[] values = _toAxisControlNames[axis];
+            for (int i = 0; iControl == null && i < values.Length; i++)
+            {
+                iControl = controller.TryGetChildControl(values[i]);
             }
 
-            return _axisControl[axis];
+            return iControl;
         }
 
         private static QuickButtonControl GetInputControlButton(XRController controller, ButtonCodes button)
         {
-            if (!_buttonControl.ContainsKey(button))
-            {
-                InputControl iControl = null;
-                string[] values = _toButtonControlNames[button];
-                for (int i = 0; iControl == null && i < values.Length; i++)
-                {
-                    iControl = controller.TryGetChildControl(values[i]);
-                }
+            //if (!_buttonControl.ContainsKey(button))
+            //{
+            //    InputControl iControl = null;
+            //    string[] values = _toButtonControlNames[button];
+            //    for (int i = 0; iControl == null && i < values.Length; i++)
+            //    {
+            //        iControl = controller.TryGetChildControl(values[i]);
+            //    }
 
-                _buttonControl[button] = iControl == null ? null : new QuickButtonControl((AxisControl)iControl); 
+            //    _buttonControl[button] = iControl == null ? null : new QuickButtonControl((AxisControl)iControl); 
+            //}
+
+            //return _buttonControl[button];
+
+            InputControl iControl = null;
+            string[] values = _toButtonControlNames[button];
+            for (int i = 0; iControl == null && i < values.Length; i++)
+            {
+                iControl = controller.TryGetChildControl(values[i]);
             }
 
-            return _buttonControl[button];
+            return new QuickButtonControl((AxisControl)iControl);
         }
 
         protected override float ImpGetAxis(AxisCode axis)
         {
             InputControl tmp = GetInputControlAxis(_inputDevice, axis);
+            if (_inputDevice.deviceId != tmp.device.deviceId)
+            {
+                _axisControl.Remove(axis);
+                Debug.Log("ERROR AXIS!!!");
+                return 0;
+            }
+
             float aValue = 0;
             float dZone = 0;
 
             if (tmp != null)
             {
                 AxisControl aControl = null;
-                
+
                 if (axis == AxisCode.LeftStick_Horizontal || axis == AxisCode.RightStick_Horizontal)
                 {
                     aControl = ((Vector2Control)tmp).x;
