@@ -91,7 +91,6 @@ namespace QuickVR
             }
             _progressInitialize = 1;
             m_IsInitialized = true;
-            Debug.Log("Adressables: Initialize Async COMPLETED!!!");
 
             int i = 0;
             for (; i < _addressableServerPaths.Count && !PathExists(_addressableServerPaths[i]); i++) ;
@@ -214,7 +213,6 @@ namespace QuickVR
             AsyncOperationHandle<IList<IResourceLocation>> handle = Addressables.LoadResourceLocationsAsync("VRUAvatar");
             yield return handle;
 
-            Debug.Log("HANDLE DONE!!!");
             if (handle.Result.Count > 0)
             {
                 //Load the first avatar. This will produce to download the whole avatars catalog if it has not been downloaded yet. 

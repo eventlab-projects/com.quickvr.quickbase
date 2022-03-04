@@ -38,6 +38,9 @@ namespace QuickVR
             public List<bool> _rootGOActive = new List<bool>();
         }
 
+
+        protected bool _isActivatingScene = false;
+
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -57,6 +60,11 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
+
+        public virtual bool IsActivatingScene()
+        {
+            return _isActivatingScene;
+        }
 
         public virtual SceneState? GetSceneState(string sceneName)
         {
@@ -166,12 +174,20 @@ namespace QuickVR
             }
         }
 
+        public virtual void UnloadScene(Scene scene)
+        {
+            if (scene.IsValid())
+            {
+                StartCoroutine(CoUnloadScene(scene));
+            }
+        }
+
         public virtual void UnloadScene(string sceneName)
         {
             //The scene is send back to background
             if (_loadedScenes.TryGetValue(sceneName, out SceneData sceneData) && sceneData._state != SceneState.Unloading)
             {
-                StartCoroutine(CoUnloadScene(sceneName));
+                StartCoroutine(CoUnloadScene(GetSceneByName(sceneName)));
             }
         }
 
@@ -205,14 +221,6 @@ namespace QuickVR
                     yield return test;
                     if (test.Result.Count > 0)
                     {
-                        Debug.Log("LOAD SCENE: SCENE FOUND!!!" + sceneName);
-                        Debug.Log("COUNT = " + test.Result.Count);
-                        for (int i = 0; i < test.Result.Count; i++)
-                        {
-                            Debug.Log(test.Result[i].PrimaryKey);
-                            Debug.Log("rType = " + test.Result[i].ResourceType);
-                        }
-                        Debug.Log(test.Result[0].PrimaryKey);
                         AsyncOperationHandle<SceneInstance> opLoadScene = Addressables.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
                         yield return opLoadScene;
 
@@ -220,10 +228,8 @@ namespace QuickVR
                     }
                     else
                     {
-                        Debug.Log("PEPITO FAIL!!!");
+                        //FAIL
                     }
-
-                    
 
                     //AsyncOperationHandle<IList<IResourceLocation>> test = Addressables.LoadResourceLocationsAsync(sceneName);
                     //Debug.Log("PEPITO = " + test.Result.Count);
@@ -244,6 +250,8 @@ namespace QuickVR
 
         protected virtual IEnumerator CoActivateScene(string sceneName, bool disableCameras)
         {
+            _isActivatingScene = true;
+
             //Ensure that we are activating a loaded scene
             if (!_loadedScenes.ContainsKey(sceneName))
             {
@@ -274,15 +282,17 @@ namespace QuickVR
                     }
                 }
             }
+
+            _isActivatingScene = false;
         }
 
-        protected virtual IEnumerator CoUnloadScene(string sceneName)
+        protected virtual IEnumerator CoUnloadScene(Scene scene)
         {
-            SetSceneState(sceneName, SceneState.Unloading);
+            //SetSceneState(sceneName, SceneState.Unloading);
 
-            yield return SceneManager.UnloadSceneAsync(sceneName);
+            yield return SceneManager.UnloadSceneAsync(scene);
 
-            _loadedScenes.Remove(sceneName);
+            //_loadedScenes.Remove(sceneName);
         }
 
         #endregion
