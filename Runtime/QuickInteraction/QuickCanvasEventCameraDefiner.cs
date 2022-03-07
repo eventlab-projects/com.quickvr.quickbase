@@ -1,11 +1,14 @@
 using System.Collections;
 using System.Collections.Generic;
+
 using UnityEngine;
+using UnityEngine.XR.Interaction.Toolkit.UI;
 
 namespace QuickVR
 {
 
     [RequireComponent(typeof(Canvas))]
+    [RequireComponent(typeof(TrackedDeviceGraphicRaycaster))]
     public class QuickCanvasEventCameraDefiner : MonoBehaviour
     {
 
