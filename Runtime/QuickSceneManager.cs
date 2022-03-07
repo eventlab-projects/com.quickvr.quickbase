@@ -214,35 +214,26 @@ namespace QuickVR
                 SceneData sData = new SceneData();
                 _loadedScenes[sceneName] = sData;
 
-                //if (isAsync)
+                if (Application.CanStreamedLevelBeLoaded(sceneName))
                 {
-                    //yield return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+                    yield return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+                }
+                else
+                {
                     AsyncOperationHandle<IList<IResourceLocation>> test = Addressables.LoadResourceLocationsAsync(sceneName);
                     yield return test;
                     if (test.Result.Count > 0)
                     {
                         AsyncOperationHandle<SceneInstance> opLoadScene = Addressables.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
                         yield return opLoadScene;
-
-                        sData._scene = opLoadScene.Result.Scene;
                     }
                     else
                     {
                         //FAIL
                     }
-
-                    //AsyncOperationHandle<IList<IResourceLocation>> test = Addressables.LoadResourceLocationsAsync(sceneName);
-                    //Debug.Log("PEPITO = " + test.Result.Count);
                 }
-                //else
-                //{
-                //    SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
 
-                //    //Wait a frame to ensure that the load process has been finished:
-                //    //https://docs.unity3d.com/ScriptReference/SceneManagement.SceneManager.LoadScene.html
-
-                //    yield return null;  
-                //}
+                sData._scene = SceneManager.GetSceneAt(SceneManager.sceneCount - 1);
             }
 
             SetSceneState(sceneName, allowSceneActivation ? SceneState.Loaded : SceneState.Preloaded);
