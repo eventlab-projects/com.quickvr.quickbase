@@ -223,10 +223,7 @@ namespace QuickVR
                     yield return null;
                 }
 
-                string key = handle.Result[0].PrimaryKey;
-                _loadedCharacters[key] = op.Result;
-                QuickAddress address = op.Result.GetOrCreateComponent<QuickAddress>();
-                address._address = key;
+                AddLoadedAvatar(handle.Result[0].PrimaryKey, op.Result);
 
                 //Load the other avatars
                 int numAvatars = handle.Result.Count;
@@ -234,16 +231,14 @@ namespace QuickVR
                 {
                     _progressInitialize = i / (float)numAvatars;
                     IResourceLocation rLocation = handle.Result[i];
-                    key = rLocation.PrimaryKey;
                     op = Addressables.LoadAssetAsync<GameObject>(rLocation);
+
                     while (!op.IsDone)
                     {
                         yield return null;
                     }
 
-                    _loadedCharacters[key] = op.Result;
-                    address = op.Result.GetOrCreateComponent<QuickAddress>();
-                    address._address = key;
+                    AddLoadedAvatar(rLocation.PrimaryKey, op.Result);
                 }
             }
 
@@ -257,6 +252,12 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
+
+        protected virtual void AddLoadedAvatar(string address, GameObject go)
+        {
+            _loadedCharacters[address] = go;
+            go.GetOrCreateComponent<QuickAddress>()._address = address;
+        }
 
         public virtual GameObject GetCharacter(string address)
         {
