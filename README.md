@@ -44,3 +44,6 @@ Select _Import_ on those samples you want to install. The samples are installed 
 
 Done! Follow the documentation on the _Samples_ folder and the documentation on the wiki to learn how to configure your application for VR and start using the library. 
 
+# Appendix B: Where is VRUnited installed?
+
+
