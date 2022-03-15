@@ -8,6 +8,10 @@ using System.Net;
 using System.Globalization;
 using UnityEngine.XR;
 
+#if (UNITY_2018_3_OR_NEWER && UNITY_ANDROID)
+using UnityEngine.Android;
+#endif
+
 namespace QuickVR
 {
 
@@ -480,7 +484,25 @@ namespace QuickVR
 #endif
         }
 
-        #region EXTENSION METHODS
+#if (UNITY_2018_3_OR_NEWER && UNITY_ANDROID)
+        public static void CheckPermission(string p)
+        {
+            if (!Permission.HasUserAuthorizedPermission(p))
+            {
+                Permission.RequestUserPermission(p);
+            }
+        }
+
+        public static void CheckPermissions(List<string> permissions)
+        {
+            foreach (string p in permissions)
+            {
+                CheckPermission(p);
+            }
+        }
+#endif
+
+#region EXTENSION METHODS
 
         public static T GetOrCreateComponent<T>(this Component c) where T : Component
         {
@@ -695,7 +717,7 @@ namespace QuickVR
             return m.triangles.Length / 3;
         }
 
-        #endregion
+#endregion
 
     }
 }
