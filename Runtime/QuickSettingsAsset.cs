@@ -48,7 +48,7 @@ namespace QuickVR
 
         public virtual string GetValue()
         {
-            return _value;
+            return PlayerPrefs.GetString(_key);
         }
 
         public virtual void SetValue(object value)
@@ -59,6 +59,8 @@ namespace QuickVR
             {
                 _type = value.GetType().AssemblyQualifiedName;
             }
+
+            PlayerPrefs.SetString(_key, _value);
         }
 
         public virtual int GetOrder()
