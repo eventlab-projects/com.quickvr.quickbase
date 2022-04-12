@@ -71,19 +71,6 @@ namespace QuickVR
             return s.GetValue();
         }
 
-        public static T GetValue<T>(string key)
-        {
-            T result = default(T);
-
-            System.Type t;
-            if (typeof(T) == typeof(int))
-            {
-
-            }
-
-            return result;
-        }
-
         public static int GetInt(string key, int defaultValue = 0)
         {
             int result;
