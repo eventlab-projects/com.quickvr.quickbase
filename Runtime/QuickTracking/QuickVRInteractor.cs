@@ -21,16 +21,29 @@ namespace QuickVR
 
         #region PUBLIC ATTRIBUTES
 
-        public XRNode _xrNode = XRNode.LeftHand;
-
-        public enum GrabMode
+        public XRNode _xrNode
         {
-            Direct,
-            Ray,
-        }
-        public GrabMode _grabMode = GrabMode.Direct;
+            get
+            {
+                return m_XRNode;
+            }
+            set
+            {
+                m_XRNode = value;
 
-        protected enum ActionType
+                //Load the default ActionMap for this controller
+                _actionMapDefault = InputManager.GetInputActionsDefault().FindActionMap(_xrNode == XRNode.LeftHand ? ACTION_MAP_CONTROLLER_LEFT : ACTION_MAP_CONTROLLER_RIGHT);
+
+                ConfigureInteractorGrabDirect();
+                ConfigureInteractorGrabRay();
+                ConfigureInteractorTeleportRay();
+                ConfigureInteractorUIRay();
+            }
+        } 
+            
+        protected XRNode m_XRNode = XRNode.LeftHand;
+
+        public enum ActionType
         {
             Select,
             Activate,
@@ -71,7 +84,8 @@ namespace QuickVR
             _interactorTeleportRay = CreateInteractor(_interactionManager._pfInteractorTeleportRay);
             _interactorUIRay = CreateInteractor(_interactionManager._pfInteractorUIRay);
 
-            EnableInteractorGrab(false);
+            EnableInteractorGrabRay(false);
+            EnableInteractorGrabDirect(false);
             EnableInteractorTeleport(false);
             EnableInteractorUI(false);
         }
@@ -85,30 +99,19 @@ namespace QuickVR
             return result;
         }
 
-        protected virtual void Start()
-        {
-            //Load the default ActionMap for this controller
-            _actionMapDefault = InputManager.GetInputActionsDefault().FindActionMap(_xrNode == XRNode.LeftHand ? ACTION_MAP_CONTROLLER_LEFT : ACTION_MAP_CONTROLLER_RIGHT);
-
-            ConfigureInteractorGrabDirect();
-            ConfigureInteractorGrabRay();
-            ConfigureInteractorTeleportRay();
-            ConfigureInteractorUIRay();
-        }
-
         protected virtual void ConfigureInteractorGrabDirect()
         {
             //Configure the direct interactor
-            CheckInputAction(_interactorGrabDirect, ActionType.Select, "Grab");
-            CheckInputAction(_interactorGrabDirect, ActionType.Activate, "Use");
+            SetInputAction(_interactorGrabDirect, ActionType.Select, "Grab");
+            SetInputAction(_interactorGrabDirect, ActionType.Activate, "Use");
         }
 
         protected virtual void ConfigureInteractorGrabRay()
         {
             //Configure the grab ray
-            CheckInputAction(_interactorGrabRay, ActionType.Select, "Grab");
-            CheckInputAction(_interactorGrabRay, ActionType.Activate, "Use");
-            CheckInputAction(_interactorGrabRay, ActionType.Haptic, "Haptic Device");
+            SetInputAction(_interactorGrabRay, ActionType.Select, "Grab");
+            SetInputAction(_interactorGrabRay, ActionType.Activate, "Use");
+            SetInputAction(_interactorGrabRay, ActionType.Haptic, "Haptic Device");
 
             QuickXRRayInteractor ray = _interactorGrabRay.GetComponent<QuickXRRayInteractor>();
             ray._interactionType = InteractorType.Grab;
@@ -118,8 +121,8 @@ namespace QuickVR
         protected virtual void ConfigureInteractorTeleportRay()
         {
             //Configure the teleport ray
-            CheckInputAction(_interactorTeleportRay, ActionType.Select, "Teleport");
-            CheckInputAction(_interactorTeleportRay, ActionType.Haptic, "Haptic Device");
+            SetInputAction(_interactorTeleportRay, ActionType.Select, "Teleport");
+            SetInputAction(_interactorTeleportRay, ActionType.Haptic, "Haptic Device");
             
             QuickXRRayInteractor ray = _interactorTeleportRay.GetComponent<QuickXRRayInteractor>();
             ray._interactionType = InteractorType.Teleport;
@@ -129,43 +132,48 @@ namespace QuickVR
         protected virtual void ConfigureInteractorUIRay()
         {
             //Configure the UI ray
-            CheckInputAction(_interactorUIRay, ActionType.UI, "Use");
+            SetInputAction(_interactorUIRay, ActionType.UI, "Use");
 
             QuickXRRayInteractor ray = _interactorUIRay.GetComponent<QuickXRRayInteractor>();
             ray._interactionType = InteractorType.UI;
             ray.enableUIInteraction = true;
         }
 
-        protected virtual void CheckInputAction(ActionBasedController interactor, ActionType actionType, string defaultActionName)
+        protected virtual void SetInputAction(ActionBasedController interactor, ActionType actionType, string actionName)
         {
-            InputAction defaultAction = _actionMapDefault.FindAction(defaultActionName);
+            InputAction action = _actionMapDefault.FindAction(actionName);
             if (actionType == ActionType.Activate)
             {
-                if (!interactor.activateAction.action.IsValid())
-                {
-                    interactor.activateAction = new InputActionProperty(defaultAction);
-                }
+                interactor.activateAction = new InputActionProperty(action);
             }
             else if (actionType == ActionType.Select)
             {
-                if (!interactor.selectAction.action.IsValid())
-                {
-                    interactor.selectAction = new InputActionProperty(defaultAction);
-                }
+                interactor.selectAction = new InputActionProperty(action);
             }
             else if (actionType == ActionType.Haptic)
             {
-                if (!interactor.hapticDeviceAction.action.IsValid())
-                {
-                    interactor.hapticDeviceAction = new InputActionProperty(defaultAction);
-                }
+                interactor.hapticDeviceAction = new InputActionProperty(action);
             }
             else if (actionType == ActionType.UI)
             {
-                if (!interactor.uiPressAction.action.IsValid())
-                {
-                    interactor.uiPressAction = new InputActionProperty(defaultAction);
-                }
+                interactor.uiPressAction = new InputActionProperty(action);
+            }
+        }
+
+        public virtual void SetInputAction(InteractorType interactorType, ActionType actionType, string actionName)
+        {
+            if (interactorType == InteractorType.Grab)
+            {
+                SetInputAction(_interactorGrabDirect, actionType, actionName);
+                SetInputAction(_interactorGrabRay, actionType, actionName);
+            }
+            else if (interactorType == InteractorType.Teleport)
+            {
+                SetInputAction(_interactorTeleportRay, actionType, actionName);
+            }
+            else if (interactorType == InteractorType.UI)
+            {
+                SetInputAction(_interactorUIRay, actionType, actionName);
             }
         }
 
@@ -173,41 +181,29 @@ namespace QuickVR
 
         #region GET AND SET
 
-        public virtual ActionBasedController GetInteractorGrab()
-        {
-            return _grabMode == GrabMode.Direct ? _interactorGrabDirect : _interactorGrabRay;
-        }
-
         public virtual ActionBasedController GetInteractorTeleport()
         {
             return _interactorTeleportRay;
         }
 
-        public virtual bool IsEnabledInteractorGrab()
+        public virtual bool IsEnabledInteractorGrabDirect()
         {
-            return GetInteractorGrab().gameObject.activeSelf;
+            return _interactorGrabDirect.gameObject.activeSelf;
         }
 
-        public virtual void EnableInteractorGrab(bool enable)
+        public virtual bool IsEnabledInteractorGrabRay()
         {
-            if (enable)
-            {
-                if (_grabMode == GrabMode.Direct)
-                {
-                    _interactorGrabDirect.gameObject.SetActive(true);
-                    _interactorGrabRay.gameObject.SetActive(false);
-                }
-                else
-                {
-                    _interactorGrabDirect.gameObject.SetActive(false);
-                    _interactorGrabRay.gameObject.SetActive(true);
-                }
-            }
-            else
-            {
-                _interactorGrabDirect.gameObject.SetActive(false);
-                _interactorGrabRay.gameObject.SetActive(false);
-            }
+            return _interactorGrabRay.gameObject.activeSelf;
+        }
+
+        public virtual void EnableInteractorGrabDirect(bool enable)
+        {
+            _interactorGrabDirect.gameObject.SetActive(enable);
+        }
+
+        public virtual void EnableInteractorGrabRay(bool enable)
+        {
+            _interactorGrabRay.gameObject.SetActive(enable);
         }
 
         public virtual bool IsEnabledInteractorTeleport()

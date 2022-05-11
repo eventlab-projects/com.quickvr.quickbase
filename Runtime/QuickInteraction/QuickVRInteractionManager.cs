@@ -27,9 +27,6 @@ namespace QuickVR
             RightHand,
         }
 
-        public QuickVRInteractor.GrabMode _grabModeHandLeft = QuickVRInteractor.GrabMode.Direct;
-        public QuickVRInteractor.GrabMode _grabModeHandRight = QuickVRInteractor.GrabMode.Direct;
-
         public enum DefaultLocomotionProvider
         {
             Teleport, 
@@ -284,12 +281,6 @@ namespace QuickVR
 
         protected virtual void Update()
         {
-            //Enable the corresponding interactors for the lefthand
-            _interactorHandLeft._grabMode = _grabModeHandLeft;
-            
-            //Enable the corresponding interactors for the righthand
-            _interactorHandRight._grabMode = _grabModeHandRight;
-
             //if (Input.GetKeyDown(KeyCode.Alpha1))
             //{
             //    _interactorHandLeft.EnableInteractorGrab(!_interactorHandLeft.IsEnabledInteractorGrab());
