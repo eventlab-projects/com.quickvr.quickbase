@@ -81,6 +81,16 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
+        protected virtual void Awake()
+        {
+#if !UNITY_EDITOR && UNITY_ANDROID
+            List<string> tmp = new List<string>();
+            tmp.Add(Application.persistentDataPath + "/AddressableProjects");
+            tmp.AddRange(_addressableServerPaths);
+            _addressableServerPaths = tmp;
+#endif
+        }
+
         protected virtual IEnumerator Start()
         {
             AsyncOperationHandle<IResourceLocator> op = Addressables.InitializeAsync();
@@ -99,6 +109,7 @@ namespace QuickVR
             {
                 string serverPath = _addressableServerPaths[i];
                 List<string> catalogPaths = new List<string>();
+
                 if (IsLocalPath(serverPath))
                 {
                     DiscoverCatalogsLocal(serverPath, catalogPaths);
@@ -140,6 +151,7 @@ namespace QuickVR
                 //We have found the ServerData subfolder, which by convention, it contains the catalogs. 
                 //Look for the catalog file on that folder
                 string serverDataPath = subDirs[i] + "/" + _buildPlatform.ToString();
+
                 if (Directory.Exists(serverDataPath))
                 {
                     List<string> files = new List<string>(Directory.EnumerateFiles(serverDataPath, "*.json"));

@@ -485,6 +485,7 @@ namespace QuickVR
         }
 
 #if (UNITY_2018_3_OR_NEWER && UNITY_ANDROID)
+
         public static void CheckPermission(string p)
         {
             if (!Permission.HasUserAuthorizedPermission(p))
@@ -500,9 +501,15 @@ namespace QuickVR
                 CheckPermission(p);
             }
         }
+
+        public static bool HasPermission(string p)
+        {
+            return Permission.HasUserAuthorizedPermission(p);
+        }
+
 #endif
 
-#region EXTENSION METHODS
+        #region EXTENSION METHODS
 
         public static T GetOrCreateComponent<T>(this Component c) where T : Component
         {
