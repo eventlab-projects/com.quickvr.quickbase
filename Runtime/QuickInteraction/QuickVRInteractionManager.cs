@@ -46,7 +46,6 @@ namespace QuickVR
         protected QuickVRInteractor _interactorHandLeft = null;
         protected QuickVRInteractor _interactorHandRight = null;
 
-        protected LocomotionSystem _locomotionSystem = null;
         protected TeleportationProvider _teleportProvider = null;
         protected ActionBasedContinuousMoveProvider _continousMoveProvider = null;
         protected ActionBasedContinuousTurnProvider _continousRotationProvider = null;
@@ -55,6 +54,8 @@ namespace QuickVR
         protected QuickVRHandAnimator _handAnimatorLeft = null;
         protected QuickVRHandAnimator _handAnimatorRight = null;
         protected List<XRGrabInteractable> _grabInteractables = new List<XRGrabInteractable>();
+
+        protected Dictionary<DefaultLocomotionProvider, LocomotionProvider> _locomotionProviders = new Dictionary<DefaultLocomotionProvider, LocomotionProvider>();
 
         #endregion
 
@@ -89,7 +90,7 @@ namespace QuickVR
             //By default, disable all the locomotion providers
             foreach (DefaultLocomotionProvider lProvider in QuickUtils.GetEnumValues<DefaultLocomotionProvider>())
             {
-                EnableLocomotionSystem(lProvider, false);
+                SetEnabledLocomotionSystem(lProvider, false);
             }
 
             BaseTeleportationInteractable[] teleportationInteractables = FindObjectsOfType<BaseTeleportationInteractable>();
@@ -119,24 +120,33 @@ namespace QuickVR
         protected virtual void Reset()
         {
             _xrRig = transform.CreateChild("__XRRig__").GetOrCreateComponent<QuickXRRig>();
-            _locomotionSystem = _xrRig.GetOrCreateComponent<LocomotionSystem>();
-            
+            CreateLocomotionProviders();
+        }
+
+        protected virtual void CreateLocomotionProviders()
+        {
+            LocomotionSystem locomotionSystem = _xrRig.GetOrCreateComponent<LocomotionSystem>();
+
             _teleportProvider = gameObject.GetOrCreateComponent<TeleportationProvider>();
-            _teleportProvider.system = _locomotionSystem;
+            _teleportProvider.system = locomotionSystem;
 
             _continousMoveProvider = gameObject.GetOrCreateComponent<ActionBasedContinuousMoveProvider>();
-            _continousMoveProvider.system = _locomotionSystem;
+            _continousMoveProvider.system = locomotionSystem;
             if (!_continousMoveProvider.leftHandMoveAction.action.IsValid())
             {
                 _continousMoveProvider.leftHandMoveAction = new InputActionProperty(InputManager.GetInputActionsDefault().FindAction("General/Move"));
             }
 
             _continousRotationProvider = gameObject.GetOrCreateComponent<ActionBasedContinuousTurnProvider>();
-            _continousRotationProvider.system = _locomotionSystem;
+            _continousRotationProvider.system = locomotionSystem;
             if (!_continousRotationProvider.rightHandTurnAction.action.IsValid())
             {
                 _continousRotationProvider.rightHandTurnAction = new InputActionProperty(InputManager.GetInputActionsDefault().FindAction("General/RotateCamera"));
             }
+
+            _locomotionProviders[DefaultLocomotionProvider.Teleport] = _teleportProvider;
+            _locomotionProviders[DefaultLocomotionProvider.ContinuousMove] = _continousMoveProvider;
+            _locomotionProviders[DefaultLocomotionProvider.ContinuousTurn] = _continousRotationProvider;
         }
 
         protected virtual void CheckPrefabs()
@@ -194,36 +204,20 @@ namespace QuickVR
 
         #region GET AND SET
 
-        public virtual void EnableLocomotionSystem(DefaultLocomotionProvider lProvider, bool enable)
+        public virtual void SetEnabledLocomotionSystem(DefaultLocomotionProvider lProvider, bool enabled)
         {
-            if (lProvider == DefaultLocomotionProvider.Teleport)
+            if (_locomotionProviders.TryGetValue(lProvider, out LocomotionProvider result))
             {
-                _teleportProvider.enabled = enable;
-            }
-            else if (lProvider == DefaultLocomotionProvider.ContinuousMove)
-            {
-                _continousMoveProvider.enabled = enable;
-            }
-            else if (lProvider == DefaultLocomotionProvider.ContinuousTurn)
-            {
-                _continousRotationProvider.enabled = enable;
+                result.enabled = enabled;
             }
         }
 
         public virtual bool IsEnabledLocomotionSystem(DefaultLocomotionProvider lProvider)
         {
             bool result = false;
-            if (lProvider == DefaultLocomotionProvider.Teleport)
+            if (_locomotionProviders.TryGetValue(lProvider, out LocomotionProvider tmp))
             {
-                result = _teleportProvider.enabled;
-            }
-            else if (lProvider == DefaultLocomotionProvider.ContinuousMove)
-            {
-                result = _continousMoveProvider.enabled;
-            }
-            else if (lProvider == DefaultLocomotionProvider.ContinuousTurn)
-            {
-                result = _continousRotationProvider.enabled;
+                result = tmp.enabled;
             }
 
             return result;
