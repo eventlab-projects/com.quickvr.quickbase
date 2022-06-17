@@ -8,6 +8,8 @@ using UnityEngine.XR.Interaction.Toolkit.UI;
 using UnityEngine.InputSystem;
 using UnityEngine.EventSystems;
 
+using Unity.XR.CoreUtils;
+
 namespace QuickVR
 {
 
@@ -41,7 +43,7 @@ namespace QuickVR
         protected QuickVRManager _vrManager = null;
         protected XRInteractionManager _xrInteractionManager = null;
 
-        protected QuickXRRig _xrRig = null;
+        protected XROrigin _xrRig = null;
         
         protected QuickVRInteractor _interactorHandLeft = null;
         protected QuickVRInteractor _interactorHandRight = null;
@@ -119,7 +121,7 @@ namespace QuickVR
 
         protected virtual void Reset()
         {
-            _xrRig = transform.CreateChild("__XRRig__").GetOrCreateComponent<QuickXRRig>();
+            _xrRig = transform.CreateChild("__XRRig__").GetOrCreateComponent<XROrigin>();
             CreateLocomotionProviders();
         }
 
@@ -208,7 +210,10 @@ namespace QuickVR
         {
             if (_locomotionProviders.TryGetValue(lProvider, out LocomotionProvider result))
             {
-                result.enabled = enabled;
+                if (enabled != result.enabled)
+                {
+                    result.enabled = enabled;
+                }
             }
         }
 
@@ -304,7 +309,7 @@ namespace QuickVR
 
         protected virtual void UpdateNewAnimatorTarget(Animator animator)
         {
-            _xrRig.rig = animator.gameObject;   //Configure the XRRig to act in this animator
+            _xrRig.Origin = animator.gameObject;   //Configure the XRRig to act in this animator
             _characterController = animator.transform.GetOrCreateComponent<CharacterController>();
             foreach (XRGrabInteractable g in _grabInteractables)
             {

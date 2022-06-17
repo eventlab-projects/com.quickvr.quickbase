@@ -179,10 +179,33 @@ namespace QuickVR
 
         public virtual void SetInteractorEnabled(InteractorType type, bool enabled)
         {
+            //ActionBasedController interactor = GetInteractor(type);
+            //if (interactor && interactor.gameObject.activeSelf != enabled)
+            //{
+            //    interactor.gameObject.SetActive(enabled);
+            //}
+
             ActionBasedController interactor = GetInteractor(type);
-            if (interactor)
+            if (interactor && interactor.gameObject.activeSelf != enabled)
             {
                 interactor.gameObject.SetActive(enabled);
+
+                //Disable all the interactors
+                HashSet<ActionBasedController> enabledInteractors = new HashSet<ActionBasedController>();
+                foreach (var pair in _interactors)
+                {
+                    if (pair.Value.gameObject.activeSelf)
+                    {
+                        enabledInteractors.Add(pair.Value);
+                    }
+                    pair.Value.gameObject.SetActive(false);
+                }
+
+                //Reenable the interactors that were enabled at the begining. 
+                foreach (ActionBasedController tmp in enabledInteractors)
+                {
+                    tmp.gameObject.SetActive(true);
+                }
             }
         }
 
