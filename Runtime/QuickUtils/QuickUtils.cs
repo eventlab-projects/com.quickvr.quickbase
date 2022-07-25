@@ -675,24 +675,24 @@ namespace QuickVR
             return action != null && action.bindings.Count > 0;
         }
 
-        public static Mesh GetMesh(this Renderer r)
-        {
-            Mesh result = null;
-            if (r.GetType() == typeof(SkinnedMeshRenderer))
-            {
-                result = ((SkinnedMeshRenderer)r).sharedMesh;
-            }
-            else
-            {
-                MeshFilter mFilter = r.GetComponent<MeshFilter>();
-                if (mFilter)
-                {
-                    result = mFilter.sharedMesh;
-                }
-            }
+        //public static Mesh GetMesh(this Renderer r)
+        //{
+        //    Mesh result = null;
+        //    if (r.GetType() == typeof(SkinnedMeshRenderer))
+        //    {
+        //        result = ((SkinnedMeshRenderer)r).sharedMesh;
+        //    }
+        //    else
+        //    {
+        //        MeshFilter mFilter = r.GetComponent<MeshFilter>();
+        //        if (mFilter)
+        //        {
+        //            result = mFilter.sharedMesh;
+        //        }
+        //    }
 
-            return result;
-        }
+        //    return result;
+        //}
 
         public static void SetMesh(this Renderer r, Mesh mesh)
         {
