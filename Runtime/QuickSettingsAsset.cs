@@ -48,6 +48,11 @@ namespace QuickVR
 
         public virtual string GetValue()
         {
+            if (!PlayerPrefs.HasKey(_key))
+            {
+                PlayerPrefs.SetString(_key, _value);
+            }
+
             return PlayerPrefs.GetString(_key);
         }
 
@@ -60,6 +65,11 @@ namespace QuickVR
                 _type = value.GetType().AssemblyQualifiedName;
             }
 
+            PlayerPrefs.SetString(_key, _value);
+        }
+
+        public virtual void ResetValue()
+        {
             PlayerPrefs.SetString(_key, _value);
         }
 

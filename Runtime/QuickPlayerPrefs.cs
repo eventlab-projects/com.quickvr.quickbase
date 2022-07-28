@@ -130,6 +130,19 @@ namespace QuickVR
             _settings.RemoveSetting(key);
         }
 
+        public static void ResetAllSettings()
+        {
+            foreach (QuickSetting s in _settings._settingsBase)
+            {
+                s.ResetValue();
+            }
+
+            foreach (QuickSetting s in _settings._settingsCustom)
+            {
+                s.ResetValue();
+            }
+        }
+
         #endregion
 
     }
