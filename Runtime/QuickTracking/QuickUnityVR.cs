@@ -352,7 +352,8 @@ namespace QuickVR {
                 {
                     ControlType cType = GetIKControl(ikBone);
                     HumanBodyBones boneID = ToHumanBodyBones(ikBone);
-                    GetIKSolver(ikBone)._enableIK = cType != ControlType.Animation;
+                    QuickIKSolver ikSolver = GetIKSolver(ikBone);
+                    ikSolver._enableIK = cType != ControlType.Animation;
 
                     if (cType == ControlType.Tracking)
                     {
@@ -379,9 +380,16 @@ namespace QuickVR {
                             }
                             else if (boneID == HumanBodyBones.LeftEye || boneID == HumanBodyBones.RightEye)
                             {
-                                QuickIKSolverEye ikSolver = (QuickIKSolverEye)_animator.GetComponent<QuickIKManager>().GetIKSolver(boneID);
-                                ikSolver._weightBlink = ((QuickVRNodeEye)node).GetBlinkFactor();
+                                QuickIKSolverEye ikSolverEye = (QuickIKSolverEye)ikSolver;
+                                ikSolverEye._weightBlink = ((QuickVRNodeEye)node).GetBlinkFactor();
                             }
+                        }
+                        else
+                        {
+                            //Keep the position and rotation that comes from the animation. 
+                            Transform tBone = _animator.GetBoneTransform(boneID);
+                            ikSolver._targetLimb.position = tBone.position;
+                            //ikSolver._targetLimb.GetChild(0).rotation = tBone.rotation;
                         }
                     }
                 }
@@ -393,6 +401,7 @@ namespace QuickVR {
                     QuickIKSolver ikSolverHips = GetIKSolver(IKBone.Hips);
                     QuickIKSolver ikSolverHead = GetIKSolver(IKBone.Head);
                     float chainLength = Vector3.Distance(_animator.GetBoneTransform(HumanBodyBones.Hips).position, _animator.GetBoneTransform(HumanBodyBones.Head).position);
+                    //Debug.Log("chainLength = " + chainLength.ToString("f3"));
                     Vector3 v = (ikSolverHips._targetLimb.position - ikSolverHead._targetLimb.position).normalized;
                     ikSolverHips._targetLimb.position = ikSolverHead._targetLimb.position + v * chainLength;
                 }
