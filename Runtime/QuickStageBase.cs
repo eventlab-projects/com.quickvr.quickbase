@@ -47,6 +47,10 @@ namespace QuickVR {
         public delegate void OnStageAction();
         public event OnStageAction OnInit;
         public event OnStageAction OnFinish;
+
+        public delegate void OnInstructionAction(int instructionID);
+        public event OnInstructionAction OnInstructionPre;
+        public event OnInstructionAction OnInstructionPost;
         
         #endregion
 
@@ -162,23 +166,44 @@ namespace QuickVR {
         private IEnumerator CoUpdateBase()
         {
             _instructionsManager.SetAudioSource(_instructionsAudioSource);
-            _instructionsManager._timePauseBetweenInstructions = _instructionsTimePause;
             _instructionsManager._volume = _instructionsVolume;
+
+            List<AudioClip> instructions = null;
+
             SettingsBase.Languages lang = SettingsBase.GetLanguage();
             if (lang == SettingsBase.Languages.Spanish)
             {
-                _instructionsManager.Play(_instructionsSpanish);
+                instructions = _instructionsSpanish;
             }
             else if (lang == SettingsBase.Languages.English)
             {
-                if (_instructionsEnglish.Count > 0)
-                {
-                    _instructionsManager.Play(_instructionsEnglish);
-                }
+                instructions = _instructionsEnglish;
             }
 
-            while (_instructionsManager.IsPlaying()) yield return null;
+            if (instructions != null)
+            {
+                for (int i = 0; i < instructions.Count; i++)
+                {
+                    if (OnInstructionPre != null)
+                    {
+                        OnInstructionPre(i);
+                    }
 
+                    _instructionsManager.Play(instructions[i]);
+                    while (_instructionsManager.IsPlaying()) yield return null;
+
+                    if (OnInstructionPost != null)
+                    {
+                        OnInstructionPost(i);
+                    }
+
+                    if (i < instructions.Count - 1)
+                    {
+                        yield return new WaitForSeconds(_instructionsTimePause);
+                    }
+                }
+            } 
+            
             _coSet = _coManager.BeginCoroutineSet();
             _coManager.StartCoroutine(CoUpdate(), _coSet);
             _coManager.StartCoroutine(CoWaitForUserInput(), _coSet);
