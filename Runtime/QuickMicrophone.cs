@@ -71,7 +71,7 @@ namespace QuickVR
 
         public virtual AudioClip StopRecording()
         {
-            if (_isInitialized && _isRecording)
+            if (_isInitialized && _isRecording && _audioClip)
             {
                 int sampleEnd = Microphone.GetPosition("");
                 int numSamples = sampleEnd > _sampleStart ? sampleEnd - _sampleStart : (_audioClip.samples - _sampleStart) + sampleEnd;
@@ -87,9 +87,9 @@ namespace QuickVR
 
                 _lastRecordedClip = AudioClip.Create("MicRecord", numSamples, 1, MIC_FREQUENCY, false);
                 _lastRecordedClip.SetData(recordData, 0);
-
-                _isRecording = false;
             }
+
+            _isRecording = false;
 
             return _lastRecordedClip;
         }
