@@ -572,13 +572,17 @@ namespace QuickVR {
 
         public override void UpdateTracking()
         {
-            if (_animator.runtimeAnimatorController == null)
-            {
-                for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++)
-                {
-                    GetIKSolver(ikBone).ResetIKChain();
-                }
-            }
+            ////if (_animator.runtimeAnimatorController == null)
+            //{
+            //    for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++)
+            //    {
+            //        QuickIKSolver ikSolver = GetIKSolver(ikBone);
+            //        if (ikSolver._enableIK)
+            //        {
+            //            GetIKSolver(ikBone).ResetIKChain();
+            //        }
+            //    }
+            //}
 
             QuickIKSolver ikSolverHips = GetIKSolver(IKBone.Hips);
             QuickIKSolver ikSolverHead = GetIKSolver(IKBone.Head);

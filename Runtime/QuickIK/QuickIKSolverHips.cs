@@ -117,7 +117,8 @@ namespace QuickVR
         {
             if (!_enableIK) return;
 
-            _boneLimb.position = _targetLimb.position;
+            _boneLimb.position = Vector3.Lerp(_boneLimb.position, _targetLimb.position, _weightIKPos);
+            _boneLimb.rotation = Quaternion.Lerp(_boneLimb.rotation, _targetLimb.GetChild(0).rotation, _weightIKRot);
         }
 
         #endregion
