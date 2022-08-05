@@ -387,8 +387,10 @@ namespace QuickVR {
                         else
                         {
                             //Keep the position and rotation that comes from the animation. 
-                            Transform tBone = _animator.GetBoneTransform(boneID);
-                            ikSolver._targetLimb.position = tBone.position;
+                            if (ikSolver._boneLimb)
+                            {
+                                ikSolver._targetLimb.position = ikSolver._boneLimb.position;
+                            }
                             //ikSolver._targetLimb.GetChild(0).rotation = tBone.rotation;
                         }
                     }

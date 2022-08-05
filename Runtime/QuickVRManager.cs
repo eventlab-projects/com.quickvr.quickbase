@@ -276,6 +276,14 @@ namespace QuickVR
                 _cameraController._cameraNearPlane = zNearDefiner._zNear;
             }
 
+            if (animator != _animatorSource)
+            {
+                QuickIKManager ikManager = animator.GetOrCreateComponent<QuickIKManager>();
+                ikManager.enabled = false;
+            }
+
+            animator.GetOrCreateComponent<QuickLocomotionMasterAnimation>();
+
             _copyPose.SetAnimatorDest(animator);
             if (OnTargetAnimatorSet != null)
             {

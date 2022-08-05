@@ -49,7 +49,6 @@ namespace QuickVR
         protected QuickVRInteractor _interactorHandRight = null;
 
         protected TeleportationProvider _teleportProvider = null;
-        protected ActionBasedContinuousMoveProvider _continousMoveProvider = null;
         protected ActionBasedContinuousTurnProvider _continousRotationProvider = null;
 
         protected CharacterController _characterController = null;
@@ -132,12 +131,7 @@ namespace QuickVR
             _teleportProvider = gameObject.GetOrCreateComponent<TeleportationProvider>();
             _teleportProvider.system = locomotionSystem;
 
-            _continousMoveProvider = gameObject.GetOrCreateComponent<ActionBasedContinuousMoveProvider>();
-            _continousMoveProvider.system = locomotionSystem;
-            if (!_continousMoveProvider.leftHandMoveAction.action.IsValid())
-            {
-                _continousMoveProvider.leftHandMoveAction = new InputActionProperty(InputManager.GetInputActionsDefault().FindAction("General/Move"));
-            }
+            CreateLocomotionProviderContinuousMove();
 
             _continousRotationProvider = gameObject.GetOrCreateComponent<ActionBasedContinuousTurnProvider>();
             _continousRotationProvider.system = locomotionSystem;
@@ -147,8 +141,27 @@ namespace QuickVR
             }
 
             _locomotionProviders[DefaultLocomotionProvider.Teleport] = _teleportProvider;
-            _locomotionProviders[DefaultLocomotionProvider.ContinuousMove] = _continousMoveProvider;
             _locomotionProviders[DefaultLocomotionProvider.ContinuousTurn] = _continousRotationProvider;
+        }
+
+        protected virtual ActionBasedContinuousMoveProvider CreateLocomotionProviderContinuousMove()
+        {
+            ActionBasedContinuousMoveProvider result = gameObject.GetComponent<ActionBasedContinuousMoveProvider>();
+            if (result)
+            {
+                DestroyImmediate(result);
+            }
+                
+            result = gameObject.AddComponent<ActionBasedContinuousMoveProvider>();
+            result.system = _xrRig.GetComponent<LocomotionSystem>();
+            if (!result.leftHandMoveAction.action.IsValid())
+            {
+                result.leftHandMoveAction = new InputActionProperty(InputManager.GetInputActionsDefault().FindAction("General/Move"));
+            }
+
+            _locomotionProviders[DefaultLocomotionProvider.ContinuousMove] = result;
+
+            return result;
         }
 
         protected virtual void CheckPrefabs()
@@ -330,7 +343,10 @@ namespace QuickVR
             //_interactorHandRight.transform.ResetTransformation();
             //_interactorHandRight.transform.LookAt(animator.GetBoneTransform(HumanBodyBones.RightMiddleProximal), transform.up);
 
-            _continousMoveProvider.forwardSource = animator.transform;
+            //The ContinuousMoveProvider needs to be recreated each time the target animator changes, as 
+            //the CharacterController is cached in that behaviour, and as it is a private member, it cannot be accessed
+            //in any way outside the class. 
+            CreateLocomotionProviderContinuousMove().forwardSource = animator.transform;
         }
 
         protected virtual void SetHandInteractorPosition(Animator animator, bool isLeft)
