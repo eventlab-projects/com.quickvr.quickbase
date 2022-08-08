@@ -155,7 +155,7 @@ namespace QuickVR {
             base.Awake();
 
             _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
-            _vrPlayArea.transform.parent = transform;
+            //_vrPlayArea.transform.parent = transform;
 
             CreateVRCursors();
             CreateFootPrints();
@@ -297,12 +297,18 @@ namespace QuickVR {
             _vrPlayArea.Calibrate();
 
             float rotAngle = Vector3.SignedAngle(_vrPlayArea.GetUserForward(), transform.forward, transform.up);
-            _vrPlayArea.transform.Rotate(transform.up, rotAngle, Space.World);
+            _vrPlayArea._origin.Rotate(transform.up, rotAngle, Space.World);
 
             //Set the offset of the TrackedObject of the head
-            QuickVRNode node = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
-            Vector3 offset = GetIKSolver(IKBone.Head)._targetLimb.position - node.GetTrackedObject().transform.position;
-            _vrPlayArea.transform.position += offset;
+            //QuickVRNode node = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
+            //Vector3 offset = GetIKSolver(IKBone.Head)._targetLimb.position - node.GetTrackedObject().transform.position;
+            //_vrPlayArea.transform.position += offset;
+            Transform targetHead = GetIKSolver(HumanBodyBones.Head)._targetLimb;
+            Vector3 offset = transform.position - targetHead.position;
+            _vrPlayArea._origin.position = _vrPlayArea.GetVRNode(HumanBodyBones.Head).GetTrackedObject().transform.position + offset;
+
+            //For the sake of clarity, we move the PlayArea in a way that the _origin will end up at Vector3.zero
+            _vrPlayArea.transform.position -= _vrPlayArea._origin.position;
         }
 
         protected virtual void OnCalibrateVRNodeHead(QuickVRNode node)
@@ -606,7 +612,11 @@ namespace QuickVR {
         
         protected virtual void UpdateIKTargetPosFromUser(QuickVRNode node, HumanBodyBones boneID)
         {
-            GetIKSolver(boneID)._targetLimb.position = node.GetTrackedObject().transform.position;
+            //GetIKSolver(boneID)._targetLimb.position = node.GetTrackedObject().transform.position;
+            Transform target = GetIKSolver(boneID)._targetLimb;
+            QuickTrackedObject tObject = node.GetTrackedObject();
+            target.localPosition = _vrPlayArea._origin.InverseTransformPoint(tObject.transform.position);
+            //target.localPosition = tObject.transform.localPosition;
         }
 
         protected virtual void UpdateIKTargetRotFromUser(QuickVRNode node, HumanBodyBones boneID)

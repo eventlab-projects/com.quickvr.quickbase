@@ -9,8 +9,26 @@ namespace QuickVR
     public class QuickVRPlayArea : MonoBehaviour
     {
 
-        #region PROTECTED ATTRIBUTES
+        #region PUBLIC ATTRIBUTES
 
+        public Transform _origin
+        {
+            get 
+            {
+                if (!m_Origin)
+                {
+                    m_Origin = m_Origin = transform.CreateChild("__Origin__");
+                }
+
+                return m_Origin;
+            }
+        }
+        protected Transform m_Origin = null;
+
+        #endregion
+
+
+        #region PROTECTED ATTRIBUTES
 
         protected Dictionary<QuickHumanBodyBones, QuickVRNode> _vrNodes = new Dictionary<QuickHumanBodyBones, QuickVRNode>();
 
