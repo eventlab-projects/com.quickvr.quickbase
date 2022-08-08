@@ -282,7 +282,7 @@ namespace QuickVR
                 ikManager.enabled = false;
             }
 
-            animator.GetOrCreateComponent<QuickLocomotionMasterAnimation>();
+            animator.GetOrCreateComponent<QuickLocomotionAnimationVR>();
 
             _copyPose.SetAnimatorDest(animator);
             if (OnTargetAnimatorSet != null)
@@ -396,11 +396,6 @@ namespace QuickVR
             _copyPose.CopyPose();
             if (OnPostCopyPose != null) OnPostCopyPose();
 
-            UpdateCamera();
-        }
-
-        protected virtual void UpdateCamera()
-        {
             //Update the Camera position
             if (OnPreCameraUpdate != null) OnPreCameraUpdate();
             _cameraController.UpdateCameraPosition(_animatorTarget);

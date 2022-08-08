@@ -8,7 +8,7 @@ using UnityEngine.Playables;
 namespace QuickVR
 {
 
-    public class QuickLocomotionMasterAnimation : PlayableSampleBase
+    public class QuickLocomotionAnimationBase : PlayableSampleBase
     {
 
         #region PUBLIC ATTRIBUTES
@@ -60,7 +60,7 @@ namespace QuickVR
             float speed = _locomotionTracker._speed;
             speed = Mathf.Lerp(_lastSpeed, speed, _smoothness);
 
-            _animator.SetBool("ShouldMove", speed > 0.001f);
+            _animatorPlayable.SetBool("ShouldMove", speed > 0.001f);
 
             /*
             if (speed > 0.01f && speed < _minSpeed)
@@ -78,8 +78,8 @@ namespace QuickVR
             localDisplacement = Vector3.Lerp(_lastLocalDisplacement, localDisplacement, _smoothness);
             localDisplacement = localDisplacement.normalized * speed;
 
-            _animator.SetFloat("VelX", localDisplacement.x);
-            _animator.SetFloat("VelZ", localDisplacement.z);
+            _animatorPlayable.SetFloat("VelX", localDisplacement.x);
+            _animatorPlayable.SetFloat("VelZ", localDisplacement.z);
 
             _lastLocalDisplacement = localDisplacement;
             _lastSpeed = speed;
@@ -87,17 +87,32 @@ namespace QuickVR
 
         protected virtual void LateUpdate()
         {
-            UpdateFootIK(true);
-            UpdateFootIK(false);
+            UpdateFeetIKTargets();
+            UpdateFeetIKSolvers();
         }
 
-        protected virtual void UpdateFootIK(bool isLeft)
+        protected virtual void UpdateFeetIKTargets()
+        {
+            UpdateFootIKTarget(true);
+            UpdateFootIKTarget(false);
+        }
+
+        protected virtual void UpdateFootIKTarget(bool isLeft)
         {
             QuickIKSolver ikSolver = _ikManager.GetIKSolver(isLeft ? HumanBodyBones.LeftFoot : HumanBodyBones.RightFoot);
             ikSolver._targetLimb.position = ikSolver._boneLimb.position;
             ikSolver._targetLimb.GetChild(0).rotation = ikSolver._boneLimb.rotation;
+        }
 
-            ikSolver.UpdateIK();
+        protected virtual void UpdateFeetIKSolvers()
+        {
+            UpdateFootIKSolver(true);
+            UpdateFootIKSolver(false);
+        }
+
+        protected virtual void UpdateFootIKSolver(bool isLeft)
+        {
+            _ikManager.GetIKSolver(isLeft ? HumanBodyBones.LeftFoot : HumanBodyBones.RightFoot).UpdateIK();
         }
 
         #endregion
