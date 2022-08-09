@@ -400,6 +400,8 @@ namespace QuickVR
                     Gizmos.matrix = Matrix4x4.identity;
                 }
             }
+
+            DebugExtension.DrawCoordinatesSystem(_origin.position, _origin.right, _origin.up, _origin.forward, 0.1f);
         }
 
         #endregion

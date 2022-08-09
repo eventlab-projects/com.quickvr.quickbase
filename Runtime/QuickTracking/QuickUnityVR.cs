@@ -295,14 +295,9 @@ namespace QuickVR {
             _footprints.transform.rotation = transform.rotation;
 
             _vrPlayArea.Calibrate();
-
-            float rotAngle = Vector3.SignedAngle(_vrPlayArea.GetUserForward(), transform.forward, transform.up);
-            _vrPlayArea._origin.Rotate(transform.up, rotAngle, Space.World);
-
+            _vrPlayArea._origin.forward = _vrPlayArea.GetUserForward().normalized;
+            
             //Set the offset of the TrackedObject of the head
-            //QuickVRNode node = _vrPlayArea.GetVRNode(HumanBodyBones.Head);
-            //Vector3 offset = GetIKSolver(IKBone.Head)._targetLimb.position - node.GetTrackedObject().transform.position;
-            //_vrPlayArea.transform.position += offset;
             Transform targetHead = GetIKSolver(HumanBodyBones.Head)._targetLimb;
             Vector3 offset = transform.position - targetHead.position;
             _vrPlayArea._origin.position = _vrPlayArea.GetVRNode(HumanBodyBones.Head).GetTrackedObject().transform.position + offset;
@@ -580,6 +575,9 @@ namespace QuickVR {
                 //    }
                 //}
 
+                Quaternion tmp = transform.rotation;
+                transform.rotation = _vrPlayArea._origin.rotation;
+
                 foreach (bool isLeft in new bool[] { true, false })
                 {
                     foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
@@ -605,6 +603,8 @@ namespace QuickVR {
                     }
                 }
 
+                transform.rotation = tmp;
+
             }
 
             base.UpdateIKFingers();
@@ -621,7 +621,14 @@ namespace QuickVR {
 
         protected virtual void UpdateIKTargetRotFromUser(QuickVRNode node, HumanBodyBones boneID)
         {
-            GetIKSolver(boneID)._targetLimb.rotation = node.GetTrackedObject().transform.rotation;
+            //GetIKSolver(boneID)._targetLimb.rotation = node.GetTrackedObject().transform.rotation;
+            Transform target = GetIKSolver(boneID)._targetLimb;
+            QuickTrackedObject tObject = node.GetTrackedObject();
+            target.localRotation = Quaternion.Inverse(_vrPlayArea._origin.rotation) * tObject.transform.rotation;
+            //Quaternion tmp = transform.rotation;
+            //transform.rotation = _vrPlayArea._origin.rotation;
+            //target.rotation = tObject.transform.rotation;
+            //transform.rotation = tmp;
         }
 
         //protected virtual void UpdateIKTargetPosFromCalibrationPose(QuickVRNode node, HumanBodyBones boneID)
