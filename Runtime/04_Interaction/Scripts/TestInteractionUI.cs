@@ -12,6 +12,7 @@ public class TestInteractionUI : MonoBehaviour
     #region PUBLIC ATTRIBUTES
 
     [Header("Locomotion")]
+    public Toggle _toggleDirectMove = null;
     public Toggle _toggleContinuousMove = null;
     public Toggle _toggleContinuousTurn = null;
     public Toggle _toggleTeleportLeftHand = null;
@@ -87,6 +88,7 @@ public class TestInteractionUI : MonoBehaviour
         if (_show && _interactionManager)
         {
             //Locomotion
+            _interactionManager.SetEnabledLocomotionSystem(QuickVRInteractionManager.DefaultLocomotionProvider.DirectMove, _toggleDirectMove.isOn);
             _interactionManager.SetEnabledLocomotionSystem(QuickVRInteractionManager.DefaultLocomotionProvider.ContinuousMove, _toggleContinuousMove.isOn);
             _interactionManager.SetEnabledLocomotionSystem(QuickVRInteractionManager.DefaultLocomotionProvider.ContinuousTurn, _toggleContinuousTurn.isOn);
             _interactionManager.SetEnabledLocomotionSystem(QuickVRInteractionManager.DefaultLocomotionProvider.Teleport, _toggleTeleportLeftHand.isOn || _toggleTeleportRightHand.isOn);

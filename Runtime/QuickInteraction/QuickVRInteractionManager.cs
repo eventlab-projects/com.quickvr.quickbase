@@ -32,6 +32,7 @@ namespace QuickVR
         public enum DefaultLocomotionProvider
         {
             Teleport, 
+            DirectMove,
             ContinuousMove, 
             ContinuousTurn,
         }
@@ -47,9 +48,6 @@ namespace QuickVR
         
         protected QuickVRInteractor _interactorHandLeft = null;
         protected QuickVRInteractor _interactorHandRight = null;
-
-        protected TeleportationProvider _teleportProvider = null;
-        protected ActionBasedContinuousTurnProvider _continousRotationProvider = null;
 
         protected CharacterController _characterController = null;
         protected QuickVRHandAnimator _handAnimatorLeft = null;
@@ -97,7 +95,7 @@ namespace QuickVR
             BaseTeleportationInteractable[] teleportationInteractables = FindObjectsOfType<BaseTeleportationInteractable>();
             foreach (BaseTeleportationInteractable t in teleportationInteractables)
             {
-                t.teleportationProvider = _teleportProvider;
+                t.teleportationProvider = (TeleportationProvider)_locomotionProviders[DefaultLocomotionProvider.Teleport];
             }
 
             _grabInteractables = new List<XRGrabInteractable>(FindObjectsOfType<XRGrabInteractable>());
@@ -121,45 +119,70 @@ namespace QuickVR
         protected virtual void Reset()
         {
             _xrRig = transform.CreateChild("__XRRig__").GetOrCreateComponent<XROrigin>();
+            _xrRig.GetOrCreateComponent<LocomotionSystem>();
             CreateLocomotionProviders();
         }
 
         protected virtual void CreateLocomotionProviders()
         {
-            LocomotionSystem locomotionSystem = _xrRig.GetOrCreateComponent<LocomotionSystem>();
-
-            _teleportProvider = gameObject.GetOrCreateComponent<TeleportationProvider>();
-            _teleportProvider.system = locomotionSystem;
-
+            CreateLocomotionProviderTeleport();
             CreateLocomotionProviderContinuousMove();
-
-            _continousRotationProvider = gameObject.GetOrCreateComponent<ActionBasedContinuousTurnProvider>();
-            _continousRotationProvider.system = locomotionSystem;
-            if (!_continousRotationProvider.rightHandTurnAction.action.IsValid())
-            {
-                _continousRotationProvider.rightHandTurnAction = new InputActionProperty(InputManager.GetInputActionsDefault().FindAction("General/RotateCamera"));
-            }
-
-            _locomotionProviders[DefaultLocomotionProvider.Teleport] = _teleportProvider;
-            _locomotionProviders[DefaultLocomotionProvider.ContinuousTurn] = _continousRotationProvider;
+            CreateLocomotionProviderContiuousTurn();
+            CreateLocomotionProviderDirectMove();
         }
 
-        protected virtual ActionBasedContinuousMoveProvider CreateLocomotionProviderContinuousMove()
+        protected virtual T CreateLocomotionProvider<T>() where T : LocomotionProvider
         {
-            ActionBasedContinuousMoveProvider result = gameObject.GetComponent<ActionBasedContinuousMoveProvider>();
+            T result = gameObject.GetComponent<T>();
             if (result)
             {
                 DestroyImmediate(result);
             }
-                
-            result = gameObject.AddComponent<ActionBasedContinuousMoveProvider>();
+
+            result = gameObject.AddComponent<T>();
             result.system = _xrRig.GetComponent<LocomotionSystem>();
+
+            return result;
+        }
+
+        protected virtual TeleportationProvider CreateLocomotionProviderTeleport()
+        {
+            TeleportationProvider result = CreateLocomotionProvider<TeleportationProvider>();
+            _locomotionProviders[DefaultLocomotionProvider.Teleport] = result;
+
+            return result;
+        }
+
+        protected virtual ActionBasedContinuousMoveProvider CreateLocomotionProviderContinuousMove()
+        {
+            ActionBasedContinuousMoveProvider result = CreateLocomotionProvider<ActionBasedContinuousMoveProvider>();
             if (!result.leftHandMoveAction.action.IsValid())
             {
                 result.leftHandMoveAction = new InputActionProperty(InputManager.GetInputActionsDefault().FindAction("General/Move"));
             }
 
             _locomotionProviders[DefaultLocomotionProvider.ContinuousMove] = result;
+
+            return result;
+        }
+
+        protected virtual ActionBasedContinuousTurnProvider CreateLocomotionProviderContiuousTurn()
+        {
+            ActionBasedContinuousTurnProvider result = CreateLocomotionProvider<ActionBasedContinuousTurnProvider>();
+            if (!result.rightHandTurnAction.action.IsValid())
+            {
+                result.rightHandTurnAction = new InputActionProperty(InputManager.GetInputActionsDefault().FindAction("General/RotateCamera"));
+            }
+
+            _locomotionProviders[DefaultLocomotionProvider.ContinuousTurn] = result;
+
+            return result;
+        }
+
+        protected virtual QuickDirectMove CreateLocomotionProviderDirectMove()
+        {
+            QuickDirectMove result = CreateLocomotionProvider<QuickDirectMove>();
+            _locomotionProviders[DefaultLocomotionProvider.DirectMove] = result;
 
             return result;
         }
@@ -257,7 +280,7 @@ namespace QuickVR
 
         protected virtual void OnGrabInteractable(SelectEnterEventArgs args)
         {
-            foreach (Collider c in args.interactable.colliders)
+            foreach (Collider c in args.interactableObject.colliders)
             {
                 Physics.IgnoreCollision(_characterController, c, true);
 
@@ -275,7 +298,7 @@ namespace QuickVR
 
         protected virtual void OnDropInteractable(SelectExitEventArgs args)
         {
-            foreach (Collider c in args.interactable.colliders)
+            foreach (Collider c in args.interactableObject.colliders)
             {
                 Physics.IgnoreCollision(_characterController, c, false);
 
@@ -347,6 +370,7 @@ namespace QuickVR
             //the CharacterController is cached in that behaviour, and as it is a private member, it cannot be accessed
             //in any way outside the class. 
             CreateLocomotionProviderContinuousMove().forwardSource = animator.transform;
+            CreateLocomotionProviderDirectMove().forwardSource = animator.transform;
         }
 
         protected virtual void SetHandInteractorPosition(Animator animator, bool isLeft)
