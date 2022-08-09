@@ -3,6 +3,7 @@ using System.Collections.Generic;
 
 using UnityEngine;
 using UnityEngine.XR.Interaction.Toolkit;
+using UnityEngine.XR;
 
 namespace QuickVR
 {
@@ -40,11 +41,40 @@ namespace QuickVR
         }
         protected QuickVRNode m_NodeHead = null;
 
+        protected QuickIKManager _ikManager
+        {
+            get
+            {
+                if (!m_IKManager)
+                {
+                    m_IKManager = QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource().GetComponent<QuickIKManager>();
+                }
+
+                return m_IKManager;
+            }
+        }
+        protected QuickIKManager m_IKManager = null;
+
         protected Vector3 _lastPos = Vector3.zero;
+
+        //_headToHips will be static because we want to avoid the value to be lost when creating new instances of QuickDirectMove
+        protected static Vector3 _headToHips = Vector3.zero;   
 
         #endregion
 
         #region CREATION AND DESTRUCTION
+
+        protected override void Awake()
+        {
+            base.Awake();
+
+            QuickVRManager.OnPostCalibrate += SetHeadToHipsVector;
+        }
+
+        protected virtual void OnDestroy()
+        {
+            QuickVRManager.OnPostCalibrate -= SetHeadToHipsVector;
+        }
 
         protected virtual void OnEnable()
         {
@@ -52,16 +82,25 @@ namespace QuickVR
             {
                 _lastPos = GetCurrentPos();
             }
+
+            QuickVRManager.OnPostUpdateIKTargets += UpdateHipsIKTarget;
         }
 
         protected virtual void OnDisable()
         {
             _lastPos = Vector3.zero;
+
+            QuickVRManager.OnPostUpdateIKTargets -= UpdateHipsIKTarget;
         }
 
         #endregion
 
         #region GET AND SET
+
+        protected virtual void SetHeadToHipsVector()
+        {
+            _headToHips = _ikManager.GetIKSolver(HumanBodyBones.Hips)._targetLimb.position - _ikManager.GetIKSolver(HumanBodyBones.Head)._targetLimb.position;
+        }
 
         /// <summary>
         /// Reads the current value of the move input.
@@ -87,8 +126,21 @@ namespace QuickVR
 
         protected virtual Vector3 GetCurrentPos()
         {
-            return _nodeHead.GetTrackedObject().transform.position;
+            Vector3 result = Vector3.zero;
+            InputDevice device = InputDevices.GetDeviceAtXRNode(XRNode.Head);
+            if (device.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 tmp))
+            {
+                result = tmp;
+            }
+
+            return result;
+
+            //return _nodeHead.GetTrackedObject().transform.position;
         }
+
+        #endregion
+
+        #region UPDATE
 
         /// <summary>
         /// Determines how much to slide the rig due to <paramref name="input"/> vector.
@@ -114,7 +166,21 @@ namespace QuickVR
         {
             base.MoveRig(translationInWorldSpace);
 
+            Vector2 h = ReadInput();
+            _vrPlayArea._origin.position += new Vector3(h.x, 0, h.y);
+
             _lastPos = GetCurrentPos();
+        }
+
+        protected virtual void UpdateHipsIKTarget()
+        {
+            if (!_vrPlayArea.GetVRNode(HumanBodyBones.Hips).IsTracked())
+            {
+                Transform targetHead = _ikManager.GetIKSolver(HumanBodyBones.Head)._targetLimb;
+                Transform targetHips = _ikManager.GetIKSolver(HumanBodyBones.Hips)._targetLimb;
+
+                targetHips.position = targetHead.position + _headToHips;
+            }
         }
 
         #endregion
