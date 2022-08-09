@@ -33,6 +33,7 @@ namespace QuickVR
         {
             Teleport, 
             DirectMove,
+            DirectTurn,
             ContinuousMove, 
             ContinuousTurn,
         }
@@ -129,6 +130,7 @@ namespace QuickVR
             CreateLocomotionProviderContinuousMove();
             CreateLocomotionProviderContiuousTurn();
             CreateLocomotionProviderDirectMove();
+            CreateLocomotionProviderDirectTurn();
         }
 
         protected virtual T CreateLocomotionProvider<T>() where T : LocomotionProvider
@@ -183,6 +185,14 @@ namespace QuickVR
         {
             QuickDirectMove result = CreateLocomotionProvider<QuickDirectMove>();
             _locomotionProviders[DefaultLocomotionProvider.DirectMove] = result;
+
+            return result;
+        }
+
+        protected virtual QuickDirectTurn CreateLocomotionProviderDirectTurn()
+        {
+            QuickDirectTurn result = CreateLocomotionProvider<QuickDirectTurn>();
+            _locomotionProviders[DefaultLocomotionProvider.DirectTurn] = result;
 
             return result;
         }
