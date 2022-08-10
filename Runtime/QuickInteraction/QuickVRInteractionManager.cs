@@ -143,6 +143,7 @@ namespace QuickVR
 
             result = gameObject.AddComponent<T>();
             result.system = _xrRig.GetComponent<LocomotionSystem>();
+            result.enabled = false;
 
             return result;
         }

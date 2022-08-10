@@ -58,7 +58,8 @@ namespace QuickVR
         protected Vector3 _lastPos = Vector3.zero;
 
         //_headToHips will be static because we want to avoid the value to be lost when creating new instances of QuickDirectMove
-        protected static Vector3 _headToHips = Vector3.zero;   
+        protected static Vector3 _headToHips = Vector3.zero;
+        protected static Vector3 _originToHeadOffset = Vector3.zero;
 
         #endregion
 
@@ -68,12 +69,12 @@ namespace QuickVR
         {
             base.Awake();
 
-            QuickVRManager.OnPostCalibrate += SetHeadToHipsVector;
+            QuickVRManager.OnPostCalibrate += OnPostCalibrateAction;
         }
 
         protected virtual void OnDestroy()
         {
-            QuickVRManager.OnPostCalibrate -= SetHeadToHipsVector;
+            QuickVRManager.OnPostCalibrate -= OnPostCalibrateAction;
         }
 
         protected virtual void OnEnable()
@@ -81,6 +82,11 @@ namespace QuickVR
             if (_nodeHead.IsTracked())
             {
                 _lastPos = GetCurrentPos();
+
+                //Reposition the _vrOrigin according to the new user's head position. 
+                Vector3 currentOffset = GetCurrentOriginToHeadOffset();
+                Vector3 t = currentOffset - _originToHeadOffset;
+                _vrPlayArea._origin.position += _vrPlayArea._origin.TransformDirection(t);
             }
 
             QuickVRManager.OnPostUpdateIKTargets += UpdateHipsIKTarget;
@@ -97,9 +103,10 @@ namespace QuickVR
 
         #region GET AND SET
 
-        protected virtual void SetHeadToHipsVector()
+        protected virtual void OnPostCalibrateAction()
         {
             _headToHips = _ikManager.GetIKSolver(HumanBodyBones.Hips)._targetLimb.position - _ikManager.GetIKSolver(HumanBodyBones.Head)._targetLimb.position;
+            _originToHeadOffset = GetCurrentOriginToHeadOffset();
         }
 
         /// <summary>
@@ -124,18 +131,15 @@ namespace QuickVR
             return result;
         }
 
+        protected virtual Vector3 GetCurrentOriginToHeadOffset()
+        {
+            Vector3 offsetWS = Vector3.ProjectOnPlane(GetCurrentPos() - _vrPlayArea._origin.position, _vrPlayArea._origin.up);
+            return _vrPlayArea._origin.InverseTransformDirection(offsetWS);
+        }
+
         protected virtual Vector3 GetCurrentPos()
         {
-            Vector3 result = Vector3.zero;
-            InputDevice device = InputDevices.GetDeviceAtXRNode(XRNode.Head);
-            if (device.TryGetFeatureValue(CommonUsages.devicePosition, out Vector3 tmp))
-            {
-                result = tmp;
-            }
-
-            return result;
-
-            //return _nodeHead.GetTrackedObject().transform.position;
+            return _nodeHead.GetTrackedObject().transform.position;
         }
 
         #endregion
@@ -149,12 +153,7 @@ namespace QuickVR
         /// <returns>Returns the translation amount in world space to move the rig.</returns>
         protected override Vector3 ComputeDesiredMove(Vector2 input)
         {
-            //The input is the horizontal displacement in the QuickVRPlayArea's origin system. 
-            //So we have to translate it to target avatar's system. 
-            Quaternion q = Quaternion.FromToRotation(_vrPlayArea._origin.forward, system.xrOrigin.Origin.transform.forward);
-            Vector3 result = q * new Vector3(input.x, 0, input.y);
-
-            return result;
+            return new Vector3(input.x, 0, input.y);
         }
 
         /// <summary>
@@ -164,10 +163,13 @@ namespace QuickVR
         /// <param name="translationInWorldSpace">The translation amount in world space to move the rig (pre-gravity).</param>
         protected override void MoveRig(Vector3 translationInWorldSpace)
         {
-            base.MoveRig(translationInWorldSpace);
+            //The input is the horizontal displacement in the QuickVRPlayArea's origin system. 
+            //So we have to translate it to target avatar's system. 
+            _vrPlayArea._origin.position += translationInWorldSpace;
+            Quaternion q = Quaternion.FromToRotation(_vrPlayArea._origin.forward, system.xrOrigin.Origin.transform.forward);
+            translationInWorldSpace = q * translationInWorldSpace;
 
-            Vector2 h = ReadInput();
-            _vrPlayArea._origin.position += new Vector3(h.x, 0, h.y);
+            base.MoveRig(translationInWorldSpace);
 
             _lastPos = GetCurrentPos();
         }
