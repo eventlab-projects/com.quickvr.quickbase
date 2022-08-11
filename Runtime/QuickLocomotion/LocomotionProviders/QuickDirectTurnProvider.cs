@@ -7,7 +7,7 @@ using UnityEngine.XR.Interaction.Toolkit;
 namespace QuickVR
 {
 
-    public class QuickDirectTurn : ContinuousTurnProviderBase
+    public class QuickDirectTurnProvider : ContinuousTurnProviderBase
     {
 
         #region PROTECTED ATTRIBUTES

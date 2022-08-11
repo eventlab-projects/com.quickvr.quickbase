@@ -8,7 +8,7 @@ using UnityEngine.XR;
 namespace QuickVR
 {
     
-    public class QuickDirectMove : ContinuousMoveProviderBase
+    public class QuickDirectMoveProvider : ContinuousMoveProviderBase
     {
 
         #region PROTECTED ATTRIBUTES

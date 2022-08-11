@@ -182,17 +182,17 @@ namespace QuickVR
             return result;
         }
 
-        protected virtual QuickDirectMove CreateLocomotionProviderDirectMove()
+        protected virtual QuickDirectMoveProvider CreateLocomotionProviderDirectMove()
         {
-            QuickDirectMove result = CreateLocomotionProvider<QuickDirectMove>();
+            QuickDirectMoveProvider result = CreateLocomotionProvider<QuickDirectMoveProvider>();
             _locomotionProviders[DefaultLocomotionProvider.DirectMove] = result;
 
             return result;
         }
 
-        protected virtual QuickDirectTurn CreateLocomotionProviderDirectTurn()
+        protected virtual QuickDirectTurnProvider CreateLocomotionProviderDirectTurn()
         {
-            QuickDirectTurn result = CreateLocomotionProvider<QuickDirectTurn>();
+            QuickDirectTurnProvider result = CreateLocomotionProvider<QuickDirectTurnProvider>();
             _locomotionProviders[DefaultLocomotionProvider.DirectTurn] = result;
 
             return result;
