@@ -77,12 +77,6 @@ namespace QuickVR
 
         protected virtual void OnEnable()
         {
-            if (_nodeHead.IsTracked())
-            {
-                //Reposition the _vrOrigin according to the new user's head position. 
-                //UpdateVROriginPosition(ReadInput());
-            }
-
             QuickVRManager.OnPostUpdateIKTargets += UpdateHipsIKTarget;
         }
 
