@@ -10,6 +10,13 @@ namespace QuickVR
     public class QuickDirectTurnProvider : ContinuousTurnProviderBase
     {
 
+        #region PUBLIC ATTRIBUTES
+
+        public float _minActivaAngle = -20;
+        public float _maxActiveAngle = 20;
+
+        #endregion
+
         #region PROTECTED ATTRIBUTES
 
         protected QuickVRPlayArea _vrPlayArea
@@ -39,20 +46,6 @@ namespace QuickVR
             }
         }
         protected QuickVRNode m_NodeHead = null;
-
-        protected Vector3 _lastForward = Vector3.zero;
-
-        #endregion
-
-        #region CREATION AND DESTRUCTION
-
-        protected virtual void OnEnable()
-        {
-        }
-
-        protected virtual void OnDisable()
-        {
-        }
 
         #endregion
 
@@ -87,13 +80,12 @@ namespace QuickVR
         /// <returns>Returns the turn amount in degrees for the given <paramref name="input"/> vector.</returns>
         protected override float GetTurnAmount(Vector2 input)
         {
-            Vector2 lastFwd = new Vector2(_lastForward.x, _lastForward.z);
-            _lastForward = GetCurrentForward();
-            _vrPlayArea._origin.forward = Vector3.ProjectOnPlane(_lastForward, Vector3.up).normalized;
+            Vector3 up = _vrPlayArea._origin.transform.up;
+            Vector3 lastFwd = Vector3.ProjectOnPlane(_vrPlayArea._origin.transform.forward, up);
+            float result = Vector2.SignedAngle(input, new Vector2(lastFwd.x, lastFwd.z));
+            _vrPlayArea._origin.Rotate(up, result, Space.World);
 
-            //return Vector2.SignedAngle(lastFwd, input);
-
-            return Vector2.SignedAngle(input, lastFwd);
+            return result;
         }
 
         #endregion
