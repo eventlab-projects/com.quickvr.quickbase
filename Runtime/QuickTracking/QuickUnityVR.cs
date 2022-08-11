@@ -27,6 +27,7 @@ namespace QuickVR {
         public QuickHandGestureSettings _gestureSettingsRightHand = null;
 
         public bool _useFootprints = true;
+        public bool _isSitting = false;
 
         public static bool _handsSwaped = false;
 
@@ -385,21 +386,26 @@ namespace QuickVR {
                                 ikSolverEye._weightBlink = ((QuickVRNodeEye)node).GetBlinkFactor();
                             }
                         }
-                        else
-                        {
-                            //Keep the position and rotation that comes from the animation. 
-                            if (ikSolver._boneLimb)
-                            {
-                                ikSolver._targetLimb.position = ikSolver._boneLimb.position;
-                            }
-                            //ikSolver._targetLimb.GetChild(0).rotation = tBone.rotation;
-                        }
+                        //else
+                        //{
+                        //    //Keep the position and rotation that comes from the animation. 
+                        //    if (ikSolver._boneLimb)
+                        //    {
+                        //        //ikSolver._targetLimb.position = ikSolver._boneLimb.position;
+                        //    }
+                        //    //ikSolver._targetLimb.GetChild(0).rotation = tBone.rotation;
+                        //}
                     }
                 }
 
                 //2) Special case. If the Hips is set to Tracking mode, we need to adjust the IKTarget position of the hips
                 //in a way that the head will match the position of the camera provided by the HMD
-                if (GetIKControl(IKBone.Hips) == ControlType.Tracking)
+                if (
+                    GetIKControl(IKBone.Head) == ControlType.Tracking &&
+                    _vrPlayArea.GetVRNode(HumanBodyBones.Head).IsTracked() &&
+                    GetIKControl(IKBone.Hips) == ControlType.Tracking && 
+                    !_vrPlayArea.GetVRNode(HumanBodyBones.Hips).IsTracked()
+                    )
                 {
                     QuickIKSolver ikSolverHips = GetIKSolver(IKBone.Hips);
                     QuickIKSolver ikSolverHead = GetIKSolver(IKBone.Head);

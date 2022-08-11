@@ -11,6 +11,24 @@ namespace QuickVR
     public class QuickLocomotionAnimationVR : QuickLocomotionAnimationBase
     {
 
+        #region PROTECTED ATTRIBUTES
+
+        protected QuickUnityVR _unityVR
+        {
+            get
+            {
+                if (!m_UnityVR)
+                {
+                    m_UnityVR = QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource().GetComponent<QuickUnityVR>();
+                }
+
+                return m_UnityVR;
+            }
+        }
+        protected QuickUnityVR m_UnityVR = null;
+
+        #endregion
+
         #region CREATION AND DESTRUCTION
 
         protected override void OnEnable()
@@ -32,6 +50,13 @@ namespace QuickVR
         #endregion
 
         #region UPDATE
+
+        protected override void Update()
+        {
+            _weight = _unityVR._isSitting ? 0 : 1;
+
+            base.Update();
+        }
 
         protected override void LateUpdate()
         {

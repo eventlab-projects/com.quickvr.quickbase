@@ -13,13 +13,15 @@ namespace QuickVR
 
         #region PUBLIC ATTRIBUTES
 
+        [Range(0.0f, 1.0f)]
+        public float _weight = 1.0f;
+
         public float _smoothness = 0.1f;
 
         #endregion
 
         #region PROTECTED ATTRIBUTES
 
-        protected RuntimeAnimatorController _locomotionController = null;
         protected QuickLocomotionTracker _locomotionTracker = null;
         protected QuickIKManager _ikManager = null;
 
@@ -27,6 +29,12 @@ namespace QuickVR
 
         protected Vector3 _lastLocalDisplacement = Vector3.zero;
         protected float _lastSpeed = 0;
+
+        protected Vector3 _ikTargetLeftFootPos = Vector3.zero;
+        protected Quaternion _ikTargetLeftFootRot = Quaternion.identity;
+
+        protected Vector3 _ikTargetRightFootPos = Vector3.zero;
+        protected Quaternion _ikTargetRightFootRot = Quaternion.identity;
 
         #endregion
 
@@ -36,7 +44,6 @@ namespace QuickVR
         {
             base.Awake();
 
-            _locomotionController = Resources.Load<RuntimeAnimatorController>("QuickLocomotionMaster");
             _locomotionTracker = gameObject.GetOrCreateComponent<QuickLocomotionTracker>();
             _ikManager = GetComponent<QuickIKManager>();
         }
@@ -44,7 +51,7 @@ namespace QuickVR
         protected virtual void Start()
         {
             // Creates AnimationClipPlayable and connects them to the mixer.
-            _animatorPlayable = AnimatorControllerPlayable.Create(_playableGraph, _locomotionController);
+            _animatorPlayable = AnimatorControllerPlayable.Create(_playableGraph, Resources.Load<RuntimeAnimatorController>("QuickLocomotionMaster"));
             _playableOutput.SetSourcePlayable(_animatorPlayable);
 
             // Plays the Graph.
@@ -57,6 +64,8 @@ namespace QuickVR
 
         protected virtual void Update()
         {
+            _playableOutput.SetWeight(_weight);
+
             float speed = _locomotionTracker._speed;
             speed = Mathf.Lerp(_lastSpeed, speed, _smoothness);
 
@@ -100,7 +109,7 @@ namespace QuickVR
         protected virtual void UpdateFootIKTarget(bool isLeft)
         {
             QuickIKSolver ikSolver = _ikManager.GetIKSolver(isLeft ? HumanBodyBones.LeftFoot : HumanBodyBones.RightFoot);
-            ikSolver._targetLimb.position = ikSolver._boneLimb.position;
+            ikSolver._targetLimb.position = isLeft ? _ikTargetLeftFootPos : _ikTargetRightFootPos;
             ikSolver._targetLimb.GetChild(0).rotation = ikSolver._boneLimb.rotation;
         }
 
@@ -108,6 +117,15 @@ namespace QuickVR
         {
             UpdateFootIKSolver(true);
             UpdateFootIKSolver(false);
+        }
+
+        protected virtual void OnAnimatorIK()
+        {
+            _ikTargetLeftFootPos = _animator.GetIKPosition(AvatarIKGoal.LeftFoot);
+            _ikTargetLeftFootRot = _animator.GetIKRotation(AvatarIKGoal.LeftFoot);
+
+            _ikTargetRightFootPos = _animator.GetIKPosition(AvatarIKGoal.RightFoot);
+            _ikTargetRightFootRot = _animator.GetIKRotation(AvatarIKGoal.RightFoot);
         }
 
         protected virtual void UpdateFootIKSolver(bool isLeft)
