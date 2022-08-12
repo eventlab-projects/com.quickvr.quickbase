@@ -110,7 +110,7 @@ namespace QuickVR
         {
             QuickIKSolver ikSolver = _ikManager.GetIKSolver(isLeft ? HumanBodyBones.LeftFoot : HumanBodyBones.RightFoot);
             ikSolver._targetLimb.position = isLeft ? _ikTargetLeftFootPos : _ikTargetRightFootPos;
-            ikSolver._targetLimb.GetChild(0).rotation = ikSolver._boneLimb.rotation;
+            ikSolver._targetLimb.rotation = isLeft ? _ikTargetLeftFootRot : _ikTargetRightFootRot;
         }
 
         protected virtual void UpdateFeetIKSolvers()
