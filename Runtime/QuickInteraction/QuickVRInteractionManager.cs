@@ -115,6 +115,8 @@ namespace QuickVR
             QuickVRPlayArea playArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
             _handAnimatorLeft = ((QuickVRNodeHand)playArea.GetVRNode(HumanBodyBones.LeftHand)).GetHandAnimator();
             _handAnimatorRight = ((QuickVRNodeHand)playArea.GetVRNode(HumanBodyBones.RightHand)).GetHandAnimator();
+
+            _xrRig.Camera = Camera.main;
         }
 
         protected virtual void Reset()

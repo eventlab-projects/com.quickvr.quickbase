@@ -15,6 +15,12 @@ namespace QuickVR.SampleInteraction
         [Header("General Settings")]
         public float _guiDistance = 2.5f;
 
+        /// <summary>
+        /// The gui will update its orientation once the angle formed by the forward of the target avatar and the forward of 
+        /// the gui is greater than _guiDeadAngle. 
+        /// </summary>
+        public float _guiDeadAngle = 45.0f; 
+
         [Header("Locomotion")]
         public Toggle _toggleDirectMove = null;
         public Toggle _toggleDirectTurn = null;
@@ -46,6 +52,7 @@ namespace QuickVR.SampleInteraction
         protected Coroutine _coUpdatePosition = null;
 
         protected Animator _animator = null;
+        protected Coroutine _coUpdateTargetFwd = null;
 
         #endregion
 
@@ -63,22 +70,14 @@ namespace QuickVR.SampleInteraction
 
         protected virtual void OnEnable()
         {
-            StopUpdate();
             _coUpdatePosition = StartCoroutine(CoUpdatePosition());
         }
 
         protected virtual void OnDisable()
         {
-            StopUpdate();
-        }
-
-        protected virtual void StopUpdate()
-        {
-            if (_coUpdatePosition != null)
-            {
-                StopCoroutine(_coUpdatePosition);
-                _coUpdatePosition = null;
-            }
+            StopAllCoroutines();
+            _coUpdatePosition = null;
+            _coUpdateTargetFwd = null;
         }
 
         protected virtual void Start()
@@ -148,12 +147,29 @@ namespace QuickVR.SampleInteraction
             {
                 if (_animator)
                 {
-                    Vector3 offset = _animator.transform.forward * _guiDistance + _animator.transform.up;
+                    if ((Vector3.Angle(transform.forward, _animator.transform.forward) > 45) && _coUpdateTargetFwd == null)
+                    {
+                        _coUpdateTargetFwd = StartCoroutine(CoUpdateTargetForward());
+                    }
+
+                    Vector3 offset = transform.forward * _guiDistance + _animator.transform.up;
                     transform.position = _animator.transform.position + offset;
                 }
 
                 yield return null;
             }
+        }
+
+        protected virtual IEnumerator CoUpdateTargetForward()
+        {
+            while (Vector3.Angle(transform.forward, _animator.transform.forward) > 1)
+            {
+                transform.forward = Vector3.Lerp(transform.forward, _animator.transform.forward, Time.deltaTime);
+
+                yield return null;
+            }
+
+            _coUpdateTargetFwd = null;
         }
 
         #endregion
