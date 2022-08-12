@@ -19,27 +19,6 @@
     "name": "EventLab",
     "email": "eventlab.projects@gmail.com",
     "url": "http://www.event-lab.org/"
-  },
-  
-  "samples": [
-  {
-    "displayName": "00_HelloWorld",
-    "description": "QuickVR hello world",
-    "path": "Samples~/00_HelloWorld"
-  },
-
-  {
-    "displayName": "01_Workflow",
-    "description": "QuickBaseGameManager and Stages",
-    "path": "Samples~/01_Workflow"
-  },
-  
-  {
-    "displayName": "02_InputManager",
-    "description": "QuickVR Input Manager",
-    "path": "Samples~/02_InputManager"
   }
-  
-  ]
   
 }
