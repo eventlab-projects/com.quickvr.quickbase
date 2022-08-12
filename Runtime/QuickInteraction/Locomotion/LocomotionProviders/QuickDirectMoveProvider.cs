@@ -56,7 +56,7 @@ namespace QuickVR
         protected QuickIKManager m_IKManager = null;
 
         //_headToHips will be static because we want to avoid the value to be lost when creating new instances of QuickDirectMove
-        protected static Vector3 _headToHips = Vector3.zero;
+        protected static Vector3 _headToHipsOffset = Vector3.zero;
         protected static Vector3 _originToHeadOffset = Vector3.zero;
 
         #endregion
@@ -91,7 +91,8 @@ namespace QuickVR
 
         protected virtual void OnPostCalibrateAction()
         {
-            _headToHips = _ikManager.GetIKSolver(HumanBodyBones.Hips)._targetLimb.position - _ikManager.GetIKSolver(HumanBodyBones.Head)._targetLimb.position;
+            Vector3 headToHipsOffsetWS = _ikManager.GetIKSolver(HumanBodyBones.Hips)._targetLimb.position - _ikManager.GetIKSolver(HumanBodyBones.Head)._targetLimb.position;
+            _headToHipsOffset = _ikManager.transform.InverseTransformDirection(headToHipsOffsetWS);
             _originToHeadOffset = _vrPlayArea._origin.InverseTransformDirection(GetCurrentOriginToHeadOffset());
         }
 
@@ -166,7 +167,7 @@ namespace QuickVR
                 Transform targetHead = _ikManager.GetIKSolver(HumanBodyBones.Head)._targetLimb;
                 Transform targetHips = _ikManager.GetIKSolver(HumanBodyBones.Hips)._targetLimb;
 
-                targetHips.position = targetHead.position + _headToHips;
+                targetHips.position = targetHead.position + _ikManager.transform.TransformDirection(_headToHipsOffset);
             }
         }
 
