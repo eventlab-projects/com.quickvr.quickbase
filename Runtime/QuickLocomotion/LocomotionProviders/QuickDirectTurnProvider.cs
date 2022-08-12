@@ -80,11 +80,16 @@ namespace QuickVR
         /// <returns>Returns the turn amount in degrees for the given <paramref name="input"/> vector.</returns>
         protected override float GetTurnAmount(Vector2 input)
         {
-            Vector3 up = _vrPlayArea._origin.transform.up;
-            Vector3 lastFwd = Vector3.ProjectOnPlane(_vrPlayArea._origin.transform.forward, up);
-            float result = Vector2.SignedAngle(input, new Vector2(lastFwd.x, lastFwd.z));
-            _vrPlayArea._origin.Rotate(up, result, Space.World);
+            float result = 0;
 
+            if (_nodeHead.IsTracked())
+            {
+                Vector3 up = _vrPlayArea._origin.transform.up;
+                Vector3 lastFwd = Vector3.ProjectOnPlane(_vrPlayArea._origin.transform.forward, up);
+                result = Vector2.SignedAngle(input, new Vector2(lastFwd.x, lastFwd.z));
+                _vrPlayArea._origin.Rotate(up, result, Space.World);
+            }
+            
             return result;
         }
 

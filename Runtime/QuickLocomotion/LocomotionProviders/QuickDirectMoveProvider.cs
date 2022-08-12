@@ -130,13 +130,19 @@ namespace QuickVR
         /// <returns>Returns the translation amount in world space to move the rig.</returns>
         protected override Vector3 ComputeDesiredMove(Vector2 input)
         {
-            Vector3 t = UpdateVROriginPosition(input);
+            Vector3 result = Vector3.zero;
+            
+            if (_nodeHead.IsTracked())
+            {
+                Vector3 t = UpdateVROriginPosition(input);
 
-            //The input is the horizontal displacement in the QuickVRPlayArea's origin system. 
-            //So we have to translate it to target avatar's system. 
-            Quaternion q = Quaternion.FromToRotation(_vrPlayArea._origin.forward, system.xrOrigin.Origin.transform.forward);
+                //The input is the horizontal displacement in the QuickVRPlayArea's origin system. 
+                //So we have to translate it to target avatar's system. 
+                Quaternion q = Quaternion.FromToRotation(_vrPlayArea._origin.forward, system.xrOrigin.Origin.transform.forward);
+                result = q * t;
+            }
 
-            return q * t;
+            return result;
         }
 
         /// <summary>

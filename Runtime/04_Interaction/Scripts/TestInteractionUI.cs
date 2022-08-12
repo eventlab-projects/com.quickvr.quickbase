@@ -12,6 +12,9 @@ namespace QuickVR.SampleInteraction
 
         #region PUBLIC ATTRIBUTES
 
+        [Header("General Settings")]
+        public float _guiDistance = 2.5f;
+
         [Header("Locomotion")]
         public Toggle _toggleDirectMove = null;
         public Toggle _toggleDirectTurn = null;
@@ -40,25 +43,47 @@ namespace QuickVR.SampleInteraction
 
         protected CanvasGroup _canvasGroup = null;
 
+        protected Coroutine _coUpdatePosition = null;
+
+        protected Animator _animator = null;
+
         #endregion
 
         #region CREATION AND DESTRUCTION
 
         protected virtual void Awake()
         {
-            _canvasGroup = gameObject.GetOrCreateComponent<CanvasGroup>();
+            QuickVRManager.OnTargetAnimatorSet += OnTargetAnimatorSetAction;
         }
 
-        protected virtual IEnumerator Start()
+        protected virtual void OnDestroy()
         {
-            QuickVRManager vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
-            while (!vrManager.GetAnimatorTarget())
+            QuickVRManager.OnTargetAnimatorSet -= OnTargetAnimatorSetAction;
+        }
+
+        protected virtual void OnEnable()
+        {
+            StopUpdate();
+            _coUpdatePosition = StartCoroutine(CoUpdatePosition());
+        }
+
+        protected virtual void OnDisable()
+        {
+            StopUpdate();
+        }
+
+        protected virtual void StopUpdate()
+        {
+            if (_coUpdatePosition != null)
             {
-                yield return null;
+                StopCoroutine(_coUpdatePosition);
+                _coUpdatePosition = null;
             }
+        }
 
-            transform.parent = vrManager.GetAnimatorTarget().transform;
-
+        protected virtual void Start()
+        {
+            _canvasGroup = gameObject.GetOrCreateComponent<CanvasGroup>();
             _interactionManager = QuickSingletonManager.GetInstance<QuickVRInteractionManager>();
             _interactorLeftHand = _interactionManager.GetVRInteractorHandLeft();
             _interactorRightHand = _interactionManager.GetVRInteractorHandRight();
@@ -68,11 +93,20 @@ namespace QuickVR.SampleInteraction
 
         #endregion
 
+        #region GET AND SET
+
+        protected virtual void OnTargetAnimatorSetAction(Animator animator)
+        {
+            _animator = animator;
+        }
+
+        #endregion
+
         #region UPDATE
 
         protected virtual void Update()
         {
-            if (InputManagerVR.GetKeyDown(InputManagerVR.ButtonCodes.LeftPrimaryPress) || InputManagerKeyboard.GetKeyDown(UnityEngine.InputSystem.Key.A))
+            if (InputManagerVR.GetKeyDown(InputManagerVR.ButtonCodes.LeftPrimaryPress) || InputManagerKeyboard.GetKeyDown(UnityEngine.InputSystem.Key.X))
             {
                 _show = !_show;
 
@@ -105,6 +139,20 @@ namespace QuickVR.SampleInteraction
                 _interactorRightHand.SetInteractorEnabled(InteractorType.Grab, _toggleGrabRayRightHand.isOn);
                 _interactorLeftHand.SetInteractorEnabled(InteractorType.UI, _toggleUIRayLeftHand.isOn);
                 _interactorRightHand.SetInteractorEnabled(InteractorType.UI, _toggleUIRayRightHand.isOn);
+            }
+        }
+
+        protected virtual IEnumerator CoUpdatePosition()
+        {
+            while (true)
+            {
+                if (_animator)
+                {
+                    Vector3 offset = _animator.transform.forward * _guiDistance + _animator.transform.up;
+                    transform.position = _animator.transform.position + offset;
+                }
+
+                yield return null;
             }
         }
 
