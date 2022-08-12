@@ -178,7 +178,7 @@ BlendTree:
   m_Name: WalkAndRunBlendTree
   m_Childs:
   - serializedVersion: 2
-    m_Motion: {fileID: 7400000, guid: 22c61545b6fdd4c418a6e5aae110b25a, type: 3}
+    m_Motion: {fileID: 7400000, guid: 63dc9837fc3171744a9ca054902d0b2a, type: 2}
     m_Threshold: -76.99999
     m_Position: {x: 0, y: 0}
     m_TimeScale: 1
@@ -571,7 +571,7 @@ AnimatorState:
   m_MirrorParameterActive: 0
   m_CycleOffsetParameterActive: 0
   m_TimeParameterActive: 0
-  m_Motion: {fileID: 7400000, guid: 22c61545b6fdd4c418a6e5aae110b25a, type: 3}
+  m_Motion: {fileID: 7400000, guid: 63dc9837fc3171744a9ca054902d0b2a, type: 2}
   m_Tag: 
   m_SpeedParameter: 
   m_MirrorParameter: 
