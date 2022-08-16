@@ -1,5 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
+
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -82,7 +84,14 @@ namespace QuickVR
         public static float GetFloat(string key, float defaultValue = 0)
         {
             float result;
-            if (!float.TryParse(GetString(key, defaultValue.ToString()), out result)) result = defaultValue;
+            string s = GetString(key, defaultValue.ToString());
+            NumberStyles numStyle = NumberStyles.Float | NumberStyles.AllowThousands;
+            CultureInfo cInfo = CultureInfo.InvariantCulture;
+
+            if (!float.TryParse(s, numStyle, cInfo, out result))
+            {
+                result = defaultValue;
+            }
 
             return result;
         }

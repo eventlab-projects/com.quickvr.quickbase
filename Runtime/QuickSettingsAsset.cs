@@ -58,7 +58,17 @@ namespace QuickVR
 
         public virtual void SetValue(object value)
         {
-            _value = value.ToString();
+            if (value.GetType() == typeof(float))
+            {
+                //This is to avoid culture changes on decimal representation, i.e., ',' instead of '.'. 
+                //Doing this we ensure that a float point number will be always stored with a '.' as a 
+                //decimal separator. 
+                _value = ((float)value).ToString(System.Globalization.CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                _value = value.ToString();
+            }
 
             if (_type == "")
             {
