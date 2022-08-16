@@ -99,6 +99,11 @@ namespace QuickVR
             return null;
         }
 
+        public virtual QuickAnimation GetRecordedAnimation()
+        {
+            return _recordedAnimation;
+        }
+
         public virtual void Play(QuickAnimation clip, float timeStart = 0, float timeEnd = Mathf.Infinity)
         {
             _playAnimationClip = clip;

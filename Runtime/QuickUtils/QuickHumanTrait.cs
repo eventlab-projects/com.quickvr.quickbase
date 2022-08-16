@@ -1113,6 +1113,38 @@ namespace QuickVR
             GetHumanPoseHandler(animator).SetHumanPose(ref pose);
         }
 
+        public static void Lerp(this Animator animator, ref HumanPose poseFrom, ref HumanPose poseTo, float t)
+        {
+            HumanPose pose = new HumanPose();
+            pose.bodyPosition = Vector3.Lerp(poseFrom.bodyPosition, poseTo.bodyPosition, t);
+            pose.bodyRotation = Quaternion.Lerp(poseFrom.bodyRotation, poseTo.bodyRotation, t);
+
+            int numMuscles = poseFrom.muscles.Length;
+            pose.muscles = new float[numMuscles];
+            
+            for (int i = 0; i < numMuscles; i++)
+            {
+                pose.muscles[i] = Mathf.Lerp(poseFrom.muscles[i], poseTo.muscles[i], t);
+            }
+
+            SetHumanPose(animator, ref pose);
+        }
+
+        public static void Copy(this HumanPose humanPose, ref HumanPose copyFrom)
+        {
+            //Copy the body position and rotation
+            humanPose.bodyPosition = copyFrom.bodyPosition;
+            humanPose.bodyRotation = copyFrom.bodyRotation;
+
+            //Copy the muscles
+            int numMuscles = copyFrom.muscles.Length;
+            humanPose.muscles = new float[numMuscles];
+            for (int i = 0; i < numMuscles; i++)
+            {
+                humanPose.muscles[i] = copyFrom.muscles[i];
+            }
+        }
+
         #endregion
 
     }
