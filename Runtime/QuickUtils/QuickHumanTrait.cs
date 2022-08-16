@@ -1130,18 +1130,18 @@ namespace QuickVR
             SetHumanPose(animator, ref pose);
         }
 
-        public static void Copy(this HumanPose humanPose, ref HumanPose copyFrom)
+        public static void CopyHumanPose(ref HumanPose src, ref HumanPose result)
         {
             //Copy the body position and rotation
-            humanPose.bodyPosition = copyFrom.bodyPosition;
-            humanPose.bodyRotation = copyFrom.bodyRotation;
+            result.bodyPosition = src.bodyPosition;
+            result.bodyRotation = src.bodyRotation;
 
             //Copy the muscles
-            int numMuscles = copyFrom.muscles.Length;
-            humanPose.muscles = new float[numMuscles];
+            int numMuscles = src.muscles.Length;
+            result.muscles = new float[numMuscles];
             for (int i = 0; i < numMuscles; i++)
             {
-                humanPose.muscles[i] = copyFrom.muscles[i];
+                result.muscles[i] = src.muscles[i];
             }
         }
 
