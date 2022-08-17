@@ -85,6 +85,7 @@ namespace QuickVR
         {
             float result;
             string s = GetString(key, defaultValue.ToString());
+            s = s.Replace(',', '.');
             NumberStyles numStyle = NumberStyles.Float | NumberStyles.AllowThousands;
             CultureInfo cInfo = CultureInfo.InvariantCulture;
 
@@ -147,6 +148,15 @@ namespace QuickVR
             }
 
             foreach (QuickSetting s in _settings._settingsCustom)
+            {
+                s.ResetValue();
+            }
+        }
+
+        public static void ResetSetting(string key)
+        {
+            QuickSetting s =_settings.GetSetting(key);
+            if (s != null)
             {
                 s.ResetValue();
             }

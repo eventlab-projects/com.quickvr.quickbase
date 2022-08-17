@@ -192,6 +192,14 @@ namespace QuickVR
                 outFile.Indent--;
                 outFile.WriteLine("}");
 
+                //The reset
+                outFile.WriteLine("public static void Reset" + k + "()");
+                outFile.WriteLine("{");
+                outFile.Indent++;
+                outFile.WriteLine("QuickPlayerPrefs.ResetSetting(\"" + k + "\");");
+                outFile.Indent--;
+                outFile.WriteLine("}");
+
                 outFile.WriteLine();
             }
 
