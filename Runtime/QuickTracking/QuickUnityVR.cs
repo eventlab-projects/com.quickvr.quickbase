@@ -300,8 +300,9 @@ namespace QuickVR {
             
             //Set the offset of the TrackedObject of the head
             Transform targetHead = GetIKSolver(HumanBodyBones.Head)._targetLimb;
-            Vector3 offset = transform.position - targetHead.position;
-            _vrPlayArea._origin.position = _vrPlayArea.GetVRNode(HumanBodyBones.Head).GetTrackedObject().transform.position + offset;
+            Vector3 offsetLS = transform.InverseTransformDirection(transform.position - targetHead.position);
+            Vector3 offsetWS = _vrPlayArea._origin.TransformDirection(offsetLS);
+            _vrPlayArea._origin.position = _vrPlayArea.GetVRNode(HumanBodyBones.Head).GetTrackedObject().transform.position + offsetWS;
 
             //For the sake of clarity, we move the PlayArea in a way that the _origin will end up at Vector3.zero
             _vrPlayArea.transform.position -= _vrPlayArea._origin.position;
