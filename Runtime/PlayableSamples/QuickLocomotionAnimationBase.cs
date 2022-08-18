@@ -121,11 +121,20 @@ namespace QuickVR
 
         protected virtual void OnAnimatorIK()
         {
-            _ikTargetLeftFootPos = _animator.GetIKPosition(AvatarIKGoal.LeftFoot);
-            _ikTargetLeftFootRot = _animator.GetIKRotation(AvatarIKGoal.LeftFoot);
+            UpdateFootIKTargetData(true, out _ikTargetLeftFootPos, out _ikTargetLeftFootRot);
+            UpdateFootIKTargetData(false, out _ikTargetRightFootPos, out _ikTargetRightFootRot);
+        }
 
-            _ikTargetRightFootPos = _animator.GetIKPosition(AvatarIKGoal.RightFoot);
-            _ikTargetRightFootRot = _animator.GetIKRotation(AvatarIKGoal.RightFoot);
+        protected virtual void UpdateFootIKTargetData(bool isLeft, out Vector3 ikTargetPos, out Quaternion ikTargetRot)
+        {
+            AvatarIKGoal ikGoal = isLeft ? AvatarIKGoal.LeftFoot : AvatarIKGoal.RightFoot;
+            HumanBodyBones boneID = isLeft ? HumanBodyBones.LeftFoot : HumanBodyBones.RightFoot;
+
+            QuickIKSolver ikSolverFoot = _ikManager.GetIKSolver(boneID);
+            ikSolverFoot.ResetIKChain();
+
+            ikTargetPos = Vector3.Lerp(ikSolverFoot._targetLimb.position, _animator.GetIKPosition(ikGoal), _weight);
+            ikTargetRot = Quaternion.Lerp(ikSolverFoot._targetLimb.rotation, _animator.GetIKRotation(ikGoal), _weight);
         }
 
         protected virtual void UpdateFootIKSolver(bool isLeft)
