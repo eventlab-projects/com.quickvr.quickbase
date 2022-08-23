@@ -282,7 +282,7 @@ namespace QuickVR
                 ikManager.enabled = false;
             }
 
-            animator.GetOrCreateComponent<QuickLocomotionAnimationVR>();
+            //animator.GetOrCreateComponent<QuickLocomotionAnimationVR>();
 
             _copyPose.SetAnimatorDest(animator);
             if (OnTargetAnimatorSet != null)
