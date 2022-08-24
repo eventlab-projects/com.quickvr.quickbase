@@ -194,11 +194,6 @@ namespace QuickVR {
 
 		#region GET AND SET
 
-        public Transform GetPlayer()
-        {
-            return _player;
-        }
-
         public virtual bool IsRunning()
         {
             return _state == State.StagesMain;
@@ -224,15 +219,6 @@ namespace QuickVR {
                 yield return null;
                         
             yield return null;
-        }
-
-        public virtual void MovePlayerTo(Transform target, bool calibrate = true)
-        {
-            GetPlayer().position = target.position;
-            GetPlayer().rotation = target.rotation;
-            
-            if (OnMovedPlayer != null)
-                OnMovedPlayer();
         }
 
         public virtual void GetExpirationDate(out int day, out int month, out int year)
@@ -343,6 +329,7 @@ namespace QuickVR {
 		}
 
         #endregion
+
     }
 
 }

@@ -9,21 +9,11 @@ namespace QuickVR
     {
         public override void Init()
         {
-            _sourceTransform = _gameManager.GetPlayer();
+            _sourceTransform = _vrManager.GetAnimatorTarget().transform;
 
             base.Init();
         }
 
-        protected override void Teleport()
-        {
-            if (_sourceTransform && _destTransform)
-            {
-                _gameManager.MovePlayerTo(_destTransform);
-
-                if (_enableSourceTransform)
-                    _sourceTransform.gameObject.SetActive(true);
-            }
-        }
     }
 
 }

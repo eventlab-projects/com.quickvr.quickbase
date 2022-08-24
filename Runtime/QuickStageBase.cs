@@ -25,6 +25,7 @@ namespace QuickVR {
 
         #region PROTECTED PARAMETERS
 
+        protected QuickVRManager _vrManager = null;
         protected QuickInstructionsManager _instructionsManager = null;
 
         protected QuickBaseGameManager _gameManager = null;
@@ -57,6 +58,7 @@ namespace QuickVR {
         #region CREATION AND DESTRUCTION
 
         protected virtual void Awake() {
+            _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
             _instructionsManager = QuickSingletonManager.GetInstance<QuickInstructionsManager>();
             _gameManager = QuickSingletonManager.GetInstance<QuickBaseGameManager>();
             _coManager = QuickSingletonManager.GetInstance<QuickCoroutineManager>();
