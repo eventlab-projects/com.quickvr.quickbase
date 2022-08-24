@@ -7,9 +7,15 @@ using System.IO;
 
 namespace QuickVR {
 
-	public class QuickBaseGameManager : MonoBehaviour {
+	public class QuickBaseGameManager : MonoBehaviour 
+    {
 
         #region PUBLIC PARAMETERS
+
+        public static QuickBaseGameManager _instance
+        {
+            get; private set;
+        }
 
         public Transform _playerMale = null;
         public Transform _playerFemale = null;
@@ -137,6 +143,8 @@ namespace QuickVR {
 
         protected virtual void Awake() 
         {
+            _instance = this;
+
             Reset();
 
             _guiCalibration = QuickSingletonManager.GetInstance<QuickUserGUICalibration>();
