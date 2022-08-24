@@ -120,8 +120,6 @@ namespace QuickVR {
                 QuickStageBase dummy = _stagesMain.transform.CreateChild("DeleteMe").GetOrCreateComponent<QuickStageBase>();
                 dummy._maxTimeOut = -1;
             }
-
-            _stagesMain.OnFinish += Finish;
         }
 
         protected virtual void CreateStagesPost()
