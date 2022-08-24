@@ -33,7 +33,8 @@ namespace QuickVR
         }
 
         public List<SceneAction> _sceneActions = new List<SceneAction>();
-        public string _activeScene = "";
+        public string _activeScene = "";    //The new ActiveScene, if any
+        public string _logicScene = "";     //The new LogicScene, if any
 
         #endregion
 
@@ -55,8 +56,6 @@ namespace QuickVR
 
         public override void Init()
         {
-            base.Init();
-
             foreach (SceneAction s in _sceneActions)
             {
                 if (s._type == SceneAction.Type.Preload)
@@ -91,6 +90,30 @@ namespace QuickVR
             {
                 _sceneManager.ActivateScene(_activeScene);
             }
+
+            base.Init();
+        }
+
+        public override void Finish()
+        {
+            if (_logicScene.Length > 0)
+            {
+                StartCoroutine(CoWaitForLogicScene());
+            }
+            else
+            {
+                base.Finish();
+            }
+        }
+
+        protected virtual IEnumerator CoWaitForLogicScene()
+        {
+            Debug.Log("Waiting for new logic scene: " + _logicScene);
+            while (_sceneManager.GetSceneState(_logicScene) != QuickSceneManager.SceneState.Loaded)
+            {
+                yield return null;
+            }
+            Debug.Log("Logic scene: " + _logicScene + " is now loaded!!!");
         }
 
         #endregion
