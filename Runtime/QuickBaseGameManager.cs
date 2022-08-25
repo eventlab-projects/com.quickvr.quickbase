@@ -14,7 +14,10 @@ namespace QuickVR {
 
         public static QuickBaseGameManager _instance
         {
-            get; private set;
+            get
+            {
+                return GetTopGameManager();
+            }
         }
 
         public Transform _playerMale = null;
@@ -67,6 +70,12 @@ namespace QuickVR {
 
         #endregion
 
+        #region PRIVATE ATTRIBUTES
+
+        private static Stack<QuickBaseGameManager> _stackGameManagers = new Stack<QuickBaseGameManager>();
+
+        #endregion
+
         #region CONSTANTS 
 
         protected const string ROOT_STAGES_PRE_NAME = "__StagesPre__";
@@ -89,6 +98,25 @@ namespace QuickVR {
             CreateStagesPre();
             CreateStagesMain();
             CreateStagesPost();
+
+            //_stagesPre, _stagesMain and _stagesPost cannot be inactive. So check if they are marked as 
+            //inactive and it that case, reactivate them and deactivate the children. 
+            CheckStagesGroup(_stagesPre);
+            CheckStagesGroup(_stagesMain);
+            CheckStagesGroup(_stagesPost);
+        }
+
+        protected virtual void CheckStagesGroup(QuickStageGroup sGroup)
+        {
+            if (!sGroup.gameObject.activeSelf)
+            {
+                foreach (Transform t in sGroup.transform)
+                {
+                    t.gameObject.SetActive(false);
+                }
+
+                sGroup.gameObject.SetActive(true);
+            }
         }
 
         protected virtual void CreateStagesPre()
@@ -135,13 +163,13 @@ namespace QuickVR {
                 fade._fadeType = QuickStageFade.FadeType.FadeOut;
             }
 
-            _stagesPost.OnFinish += QuickUtils.CloseApplication;
+            _stagesPost.OnFinish += OnFinishStagesPost;
         }
 
 
         protected virtual void Awake() 
         {
-            _instance = this;
+            PushGameManager(this);
 
             Reset();
 
@@ -200,6 +228,21 @@ namespace QuickVR {
 
 		#region GET AND SET
 
+        private static void PushGameManager(QuickBaseGameManager gameManager)
+        {
+            _stackGameManagers.Push(gameManager);
+        }
+
+        private static QuickBaseGameManager PopGameManager()
+        {
+            return _stackGameManagers.Pop();
+        }
+
+        private static QuickBaseGameManager GetTopGameManager()
+        {
+            return _stackGameManagers.Count > 0 ? _stackGameManagers.Peek() : null;
+        }
+
         public virtual bool IsRunning()
         {
             return _state == State.StagesMain;
@@ -254,7 +297,6 @@ namespace QuickVR {
 
                 QuickStageBase.ClearStackStages();
 
-                QuickVRManager.Log("Elapsed Time = " + _timeRunning.ToString("f3") + " seconds");
                 _stagesPost.Init();
             }
         }
@@ -318,6 +360,18 @@ namespace QuickVR {
             _timeRunning = 0.0f;
         }
 
+        protected virtual void OnFinishStagesPost()
+        {
+            PopGameManager();
+
+            if (GetTopGameManager() == null)
+            {
+                QuickVRManager.Log("Elapsed Time = " + _timeRunning.ToString("f3") + " seconds");
+
+                QuickUtils.CloseApplication();
+            }
+        }
+
         protected virtual void LateUpdate() 
         {
             if (InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_EXIT))
@@ -328,9 +382,6 @@ namespace QuickVR {
 			if (_state == State.StagesMain) 
             {
 				_timeRunning += Time.deltaTime;
-				
-                //if (_footprints != null)
-                //    _footprints.transform.position = new Vector3(_footprints.transform.position.x, GetPlayer().position.y, _footprints.transform.position.z);
             }
 		}
 

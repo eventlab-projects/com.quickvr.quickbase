@@ -114,6 +114,15 @@ namespace QuickVR
                 yield return null;
             }
             Debug.Log("Logic scene: " + _logicScene + " is now loaded!!!");
+
+            //Wait till the logic flow control has been given back to the GameManager of this scene. 
+            while (_gameManager != QuickBaseGameManager._instance)
+            {
+                yield return null;
+            }
+
+            //Finish the stage as usual. 
+            base.Finish();
         }
 
         #endregion
