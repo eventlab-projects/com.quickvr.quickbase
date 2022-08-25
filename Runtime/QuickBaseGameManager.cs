@@ -20,9 +20,6 @@ namespace QuickVR {
             }
         }
 
-        public Transform _playerMale = null;
-        public Transform _playerFemale = null;
-
         //public bool _useFootprints = true;
         //public Transform _footprints = null;
         public float _minDistToFootPrints = 0.5f;        
@@ -201,9 +198,6 @@ namespace QuickVR {
 
         protected virtual void AwakePlayer()
         {
-            if (_playerFemale) _playerFemale.gameObject.SetActive(false);
-            if (_playerMale) _playerMale.gameObject.SetActive(false);
-            _player = (SettingsBase.GetGender() == SettingsBase.Genders.Female) ? _playerFemale : _playerMale;
             if (!_player)
             {
                 QuickUnityVR hTracking = FindObjectOfType<QuickUnityVR>();

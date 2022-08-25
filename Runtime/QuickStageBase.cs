@@ -77,7 +77,7 @@ namespace QuickVR {
             enabled = true;
 
             _timeStart = Time.time;
-            QuickVRManager.Log("RUNNING STAGE: " + GetName());
+            QuickVRManager.Log("RUNNING STAGE: " + GetName() + " " + gameObject.scene.name);
 
             if (OnInit != null)
             {
