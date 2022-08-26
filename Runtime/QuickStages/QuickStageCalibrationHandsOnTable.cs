@@ -12,7 +12,12 @@ namespace QuickVR
 
         public Transform _tableRoot = null;
 
-        public static float CALIBRATION_HAND_HEIGHT = 0;
+        #endregion
+
+        #region EVENTS
+
+        public delegate void QuickCalibrationAction(float newHandHeight);
+        public static event QuickCalibrationAction OnCalibrationHandHeightUpdated;
 
         #endregion
 
@@ -102,10 +107,15 @@ namespace QuickVR
             {
                 Vector3 currentPos = _tableRoot.transform.position;
                 Animator animator = _vrManager.GetAnimatorTarget();
-                CALIBRATION_HAND_HEIGHT = Mathf.Min(animator.GetBoneTransform(HumanBodyBones.LeftHand).position.y, animator.GetBoneTransform(HumanBodyBones.RightHand).position.y);
-                _tableRoot.transform.position = new Vector3(currentPos.x, CALIBRATION_HAND_HEIGHT - 0.035f, currentPos.z);
+                float handHeight = Mathf.Min(animator.GetBoneTransform(HumanBodyBones.LeftHand).position.y, animator.GetBoneTransform(HumanBodyBones.RightHand).position.y);
+                _tableRoot.transform.position = new Vector3(currentPos.x, handHeight - 0.035f, currentPos.z);
 
                 _applyTableOffset = false;
+
+                if (OnCalibrationHandHeightUpdated != null)
+                {
+                    OnCalibrationHandHeightUpdated(handHeight);
+                }
             }
         }
 
