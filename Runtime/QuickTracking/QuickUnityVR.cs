@@ -303,6 +303,7 @@ namespace QuickVR {
             Vector3 offsetLS = transform.InverseTransformDirection(transform.position - targetHead.position);
             Vector3 offsetWS = _vrPlayArea._origin.TransformDirection(offsetLS);
             _vrPlayArea._origin.position = _vrPlayArea.GetVRNode(HumanBodyBones.Head).GetTrackedObject().transform.position + offsetWS;
+            //_vrPlayArea._origin.position = _vrPlayArea.GetVRNode(HumanBodyBones.Head).transform.position + offsetWS;
 
             //For the sake of clarity, we move the PlayArea in a way that the _origin will end up at Vector3.zero
             _vrPlayArea.transform.position -= _vrPlayArea._origin.position;

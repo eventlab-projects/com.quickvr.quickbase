@@ -598,12 +598,20 @@ namespace QuickVR
             Transform tHead = animator.GetBoneTransform(HumanBodyBones.Head);
             Transform tEye = tHead.CreateChild(eyeLeft? VR_EYE_LEFT : VR_EYE_RIGHT);
 
-            //The eye center position
-            tEye.position = tHead.position + animator.transform.forward * 0.15f + animator.transform.up * 0.13f;
+            Transform tBone = animator.GetBoneTransform(eyeLeft ? HumanBodyBones.LeftEye : HumanBodyBones.RightEye);
+            if (tBone)
+            {
+                tEye.position = tBone.position;
+            }
+            else
+            {
+                //The eye center position
+                tEye.position = tHead.position + animator.transform.forward * 0.15f + animator.transform.up * 0.13f;
 
-            //Account for the Eye Separation
-            float sign = eyeLeft ? -1.0f : 1.0f;
-            tEye.position += sign * animator.transform.right * 0.032f;
+                //Account for the Eye Separation
+                float sign = eyeLeft ? -1.0f : 1.0f;
+                tEye.position += sign * animator.transform.right * 0.032f;
+            }
         }
 
         private static void CreateFingerTips(this Animator animator)
