@@ -385,20 +385,20 @@ namespace QuickVR {
             }
 
             //Recalculate the ikTargetHint position of the arms and legs
-            for (IKBone ikBone = IKBone.LeftHand; ikBone <= IKBone.RightFoot; ikBone++)
-            {
-                QuickIKSolver ikSolver = GetIKSolver(ikBone);
-                if (ikSolver._targetHint)
-                {
-                    Vector3 u = (ikSolver._boneMid.position - ikSolver._boneLimb.position).normalized;
-                    Vector3 v = (ikSolver._boneMid.position - ikSolver._boneUpper.position).normalized;
+            //for (IKBone ikBone = IKBone.LeftHand; ikBone <= IKBone.RightFoot; ikBone++)
+            //{
+            //    QuickIKSolver ikSolver = GetIKSolver(ikBone);
+            //    if (ikSolver._targetHint)
+            //    {
+            //        Vector3 u = (ikSolver._boneMid.position - ikSolver._boneLimb.position).normalized;
+            //        Vector3 v = (ikSolver._boneMid.position - ikSolver._boneUpper.position).normalized;
 
-                    if (Vector3.Angle(u, v) < 175)
-                    {
-                        ikSolver._targetHint.position = ikSolver._boneMid.position + (u + v).normalized * DEFAULT_TARGET_HINT_DISTANCE;
-                    }
-                }
-            }
+            //        if (Vector3.Angle(u, v) < 175)
+            //        {
+            //            ikSolver._targetHint.position = ikSolver._boneMid.position + (u + v).normalized * DEFAULT_TARGET_HINT_DISTANCE;
+            //        }
+            //    }
+            //}
         }
                 
         protected virtual Transform GetIKTargetParent(HumanBodyBones boneID)

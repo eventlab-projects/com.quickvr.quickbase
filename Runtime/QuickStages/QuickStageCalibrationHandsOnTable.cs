@@ -22,15 +22,13 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        protected override void Awake()
+        protected virtual void OnEnable()
         {
-            base.Awake();
-
             QuickVRManager.OnPostCalibrate += RequestApplyTableOffset;
             QuickVRManager.OnPostCopyPose += ApplyTableOffset;
         }
 
-        protected virtual void OnDestroy()
+        protected virtual void OnDisable()
         {
             QuickVRManager.OnPostCalibrate -= RequestApplyTableOffset;
             QuickVRManager.OnPostCopyPose -= ApplyTableOffset;
