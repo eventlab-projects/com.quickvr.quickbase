@@ -14,13 +14,6 @@ namespace QuickVR
 
         #endregion
 
-        #region EVENTS
-
-        public delegate void QuickCalibrationAction(float newHandHeight);
-        public static event QuickCalibrationAction OnCalibrationHandHeightUpdated;
-
-        #endregion
-
         #region PROTECTED ATTRIBUTES
 
         protected bool _applyTableOffset = false;
