@@ -25,7 +25,7 @@ namespace QuickVR
             QuickIKManagerExecuteInEditMode.OnIKManagerAdded += OnQuickIKManagerAdded;
             QuickIKManagerExecuteInEditMode.OnIKManagerRemoved += OnQuickIKManagerRemoved;
 
-            //SceneView.duringSceneGui += OnSceneGUI;
+            SceneView.duringSceneGui += OnSceneGUI;
         }
 
         private static void OnQuickIKManagerAdded(QuickIKManagerExecuteInEditMode ikManager)

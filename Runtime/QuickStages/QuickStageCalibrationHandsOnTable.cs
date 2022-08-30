@@ -10,7 +10,7 @@ namespace QuickVR
 
         #region PUBLIC ATTRIBUTES
 
-        public Transform _tableRoot = null;
+        public Transform _tableTop = null;
 
         #endregion
 
@@ -95,7 +95,7 @@ namespace QuickVR
 
         protected virtual void RequestApplyTableOffset()
         {
-            if (_tableRoot)
+            if (_tableTop)
             {
                 _applyTableOffset = true;
             }
@@ -105,17 +105,15 @@ namespace QuickVR
         {
             if (_applyTableOffset)
             {
-                Vector3 currentPos = _tableRoot.transform.position;
-                Animator animator = _vrManager.GetAnimatorTarget();
-                float handHeight = Mathf.Min(animator.GetBoneTransform(HumanBodyBones.LeftHand).position.y, animator.GetBoneTransform(HumanBodyBones.RightHand).position.y);
-                _tableRoot.transform.position = new Vector3(currentPos.x, handHeight - 0.035f, currentPos.z);
+                Animator aTarget = _vrManager.GetAnimatorTarget();
+                float handHeight = Mathf.Min(aTarget.GetBoneTransform(HumanBodyBones.LeftHand).position.y, aTarget.GetBoneTransform(HumanBodyBones.RightHand).position.y);
+                Vector3 handOffset = Vector3.up * (_tableTop.transform.position.y - handHeight + 0.035f);
+
+                QuickUnityVR unityVR = _vrManager.GetAnimatorSource().GetComponent<QuickUnityVR>();
+                unityVR.SetIKTrackingOffset(IKBone.LeftHand, handOffset);
+                unityVR.SetIKTrackingOffset(IKBone.RightHand, handOffset);
 
                 _applyTableOffset = false;
-
-                if (OnCalibrationHandHeightUpdated != null)
-                {
-                    OnCalibrationHandHeightUpdated(handHeight);
-                }
             }
         }
 

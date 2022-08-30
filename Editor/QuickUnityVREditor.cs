@@ -64,8 +64,15 @@ namespace QuickVR
         protected override void DrawIKSolverProperties(IKBone ikBone)
         {
             _target.SetIKControl(ikBone, (QuickUnityVR.ControlType)EditorGUILayout.EnumPopup(ikBone.ToString(), _target.GetIKControl(ikBone)));
-            if (_target.GetIKControl(ikBone) != QuickUnityVR.ControlType.Animation)
+            QuickUnityVR.ControlType cType = _target.GetIKControl(ikBone);
+            if (cType != QuickUnityVR.ControlType.Animation)
             {
+                if (cType == QuickUnityVR.ControlType.Tracking)
+                {
+                    //DrawIKTrackingOffsetProperty(ikBone);
+                    Vector3 offset = EditorGUILayout.Vector3Field("Tracking Offset", _target.GetIKTrackingOffset(ikBone));
+                    _target.SetIKTrackingOffset(ikBone, offset);
+                }
                 DrawIKSolverPropertiesBase(_target.GetIKSolver(ikBone));
             }
         }
