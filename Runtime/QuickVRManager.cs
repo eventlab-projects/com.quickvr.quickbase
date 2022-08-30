@@ -322,6 +322,11 @@ namespace QuickVR
             SetAnimatorTarget(animator);
         }
 
+        public virtual bool IsCalibrated()
+        {
+            return !_isCalibrationRequired;
+        }
+
         public virtual void RequestCalibration()
         {
             _isCalibrationRequired = true;

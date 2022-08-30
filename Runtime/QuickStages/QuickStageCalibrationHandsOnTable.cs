@@ -22,16 +22,29 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        protected virtual void OnEnable()
+        public override void Init()
         {
-            QuickVRManager.OnPostCalibrate += RequestApplyTableOffset;
+            QuickVRManager.OnPreCalibrate += RequestApplyTableOffset;
             QuickVRManager.OnPostCopyPose += ApplyTableOffset;
+
+            base.Init();
         }
 
-        protected virtual void OnDisable()
+        public override void Finish()
         {
-            QuickVRManager.OnPostCalibrate -= RequestApplyTableOffset;
+            QuickVRManager.OnPreCalibrate -= RequestApplyTableOffset;
             QuickVRManager.OnPostCopyPose -= ApplyTableOffset;
+
+            base.Finish();
+        }
+
+        #endregion
+
+        #region GET AND SET
+
+        protected override bool IsCalibrationDone()
+        {
+            return base.IsCalibrationDone() && !_applyTableOffset;            
         }
 
         #endregion

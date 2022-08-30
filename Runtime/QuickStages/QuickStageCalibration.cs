@@ -60,6 +60,17 @@ namespace QuickVR
 
             _guiCalibration.gameObject.SetActive(false);
             _vrManager.RequestCalibration();
+
+            //Wait for the system to be calibrated. 
+            while (!IsCalibrationDone())
+            {
+                yield return null;
+            }
+        }
+
+        protected virtual bool IsCalibrationDone()
+        {
+            return _vrManager.IsCalibrated();
         }
 
         protected virtual IEnumerator CoShowLogos()
