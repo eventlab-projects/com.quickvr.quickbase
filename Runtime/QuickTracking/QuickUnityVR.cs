@@ -113,11 +113,7 @@ namespace QuickVR {
             {
                 if (m_IKTrackingUpdateMode == null || m_IKTrackingUpdateMode.Count == 0)
                 {
-                    m_IKTrackingUpdateMode = new List<Vector3>();
-                    for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++)
-                    {
-                        m_IKTrackingUpdateMode.Add(Vector3.zero);
-                    }
+                    m_IKTrackingUpdateMode = new List<Vector3>(new Vector3[(int)IKBone.LastBone]); ;
                 }
 
                 return m_IKTrackingUpdateMode;
@@ -295,6 +291,14 @@ namespace QuickVR {
             _ikTrackingOffset[(int)ikBone] = offset;
         }
 
+        protected virtual void ResetTrackingOffsets()
+        {
+            for (IKBone ikBone = 0; ikBone < IKBone.LastBone; ikBone++)
+            {
+                _ikTrackingOffset[(int)ikBone] = Vector3.zero;
+            }
+        }
+
         public virtual int GetNumExtraTrackers()
         {
             return 0;
@@ -326,6 +330,8 @@ namespace QuickVR {
         public override void Calibrate()
         {
             base.Calibrate();
+
+            ResetTrackingOffsets();
 
             transform.localScale = Vector3.one;
 

@@ -262,6 +262,12 @@ namespace QuickVR
 
         public virtual void SetAnimatorTarget(Animator animator)
         {
+            if (_animatorSource == null)
+            {
+                Debug.LogError("ERROR: You must define AnimatorSource prior to AnimatorTarget!!!");
+                return;
+            }
+
             if (_animatorTarget != null)
             {
                 _animatorTarget.transform.parent = null;

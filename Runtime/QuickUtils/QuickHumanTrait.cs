@@ -81,10 +81,10 @@ namespace QuickVR
         RightLittleProximal = HumanBodyBones.RightLittleProximal,
         RightLittleIntermediate = HumanBodyBones.RightLittleIntermediate,
         RightLittleDistal = HumanBodyBones.RightLittleDistal,
-        
+
         //Left hand tip bones
-        LeftThumbTip = HumanBodyBones.LastBone, 
-        LeftIndexTip, 
+        LeftThumbTip = HumanBodyBones.LastBone,
+        LeftIndexTip,
         LeftMiddleTip,
         LeftRingTip,
         LeftLittleTip,
@@ -101,7 +101,7 @@ namespace QuickVR
 
     public enum QuickHumanFingers
     {
-        Thumb, 
+        Thumb,
         Index,
         Middle,
         Ring,
@@ -121,7 +121,7 @@ namespace QuickVR
 
         private static HumanBodyBones[] _humanBodyBones = null;
         private static QuickHumanFingers[] _fingers = null;
-        
+
         private static Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> _bonesFromFingerLeft = null;
         private static Dictionary<QuickHumanFingers, List<QuickHumanBodyBones>> _bonesFromFingerRight = null;
         private static Dictionary<QuickHumanBodyBones, QuickHumanFingers> _fingerFromBone = new Dictionary<QuickHumanBodyBones, QuickHumanFingers>();
@@ -226,7 +226,7 @@ namespace QuickVR
             _nextBoneInChain[QuickHumanBodyBones.RightLowerLeg] = QuickHumanBodyBones.RightFoot;
 
             //Hands chains
-            foreach (bool b in new bool[]{ true, false}) 
+            foreach (bool b in new bool[] { true, false })
             {
                 foreach (QuickHumanFingers f in GetHumanFingers())
                 {
@@ -274,7 +274,7 @@ namespace QuickVR
 
         public static string GetMuscleName(int muscleID)
         {
-            return muscleID >= 0? GetMuscleNames()[muscleID] : "Undefined";
+            return muscleID >= 0 ? GetMuscleNames()[muscleID] : "Undefined";
         }
 
         public static int GetRequiredBoneCount()
@@ -358,7 +358,7 @@ namespace QuickVR
 
             bool b = _nextBoneInChain.TryGetValue(boneID, out QuickHumanBodyBones result);
 
-            return b? result : QuickHumanBodyBones.LastBone;
+            return b ? result : QuickHumanBodyBones.LastBone;
         }
 
         public static List<HumanBodyBones> GetChildBones(HumanBodyBones boneID)
@@ -464,7 +464,7 @@ namespace QuickVR
                     }
                 }
             }
-            
+
             return result;
         }
 
@@ -513,10 +513,10 @@ namespace QuickVR
         {
             int i = (int)boneID;
 
-            return 
+            return
                 (
                 (i >= (int)QuickHumanBodyBones.LeftThumbProximal && i <= (int)QuickHumanBodyBones.LeftLittleDistal) ||
-                (i >= (int)QuickHumanBodyBones.LeftThumbTip && i <= (int)QuickHumanBodyBones.LeftLittleTip) 
+                (i >= (int)QuickHumanBodyBones.LeftThumbTip && i <= (int)QuickHumanBodyBones.LeftLittleTip)
                 );
         }
 
@@ -596,22 +596,14 @@ namespace QuickVR
         private static void CreateEyeVR(this Animator animator, bool eyeLeft)
         {
             Transform tHead = animator.GetBoneTransform(HumanBodyBones.Head);
-            Transform tEye = tHead.CreateChild(eyeLeft? VR_EYE_LEFT : VR_EYE_RIGHT);
+            Transform tEye = tHead.CreateChild(eyeLeft ? VR_EYE_LEFT : VR_EYE_RIGHT);
 
-            Transform tBone = animator.GetBoneTransform(eyeLeft ? HumanBodyBones.LeftEye : HumanBodyBones.RightEye);
-            if (tBone)
-            {
-                tEye.position = tBone.position;
-            }
-            else
-            {
-                //The eye center position
-                tEye.position = tHead.position + animator.transform.forward * 0.15f + animator.transform.up * 0.13f;
+            //The eye center position
+            tEye.position = tHead.position + animator.transform.forward * 0.15f + animator.transform.up * 0.13f;
 
-                //Account for the Eye Separation
-                float sign = eyeLeft ? -1.0f : 1.0f;
-                tEye.position += sign * animator.transform.right * 0.032f;
-            }
+            //Account for the Eye Separation
+            float sign = eyeLeft ? -1.0f : 1.0f;
+            tEye.position += sign * animator.transform.right * 0.032f;
         }
 
         private static void CreateFingerTips(this Animator animator)
@@ -682,7 +674,7 @@ namespace QuickVR
             Transform eye = animator.GetBoneTransform(eyeBoneID);
             if (!eye)
             {
-                eye = animator.GetEyeVR(eyeLeft); 
+                eye = animator.GetEyeVR(eyeLeft);
             }
 
             return eye;
@@ -690,14 +682,14 @@ namespace QuickVR
 
         public static Transform GetEyeVR(this Animator animator, bool eyeLeft)
         {
-            return animator.GetBoneTransform(HumanBodyBones.Head).Find(eyeLeft? VR_EYE_LEFT : VR_EYE_RIGHT);
+            return animator.GetBoneTransform(HumanBodyBones.Head).Find(eyeLeft ? VR_EYE_LEFT : VR_EYE_RIGHT);
         }
 
         private static Transform CreateEyeCenterVR(this Animator animator)
         {
             Transform tHead = animator.GetBoneTransform(HumanBodyBones.Head);
             Transform tResult = tHead.CreateChild(VR_EYE_CENTER);
-            
+
             tResult.rotation = animator.transform.rotation;
             tResult.position = Vector3.Lerp(animator.GetEyeVR(true).position, animator.GetEyeVR(false).position, 0.5f);
 
@@ -711,7 +703,7 @@ namespace QuickVR
 
         //public static Vector3 GetEyeCenterPosition(this Animator animator)
         //{
-            
+
         //    Transform lEye = animator.GetEye(true);
         //    Transform rEye = animator.GetEye(false);
         //    if (lEye && rEye)
@@ -822,7 +814,7 @@ namespace QuickVR
         private static void EnforceTPoseArms(ref HumanPose pose)
         {
             //Shoulder
-            foreach (HumanBodyBones boneID in new HumanBodyBones[] { HumanBodyBones.LeftShoulder, HumanBodyBones.RightShoulder})
+            foreach (HumanBodyBones boneID in new HumanBodyBones[] { HumanBodyBones.LeftShoulder, HumanBodyBones.RightShoulder })
             {
                 pose.muscles[GetMuscleFromBone(boneID, 1)] = 0;
                 pose.muscles[GetMuscleFromBone(boneID, 2)] = 0;
@@ -877,12 +869,12 @@ namespace QuickVR
             {
                 HumanBodyBones.LeftIndexProximal,
                 HumanBodyBones.LeftMiddleProximal,
-                HumanBodyBones.LeftRingProximal, 
+                HumanBodyBones.LeftRingProximal,
                 HumanBodyBones.LeftLittleProximal,
 
-                HumanBodyBones.RightIndexProximal, 
+                HumanBodyBones.RightIndexProximal,
                 HumanBodyBones.RightMiddleProximal,
-                HumanBodyBones.RightRingProximal, 
+                HumanBodyBones.RightRingProximal,
                 HumanBodyBones.RightLittleProximal
             })
             {
@@ -890,8 +882,8 @@ namespace QuickVR
             }
 
             //Index to Little Intermediate and Distal phalanges
-            foreach (HumanBodyBones boneID in new HumanBodyBones[] 
-            { 
+            foreach (HumanBodyBones boneID in new HumanBodyBones[]
+            {
                 HumanBodyBones.LeftIndexIntermediate, HumanBodyBones.LeftIndexDistal,
                 HumanBodyBones.LeftMiddleIntermediate, HumanBodyBones.LeftMiddleDistal,
                 HumanBodyBones.LeftRingIntermediate, HumanBodyBones.LeftRingDistal,
@@ -981,12 +973,12 @@ namespace QuickVR
         //    Vector3 v = tIndex.position - tHand.position;
         //    Vector3 w = tLittle.position - tHand.position;
         //    Vector3 n = Vector3.Cross(v, w);
-            
+
         //    if (isLeft)
         //    {
         //        n *= -1;
         //    }
-            
+
         //    tPose.LookAt(tMiddle.position, n);
 
         //    //Align the forward vector
@@ -1129,7 +1121,7 @@ namespace QuickVR
 
             int numMuscles = poseFrom.muscles.Length;
             pose.muscles = new float[numMuscles];
-            
+
             for (int i = 0; i < numMuscles; i++)
             {
                 pose.muscles[i] = Mathf.Lerp(poseFrom.muscles[i], poseTo.muscles[i], t);
