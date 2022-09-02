@@ -4,7 +4,8 @@ using UnityEngine.XR;
 
 using System.Collections.Generic;
 
-namespace QuickVR {
+namespace QuickVR 
+{
 
     public class QuickUnityVR : QuickIKManager
     {
@@ -664,7 +665,9 @@ namespace QuickVR {
             //GetIKSolver(boneID)._targetLimb.position = node.GetTrackedObject().transform.position;
             Transform target = GetIKSolver(boneID)._targetLimb;
             QuickTrackedObject tObject = node.GetTrackedObject();
-            target.localPosition = _vrPlayArea._origin.InverseTransformPoint(tObject.transform.position) + GetIKTrackingOffset(boneID);
+            Vector3 localPos = _vrPlayArea._origin.InverseTransformPoint(tObject.transform.position) + GetIKTrackingOffset(boneID);
+            //target.localPosition = localPos;
+            target.position = transform.TransformPoint(localPos); //transform.position + transform.rotation * localPos;
             //target.localPosition = tObject.transform.localPosition;
         }
 
@@ -673,7 +676,10 @@ namespace QuickVR {
             //GetIKSolver(boneID)._targetLimb.rotation = node.GetTrackedObject().transform.rotation;
             Transform target = GetIKSolver(boneID)._targetLimb;
             QuickTrackedObject tObject = node.GetTrackedObject();
-            target.localRotation = Quaternion.Inverse(_vrPlayArea._origin.rotation) * tObject.transform.rotation;
+            Quaternion localRot = Quaternion.Inverse(_vrPlayArea._origin.rotation) * tObject.transform.rotation;
+            //target.localRotation = localRot;
+            target.rotation = transform.rotation * localRot;
+
             //Quaternion tmp = transform.rotation;
             //transform.rotation = _vrPlayArea._origin.rotation;
             //target.rotation = tObject.transform.rotation;
