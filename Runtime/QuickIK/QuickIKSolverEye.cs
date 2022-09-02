@@ -158,6 +158,7 @@ namespace QuickVR
             //if (_enableIK && _boneLimb && _targetLimb) return;
             if (_enableIK)
             {
+                _targetLimb.localPosition = _initialLocalPositionTargetLimb;
                 Quaternion animBoneUpperRot = _boneUpper.rotation;
                 Quaternion animBoneMidRot = _boneMid.rotation;
                 Quaternion animBoneLimbRot = _boneLimb.rotation;
