@@ -1,7 +1,7 @@
 fileFormatVersion: 2
 guid: 317a56890b5c8e74ab1d492a2c7fb608
 ModelImporter:
-  serializedVersion: 20200
+  serializedVersion: 20300
   internalIDToNameTable:
   - first:
       1: 100000
@@ -738,7 +738,12 @@ ModelImporter:
   - first:
       41386430: 2186277476908879412
     second: ImportLogs
-  externalObjects: {}
+  externalObjects:
+  - first:
+      type: UnityEngine:Material
+      assembly: UnityEngine.CoreModule
+      name: DummyMaterial__DummyTexture
+    second: {fileID: 2100000, guid: 9beb5fd5909771c4d825a4c10ede6521, type: 2}
   materials:
     materialImportMode: 2
     materialName: 0
@@ -1562,6 +1567,7 @@ ModelImporter:
   humanoidOversampling: 1
   avatarSetup: 1
   addHumanoidExtraRootOnlyWhenUsingAvatar: 0
+  remapMaterialsIfMaterialImportModeIsNone: 1
   additionalBone: 0
   userData: 
   assetBundleName: 
