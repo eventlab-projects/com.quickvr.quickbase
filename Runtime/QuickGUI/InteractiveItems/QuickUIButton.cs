@@ -25,6 +25,8 @@ namespace QuickVR
 
         #endregion
 
+        #region CREATION AND DESTRUCTION
+
         protected virtual void Awake()
         {
             _buttonBG = gameObject.GetOrCreateComponent<Image>();
@@ -45,6 +47,17 @@ namespace QuickVR
             //CreateLabel();
         }
 
+        protected override void OnDisable()
+        {
+            _buttonBG.color = _colorNormal;
+
+            base.OnDisable();
+        }
+
+        #endregion
+
+        #region UPDATE
+
         public override void Over()
         {
             base.Over();
@@ -58,6 +71,16 @@ namespace QuickVR
 
             _buttonBG.color = _colorNormal;
         }
+
+        protected virtual void Update()
+        {
+            if (_buttonBG.material)
+            {
+                _buttonBG.material.color = _buttonBG.color;
+            }
+        }
+
+        #endregion
 
         //#region GET AND SET
 

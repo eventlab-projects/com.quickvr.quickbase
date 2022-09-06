@@ -192,9 +192,8 @@ namespace QuickVR {
                         OnInstructionPre(i);
                     }
 
-                    _instructionsManager.Play(instructions[i]);
-                    while (_instructionsManager.IsPlaying()) yield return null;
-
+                    yield return StartCoroutine(CoPlayInstructionAndWait(instructions[i]));
+                    
                     if (OnInstructionPost != null)
                     {
                         OnInstructionPost(i);
@@ -215,6 +214,15 @@ namespace QuickVR {
             yield return _coManager.WaitForCoroutineSet(_coSet);
 
             Finish();
+        }
+
+        protected virtual IEnumerator CoPlayInstructionAndWait(AudioClip clip)
+        {
+            _instructionsManager.Play(clip);
+            while (_instructionsManager.IsPlaying())
+            {
+                yield return null;
+            }
         }
 
         protected virtual IEnumerator CoWaitForUserInput()
