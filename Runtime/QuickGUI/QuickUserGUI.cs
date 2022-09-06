@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 namespace QuickVR
 {
@@ -24,7 +25,7 @@ namespace QuickVR
         #region PROTECTED ATTRIBUTES
 
         protected Canvas _canvas = null;
-        protected Text _instructions = null;
+        protected TextMeshProUGUI _instructions = null;
 
         protected static HashSet<QuickUserGUI> _guis = new HashSet<QuickUserGUI>(); //All the GUIS present in the game. 
 
@@ -97,24 +98,27 @@ namespace QuickVR
             return result;
         }
 
-        protected virtual Text CreateInstructionsText()
+        protected virtual TextMeshProUGUI CreateInstructionsText()
         {
             Transform tInstructions = transform.CreateChild(NAME_INSTRUCTIONS_TRANSFORM);
-            Text result = tInstructions.GetComponent<Text>();
+            TextMeshProUGUI result = tInstructions.GetComponent<TextMeshProUGUI>();
             if (!result)
             {
-                result = tInstructions.gameObject.AddComponent<Text>();
+                result = tInstructions.gameObject.AddComponent<TextMeshProUGUI>();
+
+                RectTransform tCanvas = _canvas.GetComponent<RectTransform>();
                 RectTransform t = result.GetComponent<RectTransform>();
-                t.sizeDelta = new Vector2(15, 12);
+                float sf = 100;
+                t.sizeDelta = new Vector2(tCanvas.GetWidth() * sf, tCanvas.GetHeight() * sf);
                 t.anchorMin = new Vector2(0.5f, 1.0f);
                 t.anchorMax = new Vector2(0.5f, 1.0f);
                 t.pivot = new Vector2(0.5f, 1.0f);
 
-                t.localScale = Vector3.one * 0.25f;
+                t.localScale = Vector3.one * (1.0f / sf);
 
-                result.font = Resources.Load<Font>("Fonts/arial");
-                result.fontSize = 1;
-                result.material = Instantiate(Resources.Load<Material>("Materials/GUIText"));
+                //result.font = Resources.Load<Font>("Fonts/arial");
+                //result.fontSize = 1;
+                //result.material = Instantiate(Resources.Load<Material>("Materials/GUIText"));
             }
             
             return result;
@@ -157,7 +161,18 @@ namespace QuickVR
 
         public virtual QuickUIButton GetButton(string buttonName)
         {
-            return transform.Find(buttonName).GetOrCreateComponent<QuickUIButton>();
+            QuickUIButton result = null;
+
+            Button[] buttons = transform.GetComponentsInChildren<Button>(true);
+            foreach (Button b in buttons)
+            {
+                if (b.name == buttonName)
+                {
+                    result = b.GetOrCreateComponent<QuickUIButton>();        
+                }
+            }
+
+            return result;
         }
 
         public virtual void ResetPosition()

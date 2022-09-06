@@ -39,7 +39,7 @@ namespace QuickVR
 		{
 			base.Awake();
 
-			_instructions.alignment = TextAnchor.MiddleCenter;
+			_instructions.alignment = TMPro.TextAlignmentOptions.Center;
 			_timeLeft = _updateInterval;
 		}
 

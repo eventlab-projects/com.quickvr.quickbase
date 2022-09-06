@@ -65,7 +65,8 @@ namespace QuickVR
 
             _hint = CreateHint();
 
-            _instructions.alignment = TextAnchor.MiddleCenter;
+            _instructions.alignment = TMPro.TextAlignmentOptions.Center;
+            _instructions.fontSize = 30;
             //_instructions.fontSize = 2;
         }
 
@@ -128,7 +129,7 @@ namespace QuickVR
         {
             base.ActionPostCameraUpdate();
 
-            if (_autoUpdateHint && _instructions.text.Length > 0)
+            if (_autoUpdateHint && _instructions.text != null && _instructions.text.Length > 0)
             {
                 string hint = "";
                 bool isEnglish = SettingsBase.GetLanguage() == SettingsBase.Languages.English;
