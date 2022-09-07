@@ -8,6 +8,7 @@ using System.Collections.Generic;
 namespace QuickVR
 {
 
+    [Obsolete("QuickUICursor is not used anymore and will be removed in future releases. Use QuickVRInteractionManager instead")]
     // The Cursor is a small point at the centre of the screen.
     // It is used as a visual aid for aiming. The position of the
     // Cursor is either at a default position in space or on the

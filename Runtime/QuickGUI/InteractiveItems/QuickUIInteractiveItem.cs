@@ -2,15 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.EventSystems;
 
-namespace QuickVR {
+namespace QuickVR 
+{
 	
     // This class should be added to any gameobject in the scene
     // that should react to input based on the user's cursor.
     // It contains events that can be subscribed to by classes that
     // need to know about input specifics to this gameobject.
     
-	public class QuickUIInteractiveItem : MonoBehaviour {
+	public class QuickUIInteractiveItem : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler, IPointerDownHandler, IPointerUpHandler
+    {
 
 		#region PUBLIC PARAMETERS
 
@@ -23,6 +26,8 @@ namespace QuickVR {
 		protected bool _isOver;	            //Indicates that the cursor is over this interactive item
 		protected bool _isDown;	            //Indicates that the Trigger assigned to the cursor has been pressed on this interactive item
         protected float _timeOver = 0.0f;   //Indicates how much time the cursor is over the interactive item
+
+        protected Coroutine _coTimeOver = null;
 
 		#endregion
 
@@ -59,15 +64,43 @@ namespace QuickVR {
             return _timeOver;
         }
 
-		#endregion
+        #endregion
 
-		#region UPDATE
+        #region UPDATE
 
-		// The below functions are called by the VRRayCaster when the appropriate input is detected.
+        //Detect if the Cursor starts to pass over the GameObject
+        public void OnPointerEnter(PointerEventData pointerEventData)
+        {
+            Over();
+        }
+
+        //Detect when Cursor leaves the GameObject
+        public void OnPointerExit(PointerEventData pointerEventData)
+        {
+            Out();
+        }
+
+        public void OnPointerDown(PointerEventData eventData)
+        {
+            Down();
+        }
+
+        public void OnPointerUp(PointerEventData eventData)
+        {
+            Up();
+        }
+
+        // The below functions are called by the VRRayCaster when the appropriate input is detected.
         // They in turn call the appropriate events should they have subscribers.
-        public virtual void Over() {
+        public virtual void Over() 
+        {
             _isOver = true;
-            StartCoroutine(CoUpdateTimeOver());
+            if (_coTimeOver != null)
+            {
+                StopCoroutine(_coTimeOver);
+            }
+            _timeOver = 0;
+            _coTimeOver = StartCoroutine(CoUpdateTimeOver());
 
             if (OnOver != null) OnOver();
         }
@@ -97,11 +130,9 @@ namespace QuickVR {
                 _timeOver += Time.deltaTime;
                 yield return null;
             }
-
-            _timeOver = 0.0f;
         }
-			
-		#endregion
+
+        #endregion
 
     }
 
