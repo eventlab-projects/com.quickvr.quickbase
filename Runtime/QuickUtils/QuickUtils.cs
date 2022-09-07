@@ -114,12 +114,12 @@ namespace QuickVR
             return m;
         }
 
-        public static bool IsInternetConnection()
+        public static bool IsInternetConnection(string url = "http://www.google.com")
         {
             try
             {
                 using (var client = new WebClient())
-                using (var stream = client.OpenRead("http://www.google.com"))
+                using (var stream = client.OpenRead(url))
                 {
                     return true;
                 }

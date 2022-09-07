@@ -8,6 +8,12 @@ namespace QuickVR
     public class QuickStageCheckInternetConnection : QuickStagePreBase
     {
 
+        #region PUBLIC ATTRIBUTES
+
+        public string _testURL = "http://www.google.com";
+
+        #endregion
+
         #region CREATION AND DESTRUCTIOn
 
         protected override void Awake()
@@ -23,7 +29,7 @@ namespace QuickVR
 
         protected override IEnumerator CoUpdate()
         {
-            if (!QuickUtils.IsInternetConnection())
+            if (!QuickUtils.IsInternetConnection(_testURL))
             {
                 _guiCalibration.SetCalibrationInstructions(QuickUserGUICalibration.CalibrationStep.InternetConnectionRequired);
 
