@@ -113,7 +113,7 @@ namespace QuickVR
             InputDevice iDevice = InputDevices.GetDeviceAtXRNode(nodeType);
             while (true)
             {
-                iDevice.SendHapticImpulse(0, 1);
+                iDevice.SendHapticImpulse(0, 1, 0.1f);
                 yield return null;
             }
         }
