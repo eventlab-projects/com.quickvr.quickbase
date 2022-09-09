@@ -12,6 +12,8 @@ namespace QuickVR
 
         #region CONSTANTS
 
+        public const string MAT_PARAM_GUI_ZTEST_MODE = "unity_GUIZTestMode";
+
         protected const string NAME_INSTRUCTIONS_TRANSFORM = "__Instructions__";
 
         #endregion
@@ -37,6 +39,8 @@ namespace QuickVR
             }
         }
 
+        protected TextMeshProUGUI[] _textMeshes;
+
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -46,6 +50,8 @@ namespace QuickVR
             RegisterGUI(this);
 
             Reset();
+
+            _textMeshes = GetComponentsInChildren<TextMeshProUGUI>(true);
         }
 
         protected static void RegisterGUI(QuickUserGUI userGUI)
@@ -120,7 +126,7 @@ namespace QuickVR
                 //result.fontSize = 1;
                 //result.material = Instantiate(Resources.Load<Material>("Materials/GUIText"));
             }
-            
+
             return result;
         }
 
@@ -190,12 +196,28 @@ namespace QuickVR
 
         protected virtual void ActionPostCameraUpdate()
         {
+            UpdateZTestMode();
+
             if (_followCamera)
             {
                 Vector3 fwd = _camera.transform.forward;
                 transform.position = _camera.transform.position + fwd * 3;
                 //transform.forward = fwd;
                 transform.rotation = _camera.transform.rotation;
+            }
+        }
+
+        protected virtual void UpdateZTestMode()
+        {
+            int zTestValue = (int)UnityEngine.Rendering.CompareFunction.Always;
+
+            foreach (TextMeshProUGUI t in _textMeshes)
+            {
+                Material mat = t.materialForRendering;
+                if (mat && mat.GetInt(MAT_PARAM_GUI_ZTEST_MODE) != zTestValue)
+                {
+                    mat.SetInt(MAT_PARAM_GUI_ZTEST_MODE, zTestValue);
+                }
             }
         }
 
