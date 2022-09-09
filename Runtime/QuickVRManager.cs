@@ -11,6 +11,12 @@ namespace QuickVR
     public class QuickVRManager : MonoBehaviour
     {
 
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSplashScreen)]
+        static void Init()
+        {
+            XRSettings.gameViewRenderMode = GameViewRenderMode.RightEye;
+        }
+
         //#region EXECUTION ORDER MANAGERS
 
         //[DefaultExecutionOrder(-1000)] //Execute as soon as possible
