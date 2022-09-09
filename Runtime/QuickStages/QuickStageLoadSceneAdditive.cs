@@ -115,8 +115,19 @@ namespace QuickVR
             }
             Debug.Log("Logic scene: " + _logicScene + " is now loaded!!!");
 
+            _sceneManager.SetLogicScene(_logicScene);
+
             //Wait till the logic flow control has been given back to the GameManager of this scene. 
-            while (_gameManager != QuickBaseGameManager._instance)
+            //while (_gameManager != QuickBaseGameManager._instance)
+            //{
+            //    yield return null;
+            //}
+
+            CameraFade cFade = QuickSingletonManager.GetInstance<CameraFade>();
+            cFade.StartFade(Color.clear, 5);
+
+            int thisSceneHandle = gameObject.scene.handle;
+            while (thisSceneHandle != _sceneManager.GetLogicScene().handle)
             {
                 yield return null;
             }

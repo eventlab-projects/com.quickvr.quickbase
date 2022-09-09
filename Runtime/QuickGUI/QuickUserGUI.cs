@@ -214,7 +214,7 @@ namespace QuickVR
             foreach (TextMeshProUGUI t in _textMeshes)
             {
                 Material mat = t.materialForRendering;
-                if (mat && mat.GetInt(MAT_PARAM_GUI_ZTEST_MODE) != zTestValue)
+                if (mat && mat.HasProperty(MAT_PARAM_GUI_ZTEST_MODE) && mat.GetInt(MAT_PARAM_GUI_ZTEST_MODE) != zTestValue)
                 {
                     mat.SetInt(MAT_PARAM_GUI_ZTEST_MODE, zTestValue);
                 }

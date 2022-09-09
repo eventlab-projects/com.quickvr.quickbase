@@ -40,6 +40,7 @@ namespace QuickVR
 
 
         protected bool _isActivatingScene = false;
+        protected Scene _logicScene;
 
         #endregion
 
@@ -194,6 +195,20 @@ namespace QuickVR
         public virtual Scene GetActiveScene()
         {
             return SceneManager.GetActiveScene();
+        }
+
+        public virtual Scene GetLogicScene()
+        {
+            return _logicScene;
+        }
+
+        public virtual void SetLogicScene(string sceneName)
+        {
+            Scene sc = GetSceneByName(sceneName);
+            if (sc.IsValid())
+            {
+                _logicScene = sc;
+            }
         }
 
         #endregion
