@@ -117,20 +117,34 @@ namespace QuickVR
 
             _sceneManager.SetLogicScene(_logicScene);
 
-            //Wait till the logic flow control has been given back to the GameManager of this scene. 
-            //while (_gameManager != QuickBaseGameManager._instance)
+            if (_gameManager == QuickBaseGameManager._instance)
+            {
+                //The GameManager has not changed. This means that it is an old scene or a scene that does not follow
+                //the QuickVR logic workflow. So just fadein to the new scene. 
+                CameraFade cFade = QuickSingletonManager.GetInstance<CameraFade>();
+                cFade.StartFade(Color.clear, 5);
+                while (true)
+                {
+                    yield return null;
+                }
+            }
+            else
+            {
+                //Wait till the logic flow control has been given back to the GameManager of this scene. 
+                while (_gameManager != QuickBaseGameManager._instance)
+                {
+                    yield return null;
+                }
+            }
+            
+            //CameraFade cFade = QuickSingletonManager.GetInstance<CameraFade>();
+            //cFade.StartFade(Color.clear, 5);
+
+            //int thisSceneHandle = gameObject.scene.handle;
+            //while (thisSceneHandle != _sceneManager.GetLogicScene().handle)
             //{
             //    yield return null;
             //}
-
-            CameraFade cFade = QuickSingletonManager.GetInstance<CameraFade>();
-            cFade.StartFade(Color.clear, 5);
-
-            int thisSceneHandle = gameObject.scene.handle;
-            while (thisSceneHandle != _sceneManager.GetLogicScene().handle)
-            {
-                yield return null;
-            }
 
             //Finish the stage as usual. 
             base.Finish();
