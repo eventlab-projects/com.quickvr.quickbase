@@ -177,7 +177,6 @@ namespace QuickVR
             _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
             //_vrPlayArea.transform.parent = transform;
 
-            CreateVRCursors();
             CreateFootPrints();
         }
 
@@ -225,25 +224,6 @@ namespace QuickVR
             source.weight = 1.0f;
             _footprints.AddSource(source);
             _footprints.constraintActive = true;
-        }
-
-        protected virtual void CreateVRCursors()
-        {
-            CreateVRCursorHand(QuickUICursor.Role.LeftHand, _animator.GetBoneTransform(HumanBodyBones.LeftHand), _animator.GetBoneTransform(HumanBodyBones.LeftIndexDistal));
-            CreateVRCursorHand(QuickUICursor.Role.RightHand, _animator.GetBoneTransform(HumanBodyBones.RightHand), _animator.GetBoneTransform(HumanBodyBones.RightIndexDistal));
-        }
-
-        protected virtual void CreateVRCursorHand(QuickUICursor.Role cType, Transform tHand, Transform tDistal)
-        {
-            Transform tIntermediate = tDistal.parent;
-            Transform tProximal = tIntermediate.parent;
-            float l1 = Vector3.Distance(tDistal.position, tIntermediate.position);
-            float l2 = Vector3.Distance(tIntermediate.position, tProximal.position);
-            Transform cursorOrigin = tHand.CreateChild("__CursorOrigin__");
-            cursorOrigin.forward = (tIntermediate.position - tProximal.position).normalized;
-            cursorOrigin.position = tProximal.position + cursorOrigin.forward * (l1 + l2 + (l2 - l1));
-
-            QuickUICursor.CreateVRCursor(cType, cursorOrigin);
         }
 
         #endregion
@@ -459,7 +439,6 @@ namespace QuickVR
                     ikSolverHips._targetLimb.position = ikSolverHead._targetLimb.position + v * chainLength;
                 }
 
-                UpdateVRCursors();
                 _footprints.gameObject.SetActive(_useFootprints);
             }
         }
@@ -714,12 +693,6 @@ namespace QuickVR
         //    Quaternion rotOffset = node.GetTrackedObject().transform.rotation * Quaternion.Inverse(calibrationPose.rotation);
         //    t.rotation = rotOffset * t.rotation;
         //}
-
-        protected virtual void UpdateVRCursors()
-        {
-            QuickUICursor.GetVRCursor(QuickUICursor.Role.LeftHand).transform.position = _animator.GetBoneTransform(HumanBodyBones.LeftIndexDistal).position;
-            QuickUICursor.GetVRCursor(QuickUICursor.Role.RightHand).transform.position = _animator.GetBoneTransform(HumanBodyBones.RightIndexDistal).position;
-        }
 
         #endregion
 

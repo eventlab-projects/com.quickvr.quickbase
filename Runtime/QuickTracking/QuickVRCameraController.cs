@@ -66,8 +66,6 @@ namespace QuickVR
             {
                 _camera.fieldOfView = 70.0f;//90.0f;
             }
-
-            QuickUICursor.CreateVRCursor(QuickUICursor.Role.Head, _camera.transform);
         }
 
         #endregion
