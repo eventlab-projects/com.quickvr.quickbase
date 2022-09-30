@@ -55,6 +55,8 @@ public class QuickReferenceFixer : EditorWindow {
 
     #region PROTECTED ATTRIBUTES
 
+    protected string _sourcePath = "Assets/QuickVR";
+    protected string _dllName = "MyLibrary.dll";
     protected QuickReferenceFixerAsset _asset = null;
     protected Dictionary<string, QuickReferenceFixerAsset.ClassData> _guidToClass = new Dictionary<string, QuickReferenceFixerAsset.ClassData>();
 
@@ -62,10 +64,10 @@ public class QuickReferenceFixer : EditorWindow {
 
     #region GET AND SET
 
-    protected virtual string GetPathRoot()
-    {
-        return "Assets/QuickVR";
-    }
+    //protected virtual string GetPathRoot()
+    //{
+    //    return "Assets/QuickVR";
+    //}
 
     protected virtual string GetDefaultAssetPath()
     {
@@ -122,7 +124,7 @@ public class QuickReferenceFixer : EditorWindow {
         if (_guidToClass.ContainsKey(srcGUID))
         {
             QuickReferenceFixerAsset.ClassData cData = _guidToClass[srcGUID];
-            string path = GetPathRoot() + "/" + cData._quickvrModule + "/" + GetNameDll(cData._quickvrModule) + ".dll";
+            string path = _sourcePath + "/" + _dllName + (_dllName.Contains(".dll")? "" : ".dll");
             Debug.Log("path = " + path);
             result = AssetDatabase.AssetPathToGUID(path);
         }
@@ -136,6 +138,8 @@ public class QuickReferenceFixer : EditorWindow {
 
     protected virtual void OnGUI()
     {
+        _sourcePath = EditorGUILayout.TextField("Source Path", _sourcePath);
+        _dllName = EditorGUILayout.TextField("DLL Name", _dllName);
         _asset = EditorGUILayout.ObjectField("ReferenceFixerAsset", _asset, typeof(QuickReferenceFixerAsset), true) as QuickReferenceFixerAsset;
 
         if (GUILayout.Button("Save References"))
@@ -173,7 +177,7 @@ public class QuickReferenceFixer : EditorWindow {
         if (!_asset) _asset = QuickReferenceFixerAssetCreator.CreateAsset(GetDefaultAssetPath());
         _asset.Clear();
 
-        string[] scripts = AssetDatabase.FindAssets("t:script", new string[] { GetPathRoot() });
+        string[] scripts = AssetDatabase.FindAssets("t:script", new string[] { _sourcePath });
         foreach (string s in scripts)
         {
             string path = AssetDatabase.GUIDToAssetPath(s);
