@@ -42,7 +42,7 @@ namespace QuickVR
             
             //Configure the default buttons
             ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CONTINUE, ButtonCode.Left.ToString());
-            ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CANCEL, ButtonCode.Right.ToString());
+            //ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CANCEL, ButtonCode.Right.ToString());
             ConfigureDefaultButton(InputManager.DEFAULT_BUTTON_CALIBRATE, ButtonCode.Middle.ToString());
         }
 
