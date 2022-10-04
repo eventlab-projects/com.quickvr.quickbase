@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
+using TMPro;
 
 namespace QuickVR
 {
@@ -26,7 +26,7 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected Text _hint = null;
+        protected TextMeshProUGUI _hint = null;
 
         #endregion
 
@@ -65,14 +65,14 @@ namespace QuickVR
 
             _hint = CreateHint();
 
-            _instructions.alignment = TMPro.TextAlignmentOptions.Center;
+            _instructions.alignment = TextAlignmentOptions.Center;
             _instructions.fontSize = 30;
             //_instructions.fontSize = 2;
         }
 
-        protected virtual Text CreateHint()
+        protected virtual TextMeshProUGUI CreateHint()
         {
-            Text result = transform.CreateChild(NAME_HINT_TRANSFORM).GetOrCreateComponent<Text>();
+            TextMeshProUGUI result = transform.CreateChild(NAME_HINT_TRANSFORM).GetOrCreateComponent<TextMeshProUGUI>();
             RectTransform t = result.GetComponent<RectTransform>();
             t.sizeDelta = new Vector2(30, 6);
             t.anchorMin = new Vector2(0.5f, 1.0f);
@@ -82,10 +82,8 @@ namespace QuickVR
             t.anchoredPosition3D = new Vector3(0, -2.5f, 0);
             t.localScale = Vector3.one * 0.125f;
 
-            result.font = Resources.Load<Font>("Fonts/arial");
             result.fontSize = 1;
-            result.alignment = TextAnchor.UpperCenter;
-            result.material = Instantiate(Resources.Load<Material>("Materials/GUIText"));
+            result.alignment = TextAlignmentOptions.Top;
 
             return result;
         }

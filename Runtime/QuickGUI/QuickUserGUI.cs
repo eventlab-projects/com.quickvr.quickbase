@@ -121,10 +121,6 @@ namespace QuickVR
                 t.pivot = new Vector2(0.5f, 1.0f);
 
                 t.localScale = Vector3.one * (1.0f / sf);
-
-                //result.font = Resources.Load<Font>("Fonts/arial");
-                //result.fontSize = 1;
-                //result.material = Instantiate(Resources.Load<Material>("Materials/GUIText"));
             }
 
             return result;
