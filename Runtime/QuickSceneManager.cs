@@ -231,7 +231,14 @@ namespace QuickVR
 
                 if (Application.CanStreamedLevelBeLoaded(sceneName))
                 {
-                    yield return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+                    if (isAsync)
+                    {
+                        yield return SceneManager.LoadSceneAsync(sceneName, LoadSceneMode.Additive);
+                    }
+                    else
+                    {
+                        SceneManager.LoadScene(sceneName, LoadSceneMode.Additive);
+                    }
                 }
                 else
                 {
