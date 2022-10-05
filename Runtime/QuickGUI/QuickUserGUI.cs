@@ -15,6 +15,7 @@ namespace QuickVR
         public const string MAT_PARAM_GUI_ZTEST_MODE = "unity_GUIZTestMode";
 
         protected const string NAME_INSTRUCTIONS_TRANSFORM = "__Instructions__";
+        protected const string TEXT_SHADER_NAME = "TextMeshPro/Mobile/Distance Field Overlay";
 
         #endregion
 
@@ -55,6 +56,10 @@ namespace QuickVR
         protected virtual void Start()
         {
             _textMeshes = GetComponentsInChildren<TextMeshProUGUI>(true);
+            foreach (TextMeshProUGUI t in _textMeshes)
+            {
+                t.materialForRendering.shader = Shader.Find(TEXT_SHADER_NAME);
+            }
         }
 
         protected static void RegisterGUI(QuickUserGUI userGUI)
@@ -195,7 +200,7 @@ namespace QuickVR
 
         protected virtual void ActionPostCameraUpdate()
         {
-            UpdateZTestMode();
+            //UpdateZTestMode();
 
             if (_followCamera)
             {
@@ -206,23 +211,24 @@ namespace QuickVR
             }
         }
 
-        protected virtual void UpdateZTestMode()
-        {
-            int zTestValue = (int)UnityEngine.Rendering.CompareFunction.Always;
+        //protected virtual void UpdateZTestMode()
+        //{
+        //    int zTestValue = (int)UnityEngine.Rendering.CompareFunction.Always;
 
-            foreach (TextMeshProUGUI t in _textMeshes)
-            {
-                Material mat = t.materialForRendering;
-                if (mat)
-                {
-                    mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Overlay;
-                    if (mat.HasProperty(MAT_PARAM_GUI_ZTEST_MODE) && mat.GetInt(MAT_PARAM_GUI_ZTEST_MODE) != zTestValue)
-                    {
-                        mat.SetInt(MAT_PARAM_GUI_ZTEST_MODE, zTestValue);
-                    }
-                }
-            }
-        }
+        //    foreach (TextMeshProUGUI t in _textMeshes)
+        //    {
+        //        Material mat = t.materialForRendering;
+        //        if (mat)
+        //        {
+        //            mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Overlay;
+        //            Debug.Log(mat.HasProperty(MAT_PARAM_GUI_ZTEST_MODE));
+        //            if (mat.HasProperty(MAT_PARAM_GUI_ZTEST_MODE) && mat.GetInt(MAT_PARAM_GUI_ZTEST_MODE) != zTestValue)
+        //            {
+        //                mat.SetInt(MAT_PARAM_GUI_ZTEST_MODE, zTestValue);
+        //            }
+        //        }
+        //    }
+        //}
 
         #endregion
 

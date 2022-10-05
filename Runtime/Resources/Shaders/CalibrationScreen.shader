@@ -25,7 +25,9 @@ Shader "QuickVR/CalibrationScreen" {
 			CGPROGRAM
 				#pragma vertex vert
 				#pragma fragment frag
-					
+				
+				#include "UnityCG.cginc"
+
 				///////////////////////////////////////////////////
 				// UNIFORMS
 				///////////////////////////////////////////////////
@@ -35,11 +37,15 @@ Shader "QuickVR/CalibrationScreen" {
 				struct a2v {
 				    float4 position : POSITION;	
 				    float2 uv 		: TEXCOORD0;
+
+					UNITY_VERTEX_INPUT_INSTANCE_ID
 				};
 
 				struct v2f {
 				    float4 position : POSITION;
 				    float2 uv 		: TEXCOORD0;
+
+					UNITY_VERTEX_OUTPUT_STEREO
 				};
 
 				///////////////////////////////////////////////////
@@ -47,6 +53,11 @@ Shader "QuickVR/CalibrationScreen" {
 				///////////////////////////////////////////////////
 				v2f vert(a2v IN){
 				    v2f OUT;
+
+					UNITY_SETUP_INSTANCE_ID(IN); //Insert
+					UNITY_INITIALIZE_OUTPUT(v2f, OUT); //Insert
+					UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(OUT); //Insert
+
 				    OUT.position = UnityObjectToClipPos(IN.position);
 				    OUT.uv = float2(IN.uv.x, 1.0 - IN.uv.y);
 				    return OUT;
