@@ -50,7 +50,10 @@ namespace QuickVR
             RegisterGUI(this);
 
             Reset();
+        }
 
+        protected virtual void Start()
+        {
             _textMeshes = GetComponentsInChildren<TextMeshProUGUI>(true);
         }
 
@@ -210,9 +213,13 @@ namespace QuickVR
             foreach (TextMeshProUGUI t in _textMeshes)
             {
                 Material mat = t.materialForRendering;
-                if (mat && mat.HasProperty(MAT_PARAM_GUI_ZTEST_MODE) && mat.GetInt(MAT_PARAM_GUI_ZTEST_MODE) != zTestValue)
+                if (mat)
                 {
-                    mat.SetInt(MAT_PARAM_GUI_ZTEST_MODE, zTestValue);
+                    mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Overlay;
+                    if (mat.HasProperty(MAT_PARAM_GUI_ZTEST_MODE) && mat.GetInt(MAT_PARAM_GUI_ZTEST_MODE) != zTestValue)
+                    {
+                        mat.SetInt(MAT_PARAM_GUI_ZTEST_MODE, zTestValue);
+                    }
                 }
             }
         }
