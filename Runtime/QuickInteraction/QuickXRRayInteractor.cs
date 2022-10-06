@@ -18,23 +18,26 @@ namespace QuickVR
 
         #region GET AND SET
         
-        public override void GetValidTargets(List<XRBaseInteractable> validTargets)
+        public override void GetValidTargets(List<IXRInteractable> validTargets)
         {
             base.GetValidTargets(validTargets);
 
             //Discard those elements that does not match the interaction type
             for (int i = validTargets.Count - 1; i >= 0; i--)
             {
-                XRBaseInteractable t = validTargets[i];
+                IXRInteractable t = validTargets[i];
                 if (
+                    //The interactable is not a component
+                    t.transform == null ||
+
                     //The Grab ray only interacts with XRGrabInteractables and XRSimpleInteractables
-                    _interactionType == InteractorType.Grab && (!t.GetComponent<XRGrabInteractable>() && !t.GetComponent<XRSimpleInteractable>()) ||
+                    _interactionType == InteractorType.Grab && (!t.transform.GetComponent<XRGrabInteractable>() && !t.transform.GetComponent<XRSimpleInteractable>()) ||
 
                     //The Teleport ray only interacts with BaseTeleportationInteractables.
-                    _interactionType == InteractorType.Teleport && !t.GetComponent<BaseTeleportationInteractable>() ||
+                    _interactionType == InteractorType.Teleport && !t.transform.GetComponent<BaseTeleportationInteractable>() ||
 
                     //The UI ray only interacts with objects in the UILayer. 
-                    _interactionType == InteractorType.UI && t.gameObject.layer != LayerMask.NameToLayer("UI")
+                    _interactionType == InteractorType.UI && t.transform.gameObject.layer != LayerMask.NameToLayer("UI")
                     )
                 {
                     validTargets.RemoveAt(i);
