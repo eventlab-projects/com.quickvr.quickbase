@@ -56,10 +56,6 @@ namespace QuickVR
         protected virtual void Start()
         {
             _textMeshes = GetComponentsInChildren<TextMeshProUGUI>(true);
-            foreach (TextMeshProUGUI t in _textMeshes)
-            {
-                t.materialForRendering.shader = Shader.Find(TEXT_SHADER_NAME);
-            }
         }
 
         protected static void RegisterGUI(QuickUserGUI userGUI)
@@ -200,7 +196,7 @@ namespace QuickVR
 
         protected virtual void ActionPostCameraUpdate()
         {
-            //UpdateZTestMode();
+            UpdateZTestMode();
 
             if (_followCamera)
             {
@@ -211,24 +207,31 @@ namespace QuickVR
             }
         }
 
-        //protected virtual void UpdateZTestMode()
-        //{
-        //    int zTestValue = (int)UnityEngine.Rendering.CompareFunction.Always;
+        protected virtual void UpdateZTestMode()
+        {
+            //int zTestValue = (int)UnityEngine.Rendering.CompareFunction.Always;
 
-        //    foreach (TextMeshProUGUI t in _textMeshes)
-        //    {
-        //        Material mat = t.materialForRendering;
-        //        if (mat)
-        //        {
-        //            mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Overlay;
-        //            Debug.Log(mat.HasProperty(MAT_PARAM_GUI_ZTEST_MODE));
-        //            if (mat.HasProperty(MAT_PARAM_GUI_ZTEST_MODE) && mat.GetInt(MAT_PARAM_GUI_ZTEST_MODE) != zTestValue)
-        //            {
-        //                mat.SetInt(MAT_PARAM_GUI_ZTEST_MODE, zTestValue);
-        //            }
-        //        }
-        //    }
-        //}
+            if (_textMeshes != null)
+            {
+                foreach (TextMeshProUGUI t in _textMeshes)
+                {
+                    if (t.materialForRendering)
+                    {
+                        if (t.materialForRendering.shader.name != TEXT_SHADER_NAME)
+                        {
+                            t.materialForRendering.shader = Shader.Find(TEXT_SHADER_NAME);
+                        }
+                        //mat.renderQueue = (int)UnityEngine.Rendering.RenderQueue.Overlay;
+                        //Debug.Log(mat.HasProperty(MAT_PARAM_GUI_ZTEST_MODE));
+                        //if (mat.HasProperty(MAT_PARAM_GUI_ZTEST_MODE) && mat.GetInt(MAT_PARAM_GUI_ZTEST_MODE) != zTestValue)
+                        //{
+                        //    mat.SetInt(MAT_PARAM_GUI_ZTEST_MODE, zTestValue);
+                        //}
+                    }
+                }
+            }
+            
+        }
 
         #endregion
 
