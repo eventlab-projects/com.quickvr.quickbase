@@ -35,6 +35,18 @@ namespace QuickVR
     public class InputManager : MonoBehaviour
     {
 
+        #region PUBLIC ATTRIBUTES
+
+        public enum VirtualButtonState
+        {
+            Idle,
+            Triggered,
+            Pressed,
+            Released,
+        }
+
+        #endregion
+
         #region PROTECTED PARAMETERS
 
         protected static InputActionMap _actionMapDefault = null;
@@ -55,14 +67,6 @@ namespace QuickVR
 
         protected List<List<InputMap>> _validAxesMapping = new List<List<InputMap>>();
         protected List<List<InputMap>> _validButtonsMapping = new List<List<InputMap>>();
-
-        protected enum VirtualButtonState
-        {
-            Idle,
-            Triggered, 
-            Pressed,
-            Released,
-        }
 
         protected List<BaseInputManager> _inputManagers = new List<BaseInputManager>();
 
@@ -338,6 +342,36 @@ namespace QuickVR
 
         #region GET AND SET
 
+        public static VirtualButtonState GetNextState(VirtualButtonState currentState, bool isPressed)
+        {
+            VirtualButtonState result = VirtualButtonState.Idle;
+
+            if (isPressed)
+            {
+                if (currentState == VirtualButtonState.Idle)
+                {
+                    result = VirtualButtonState.Triggered;
+                }
+                else if (currentState == VirtualButtonState.Triggered || currentState == VirtualButtonState.Pressed)
+                {
+                    result = VirtualButtonState.Pressed;
+                }
+            }
+            else
+            {
+                if (currentState == VirtualButtonState.Triggered || currentState == VirtualButtonState.Pressed)
+                {
+                    result = VirtualButtonState.Released;
+                }
+                else if (currentState == VirtualButtonState.Released)
+                {
+                    result = VirtualButtonState.Idle;
+                }
+            }
+
+            return result;
+        }
+
         public virtual int ToAxisID(string virtualAxisName)
         {
             int id = 0;
@@ -539,29 +573,7 @@ namespace QuickVR
                     bPressed = iMap._inputManager.GetButton(iMap._inputCode);
                 }
 
-                VirtualButtonState currentState = _virtualButtonsState[vButtonName];
-                if (bPressed)
-                {
-                    if (currentState == VirtualButtonState.Idle)
-                    {
-                        _virtualButtonsState[vButtonName] = VirtualButtonState.Triggered;
-                    }
-                    else if (currentState == VirtualButtonState.Triggered)
-                    {
-                        _virtualButtonsState[vButtonName] = VirtualButtonState.Pressed;
-                    }
-                }
-                else
-                {
-                    if (currentState == VirtualButtonState.Triggered || currentState == VirtualButtonState.Pressed)
-                    {
-                        _virtualButtonsState[vButtonName] = VirtualButtonState.Released;
-                    }
-                    else if (currentState == VirtualButtonState.Released)
-                    {
-                        _virtualButtonsState[vButtonName] = VirtualButtonState.Idle;
-                    }
-                }
+                _virtualButtonsState[vButtonName] = GetNextState(_virtualButtonsState[vButtonName], bPressed);
             }
         }
 

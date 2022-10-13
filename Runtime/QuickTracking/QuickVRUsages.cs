@@ -8,6 +8,8 @@ namespace QuickVR
 {
     public static class QuickVRUsages
     {
+        public static InputFeatureUsage<bool> triggerTouch = new InputFeatureUsage<bool>("IndexTouch");
+
         public static InputFeatureUsage<Vector3> pointerPosition = new InputFeatureUsage<Vector3>("PointerPosition");
         public static InputFeatureUsage<Quaternion> pointerRotation = new InputFeatureUsage<Quaternion>("PointerRotation");
 
