@@ -133,11 +133,24 @@ namespace QuickVR
 
         private static InputDevice GetXRController(AxisCode axis)
         {
+            if (QuickVRPlayArea._instance)
+            {
+                QuickVRNode vrNode = QuickVRPlayArea._instance.GetVRNode(axis <= AxisCode.LeftGrip ? HumanBodyBones.LeftHand : HumanBodyBones.RightHand);
+
+                return vrNode._inputDevice;
+            }
+
             return InputDevices.GetDeviceAtXRNode(axis <= AxisCode.LeftGrip ? XRNode.LeftHand : XRNode.RightHand);
         }
 
         private static InputDevice GetXRController(ButtonCodes key)
         {
+            if (QuickVRPlayArea._instance)
+            {
+                QuickVRNode vrNode = QuickVRPlayArea._instance.GetVRNode(key <= ButtonCodes.LeftGripTouch ? HumanBodyBones.LeftHand : HumanBodyBones.RightHand);
+                return vrNode._inputDevice;
+            }
+
             return InputDevices.GetDeviceAtXRNode(key <= ButtonCodes.LeftGripTouch ? XRNode.LeftHand : XRNode.RightHand);
         }
 

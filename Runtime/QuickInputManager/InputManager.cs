@@ -97,32 +97,6 @@ namespace QuickVR
         }
         protected static InputActionAsset m_InputActionsDefault = null;
 
-        protected XRController _xrControllerLeft
-        {
-            get
-            {
-                if (m_XRControllerLeft == null)
-                {
-                    m_XRControllerLeft = XRController.leftHand;
-                }
-                return m_XRControllerLeft;
-            }
-        }
-        protected XRController m_XRControllerLeft = null;
-
-        protected XRController _xrControllerRight
-        {
-            get
-            {
-                if (m_XRControllerRight == null)
-                {
-                    m_XRControllerRight = XRController.rightHand;
-                }
-                return m_XRControllerRight;
-            }
-        }
-        protected XRController m_XRControllerRight = null;
-
         #endregion
 
         #region CONSTANTS
@@ -309,33 +283,6 @@ namespace QuickVR
             }
 
             return iManager;
-        }
-
-        protected virtual void OnEnable()
-        {
-            QuickVRManager.OnPostCalibrate += CheckHandsSwapped;
-        }
-
-        protected virtual void OnDisable()
-        {
-            QuickVRManager.OnPostCalibrate -= CheckHandsSwapped;
-        }
-
-        protected virtual void CheckHandsSwapped()
-        {
-            if (_xrControllerLeft != null && _xrControllerRight != null)
-            {
-                if (QuickSingletonManager.GetInstance<QuickVRPlayArea>().IsHandsSwapped())
-                {
-                    InputSystem.SetDeviceUsage(_xrControllerLeft, CommonUsages.RightHand);
-                    InputSystem.SetDeviceUsage(_xrControllerRight, CommonUsages.LeftHand);
-                }
-                else
-                {
-                    InputSystem.SetDeviceUsage(_xrControllerLeft, CommonUsages.LeftHand);
-                    InputSystem.SetDeviceUsage(_xrControllerRight, CommonUsages.RightHand);
-                }
-            }
         }
 
         #endregion

@@ -30,8 +30,6 @@ namespace QuickVR
         public bool _useFootprints = true;
         public bool _isSitting = false;
 
-        public static bool _handsSwaped = false;
-
         public enum ControlType
         {
             Tracking,

@@ -11,6 +11,8 @@ namespace QuickVR
 
         #region PUBLIC ATTRIBUTES
 
+        public static QuickVRPlayArea _instance = null;
+
         public Transform _origin
         {
             get 
@@ -32,8 +34,6 @@ namespace QuickVR
 
         protected Dictionary<QuickHumanBodyBones, QuickVRNode> _vrNodes = new Dictionary<QuickHumanBodyBones, QuickVRNode>();
 
-        protected bool _isHandsSwaped = false;
-
         protected Vector3 _customUserForward = Vector3.zero;  //A custom user forward provided by the application. 
 
         protected Dictionary<HumanBodyBones, float> _fingerLength = new Dictionary<HumanBodyBones, float>();
@@ -44,6 +44,8 @@ namespace QuickVR
 
         protected virtual void Awake()
         {
+            _instance = this;
+
             foreach (QuickHumanBodyBones role in QuickVRNode.GetTypeList())
             {
                 CreateVRNode(role);
@@ -191,7 +193,6 @@ namespace QuickVR
             //6     ->  Head + Hands + Hips + Feet
             //10    ->  Head + Hands + Hips + Feet + Elbows + Knees
 
-            _isHandsSwaped = false;
             List<InputDevice> bodyTrackers = GetBodyTrackers();
             int numTrackers = bodyTrackers.Count;
             QuickVRManager.Log("NUM BODY TRACKERS = " + numTrackers);
@@ -259,8 +260,8 @@ namespace QuickVR
             }
 
             UpdateVRNodes();
-            _isHandsSwaped = IsVRNodesSwaped(HumanBodyBones.LeftHand, HumanBodyBones.RightHand);
-            QuickVRManager.Log("handsSwaped = " + _isHandsSwaped);
+            bool isHandsSwapped = IsVRNodesSwaped(HumanBodyBones.LeftHand, HumanBodyBones.RightHand);
+            QuickVRManager.Log("handsSwaped = " + isHandsSwapped);
 
             foreach (HumanBodyBones t in QuickVRNode.GetTypeList())
             {
@@ -315,11 +316,6 @@ namespace QuickVR
         protected virtual void InitVRNode(HumanBodyBones nodeType, XRNodeState initialState)
         {
             
-        }
-
-        public virtual bool IsHandsSwapped()
-        {
-            return _isHandsSwaped;
         }
 
         public virtual bool IsVRNodesSwaped(HumanBodyBones typeNodeLeft, HumanBodyBones typeNodeRight, bool doSwaping = true)
