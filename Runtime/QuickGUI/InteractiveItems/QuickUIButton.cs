@@ -11,6 +11,8 @@ namespace QuickVR
 
         #region PUBLIC ATTRIBUTES
 
+        public Material _buttonBGMaterial = null;
+        
         public Color _colorNormal = Color.white;
         public Color _colorSelected = Color.cyan;
 
@@ -21,20 +23,6 @@ namespace QuickVR
         protected Image _buttonBG = null;
         protected TextMeshProUGUI _label = null;
 
-        protected static Material _buttonBGMaterial
-        {
-            get
-            {
-                if (!m_ButtonBGMaterial)
-                {
-                    m_ButtonBGMaterial = Resources.Load<Material>("Materials/GUIText");
-                }
-
-                return m_ButtonBGMaterial;
-            }
-        }
-        protected static Material m_ButtonBGMaterial = null;
-
         #endregion
 
         #region CREATION AND DESTRUCTION
@@ -42,6 +30,10 @@ namespace QuickVR
         protected virtual void Awake()
         {
             _buttonBG = gameObject.GetOrCreateComponent<Image>();
+            if (!_buttonBGMaterial)
+            {
+                _buttonBGMaterial = Resources.Load<Material>("GUIText");
+            }
             _buttonBG.material = new Material(_buttonBGMaterial);
             _buttonBG.color = _colorNormal;
         }

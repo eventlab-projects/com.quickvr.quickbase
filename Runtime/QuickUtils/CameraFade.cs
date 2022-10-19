@@ -14,6 +14,12 @@ namespace QuickVR
     public class CameraFade : MonoBehaviour
     {
 
+        #region PUBLIC ATTRIBUTES
+
+        public Shader _fadeShader = null;
+
+        #endregion
+
         #region PROTECTED PARAMETERS
 
         protected bool _isFading = false;
@@ -35,7 +41,11 @@ namespace QuickVR
             r.shadowCastingMode = ShadowCastingMode.Off;
             r.receiveShadows = false;
 
-            _material = new Material(Shader.Find("QuickVR/CalibrationScreen"));
+            if (!_fadeShader)
+            {
+                _fadeShader = Shader.Find("QuickVR/CalibrationScreen");
+            }
+            _material = new Material(_fadeShader);
             r.material = _material;
 
             gameObject.layer = LayerMask.NameToLayer("UI");
