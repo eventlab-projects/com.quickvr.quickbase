@@ -171,6 +171,7 @@ namespace QuickVR
             base.Awake();
 
             _animator.applyRootMotion = false;
+            _animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
 
             _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
             //_vrPlayArea.transform.parent = transform;

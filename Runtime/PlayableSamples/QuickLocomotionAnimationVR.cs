@@ -35,21 +35,30 @@ namespace QuickVR
         {
             base.OnEnable();
 
-            QuickVRManager.OnPreCopyPose += UpdateFeetIKTargets;
-            QuickVRManager.OnPostCopyPose += UpdateFeetIKSolvers;
+            QuickVRManager.OnPostUpdateIKTargets += UpdateFeetIKTargets;
         }
 
         protected override void OnDisable()
         {
             base.OnDisable();
 
-            QuickVRManager.OnPreCopyPose -= UpdateFeetIKTargets;
-            QuickVRManager.OnPostCopyPose -= UpdateFeetIKSolvers;
+            QuickVRManager.OnPostUpdateIKTargets -= UpdateFeetIKTargets;
         }
 
         #endregion
 
         #region UPDATE
+
+        protected override void UpdateFootIKTarget(bool isLeft)
+        {
+            base.UpdateFootIKTarget(isLeft);
+
+            QuickIKSolver ikSolver = _ikManager.GetIKSolver(isLeft ? HumanBodyBones.LeftFoot : HumanBodyBones.RightFoot);
+            QuickIKManager ikManagerSrc = QuickSingletonManager.GetInstance<QuickVRManager>().GetAnimatorSource().GetComponent<QuickIKManager>();
+            QuickIKSolver ikSolverSrc = ikManagerSrc.GetIKSolver(isLeft ? HumanBodyBones.LeftFoot : HumanBodyBones.RightFoot);
+            ikSolverSrc._targetLimb.localPosition = ikSolver._targetLimb.localPosition;
+            ikSolverSrc._targetLimb.localRotation = ikSolver._targetLimb.localRotation;
+        }
 
         protected override void Update()
         {
