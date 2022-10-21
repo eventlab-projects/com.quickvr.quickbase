@@ -155,7 +155,20 @@ namespace QuickVR
             TeleportationProvider result = CreateLocomotionProvider<TeleportationProvider>();
             _locomotionProviders[DefaultLocomotionProvider.Teleport] = result;
 
+            result.beginLocomotion += BeginLocomotionTeleport;
+            result.endLocomotion += EndLocomotionTeleport;
+
             return result;
+        }
+
+        protected virtual void BeginLocomotionTeleport(LocomotionSystem obj)
+        {
+            _characterController.enabled = false;
+        }
+
+        protected virtual void EndLocomotionTeleport(LocomotionSystem obj)
+        {
+            _characterController.enabled = true;
         }
 
         protected virtual ActionBasedContinuousMoveProvider CreateLocomotionProviderContinuousMove()

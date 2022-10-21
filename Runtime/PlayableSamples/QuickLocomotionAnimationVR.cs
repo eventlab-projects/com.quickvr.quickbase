@@ -38,9 +38,9 @@ namespace QuickVR
             QuickVRManager.OnPostUpdateIKTargets += UpdateFeetIKTargets;
         }
 
-        protected override void OnDisable()
+        protected virtual void OnDisable()
         {
-            base.OnDisable();
+            //base.OnDisable();
 
             QuickVRManager.OnPostUpdateIKTargets -= UpdateFeetIKTargets;
         }

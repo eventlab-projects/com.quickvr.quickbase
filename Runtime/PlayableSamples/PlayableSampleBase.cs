@@ -33,7 +33,7 @@ public class PlayableSampleBase : MonoBehaviour
         }
     }
 
-    protected virtual void OnDisable()
+    protected virtual void OnDestroy()
     {
         // Destroys all Playables and Outputs created by the graph.
         if (_playableGraph.IsValid())
