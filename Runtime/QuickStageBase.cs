@@ -62,14 +62,14 @@ namespace QuickVR {
         {
             _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
             _instructionsManager = QuickSingletonManager.GetInstance<QuickInstructionsManager>();
+            _interactionManager = QuickSingletonManager.GetInstance<QuickVRInteractionManager>();
             _coManager = QuickSingletonManager.GetInstance<QuickCoroutineManager>();
         }
 
 		protected virtual void Start()
         {
             _gameManager = QuickBaseGameManager._instance;
-            _interactionManager = QuickSingletonManager.GetInstance<QuickVRInteractionManager>();
-
+            
             enabled = false;
 		}
 

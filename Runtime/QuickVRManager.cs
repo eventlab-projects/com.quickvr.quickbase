@@ -415,7 +415,7 @@ namespace QuickVR
 
             //Update the Camera position
             if (OnPreCameraUpdate != null) OnPreCameraUpdate();
-            _cameraController.UpdateCameraPosition(_animatorTarget);
+            _cameraController.UpdateCameraPosition();
             if (OnPostCameraUpdate != null) OnPostCameraUpdate();
         }
 
