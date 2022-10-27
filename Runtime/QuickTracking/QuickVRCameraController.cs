@@ -22,20 +22,10 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected Animator _animatorSource = null;
+        protected Animator _animator = null;
         
-        protected Transform _head
-        {
-            get
-            {
-                return _animatorSource.GetBoneTransform(HumanBodyBones.Head);
-            }
-        }
-
         protected static Camera _camera = null;
         
-        protected Quaternion _initialLocalRotationHead = Quaternion.identity;
-
         #endregion
 
         #region CONSTANTS
@@ -68,9 +58,28 @@ namespace QuickVR
             }
         }
 
+        protected virtual void OnEnable()
+        {
+            QuickVRManager.OnTargetAnimatorSet += OnNewTargetAnimatorSet;
+        }
+
+        protected virtual void OnDistable()
+        {
+            QuickVRManager.OnTargetAnimatorSet -= OnNewTargetAnimatorSet;
+        }
+
         #endregion
 
         #region GET AND SET
+
+        protected virtual void OnNewTargetAnimatorSet(Animator animator)
+        {
+            transform.parent = animator.transform;
+            transform.localPosition = Vector3.zero;
+            transform.localRotation = Quaternion.identity;
+
+            _animator = animator;
+        }
 
         public static Camera GetCamera()
         {
@@ -81,7 +90,7 @@ namespace QuickVR
 
         #region UPDATE
 
-        public virtual void UpdateCameraPosition(Animator animator)
+        public virtual void UpdateCameraPosition()
         {
             foreach (Camera cam in Camera.allCameras)
             {
@@ -92,18 +101,12 @@ namespace QuickVR
 
             UpdateCameraRotation();
             
-            if (animator)
+            if (_animator)
             {
-                Transform tEyeCenter = animator.GetEyeCenterVR();
-                if (transform.parent != animator.transform)
-                {
-                    transform.parent = animator.transform;
-                    transform.localPosition = Vector3.zero;
-                    transform.localRotation = Quaternion.identity;
-                }
-
+                Transform tEyeCenter = _animator.GetEyeCenterVR();
+                
                 //Apply the correct rotation to the cameracontrollerroot:
-                Vector3 up = animator.transform.up;
+                Vector3 up = _animator.transform.up;
                 Vector3 rightCam = Vector3.ProjectOnPlane(_camera.transform.right, up);
                 Vector3 rightHead = Vector3.ProjectOnPlane(tEyeCenter.right, up);
 
