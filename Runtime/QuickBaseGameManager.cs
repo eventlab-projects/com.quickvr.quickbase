@@ -167,7 +167,7 @@ namespace QuickVR {
         protected virtual void Awake() 
         {
             PushGameManager(this);
-
+            
             Reset();
 
             _guiCalibration = QuickSingletonManager.GetInstance<QuickUserGUICalibration>();
@@ -182,6 +182,7 @@ namespace QuickVR {
 
         protected virtual void Start()
         {
+            QuickSingletonManager.GetInstance<QuickSceneManager>().SetLogicScene(gameObject.scene);
             StartPlayer();
 
             if (_hTracking)

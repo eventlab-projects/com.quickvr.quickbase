@@ -39,7 +39,6 @@ namespace QuickVR
         }
 
 
-        protected bool _isActivatingScene = false;
         protected Scene _logicScene;
 
         #endregion
@@ -61,11 +60,6 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
-
-        public virtual bool IsActivatingScene()
-        {
-            return _isActivatingScene;
-        }
 
         public virtual SceneState? GetSceneState(string sceneName)
         {
@@ -114,9 +108,16 @@ namespace QuickVR
             _loadedScenes[sceneName]._state = newState;
         }
 
-        public virtual bool IsValidScene(string sceneName)
+        public virtual bool IsSceneValid(string sceneName)
         {
             return SceneManager.GetSceneByName(sceneName).IsValid();
+        }
+
+        public virtual bool IsSceneLoaded(string sceneName)
+        {
+            SceneState? sState = GetSceneState(sceneName);
+
+            return sState.HasValue ? sState == SceneState.Loaded : false;
         }
 
         public virtual void PreLoadSceneAdditive(string sceneName)
@@ -155,18 +156,6 @@ namespace QuickVR
             }
         }
 
-        public virtual void ActivateScene(string sceneName, bool disableCameras = true)
-        {
-            if (!_loadedScenes.TryGetValue(sceneName, out SceneData sceneData) || sceneData._state != SceneState.Unloading)
-            {
-                StartCoroutine(CoActivateScene(sceneName, disableCameras));
-            }
-            else
-            {
-                QuickVRManager.LogWarning(sceneName + " cannot be the Active scene because it is " + SceneState.Unloading);
-            }
-        }
-
         public virtual void UnloadScenes(string[] sceneNames)
         {
             foreach (string s in sceneNames)
@@ -197,6 +186,18 @@ namespace QuickVR
             return SceneManager.GetActiveScene();
         }
 
+        public virtual void ActivateScene(string sceneName, bool disableCameras = true)
+        {
+            if (!_loadedScenes.TryGetValue(sceneName, out SceneData sceneData) || sceneData._state != SceneState.Unloading)
+            {
+                StartCoroutine(CoActivateScene(sceneName, disableCameras));
+            }
+            else
+            {
+                QuickVRManager.LogWarning(sceneName + " cannot be the Active scene because it is " + SceneState.Unloading);
+            }
+        }
+
         public virtual Scene GetLogicScene()
         {
             return _logicScene;
@@ -204,11 +205,19 @@ namespace QuickVR
 
         public virtual void SetLogicScene(string sceneName)
         {
-            Scene sc = GetSceneByName(sceneName);
-            if (sc.IsValid())
+            if (!_loadedScenes.TryGetValue(sceneName, out SceneData sceneData) || sceneData._state != SceneState.Unloading)
             {
-                _logicScene = sc;
+                StartCoroutine(CoSetLogicScene(sceneName));
             }
+            else
+            {
+                QuickVRManager.LogWarning(sceneName + " cannot be the Logic scene because it is " + SceneState.Unloading);
+            }
+        }
+
+        public virtual void SetLogicScene(Scene scene)
+        {
+            SetLogicScene(scene.name);
         }
 
         #endregion
@@ -261,10 +270,8 @@ namespace QuickVR
             SetSceneState(sceneName, allowSceneActivation ? SceneState.Loaded : SceneState.Preloaded);
         }
 
-        protected virtual IEnumerator CoActivateScene(string sceneName, bool disableCameras)
+        protected virtual IEnumerator CoWaitForSceneLoaded(string sceneName)
         {
-            _isActivatingScene = true;
-
             //Ensure that we are activating a loaded scene
             if (!_loadedScenes.ContainsKey(sceneName))
             {
@@ -278,6 +285,18 @@ namespace QuickVR
                 yield return null;
             }
             SetSceneState(sceneName, SceneState.Loaded);
+        }
+
+        protected virtual IEnumerator CoSetLogicScene(string sceneName)
+        {
+            yield return StartCoroutine(CoWaitForSceneLoaded(sceneName));
+
+            _logicScene = GetSceneByName(sceneName);
+        }
+
+        protected virtual IEnumerator CoActivateScene(string sceneName, bool disableCameras)
+        {
+            yield return StartCoroutine(CoWaitForSceneLoaded(sceneName));
 
             //At this point, the scene is loaded. Activate it. 
             Scene scene = GetSceneByName(sceneName);
@@ -295,8 +314,6 @@ namespace QuickVR
                     }
                 }
             }
-
-            _isActivatingScene = false;
         }
 
         protected virtual IEnumerator CoUnloadScene(Scene scene)

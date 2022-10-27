@@ -28,6 +28,7 @@ namespace QuickVR {
         protected QuickVRManager _vrManager = null;
         protected QuickVRInteractionManager _interactionManager = null;
         protected QuickInstructionsManager _instructionsManager = null;
+        protected QuickSceneManager _sceneManager = null;
 
         protected QuickBaseGameManager _gameManager = null;
 
@@ -35,6 +36,8 @@ namespace QuickVR {
 
         protected QuickCoroutineManager _coManager = null;
         protected int _coSet = -1;
+
+        protected bool _finishing = false;
 
         #endregion
 
@@ -61,14 +64,15 @@ namespace QuickVR {
         protected virtual void Awake() 
         {
             _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
+            _interactionManager = QuickSingletonManager.GetInstance<QuickVRInteractionManager>();
             _instructionsManager = QuickSingletonManager.GetInstance<QuickInstructionsManager>();
             _coManager = QuickSingletonManager.GetInstance<QuickCoroutineManager>();
+            _sceneManager = QuickSingletonManager.GetInstance<QuickSceneManager>();
         }
 
 		protected virtual void Start()
         {
             _gameManager = QuickBaseGameManager._instance;
-            _interactionManager = QuickSingletonManager.GetInstance<QuickVRInteractionManager>();
 
             enabled = false;
 		}
@@ -76,7 +80,7 @@ namespace QuickVR {
 		public virtual void Init()
         {
             PushStage(this);
-
+            
             enabled = true;
 
             _timeStart = Time.time;
@@ -125,6 +129,11 @@ namespace QuickVR {
 
 		public virtual void Finish() 
         {
+            _finishing = true;
+		}
+
+        protected virtual void UpdateStateFinishing()
+        {
             PopStage();
 
             _instructionsManager.Stop();
@@ -153,9 +162,9 @@ namespace QuickVR {
             {
                 nextStage.Init();
             }
-            
-			enabled = false;
-		}
+
+            enabled = false;
+        }
 
 		#endregion
 
@@ -167,6 +176,11 @@ namespace QuickVR {
 			{
 				Finish();
 			}
+            if (_finishing && _sceneManager.GetLogicScene() == gameObject.scene)
+            {
+                UpdateStateFinishing();
+                _finishing = false;
+            }
 		}
 
         private IEnumerator CoUpdateBase()

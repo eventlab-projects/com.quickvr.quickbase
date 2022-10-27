@@ -38,19 +38,12 @@ namespace QuickVR
 
         #endregion
 
-        #region PROTECTED PARAMETERS
-
-        protected QuickSceneManager _sceneManager = null;
-
-        #endregion
-
         #region CREATION AND DESTRUCTION
 
         protected override void Awake()
         {
             base.Awake();
 
-            _sceneManager = QuickSingletonManager.GetInstance<QuickSceneManager>();
             _avoidable = false;
         }
 
