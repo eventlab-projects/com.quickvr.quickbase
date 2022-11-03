@@ -45,17 +45,38 @@ namespace QuickVR
 
         #region CREATION AND DESTRUCTION
 
-        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
         protected static void Init()
         {
-            for (int i = 0; i < SceneManager.sceneCount; i++)
+            SceneManager.sceneLoaded += OnSceneLoaded;
+        }
+
+        private static void OnSceneLoaded(Scene arg0, LoadSceneMode arg1)
+        {
+            string sName = arg0.name;
+            Debug.Log("LOADED SCENE = " + sName);
+
+            if (!_loadedScenes.ContainsKey(sName))
             {
                 SceneData sData = new SceneData();
-                sData._scene = SceneManager.GetSceneAt(i);
-                sData._state = SceneState.Loaded;
-                _loadedScenes[SceneManager.GetSceneAt(i).name] = sData;
+                sData._scene = arg0;
+                _loadedScenes[sName] = sData;
             }
+
+            _loadedScenes[sName]._state = SceneState.Loaded;
         }
+
+        //[RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
+        //protected static void Init()
+        //{
+        //    for (int i = 0; i < SceneManager.sceneCount; i++)
+        //    {
+        //        SceneData sData = new SceneData();
+        //        sData._scene = SceneManager.GetSceneAt(i);
+        //        sData._state = SceneState.Loaded;
+        //        _loadedScenes[SceneManager.GetSceneAt(i).name] = sData;
+        //    }
+        //}
 
         #endregion
 
