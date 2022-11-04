@@ -325,6 +325,10 @@ namespace QuickVR {
                 }
             }
 
+            //Skip a frame. This is important in order to guarantee that the Start function of every stage (specially the one
+            //of __StagesPre__) has been executed prior to initializing the first stage. 
+            yield return null;
+
             if (gameExpired)
             {
                 while (!InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE))
