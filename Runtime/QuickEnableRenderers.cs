@@ -26,7 +26,14 @@ public class QuickEnableRenderers : MonoBehaviour
 
     protected virtual void Reset()
     {
-        _renderers = new List<Renderer>(GetComponentsInChildren<Renderer>());
+        _renderers = new List<Renderer>();
+        foreach (Renderer r in GetComponentsInChildren<Renderer>())
+        {
+            if (r.gameObject.layer != LayerMask.NameToLayer("UI"))
+            {
+                _renderers.Add(r);
+            }
+        }
     }
 
     #endregion

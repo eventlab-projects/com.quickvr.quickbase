@@ -31,6 +31,8 @@ namespace QuickVR
 
         protected virtual void Awake()
         {
+            gameObject.layer = LayerMask.NameToLayer("UI");
+
             //Create the mesh filter
             MeshFilter mFilter = gameObject.GetOrCreateComponent<MeshFilter>();
             mFilter.mesh = QuickUtils.CreateFullScreenQuad();
