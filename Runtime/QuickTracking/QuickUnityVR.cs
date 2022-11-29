@@ -319,7 +319,10 @@ namespace QuickVR
             _footprints.transform.rotation = transform.rotation;
 
             _vrPlayArea.Calibrate();
-            _vrPlayArea._origin.forward = _vrPlayArea.GetUserForward().normalized;
+            Vector3 fwd = _vrPlayArea.GetUserForward().normalized;
+            _vrPlayArea._origin.forward = fwd;
+            Vector3 rotAxis = Vector3.Cross(fwd, transform.forward);
+            _vrPlayArea.transform.Rotate(rotAxis, Vector3.Angle(fwd, transform.forward), Space.World);
             
             //Set the offset of the TrackedObject of the head
             Transform targetHead = GetIKSolver(HumanBodyBones.Head)._targetLimb;

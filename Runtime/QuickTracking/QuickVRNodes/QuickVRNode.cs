@@ -284,7 +284,7 @@ namespace QuickVR
 
         protected virtual void OnDrawGizmos()
         {
-            SetModelVisible(_showModel);
+            SetModelVisible(_showModel && _isTracked);
         }
 
         #endregion
