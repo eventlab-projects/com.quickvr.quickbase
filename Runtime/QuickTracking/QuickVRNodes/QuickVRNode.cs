@@ -89,7 +89,22 @@ namespace QuickVR
 
         public bool _showModel = false;
 
-        public InputDevice _inputDevice { get; set; }
+        public InputDevice _inputDevice 
+        {
+            get 
+            {
+                return m_InputDevice;
+            }
+            set
+            {
+                m_InputDevice = value;
+                if (m_InputDevice.isValid)
+                {
+                    UpdateState();
+                }
+            }
+        }
+        protected InputDevice m_InputDevice;
 
         #endregion
 

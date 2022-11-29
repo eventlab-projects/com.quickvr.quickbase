@@ -156,6 +156,19 @@ namespace QuickVR
 
         #endregion
 
+        #region DEBUG
+
+        protected override void OnDrawGizmos()
+        {
+            if (!_model && _showModel && _isTracked)
+            {
+                LoadVRModel();
+            }
+
+            base.OnDrawGizmos();
+        }
+
+        #endregion
 
     }
 

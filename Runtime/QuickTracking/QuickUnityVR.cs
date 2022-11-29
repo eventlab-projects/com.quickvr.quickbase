@@ -344,7 +344,8 @@ namespace QuickVR
         {
             QuickTrackedObject tObjectHead = _vrPlayArea.GetVRNode(HumanBodyBones.Head).GetTrackedObject();
             QuickTrackedObject tObjectHips = node.GetTrackedObject();
-            tObjectHips.transform.position = new Vector3(tObjectHead.transform.position.x, tObjectHips.transform.position.y, tObjectHead.transform.position.z);
+            //tObjectHips.transform.position = new Vector3(tObjectHead.transform.position.x, tObjectHips.transform.position.y, tObjectHead.transform.position.z);
+            tObjectHips.transform.position = GetIKSolver((HumanBodyBones)node.GetRole())._targetLimb.position;
         }
 
         protected virtual void OnCalibrateVRNodeLeftHand(QuickVRNode node)
@@ -362,6 +363,7 @@ namespace QuickVR
             Transform ikTarget = GetIKSolver((HumanBodyBones)node.GetRole())._targetLimb;
             QuickTrackedObject tObject = node.GetTrackedObject();
             tObject.transform.rotation = ikTarget.rotation;
+            tObject.transform.position = ikTarget.position;
         }
 
         #endregion
@@ -426,12 +428,12 @@ namespace QuickVR
 
                 //2) Special case. If the Hips is set to Tracking mode, we need to adjust the IKTarget position of the hips
                 //in a way that the head will match the position of the camera provided by the HMD
-                if (
-                    GetIKControl(IKBone.Head) == ControlType.Tracking &&
-                    _vrPlayArea.GetVRNode(HumanBodyBones.Head).IsTracked() &&
-                    GetIKControl(IKBone.Hips) == ControlType.Tracking && 
-                    !_vrPlayArea.GetVRNode(HumanBodyBones.Hips).IsTracked()
-                    )
+                //if (
+                //    GetIKControl(IKBone.Head) == ControlType.Tracking &&
+                //    _vrPlayArea.GetVRNode(HumanBodyBones.Head).IsTracked() &&
+                //    GetIKControl(IKBone.Hips) == ControlType.Tracking && 
+                //    !_vrPlayArea.GetVRNode(HumanBodyBones.Hips).IsTracked()
+                //    )
                 {
                     QuickIKSolver ikSolverHips = GetIKSolver(IKBone.Hips);
                     QuickIKSolver ikSolverHead = GetIKSolver(IKBone.Head);
@@ -660,6 +662,11 @@ namespace QuickVR
             Quaternion localRot = Quaternion.Inverse(_vrPlayArea._origin.rotation) * tObject.transform.rotation;
             //target.localRotation = localRot;
             target.rotation = transform.rotation * localRot;
+
+            if (boneID == HumanBodyBones.Hips)
+            {
+                target.rotation = Quaternion.Euler(0, target.rotation.eulerAngles.y, 0);
+            }
 
             //Quaternion tmp = transform.rotation;
             //transform.rotation = _vrPlayArea._origin.rotation;
