@@ -100,7 +100,8 @@ namespace QuickVR
                 m_InputDevice = value;
                 if (m_InputDevice.isValid)
                 {
-                    UpdateState();
+                    //UpdateState();
+                    Calibrate();
                 }
             }
         }
@@ -222,6 +223,8 @@ namespace QuickVR
         public virtual void Calibrate()
         {
             _trackedObject.transform.ResetTransformation();
+
+            UpdateState();
 
             if (OnCalibrateVRNode != null)
             {

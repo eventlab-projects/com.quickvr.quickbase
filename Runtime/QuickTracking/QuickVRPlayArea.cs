@@ -249,11 +249,11 @@ namespace QuickVR
             IsVRNodesSwaped(HumanBodyBones.LeftFoot, HumanBodyBones.RightFoot);
             QuickVRManager.Log("handsSwaped = " + isHandsSwapped);
 
-            foreach (HumanBodyBones t in QuickVRNode.GetTypeList())
-            {
-                QuickVRNode n = GetVRNode(t);
-                if (n) n.Calibrate();
-            }
+            //foreach (HumanBodyBones t in QuickVRNode.GetTypeList())
+            //{
+            //    QuickVRNode n = GetVRNode(t);
+            //    if (n) n.Calibrate();
+            //}
         }
 
         protected virtual bool ValidateNumBodyTrackers(List<InputDevice> bodyTrackers, int numTrackers)

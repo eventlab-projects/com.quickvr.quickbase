@@ -304,7 +304,7 @@ namespace QuickVR
             _footprints.transform.rotation = transform.rotation;
 
             _vrPlayArea.Calibrate();
-            AlignVRPlayArea(_vrPlayArea.GetUserForward());
+            //AlignVRPlayArea(_vrPlayArea.GetUserForward());
             
             Debug.Log("POSTCALIBRATE = " + GetIKSolver(HumanBodyBones.Hips)._targetLimb.position.ToString("f3"));
         }
@@ -330,10 +330,14 @@ namespace QuickVR
         protected virtual void OnCalibrateVRNodeHead(QuickVRNode node)
         {
             node.GetTrackedObject().transform.localPosition = _headOffset;
+
+            AlignVRPlayArea(node.transform.forward);
         }
 
         protected virtual void OnCalibrateVRNodeHips(QuickVRNode node)
         {
+            AlignVRPlayArea(node.transform.forward);
+
             QuickTrackedObject tObjectHead = _vrPlayArea.GetVRNode(HumanBodyBones.Head).GetTrackedObject();
             QuickTrackedObject tObjectHips = node.GetTrackedObject();
             //tObjectHips.transform.position = new Vector3(tObjectHead.transform.position.x, tObjectHips.transform.position.y, tObjectHead.transform.position.z);
