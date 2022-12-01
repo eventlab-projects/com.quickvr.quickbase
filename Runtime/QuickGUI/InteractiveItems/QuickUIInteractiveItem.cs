@@ -29,6 +29,9 @@ namespace QuickVR
 
         protected Coroutine _coTimeOver = null;
 
+        //[HACK] This is in order to account for OpenVRLoader, because it does not takes into account the Unity input system. 
+        protected static bool _isOpenVRLoader = false;
+
 		#endregion
 
 		#region EVENTS
@@ -41,6 +44,12 @@ namespace QuickVR
 		#endregion
 
 		#region CREATION AND DESTRUCTION
+
+        protected virtual void Start() 
+        {
+            string lName = UnityEngine.XR.Management.XRGeneralSettings.Instance.Manager.activeLoader.name;
+            _isOpenVRLoader = lName.Replace(" ", "").ToLower() == "openvrloader";
+        }
 
 		protected virtual void OnDisable() {
 			_isOver = _isDown = false;
@@ -129,6 +138,27 @@ namespace QuickVR
             {
                 _timeOver += Time.deltaTime;
                 yield return null;
+            }
+        }
+
+        protected virtual void Update()
+        {
+            if (_isOpenVRLoader)
+            {
+                if (InputManager.GetButtonDown(InputManager.DEFAULT_BUTTON_CONTINUE))
+                {
+                    if (_isOver && !_isDown)
+                    {
+                        Down();
+                    }
+                }
+                else if (InputManager.GetButtonUp(InputManager.DEFAULT_BUTTON_CONTINUE))
+                {
+                    if (_isOver && _isDown)
+                    {
+                        Up();
+                    }
+                }
             }
         }
 

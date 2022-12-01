@@ -305,8 +305,6 @@ namespace QuickVR
 
             _vrPlayArea.Calibrate();
             //AlignVRPlayArea(_vrPlayArea.GetUserForward());
-            
-            Debug.Log("POSTCALIBRATE = " + GetIKSolver(HumanBodyBones.Hips)._targetLimb.position.ToString("f3"));
         }
 
         protected virtual void AlignVRPlayArea(Vector3 userFwd)

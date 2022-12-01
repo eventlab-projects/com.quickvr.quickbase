@@ -63,8 +63,10 @@ namespace QuickVR
             _buttonBG.color = _colorNormal;
         }
 
-        protected virtual void Update()
+        protected override void Update()
         {
+            base.Update();
+
             if (_buttonBG.material)
             {
                 _buttonBG.material.color = _buttonBG.color;
