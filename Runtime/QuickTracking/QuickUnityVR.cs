@@ -431,14 +431,12 @@ namespace QuickVR
                 //    !_vrPlayArea.GetVRNode(HumanBodyBones.Hips).IsTracked()
                 //    )
                 {
-                    Debug.Log("BEFORE = " + GetIKSolver(HumanBodyBones.Hips)._targetLimb.position.ToString("f3"));
                     QuickIKSolver ikSolverHips = GetIKSolver(IKBone.Hips);
                     QuickIKSolver ikSolverHead = GetIKSolver(IKBone.Head);
                     //float chainLength = Vector3.Distance(_animator.GetBoneTransform(HumanBodyBones.Hips).position, _animator.GetBoneTransform(HumanBodyBones.Head).position);
                     Vector3 v = (ikSolverHips._targetLimb.position - ikSolverHead._targetLimb.position).normalized;
                     //Debug.Log(v.ToString("f3"));
                     ikSolverHips._targetLimb.position = ikSolverHead._targetLimb.position + v * _hipsToHeadLength;
-                    Debug.Log("AFTER = " + GetIKSolver(HumanBodyBones.Hips)._targetLimb.position.ToString("f3"));
                 }
 
                 _footprints.gameObject.SetActive(_useFootprints);
