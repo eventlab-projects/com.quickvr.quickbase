@@ -84,6 +84,7 @@ namespace QuickVR
         protected QuickVRPlayArea _vrPlayArea = null;
 
         protected Vector3 _headOffset = Vector3.zero;
+        protected float _hipsToHeadLength = 0;
 
         protected PositionConstraint _footprints = null;
 
@@ -120,9 +121,6 @@ namespace QuickVR
         }
         [SerializeField, HideInInspector]
         protected List<Vector3> m_IKTrackingUpdateMode;
-
-
-        protected List<KeyValuePair<Transform, Transform>> _boneFingers = null;
 
         //Rotation attributes for CameraMono
         protected float _speedH = 2.0f;
@@ -172,6 +170,8 @@ namespace QuickVR
 
             _animator.applyRootMotion = false;
             _animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+
+            _hipsToHeadLength = Vector3.Distance(_animator.GetBoneTransform(HumanBodyBones.Hips).position, _animator.GetBoneTransform(HumanBodyBones.Head).position);
 
             _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
             //_vrPlayArea.transform.parent = transform;
@@ -228,23 +228,6 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
-
-        protected virtual void InitBoneFingers()
-        {
-            _boneFingers = new List<KeyValuePair<Transform, Transform>>();
-            foreach (bool b in new bool[] { true, false })
-            {
-                foreach (QuickHumanFingers f in QuickHumanTrait.GetHumanFingers())
-                {
-                    List<QuickHumanBodyBones> fingerBones = QuickHumanTrait.GetBonesFromFinger(f, b);
-                    for (int i = 0; i < fingerBones.Count; i++)
-                    {
-                        QuickHumanBodyBones fBoneID = fingerBones[i];
-                        _boneFingers.Add(new KeyValuePair<Transform, Transform>(_animator.GetBoneTransform(fBoneID), _vrPlayArea.GetVRNode(fBoneID).GetTrackedObject().transform));
-                    }
-                }
-            }
-        }
 
         public virtual ControlType GetIKControl(IKBone ikBone)
         {
@@ -311,6 +294,8 @@ namespace QuickVR
         {
             base.Calibrate();
 
+            //_hipsToHeadLength = Vector3.Distance(GetIKSolver(HumanBodyBones.Hips)._targetLimb.position, GetIKSolver(HumanBodyBones.Head)._targetLimb.position);
+
             ResetTrackingOffsets();
 
             transform.localScale = Vector3.one;
@@ -319,11 +304,18 @@ namespace QuickVR
             _footprints.transform.rotation = transform.rotation;
 
             _vrPlayArea.Calibrate();
-            Vector3 fwd = _vrPlayArea.GetUserForward().normalized;
+            AlignVRPlayArea(_vrPlayArea.GetUserForward());
+            
+            Debug.Log("POSTCALIBRATE = " + GetIKSolver(HumanBodyBones.Hips)._targetLimb.position.ToString("f3"));
+        }
+
+        protected virtual void AlignVRPlayArea(Vector3 userFwd)
+        {
+            Vector3 fwd = Vector3.ProjectOnPlane(userFwd, transform.up).normalized;
             _vrPlayArea._origin.forward = fwd;
             Vector3 rotAxis = Vector3.Cross(fwd, transform.forward);
             _vrPlayArea.transform.Rotate(rotAxis, Vector3.Angle(fwd, transform.forward), Space.World);
-            
+
             //Set the offset of the TrackedObject of the head
             Transform targetHead = GetIKSolver(HumanBodyBones.Head)._targetLimb;
             Vector3 offsetLS = transform.InverseTransformDirection(transform.position - targetHead.position);
@@ -435,12 +427,14 @@ namespace QuickVR
                 //    !_vrPlayArea.GetVRNode(HumanBodyBones.Hips).IsTracked()
                 //    )
                 {
+                    Debug.Log("BEFORE = " + GetIKSolver(HumanBodyBones.Hips)._targetLimb.position.ToString("f3"));
                     QuickIKSolver ikSolverHips = GetIKSolver(IKBone.Hips);
                     QuickIKSolver ikSolverHead = GetIKSolver(IKBone.Head);
-                    float chainLength = Vector3.Distance(_animator.GetBoneTransform(HumanBodyBones.Hips).position, _animator.GetBoneTransform(HumanBodyBones.Head).position);
-                    //Debug.Log("chainLength = " + chainLength.ToString("f3"));
+                    //float chainLength = Vector3.Distance(_animator.GetBoneTransform(HumanBodyBones.Hips).position, _animator.GetBoneTransform(HumanBodyBones.Head).position);
                     Vector3 v = (ikSolverHips._targetLimb.position - ikSolverHead._targetLimb.position).normalized;
-                    ikSolverHips._targetLimb.position = ikSolverHead._targetLimb.position + v * chainLength;
+                    //Debug.Log(v.ToString("f3"));
+                    ikSolverHips._targetLimb.position = ikSolverHead._targetLimb.position + v * _hipsToHeadLength;
+                    Debug.Log("AFTER = " + GetIKSolver(HumanBodyBones.Hips)._targetLimb.position.ToString("f3"));
                 }
 
                 _footprints.gameObject.SetActive(_useFootprints);

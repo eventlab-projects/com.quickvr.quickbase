@@ -223,11 +223,11 @@ namespace QuickVR
                 else if (numTrackers == 6)
                 {
                     //Head + Hands + Hips + Feet
-                    //1) The Feet are the trackers with the lower y. 
-                    InitFeet(bodyTrackers.GetRange(4, 2));
-                    
-                    //2) Proceed as in the previous case
+                    //1) Proceed as in the previous case
                     InitHipsAndHands(bodyTrackers.GetRange(1, 3));
+
+                    //2) The Feet are the trackers with the lower y. 
+                    InitFeet(bodyTrackers.GetRange(4, 2));
                 }
                 else if (numTrackers == 8)
                 {
