@@ -279,6 +279,7 @@ namespace QuickVR
                 _animatorTarget.transform.parent = null;
             }
             _animatorTarget = animator;
+            _animatorTarget.applyRootMotion = false;
 
             animator.CreateMissingBones();
 
