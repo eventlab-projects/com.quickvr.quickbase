@@ -12,6 +12,9 @@ namespace QuickVR
 
         protected override IEnumerator CoUpdate()
         {
+            //perform an initial calibration. 
+            _vrManager.RequestCalibration();
+
             _guiCalibration.gameObject.SetActive(true);
 
             if (QuickVRManager.IsXREnabled())
