@@ -206,6 +206,24 @@ namespace QuickVR
             return _curves[curveName];
         }
 
+        public virtual void SetAnimationCurve(string curveName, QuickAnimationCurve curve)
+        {
+            _curves[curveName] = curve;
+
+            //Update _timeLength if necessary
+            foreach (AnimationCurve c in curve.GetAnimationCurves())
+            {
+                if (c.length > 0)
+                {
+                    float t = c.keys[c.length - 1].time;
+                    if (t > _timeLength)
+                    {
+                        _timeLength = t;
+                    }
+                }
+            }
+        }
+
         public virtual void AddKey(float time, bool forceAdd = false)
         {
             GetAnimationCurve(CURVE_TRANSFORM_POSITION).AddKey(time, _animator.transform.position, forceAdd);
@@ -270,52 +288,6 @@ namespace QuickVR
         public virtual float GetTimeLength()
         {
             return _timeLength;
-        }
-
-        public virtual AnimationClip ToAnimationClip()
-        {
-            AnimationClip anim = new AnimationClip();
-
-            QuickAnimationCurve curvePos = GetAnimationCurve(CURVE_BODY_POSITION);
-            anim.SetCurve("", typeof(Animator), "RootT.x", curvePos[0]);
-            anim.SetCurve("", typeof(Animator), "RootT.y", curvePos[1]);
-            anim.SetCurve("", typeof(Animator), "RootT.z", curvePos[2]);
-
-            QuickAnimationCurve curveRot = GetAnimationCurve(CURVE_BODY_ROTATION);
-            anim.SetCurve("", typeof(Animator), "RootQ.x", curveRot[0]);
-            anim.SetCurve("", typeof(Animator), "RootQ.y", curveRot[1]);
-            anim.SetCurve("", typeof(Animator), "RootQ.z", curveRot[2]);
-            anim.SetCurve("", typeof(Animator), "RootQ.w", curveRot[3]);
-
-            curvePos = GetAnimationCurve(CURVE_LEFT_FOOT_IK_GOAL_POSITION);
-            anim.SetCurve("", typeof(Animator), "LeftFootT.x", curvePos[0]);
-            anim.SetCurve("", typeof(Animator), "LeftFootT.y", curvePos[1]);
-            anim.SetCurve("", typeof(Animator), "LeftFootT.z", curvePos[2]);
-
-            curveRot = GetAnimationCurve(CURVE_LEFT_FOOT_IK_GOAL_ROTATION);
-            anim.SetCurve("", typeof(Animator), "LeftFootQ.x", curveRot[0]);
-            anim.SetCurve("", typeof(Animator), "LeftFootQ.y", curveRot[1]);
-            anim.SetCurve("", typeof(Animator), "LeftFootQ.z", curveRot[2]);
-            anim.SetCurve("", typeof(Animator), "LeftFootQ.w", curveRot[3]);
-
-            curvePos = GetAnimationCurve(CURVE_RIGHT_FOOT_IK_GOAL_POSITION);
-            anim.SetCurve("", typeof(Animator), "RightFootT.x", curvePos[0]);
-            anim.SetCurve("", typeof(Animator), "RightFootT.y", curvePos[1]);
-            anim.SetCurve("", typeof(Animator), "RightFootT.z", curvePos[2]);
-
-            curveRot = GetAnimationCurve(CURVE_RIGHT_FOOT_IK_GOAL_ROTATION);
-            anim.SetCurve("", typeof(Animator), "RightFootQ.x", curveRot[0]);
-            anim.SetCurve("", typeof(Animator), "RightFootQ.y", curveRot[1]);
-            anim.SetCurve("", typeof(Animator), "RightFootQ.z", curveRot[2]);
-            anim.SetCurve("", typeof(Animator), "RightFootQ.w", curveRot[3]);
-
-            for (int i = 0; i < QuickHumanTrait.GetNumMuscles(); i++)
-            {
-                string muscleName = QuickHumanTrait.GetMuscleName(i);
-                anim.SetCurve("", typeof(Animator), muscleName, _curves[muscleName][0]);
-            }
-
-            return anim;
         }
 
         public virtual void SetEvaluateMethod(QuickAnimEvaluateMethod evaluateMethod)

@@ -130,17 +130,26 @@ namespace QuickVR
 
         public virtual void AddKey(float time, Vector3 value, bool forceAdd = false)
         {
-            AddKey(_x, time, value.x, forceAdd);
-            AddKey(_y, time, value.y, forceAdd);
-            AddKey(_z, time, value.z, forceAdd);
+            //AddKey(_x, time, value.x, forceAdd);
+            //AddKey(_y, time, value.y, forceAdd);
+            //AddKey(_z, time, value.z, forceAdd);
+
+            AddKey(_x, time, value.x, true);
+            AddKey(_y, time, value.y, true);
+            AddKey(_z, time, value.z, true);
         }
 
         public virtual void AddKey(float time, Quaternion value, bool forceAdd = false)
         {
-            AddKey(_x, time, value.x, forceAdd);
-            AddKey(_y, time, value.y, forceAdd);
-            AddKey(_z, time, value.z, forceAdd);
-            AddKey(_w, time, value.w, forceAdd);
+            //AddKey(_x, time, value.x, forceAdd);
+            //AddKey(_y, time, value.y, forceAdd);
+            //AddKey(_z, time, value.z, forceAdd);
+            //AddKey(_w, time, value.w, forceAdd);
+
+            AddKey(_x, time, value.x, true);
+            AddKey(_y, time, value.y, true);
+            AddKey(_z, time, value.z, true);
+            AddKey(_w, time, value.w, true);
         }
 
         protected virtual void AddKey(QuickAnimationCurveBase curve, float time, float value, bool forceAdd = false)
