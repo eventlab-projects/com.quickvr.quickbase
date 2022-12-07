@@ -213,9 +213,9 @@ namespace QuickVR
             //Update _timeLength if necessary
             foreach (AnimationCurve c in curve.GetAnimationCurves())
             {
-                if (c.length > 0)
+                for (int i = 0; i < c.length; i++)
                 {
-                    float t = c.keys[c.length - 1].time;
+                    float t = c.keys[i].time;
                     if (t > _timeLength)
                     {
                         _timeLength = t;
