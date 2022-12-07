@@ -22,7 +22,13 @@ namespace QuickVR
 
             #endregion
 
-            public virtual void Parse(string curveName, AnimationCurve curve)
+            /// <summary>
+            /// 
+            /// </summary>
+            /// <param name="curveName"></param>
+            /// <param name="curve"></param>
+            /// <param name="saveKeys"></param>
+            public virtual void Parse(string curveName, AnimationCurve curve, bool saveKeys = true)
             {
                 _curveNames.Add(curveName);
 
@@ -30,7 +36,10 @@ namespace QuickVR
                 
                 foreach (Keyframe k in curve.keys)
                 {
-                    kFrames._keys.Add(k.time);
+                    if (saveKeys)
+                    {
+                        kFrames._keys.Add(k.time);
+                    }
                     kFrames._values.Add(k.value);
                 }
 
@@ -44,6 +53,12 @@ namespace QuickVR
         {
             public List<float> _keys = new List<float>();
             public List<float> _values = new List<float>();
+        }
+
+        [System.Serializable]
+        protected class QuickAnimationKeyframeParserByte
+        {
+
         }
 
         public static AnimationClip ToAnimationClip(QuickAnimation animation)
@@ -99,42 +114,42 @@ namespace QuickVR
 
             for (int i = 0; i < 3; i++)
             {
-                parser.Parse("Position" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_TRANSFORM_POSITION)[i]);
+                parser.Parse("Position" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_TRANSFORM_POSITION)[i], i == 0);
             }
 
             for (int i = 0; i < 4; i++)
             {
-                parser.Parse("Rotation" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_TRANSFORM_ROTATION)[i]);
+                parser.Parse("Rotation" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_TRANSFORM_ROTATION)[i], i == 0);
             }
 
             for (int i = 0; i < 3; i++)
             {
-                parser.Parse("RootT" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_BODY_POSITION)[i]);
+                parser.Parse("RootT" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_BODY_POSITION)[i], i == 0);
             }
             
             for (int i = 0; i < 4; i++)
             {
-                parser.Parse("RootQ" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_BODY_ROTATION)[i]);
+                parser.Parse("RootQ" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_BODY_ROTATION)[i], i == 0);
             }
 
             for (int i = 0; i < 3; i++)
             {
-                parser.Parse("LeftFootT" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_LEFT_FOOT_IK_GOAL_POSITION)[i]);
+                parser.Parse("LeftFootT" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_LEFT_FOOT_IK_GOAL_POSITION)[i], i == 0);
             }
 
             for (int i = 0; i < 4; i++)
             {
-                parser.Parse("LeftFootQ" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_LEFT_FOOT_IK_GOAL_ROTATION)[i]);
+                parser.Parse("LeftFootQ" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_LEFT_FOOT_IK_GOAL_ROTATION)[i], i == 0);
             }
 
             for (int i = 0; i < 3; i++)
             {
-                parser.Parse("RightFootT" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_RIGHT_FOOT_IK_GOAL_POSITION)[i]);
+                parser.Parse("RightFootT" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_RIGHT_FOOT_IK_GOAL_POSITION)[i], i == 0);
             }
 
             for (int i = 0; i < 4; i++)
             {
-                parser.Parse("RightFootQ" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_RIGHT_FOOT_IK_GOAL_ROTATION)[i]);
+                parser.Parse("RightFootQ" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_RIGHT_FOOT_IK_GOAL_ROTATION)[i], i == 0);
             }
 
             for (int i = 0; i < QuickHumanTrait.GetNumMuscles(); i++)
