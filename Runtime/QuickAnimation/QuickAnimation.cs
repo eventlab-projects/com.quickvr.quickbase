@@ -10,7 +10,47 @@ namespace QuickVR
     public class QuickAnimationKeyframe
     {
         public float _time = 0;
-        public int _curveMask = 0;
+        public int[] _curveMask = { 0, 0, 0, 0, 0, 0, 0, 0 };
+
+        public virtual bool IsEmpty()
+        {
+            foreach (uint i in _curveMask)
+            {
+                if (i != 0)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        public virtual void AddCurve(int curveID)
+        {
+            int maskID = Mathf.FloorToInt(curveID / 32.0f);
+            int d = curveID % 32;
+            _curveMask[maskID] |= 1 << d;
+        }
+
+        public virtual bool HasCurve(int curveID)
+        {
+            int maskID = Mathf.FloorToInt(curveID / 32.0f);
+            int d = curveID % 32;
+            return (_curveMask[maskID] & (1 << d)) != 0;
+        }
+
+        public override string ToString()
+        {
+            string result = "";
+
+            for (int i = 0; i < _curveMask.Length; i++)
+            {
+                result = System.Convert.ToString(_curveMask[i], 2) + " " + result;
+            }
+
+            return result;
+        }
+
     }
 
     public class QuickAnimation
@@ -178,6 +218,7 @@ namespace QuickVR
         protected List<QuickAnimationKeyframe> _keyFrames = new List<QuickAnimationKeyframe>();
 
         protected Dictionary<string, int> _toCurveID = new Dictionary<string, int>();
+        protected Dictionary<int, string> _toCurveName = new Dictionary<int, string>();
         protected int _currentCurveID = 0;
 
         #endregion
@@ -203,10 +244,10 @@ namespace QuickVR
         public QuickAnimation(Animator animator)
         {
             _animator = animator;
-            InitToCurveID();
+            InitHelpers();
         }
 
-        protected virtual void InitToCurveID()
+        protected virtual void InitHelpers()
         {
             AddCurveID(CURVE_TRANSFORM_POSITION);
             AddCurveID(CURVE_TRANSFORM_ROTATION);
@@ -228,7 +269,9 @@ namespace QuickVR
 
         protected virtual void AddCurveID(string curveName)
         {
-            _toCurveID[curveName] = _currentCurveID++;
+            int curveID = _currentCurveID++;
+            _toCurveID[curveName] = curveID;
+            _toCurveName[curveID] = curveName;
         }
 
         #endregion
@@ -239,9 +282,25 @@ namespace QuickVR
         {
             return _toCurveID[curveName];
         }
+
+        public virtual string GetCurveName(int curveID)
+        {
+            return _toCurveName[curveID];
+        }
+
+        public List<QuickAnimationKeyframe> GetKeyframes()
+        {
+            return _keyFrames;
+        }
+
         public virtual QuickAnimationCurve[] GetAnimationCurves()
         {
             return _curves.Values.ToArray();
+        }
+
+        public virtual int GetNumCurves()
+        {
+            return _curves.Count;
         }
 
         public virtual QuickAnimationCurve GetAnimationCurve(string curveName)
@@ -274,11 +333,11 @@ namespace QuickVR
 
         public virtual void AddKey(float time, bool forceAdd = false)
         {
-            int currentKeyIndex = _keyFrames.Count;
-            _keyFrames.Add(new QuickAnimationKeyframe());
+            QuickAnimationKeyframe kFrame = new QuickAnimationKeyframe();
+            kFrame._time = time;
 
-            GetAnimationCurve(CURVE_TRANSFORM_POSITION).AddKey(time, _animator.transform.position, forceAdd);
-            GetAnimationCurve(CURVE_TRANSFORM_ROTATION).AddKey(time, _animator.transform.rotation, forceAdd);
+            AddKey(CURVE_TRANSFORM_POSITION, time, _animator.transform.position, forceAdd, kFrame);
+            AddKey(CURVE_TRANSFORM_ROTATION, time, _animator.transform.rotation, forceAdd, kFrame);
 
             if (_animator.isHuman)
             {
@@ -286,23 +345,23 @@ namespace QuickVR
                 Vector3 bodyPosition = _pose.bodyPosition;
                 Quaternion bodyRotation = _pose.bodyRotation;
 
-                GetAnimationCurve(CURVE_BODY_POSITION).AddKey(time, bodyPosition, forceAdd);
-                GetAnimationCurve(CURVE_BODY_ROTATION).AddKey(time, bodyRotation, forceAdd);
+                AddKey(CURVE_BODY_POSITION, time, bodyPosition, forceAdd, kFrame);
+                AddKey(CURVE_BODY_ROTATION, time, bodyRotation, forceAdd, kFrame);
 
                 Vector3 ikGoalPos;
                 Quaternion ikGoalRot;
                 _animator.GetIKGoalFromBodyPose(AvatarIKGoal.LeftFoot, bodyPosition, bodyRotation, out ikGoalPos, out ikGoalRot);
-                GetAnimationCurve(CURVE_LEFT_FOOT_IK_GOAL_POSITION).AddKey(time, ikGoalPos, forceAdd);
-                GetAnimationCurve(CURVE_LEFT_FOOT_IK_GOAL_ROTATION).AddKey(time, ikGoalRot, forceAdd);
+                AddKey(CURVE_LEFT_FOOT_IK_GOAL_POSITION, time, ikGoalPos, forceAdd, kFrame);
+                AddKey(CURVE_LEFT_FOOT_IK_GOAL_ROTATION, time, ikGoalRot, forceAdd, kFrame);
 
                 _animator.GetIKGoalFromBodyPose(AvatarIKGoal.RightFoot, bodyPosition, bodyRotation, out ikGoalPos, out ikGoalRot);
-                GetAnimationCurve(CURVE_RIGHT_FOOT_IK_GOAL_POSITION).AddKey(time, ikGoalPos, forceAdd);
-                GetAnimationCurve(CURVE_RIGHT_FOOT_IK_GOAL_ROTATION).AddKey(time, ikGoalRot, forceAdd);
+                AddKey(CURVE_RIGHT_FOOT_IK_GOAL_POSITION, time, ikGoalPos, forceAdd, kFrame);
+                AddKey(CURVE_RIGHT_FOOT_IK_GOAL_ROTATION, time, ikGoalRot, forceAdd, kFrame);
 
                 for (int i = 0; i < _pose.muscles.Length; i++)
                 {
                     string muscleName = QuickHumanTrait.GetMuscleName(i);
-                    GetAnimationCurve(muscleName).AddKey(time, _pose.muscles[i], forceAdd);
+                    AddKey(muscleName, time, _pose.muscles[i], forceAdd, kFrame);
                 }
             }
 
@@ -311,24 +370,43 @@ namespace QuickVR
                 _timeLength = time;
             }
 
-            if (_keyFrames[currentKeyIndex]._curveMask == 0)
+            if (!kFrame.IsEmpty())
             {
-                _keyFrames.RemoveAt(currentKeyIndex);
+                _keyFrames.Add(kFrame);
             }
         }
 
-        protected virtual void AddKey(string curveName, float time, Vector3 value, bool forceAdd)
+        protected virtual void AddKey(string curveName, float time, Vector3 value, bool forceAdd, QuickAnimationKeyframe kFrame)
         {
-            if (GetAnimationCurve(curveName).AddKey(time, value, forceAdd) != -1)
+            if (GetAnimationCurve(curveName).AddKey(time, value, forceAdd))
             {
-                _keyFrames[_keyFrames.Count - 1]._curveMask |= 1 << GetCurveID(curveName);
+                kFrame.AddCurve(GetCurveID(curveName));
             }
         }
 
-        protected virtual void AddKey(string curveName, float time, Quaternion value, bool forceAdd)
+        protected virtual void AddKey(string curveName, float time, Quaternion value, bool forceAdd, QuickAnimationKeyframe kFrame)
         {
-            GetAnimationCurve(curveName).AddKey(time, value, forceAdd);
+            if (GetAnimationCurve(curveName).AddKey(time, value, forceAdd))
+            {
+                kFrame.AddCurve(GetCurveID(curveName));
+            }
         }
+
+        protected virtual void AddKey(string curveName, float time, float value, bool forceAdd, QuickAnimationKeyframe kFrame)
+        {
+            if (GetAnimationCurve(curveName).AddKey(time, value, forceAdd))
+            {
+                kFrame.AddCurve(GetCurveID(curveName));
+            }
+        }
+
+        //protected virtual void AddKey<T>(string curveName, float time, T value, bool forceAdd, QuickAnimationKeyframe kFrame)
+        //{
+        //    if (GetAnimationCurve(curveName).AddKey(time, value, forceAdd) != -1)
+        //    {
+        //        kFrame._curveMask |= 1 << GetCurveID(curveName);
+        //    }
+        //}
 
         public virtual Vector3 EvaluateTransformPosition(float time)
         {

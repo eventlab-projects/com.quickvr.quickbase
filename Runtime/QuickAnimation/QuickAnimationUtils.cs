@@ -18,6 +18,7 @@ namespace QuickVR
             #region PUBLIC ATTRIBUTES
 
             public List<string> _curveNames = new List<string>();
+            public List<QuickAnimationKeyframeParser> _keyFrames = new List<QuickAnimationKeyframeParser>();
             public List<QuickAnimationKeyframeParser<float>> _curveKeyFramesFloat = new List<QuickAnimationKeyframeParser<float>>();
             public List<QuickAnimationKeyframeParser<byte>> _curveKeyFramesByte = new List<QuickAnimationKeyframeParser<byte>>();
 
@@ -34,7 +35,7 @@ namespace QuickVR
                 _curveNames.Add(curveName);
 
                 QuickAnimationKeyframeParser<float> kFrames = new QuickAnimationKeyframeParser<float>();
-                
+
                 foreach (Keyframe k in curve.keys)
                 {
                     if (saveKeys)
@@ -80,6 +81,20 @@ namespace QuickVR
                 _curveKeyFramesByte.Add(kFrames);
             }
 
+        }
+
+        [System.Serializable]
+        protected class QuickAnimationKeyframeParser
+        {
+            public float _time;
+            public List<QuickAnimationKeyframeValueParser> _curveValues = new List<QuickAnimationKeyframeValueParser>();
+        }
+
+        [System.Serializable]
+        protected class QuickAnimationKeyframeValueParser 
+        {
+            public int _curveID = 0;
+            public List<float> _values = new List<float>();
         }
 
         [System.Serializable]
@@ -138,53 +153,51 @@ namespace QuickVR
         private static QuickAnimationParser ToAnimationParser(QuickAnimation animation)
         {
             QuickAnimationParser parser = new QuickAnimationParser();
-            string[] dimensions = { ".x", ".y", ".z", ".w" };
 
-            for (int i = 0; i < 3; i++)
+            //1) Save the curveNames
+            int numCurves = animation.GetNumCurves();
+            for (int i = 0; i <  numCurves; i++)
             {
-                parser.ParseFloat("Position" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_TRANSFORM_POSITION)[i], i == 0);
+                parser._curveNames.Add(animation.GetCurveName(i));
             }
 
-            for (int i = 0; i < 4; i++)
-            {
-                parser.ParseFloat("Rotation" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_TRANSFORM_ROTATION)[i], i == 0);
-            }
+            //2) Save the Keyframes
+            List<QuickAnimationKeyframe> kFrames = animation.GetKeyframes();
+            int numKFrames = kFrames.Count;
+            parser._keyFrames = new List<QuickAnimationKeyframeParser>(numKFrames);
 
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < numKFrames; i++)
             {
-                parser.ParseFloat("RootT" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_BODY_POSITION)[i], i == 0);
-            }
-            
-            for (int i = 0; i < 4; i++)
-            {
-                parser.ParseFloat("RootQ" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_BODY_ROTATION)[i], i == 0);
-            }
+                QuickAnimationKeyframeParser kFrameParser = new QuickAnimationKeyframeParser();
 
-            for (int i = 0; i < 3; i++)
-            {
-                parser.ParseFloat("LeftFootT" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_LEFT_FOOT_IK_GOAL_POSITION)[i], i == 0);
-            }
+                QuickAnimationKeyframe kFrame = kFrames[i];
+                kFrameParser._time = kFrame._time;
 
-            for (int i = 0; i < 4; i++)
-            {
-                parser.ParseFloat("LeftFootQ" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_LEFT_FOOT_IK_GOAL_ROTATION)[i], i == 0);
-            }
+                //Debug.Log("mask = " + kFrame.ToString());
 
-            for (int i = 0; i < 3; i++)
-            {
-                parser.ParseFloat("RightFootT" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_RIGHT_FOOT_IK_GOAL_POSITION)[i], i == 0);
-            }
+                for (int j = 0; j < numCurves; j++)
+                {
+                    if (kFrame.HasCurve(j))
+                    {
+                        //i is a KeyFrame of the curve j
+                        QuickAnimationCurve aCurve = animation.GetAnimationCurve(animation.GetCurveName(j));
+                        QuickAnimationKeyframeValueParser kValueParser = new QuickAnimationKeyframeValueParser();
+                        kValueParser._curveID = j;
 
-            for (int i = 0; i < 4; i++)
-            {
-                parser.ParseFloat("RightFootQ" + dimensions[i], animation.GetAnimationCurve(QuickAnimation.CURVE_RIGHT_FOOT_IK_GOAL_ROTATION)[i], i == 0);
-            }
+                        for (int d = 0; d < aCurve._numDimensions; d++)
+                        {
+                            kValueParser._values.Add(aCurve[d].Evaluate(kFrame._time));
+                        }
 
-            for (int i = 0; i < QuickHumanTrait.GetNumMuscles(); i++)
-            {
-                string muscleName = QuickHumanTrait.GetMuscleName(i);
-                parser.ParseFloat(muscleName, animation.GetAnimationCurve(muscleName)[0]);
-                //parser.ParseMuscle(i, animation.GetAnimationCurve(muscleName)[0]);
+                        kFrameParser._curveValues.Add(kValueParser);
+                    }
+                    //else
+                    //{
+                    //    Debug.Log("MISS!!!");
+                    //}
+                }
+
+                parser._keyFrames.Add(kFrameParser);
             }
 
             return parser;
@@ -210,30 +223,27 @@ namespace QuickVR
                 //result.SetAnimationCurve(QuickHumanTrait.GetMuscleName(i), ParseCurveMuscle(parser, i));
             }
 
-            int kNew = 0;
-            int kFound = 0;
-            HashSet<float> test = new HashSet<float>();
-            foreach (QuickAnimationCurve c in result.GetAnimationCurves())
-            {
-                foreach (QuickAnimationCurveBase b in c.GetAnimationCurves())
-                {
-                    foreach (Keyframe k in b.keys)
-                    {
-                        if (!test.Contains(k.time))
-                        {
-                            test.Add(k.time);
-                            kNew++;
-                        }
-                        else
-                        {
-                            kFound++;
-                        }
-                    }
-                }
-            }
-
-            Debug.Log("kNew = " + kNew);
-            Debug.Log("kFound = " + kFound);
+            //int kNew = 0;
+            //int kFound = 0;
+            //HashSet<float> test = new HashSet<float>();
+            //foreach (QuickAnimationCurve c in result.GetAnimationCurves())
+            //{
+            //    foreach (QuickAnimationCurveBase b in c.GetAnimationCurves())
+            //    {
+            //        foreach (Keyframe k in b.keys)
+            //        {
+            //            if (!test.Contains(k.time))
+            //            {
+            //                test.Add(k.time);
+            //                kNew++;
+            //            }
+            //            else
+            //            {
+            //                kFound++;
+            //            }
+            //        }
+            //    }
+            //}
 
             return result;
         }

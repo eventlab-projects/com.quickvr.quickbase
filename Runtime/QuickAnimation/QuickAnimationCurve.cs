@@ -88,7 +88,15 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        protected string _name = "";
+        public string _name 
+        {
+            get; protected set;
+        }
+
+        public int _numDimensions 
+        {
+            get; protected set;
+        }
 
         protected QuickAnimationCurveBase _x = new QuickAnimationCurveBase();
         protected QuickAnimationCurveBase _y = new QuickAnimationCurveBase();
@@ -134,59 +142,67 @@ namespace QuickVR
             return null;
         }
 
-        public virtual int AddKey(float time, float value, bool forceAdd = false)
+        public virtual bool AddKey(float time, float value, bool forceAdd = false)
         {
+            _numDimensions = 1;
             return AddKey(_x, time, value, forceAdd);
         }
 
-        public virtual int AddKey(float time, bool value, bool forceAdd = false)
+        public virtual bool AddKey(float time, bool value, bool forceAdd = false)
         {
+            _numDimensions = 1;
             return AddKey(_x, time, value ? 1 : 0, forceAdd);
         }
 
-        public virtual int AddKey(float time, Vector3 value, bool forceAdd = false)
+        public virtual bool AddKey(float time, Vector3 value, bool forceAdd = false)
         {
+            _numDimensions = 3;
             //AddKey(_x, time, value.x, forceAdd);
             //AddKey(_y, time, value.y, forceAdd);
             //AddKey(_z, time, value.z, forceAdd);
 
-            int result = -1;
+            bool result = false;
 
             Vector3 lastValue = EvaluateVector3(_x.GetLastTime());
             if (forceAdd || Vector3.SqrMagnitude(value - lastValue) > 0.0001f * 0.0001f)
             {
-                result = AddKey(_x, time, value.x, true);
+                AddKey(_x, time, value.x, true);
                 AddKey(_y, time, value.y, true);
                 AddKey(_z, time, value.z, true);
+
+                result = true;
             }
 
             return result;
         }
 
-        public virtual int AddKey(float time, Quaternion value, bool forceAdd = false)
+        public virtual bool AddKey(float time, Quaternion value, bool forceAdd = false)
         {
+            _numDimensions = 4;
             //AddKey(_x, time, value.x, forceAdd);
             //AddKey(_y, time, value.y, forceAdd);
             //AddKey(_z, time, value.z, forceAdd);
             //AddKey(_w, time, value.w, forceAdd);
 
-            int result = -1;
+            bool result = false;
 
             Quaternion lastValue = EvaluateQuaternion(_x.GetLastTime());
             if (forceAdd || Quaternion.Angle(value, lastValue) > 1)
             {
-                result = AddKey(_x, time, value.x, true);
+                AddKey(_x, time, value.x, true);
                 AddKey(_y, time, value.y, true);
                 AddKey(_z, time, value.z, true);
                 AddKey(_w, time, value.w, true);
+
+                result = true;
             }
 
             return result;
         }
 
-        protected virtual int AddKey(QuickAnimationCurveBase curve, float time, float value, bool forceAdd = false)
+        protected virtual bool AddKey(QuickAnimationCurveBase curve, float time, float value, bool forceAdd = false)
         {
-            int result = -1;
+            bool result = false;
 
             if (Mathf.Abs(value) < ZERO)
             {
@@ -197,7 +213,8 @@ namespace QuickVR
 
             if (forceAdd || !Mathf.Approximately(lastValue, value))
             {
-                result = curve.AddKey(time, value);
+                curve.AddKey(time, value);
+                result = true;
             }
 
             return result;
