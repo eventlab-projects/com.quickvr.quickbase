@@ -220,7 +220,7 @@ namespace QuickVR
             AddCurveID(CURVE_RIGHT_FOOT_IK_GOAL_POSITION);
             AddCurveID(CURVE_RIGHT_FOOT_IK_GOAL_ROTATION);
 
-            for (int i = 0; i < _pose.muscles.Length; i++)
+            for (int i = 0; i < QuickHumanTrait.GetNumMuscles(); i++)
             {
                 AddCurveID(QuickHumanTrait.GetMuscleName(i));
             }
