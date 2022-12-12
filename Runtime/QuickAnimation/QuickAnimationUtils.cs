@@ -210,12 +210,37 @@ namespace QuickVR
                 //result.SetAnimationCurve(QuickHumanTrait.GetMuscleName(i), ParseCurveMuscle(parser, i));
             }
 
+            int kNew = 0;
+            int kFound = 0;
+            HashSet<float> test = new HashSet<float>();
+            foreach (QuickAnimationCurve c in result.GetAnimationCurves())
+            {
+                foreach (QuickAnimationCurveBase b in c.GetAnimationCurves())
+                {
+                    foreach (Keyframe k in b.keys)
+                    {
+                        if (!test.Contains(k.time))
+                        {
+                            test.Add(k.time);
+                            kNew++;
+                        }
+                        else
+                        {
+                            kFound++;
+                        }
+                    }
+                }
+            }
+
+            Debug.Log("kNew = " + kNew);
+            Debug.Log("kFound = " + kFound);
+
             return result;
         }
 
         private static QuickAnimationCurve ParseCurveFloat(QuickAnimationParser parser, int curveIndex, int dimensions)
         {
-            QuickAnimationCurve result = new QuickAnimationCurve();
+            QuickAnimationCurve result = new QuickAnimationCurve(parser._curveNames[curveIndex]);
             int numKeys = parser._curveKeyFramesFloat[curveIndex]._keys.Count;
 
             for (int i = 0; i < numKeys; i++)
@@ -258,7 +283,7 @@ namespace QuickVR
 
         private static QuickAnimationCurve ParseCurveMuscle(QuickAnimationParser parser, int muscleID)
         {
-            QuickAnimationCurve result = new QuickAnimationCurve();
+            QuickAnimationCurve result = new QuickAnimationCurve(QuickHumanTrait.GetMuscleName(muscleID));
 
             int numKeys = parser._curveKeyFramesByte[muscleID]._keys.Count;
 

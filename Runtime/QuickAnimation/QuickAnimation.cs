@@ -1,9 +1,17 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System.Linq;
 
 namespace QuickVR
 {
+
+    [System.Serializable]
+    public class QuickAnimationKeyframe
+    {
+        public float _time = 0;
+        public int _curveMask = 0;
+    }
 
     public class QuickAnimation
     {
@@ -155,7 +163,7 @@ namespace QuickVR
 
                 return -1;
             }
-                
+
         }
 
         #region PROTECTED ATTRIBUTES
@@ -166,6 +174,11 @@ namespace QuickVR
 
         protected Animator _animator = null;
         protected HumanPose _pose = new HumanPose();
+
+        protected List<QuickAnimationKeyframe> _keyFrames = new List<QuickAnimationKeyframe>();
+
+        protected Dictionary<string, int> _toCurveID = new Dictionary<string, int>();
+        protected int _currentCurveID = 0;
 
         #endregion
 
@@ -190,17 +203,52 @@ namespace QuickVR
         public QuickAnimation(Animator animator)
         {
             _animator = animator;
+            InitToCurveID();
+        }
+
+        protected virtual void InitToCurveID()
+        {
+            AddCurveID(CURVE_TRANSFORM_POSITION);
+            AddCurveID(CURVE_TRANSFORM_ROTATION);
+
+            AddCurveID(CURVE_BODY_POSITION);
+            AddCurveID(CURVE_BODY_ROTATION);
+
+            AddCurveID(CURVE_LEFT_FOOT_IK_GOAL_POSITION);
+            AddCurveID(CURVE_LEFT_FOOT_IK_GOAL_ROTATION);
+
+            AddCurveID(CURVE_RIGHT_FOOT_IK_GOAL_POSITION);
+            AddCurveID(CURVE_RIGHT_FOOT_IK_GOAL_ROTATION);
+
+            for (int i = 0; i < _pose.muscles.Length; i++)
+            {
+                AddCurveID(QuickHumanTrait.GetMuscleName(i));
+            }
+        }
+
+        protected virtual void AddCurveID(string curveName)
+        {
+            _toCurveID[curveName] = _currentCurveID++;
         }
 
         #endregion
 
         #region GET AND SET
 
+        public virtual int GetCurveID(string curveName)
+        {
+            return _toCurveID[curveName];
+        }
+        public virtual QuickAnimationCurve[] GetAnimationCurves()
+        {
+            return _curves.Values.ToArray();
+        }
+
         public virtual QuickAnimationCurve GetAnimationCurve(string curveName)
         {
             if (!_curves.ContainsKey(curveName))
             {
-                _curves[curveName] = new QuickAnimationCurve();
+                _curves[curveName] = new QuickAnimationCurve(curveName);
             }
 
             return _curves[curveName];
@@ -226,6 +274,9 @@ namespace QuickVR
 
         public virtual void AddKey(float time, bool forceAdd = false)
         {
+            int currentKeyIndex = _keyFrames.Count;
+            _keyFrames.Add(new QuickAnimationKeyframe());
+
             GetAnimationCurve(CURVE_TRANSFORM_POSITION).AddKey(time, _animator.transform.position, forceAdd);
             GetAnimationCurve(CURVE_TRANSFORM_ROTATION).AddKey(time, _animator.transform.rotation, forceAdd);
 
@@ -255,7 +306,28 @@ namespace QuickVR
                 }
             }
 
-            if (time > _timeLength) _timeLength = time;
+            if (time > _timeLength)
+            {
+                _timeLength = time;
+            }
+
+            if (_keyFrames[currentKeyIndex]._curveMask == 0)
+            {
+                _keyFrames.RemoveAt(currentKeyIndex);
+            }
+        }
+
+        protected virtual void AddKey(string curveName, float time, Vector3 value, bool forceAdd)
+        {
+            if (GetAnimationCurve(curveName).AddKey(time, value, forceAdd) != -1)
+            {
+                _keyFrames[_keyFrames.Count - 1]._curveMask |= 1 << GetCurveID(curveName);
+            }
+        }
+
+        protected virtual void AddKey(string curveName, float time, Quaternion value, bool forceAdd)
+        {
+            GetAnimationCurve(curveName).AddKey(time, value, forceAdd);
         }
 
         public virtual Vector3 EvaluateTransformPosition(float time)

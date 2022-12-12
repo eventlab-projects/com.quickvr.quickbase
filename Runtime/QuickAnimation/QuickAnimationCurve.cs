@@ -88,6 +88,8 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
+        protected string _name = "";
+
         protected QuickAnimationCurveBase _x = new QuickAnimationCurveBase();
         protected QuickAnimationCurveBase _y = new QuickAnimationCurveBase();
         protected QuickAnimationCurveBase _z = new QuickAnimationCurveBase();
@@ -98,6 +100,15 @@ namespace QuickVR
         #region CONSTANTS
 
         protected static float ZERO = 0.0001f;
+
+        #endregion
+
+        #region CREATION AND DESTRUCTION
+
+        public QuickAnimationCurve(string name)
+        {
+            _name = name;
+        }
 
         #endregion
 
