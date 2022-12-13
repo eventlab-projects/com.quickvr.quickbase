@@ -23,7 +23,11 @@ namespace QuickVR
                 using (FileStream fs = new FileStream(pathDst, FileMode.Create))
                 using (ZipArchive arch = new ZipArchive(fs, ZipArchiveMode.Create))
                 {
+#if NET_2_0
                     arch.CreateEntryFromFile(pathSrc, Path.GetFileName(pathSrc));
+#elif NET_4_6
+                    arch.CreateEntry(pathSrc);
+#endif
                 }
             }
             else
@@ -39,6 +43,7 @@ namespace QuickVR
         /// <param name="pathDst"></param>
         public static void CreateFromDirectory(string pathSrc, string pathDst)
         {
+#if NET_2_0
             if (IsDirectoryPath(pathSrc))
             {
                 ZipFile.CreateFromDirectory(pathSrc, pathDst);
@@ -47,6 +52,7 @@ namespace QuickVR
             {
                 Debug.LogError("pathSrc is not a directory path. Use CreateFromFile instead. ");
             }
+#endif
         }
 
         private static bool IsFilePath(string path)
