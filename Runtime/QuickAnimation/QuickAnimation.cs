@@ -313,10 +313,28 @@ namespace QuickVR
             return _curves[curveName];
         }
 
+        public virtual QuickAnimationCurve GetAnimationCurve(int curveID)
+        {
+            return GetAnimationCurve(GetCurveName(curveID));
+        }
+
         public virtual void SetAnimationCurve(string curveName, QuickAnimationCurve curve)
         {
             _curves[curveName] = curve;
 
+            ComputeAnimationTime(curve);
+        }
+
+        public virtual void ComputeAnimationTime()
+        {
+            foreach (QuickAnimationCurve aCurve in GetAnimationCurves())
+            {
+                ComputeAnimationTime(aCurve);
+            }
+        }
+
+        protected virtual void ComputeAnimationTime(QuickAnimationCurve curve)
+        {
             //Update _timeLength if necessary
             foreach (AnimationCurve c in curve.GetAnimationCurves())
             {
