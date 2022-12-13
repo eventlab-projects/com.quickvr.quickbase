@@ -8,6 +8,12 @@ namespace QuickVR
     public static class QuickAnimationUtils
     {
 
+        #region CONSTANTS
+
+        public static string FLOAT_PRECISION = "f6";
+
+        #endregion
+
         /// <summary>
         /// An intermediate class used for json serialization. 
         /// </summary>
@@ -106,14 +112,7 @@ namespace QuickVR
             /// <summary>
             /// The curve values
             /// </summary>
-            public List<float> v = new List<float>();
-        }
-
-        [System.Serializable]
-        protected class QuickAnimationKeyframeParser<T>
-        {
-            public List<float> _keys = new List<float>();
-            public List<T> _values = new List<T>();
+            public List<string> v = new List<string>();
         }
 
         public static AnimationClip ToAnimationClip(QuickAnimation animation)
@@ -198,7 +197,22 @@ namespace QuickVR
 
                         for (int d = 0; d < aCurve._numDimensions; d++)
                         {
-                            kValueParser.v.Add(aCurve[d].Evaluate(kFrame._time));
+                            string[] tmp = aCurve[d].Evaluate(kFrame._time).ToString(FLOAT_PRECISION).Split('.');
+                            string sNumber = tmp[0];
+                            string sFraction = tmp[1];
+
+                            while (sFraction.Length > 0 && sFraction[sFraction.Length - 1] == '0')
+                            {
+                                sFraction = sFraction.Remove(sFraction.Length - 1);
+                            }
+
+                            string v = sNumber;
+                            if (sFraction.Length > 0)
+                            {
+                                v += "." + sFraction; 
+                            }
+
+                            kValueParser.v.Add(v);
                         }
 
                         kFrameParser.cv.Add(kValueParser);
@@ -232,8 +246,13 @@ namespace QuickVR
                 foreach (QuickAnimationKeyframeValueParser kValueParser in kParser.cv)
                 {
                     QuickAnimationCurve aCurve = result.GetAnimationCurve(kValueParser.id);
-                    List<float> values = kValueParser.v;
                     int dimensions = kValueParser.v.Count;
+                    float[] values = new float[dimensions];
+                    for (int i = 0; i < dimensions; i++)
+                    {
+                        values[i] = float.Parse(kValueParser.v[i]);
+                    }
+                    
                     if (dimensions == 1)
                     {
                         aCurve.AddKey(time, values[0], true);
