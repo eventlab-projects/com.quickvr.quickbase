@@ -1,9 +1,57 @@
 using UnityEngine;
+
 using System.Collections.Generic;
 using System.IO;
+using System.Threading;
 
 namespace QuickVR
 {
+
+    public class QuickAsyncOperation<T> : QuickAsyncOperation
+    {
+
+        #region PUBLIC ATTRIBUTES
+
+        public T _result
+        {
+            get
+            {
+                return m_Result;
+            }
+
+            set
+            {
+                m_Result = value;
+                _isDone = true;
+            }
+        }
+        protected T m_Result;
+
+        #endregion
+
+    }
+
+    public class QuickAsyncOperation : CustomYieldInstruction
+    {
+
+        #region PUBLIC ATTRIBUTES
+
+        public bool _isDone
+        {
+            get; set;
+        }
+
+        public override bool keepWaiting
+        {
+            get
+            {
+                return !_isDone;
+            }
+        }
+
+        #endregion
+
+    }
 
     public static class QuickAnimationUtils
     {
@@ -349,6 +397,22 @@ namespace QuickVR
         public static string ToJson(QuickAnimation animation)
         {
             return JsonUtility.ToJson(ToAnimationParser(animation));
+        }
+
+        public static QuickAsyncOperation<string> ToJsonAsync(QuickAnimation animation)
+        {
+            QuickAsyncOperation<string> op = new QuickAsyncOperation<string>();
+
+            Thread thread = new Thread
+            (
+                () => 
+                {
+                    op._result = ToJson(animation);
+                }
+            );
+            thread.Start();
+            
+            return op;
         }
 
         public static void SaveToJson(string path, QuickAnimation animation)
