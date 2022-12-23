@@ -84,7 +84,7 @@ namespace QuickVR
         protected QuickVRPlayArea _vrPlayArea = null;
 
         protected Vector3 _headOffset = Vector3.zero;
-        protected float _hipsToHeadLength = 0;
+        protected float _maxHipsToHeadDistance = 0;
 
         protected PositionConstraint _footprints = null;
 
@@ -171,7 +171,7 @@ namespace QuickVR
             _animator.applyRootMotion = false;
             _animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
 
-            _hipsToHeadLength = Vector3.Distance(_animator.GetBoneTransform(HumanBodyBones.Hips).position, _animator.GetBoneTransform(HumanBodyBones.Head).position);
+            _maxHipsToHeadDistance = Vector3.Distance(_animator.GetBoneTransform(HumanBodyBones.Hips).position, _animator.GetBoneTransform(HumanBodyBones.Head).position);
 
             _vrPlayArea = QuickSingletonManager.GetInstance<QuickVRPlayArea>();
             //_vrPlayArea.transform.parent = transform;
@@ -431,10 +431,12 @@ namespace QuickVR
                 {
                     QuickIKSolver ikSolverHips = GetIKSolver(IKBone.Hips);
                     QuickIKSolver ikSolverHead = GetIKSolver(IKBone.Head);
-                    //float chainLength = Vector3.Distance(_animator.GetBoneTransform(HumanBodyBones.Hips).position, _animator.GetBoneTransform(HumanBodyBones.Head).position);
+                    float chainLength = Vector3.Distance(_animator.GetBoneTransform(HumanBodyBones.Hips).position, _animator.GetBoneTransform(HumanBodyBones.Head).position);
                     Vector3 v = (ikSolverHips._targetLimb.position - ikSolverHead._targetLimb.position).normalized;
                     //Debug.Log(v.ToString("f3"));
-                    ikSolverHips._targetLimb.position = ikSolverHead._targetLimb.position + v * _hipsToHeadLength;
+                    float targetsDistance = Vector3.Distance(ikSolverHips._targetLimb.position, ikSolverHead._targetLimb.position);
+                    ikSolverHips._targetLimb.position = ikSolverHead._targetLimb.position + v * Mathf.Min(_maxHipsToHeadDistance, chainLength);
+                    //ikSolverHips._targetLimb.position = ikSolverHead._targetLimb.position + v * chainLength;
                 }
 
                 _footprints.gameObject.SetActive(_useFootprints);
