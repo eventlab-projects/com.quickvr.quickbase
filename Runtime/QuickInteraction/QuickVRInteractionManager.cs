@@ -135,26 +135,29 @@ namespace QuickVR
             CreateLocomotionProviderDirectTurn();
         }
 
-        protected virtual T CreateLocomotionProvider<T>() where T : LocomotionProvider
+        protected virtual T CreateLocomotionProvider<T>(DefaultLocomotionProvider lProvider) where T : LocomotionProvider
         {
             T result = gameObject.GetComponent<T>();
+            bool lProviderEnabled = false;
             if (result)
             {
+                lProviderEnabled = result.enabled;
                 DestroyImmediate(result);
             }
 
             result = gameObject.AddComponent<T>();
             result.system = _xrRig.GetComponent<LocomotionSystem>();
-            result.enabled = false;
+            result.enabled = lProviderEnabled;
+
+            _locomotionProviders[lProvider] = result;
 
             return result;
         }
 
         protected virtual TeleportationProvider CreateLocomotionProviderTeleport()
         {
-            TeleportationProvider result = CreateLocomotionProvider<TeleportationProvider>();
-            _locomotionProviders[DefaultLocomotionProvider.Teleport] = result;
-
+            TeleportationProvider result = CreateLocomotionProvider<TeleportationProvider>(DefaultLocomotionProvider.Teleport);
+            
             result.beginLocomotion += BeginLocomotionTeleport;
             result.endLocomotion += EndLocomotionTeleport;
 
@@ -173,42 +176,36 @@ namespace QuickVR
 
         protected virtual ActionBasedContinuousMoveProvider CreateLocomotionProviderContinuousMove()
         {
-            ActionBasedContinuousMoveProvider result = CreateLocomotionProvider<ActionBasedContinuousMoveProvider>();
+            ActionBasedContinuousMoveProvider result = CreateLocomotionProvider<ActionBasedContinuousMoveProvider>(DefaultLocomotionProvider.ContinuousMove);
             if (!result.leftHandMoveAction.action.IsValid())
             {
                 result.leftHandMoveAction = new InputActionProperty(InputManager.GetInputActionsDefault().FindAction("General/Move"));
             }
-
-            _locomotionProviders[DefaultLocomotionProvider.ContinuousMove] = result;
 
             return result;
         }
 
         protected virtual ActionBasedContinuousTurnProvider CreateLocomotionProviderContiuousTurn()
         {
-            ActionBasedContinuousTurnProvider result = CreateLocomotionProvider<ActionBasedContinuousTurnProvider>();
+            ActionBasedContinuousTurnProvider result = CreateLocomotionProvider<ActionBasedContinuousTurnProvider>(DefaultLocomotionProvider.ContinuousTurn);
             if (!result.rightHandTurnAction.action.IsValid())
             {
                 result.rightHandTurnAction = new InputActionProperty(InputManager.GetInputActionsDefault().FindAction("General/RotateCamera"));
             }
-
-            _locomotionProviders[DefaultLocomotionProvider.ContinuousTurn] = result;
 
             return result;
         }
 
         protected virtual QuickDirectMoveProvider CreateLocomotionProviderDirectMove()
         {
-            QuickDirectMoveProvider result = CreateLocomotionProvider<QuickDirectMoveProvider>();
-            _locomotionProviders[DefaultLocomotionProvider.DirectMove] = result;
+            QuickDirectMoveProvider result = CreateLocomotionProvider<QuickDirectMoveProvider>(DefaultLocomotionProvider.DirectMove);
 
             return result;
         }
 
         protected virtual QuickDirectTurnProvider CreateLocomotionProviderDirectTurn()
         {
-            QuickDirectTurnProvider result = CreateLocomotionProvider<QuickDirectTurnProvider>();
-            _locomotionProviders[DefaultLocomotionProvider.DirectTurn] = result;
+            QuickDirectTurnProvider result = CreateLocomotionProvider<QuickDirectTurnProvider>(DefaultLocomotionProvider.DirectTurn);
 
             return result;
         }
