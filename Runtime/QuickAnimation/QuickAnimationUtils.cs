@@ -7,6 +7,214 @@ using System.Threading;
 namespace QuickVR
 {
 
+    public class QuickAnimWriter
+    {
+
+        #region PROTECTED ATTRIBUTES
+
+        protected StreamWriter _sWriter = null;
+        protected float _animTime = 0;
+
+        protected string _indent = "";
+
+        protected int _indentLevel
+        {
+            get
+            {
+                return m_IndentLevel;
+            }
+            set
+            {
+                m_IndentLevel = value;
+
+                _indent = "";
+                for (int i = 0; i < m_IndentLevel; i++)
+                {
+                    _indent += "  ";
+                }
+            }
+        }
+        protected int m_IndentLevel = 0;
+
+        #endregion
+
+        #region GET AND SET
+
+        public virtual void WriteAnimation(string filePath, QuickAnimation animation)
+        {
+            WriteBegin(filePath);
+
+            WriteLine("%YAML 1.1");
+            WriteLine("%TAG !u! tag:unity3d.com,2011:");
+            WriteLine("--- !u!74 &7400000");
+            WriteLine("AnimationClip:");
+
+            _indentLevel++;
+            WriteLine("m_ObjectHideFlags: 0");
+            WriteLine("m_CorrespondingSourceObject: {fileID: 0}");
+            WriteLine("m_PrefabInstance: {fileID: 0}");
+            WriteLine("m_PrefabAsset: {fileID: 0}");
+            WriteLine("m_Name: " + "testAnimConverted");
+            WriteLine("serializedVersion: 6");
+            WriteLine("m_Legacy: 0");
+            WriteLine("m_Compressed: 0");
+            WriteLine("m_UseHighQualityCurve: 1");
+            WriteLine("m_RotationCurves: []");
+            WriteLine("m_CompressedRotationCurves: []");
+            WriteLine("m_EulerCurves: []");
+            WriteLine("m_PositionCurves: []");
+            WriteLine("m_ScaleCurves: []");
+
+            WriteLine("m_FloatCurves:");
+
+            //Save the main animation curves
+            QuickAnimationCurve curve = animation.GetAnimationCurve(QuickAnimation.CURVE_BODY_POSITION);
+            WriteCurve("RootT.x", curve[0]);
+            WriteCurve("RootT.y", curve[1]);
+            WriteCurve("RootT.z", curve[2]);
+
+            curve = animation.GetAnimationCurve(QuickAnimation.CURVE_BODY_ROTATION);
+            WriteCurve("RootQ.x", curve[0]);
+            WriteCurve("RootQ.y", curve[1]);
+            WriteCurve("RootQ.z", curve[2]);
+            WriteCurve("RootQ.w", curve[3]);
+
+            curve = animation.GetAnimationCurve(QuickAnimation.CURVE_LEFT_FOOT_IK_GOAL_POSITION);
+            WriteCurve("LeftFootT.x", curve[0]);
+            WriteCurve("LeftFootT.y", curve[1]);
+            WriteCurve("LeftFootT.z", curve[2]);
+
+            curve = animation.GetAnimationCurve(QuickAnimation.CURVE_LEFT_FOOT_IK_GOAL_ROTATION);
+            WriteCurve("LeftFootQ.x", curve[0]);
+            WriteCurve("LeftFootQ.y", curve[1]);
+            WriteCurve("LeftFootQ.z", curve[2]);
+            WriteCurve("LeftFootQ.w", curve[3]);
+
+            curve = animation.GetAnimationCurve(QuickAnimation.CURVE_RIGHT_FOOT_IK_GOAL_POSITION);
+            WriteCurve("RightFootT.x", curve[0]);
+            WriteCurve("RightFootT.y", curve[1]);
+            WriteCurve("RightFootT.z", curve[2]);
+
+            curve = animation.GetAnimationCurve(QuickAnimation.CURVE_RIGHT_FOOT_IK_GOAL_ROTATION);
+            WriteCurve("RightFootQ.x", curve[0]);
+            WriteCurve("RightFootQ.y", curve[1]);
+            WriteCurve("RightFootQ.z", curve[2]);
+            WriteCurve("RightFootQ.w", curve[3]);
+
+            //Save the curves for the muscles
+            for (int i = 0; i < QuickHumanTrait.GetNumMuscles(); i++)
+            {
+                string muscleName = QuickHumanTrait.GetMuscleName(i);
+                WriteCurve(muscleName, animation.GetAnimationCurve(muscleName)[0]);
+            }
+
+            WriteLine("m_PPtrCurves: []");
+            WriteLine("m_SampleRate: 60");
+            WriteLine("m_WrapMode: 0");
+
+            WriteLine("m_Bounds:");
+            _indentLevel++;
+            WriteLine("m_Center: {x: 0, y: 0, z: 0}");
+            WriteLine("m_Extent: {x: 0, y: 0, z: 0}");
+            _indentLevel--;
+
+            WriteLine("m_ClipBindingConstant:");
+            _indentLevel++;
+            WriteLine("genericBindings: []");
+            WriteLine("pptrCurveMapping: []");
+            _indentLevel--;
+
+            WriteLine("m_AnimationClipSettings:");
+            _indentLevel++;
+            WriteLine("serializedVersion: 2");
+            WriteLine("m_AdditiveReferencePoseClip: {fileID: 0}");
+            WriteLine("m_AdditiveReferencePoseTime: 0");
+            WriteLine("m_StartTime: 0");
+            WriteLine("m_StopTime: " + _animTime.ToString().Replace(",", "."));
+            WriteLine("m_OrientationOffsetY: 0");
+            WriteLine("m_Level: 0");
+            WriteLine("m_CycleOffset: 0");
+            WriteLine("m_HasAdditiveReferencePose: 0");
+            WriteLine("m_LoopTime: 0");
+            WriteLine("m_LoopBlend: 0");
+            WriteLine("m_LoopBlendOrientation: 1");
+            WriteLine("m_LoopBlendPositionY: 1");
+            WriteLine("m_LoopBlendPositionXZ: 1");
+            WriteLine("m_KeepOriginalOrientation: 0");
+            WriteLine("m_KeepOriginalPositionY: 1");
+            WriteLine("m_KeepOriginalPositionXZ: 0");
+            WriteLine("m_HeightFromFeet: 0");
+            WriteLine("m_Mirror: 0");
+            _indentLevel--;
+
+            WriteLine("m_EditorCurves: []");
+            WriteLine("m_EulerEditorCurves: []");
+            WriteLine("m_HasGenericRootTransform: 0");
+            WriteLine("m_HasMotionFloatCurves: 0");
+            WriteLine("m_Events: []");
+
+            WriteEnd();
+        }
+
+        protected virtual void WriteBegin(string filePath)
+        {
+            _indentLevel = 0;
+            _animTime = 0;
+            _sWriter = new StreamWriter(filePath);
+        }
+
+        protected virtual void WriteLine(string line)
+        {
+            _sWriter.WriteLine(_indent + line);
+        }
+
+        protected virtual void WriteCurve(string curveName, AnimationCurve aCurve)
+        {
+            WriteLine("- curve:");
+            _indentLevel += 2;
+            WriteLine("serializedVersion: 2");
+            WriteLine("m_Curve:");
+
+            foreach (Keyframe k in aCurve.keys)
+            {
+                WriteLine("- serializedVersion: 3");
+                _indentLevel++;
+
+                WriteLine("time: " + k.time.ToString().Replace(",", "."));
+                WriteLine("value: " + k.value.ToString().Replace(",", "."));
+                WriteLine("inSlope: " + k.inTangent.ToString().Replace(",", "."));
+                WriteLine("outSlope: " + k.outTangent.ToString().Replace(",", "."));
+                WriteLine("tangentMode: 0");
+                WriteLine("weightedMode: " + (int)k.weightedMode);
+                WriteLine("inWeight: " + k.inWeight.ToString().Replace(",", "."));
+                WriteLine("outWeight: " + k.outWeight.ToString().Replace(",", "."));
+                _indentLevel--;
+
+                //Update the animTime if necessary
+                _animTime = Mathf.Max(_animTime, k.time);
+            }
+
+            WriteLine("m_PreInfinity: 2");
+            WriteLine("m_PostInfinity: 2");
+            WriteLine("m_RotationOrder: 4");
+
+            _indentLevel--;
+            WriteLine("attribute: " + curveName);
+            WriteLine("path: ");
+            WriteLine("classID: 95");
+            WriteLine("script: {fileID: 0}");
+            _indentLevel--;
+        }
+
+        protected virtual void WriteEnd()
+        {
+            _sWriter.Close();
+        }
+
+        #endregion
+
+    }
+
     public class QuickAsyncOperation<T> : QuickAsyncOperation
     {
 
@@ -427,6 +635,12 @@ namespace QuickVR
             string s = File.ReadAllText(path);
 
             return ToQuickAnimation(JsonUtility.FromJson<QuickAnimationParser>(s), animator);
+        }
+
+        public static void SaveToAnim(string path, QuickAnimation animation)
+        {
+            QuickAnimWriter aWriter = new QuickAnimWriter();
+            aWriter.WriteAnimation(path, animation);
         }
 
     }
