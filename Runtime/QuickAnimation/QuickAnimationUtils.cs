@@ -69,9 +69,11 @@ namespace QuickVR
 
             //Save the main animation curves
             QuickAnimationCurve curve = animation.GetAnimationCurve(QuickAnimation.CURVE_BODY_POSITION);
-            WriteCurve("RootT.x", curve[0]);
-            WriteCurve("RootT.y", curve[1]);
-            WriteCurve("RootT.z", curve[2]);
+            QuickAnimationCurve tmp = animation.GetAnimationCurve(QuickAnimation.CURVE_TRANSFORM_POSITION);
+
+            WriteCurve("RootT.x", curve[0] + tmp[0]);
+            WriteCurve("RootT.y", curve[1] + tmp[1]);
+            WriteCurve("RootT.z", curve[2] + tmp[2]);
 
             curve = animation.GetAnimationCurve(QuickAnimation.CURVE_BODY_ROTATION);
             WriteCurve("RootQ.x", curve[0]);
@@ -154,6 +156,22 @@ namespace QuickVR
             WriteLine("m_Events: []");
 
             WriteEnd();
+        }
+
+        protected virtual AnimationCurve AddCurves(AnimationCurve c1, AnimationCurve c2)
+        {
+            AnimationCurve result = new AnimationCurve();
+
+            Keyframe[] kFrames = new Keyframe[c1.keys.Length];
+            for (int i = 0; i < kFrames.Length; i++)
+            {
+                float t = c1.keys[i].time;
+                kFrames[i].time = t;
+                kFrames[i].value = c1.keys[i].value + c2.Evaluate(t);
+            }
+            result.keys = kFrames;
+
+            return result;
         }
 
         protected virtual void WriteBegin(string filePath)

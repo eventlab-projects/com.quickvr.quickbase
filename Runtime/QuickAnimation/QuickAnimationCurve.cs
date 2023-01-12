@@ -79,6 +79,22 @@ namespace QuickVR
             return _sortedTime.Count > 0 ? _sortedTime[_sortedTime.Count - 1] : 0;
         }
 
+        public static QuickAnimationCurveBase operator +(QuickAnimationCurveBase c1, QuickAnimationCurveBase c2)
+        {
+            QuickAnimationCurveBase result = new QuickAnimationCurveBase();
+
+            Keyframe[] kFrames = new Keyframe[c1.keys.Length];
+            for (int i = 0; i < kFrames.Length; i++)
+            {
+                float t = c1.keys[i].time;
+                kFrames[i].time = t;
+                kFrames[i].value = c1.keys[i].value + c2.Evaluate(t);
+            }
+            result.keys = kFrames;
+
+            return result;
+        }
+
         #endregion
 
     }
