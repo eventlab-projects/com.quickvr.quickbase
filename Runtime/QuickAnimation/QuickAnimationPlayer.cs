@@ -31,6 +31,7 @@ namespace QuickVR
         protected float _playTimeStart = 0;
         protected float _playTimeEnd = Mathf.Infinity;
         protected float _playTimeCurrent = 0;
+        protected float _playTimePrev = 0;
 
         protected Animator _animator = null;
         protected HumanPose _humanPose = new HumanPose();
@@ -115,7 +116,7 @@ namespace QuickVR
             if (enabled && _playAnimationClip != null)
             {
                 _playAnimationClip.SetEvaluateMethod(_playMode);
-                _playTimeStart = _playTimeCurrent = timeStart;
+                _playTimeStart = _playTimeCurrent = _playTimePrev = timeStart;
                 _playTimeEnd = Mathf.Min(timeEnd, _playAnimationClip.GetTimeLength());
 
                 SetState(State.Playing);
@@ -172,7 +173,8 @@ namespace QuickVR
         protected virtual void UpdateStatePlaying()
         {
             //Update the Animation
-            UpdateStatePlaying(_playTimeCurrent);
+            UpdateStatePlaying(_playTimePrev, _playTimeCurrent);
+            _playTimePrev = _playTimeCurrent;
             _playTimeCurrent += Time.deltaTime;
 
             if (_playTimeCurrent >= _playTimeEnd)
@@ -180,20 +182,27 @@ namespace QuickVR
                 if (_playLoop)
                 {
                     _playTimeCurrent = _playTimeStart + Mathf.Repeat(_playTimeCurrent, _playTimeEnd);
+                    _playTimePrev = _playTimeStart;
                 }
                 else
                 {
-                    UpdateStatePlaying(_playTimeEnd);
+                    UpdateStatePlaying(_playTimeEnd, _playTimeEnd);
                     SetState(State.Idle);
                 }
             }
         }
 
-        protected virtual void UpdateStatePlaying(float time)
+        protected virtual void UpdateStatePlaying(float prevTime, float time)
         {
-            transform.position = _playAnimationClip.EvaluateTransformPosition(time);
-            transform.rotation = _playAnimationClip.EvaluateTransformRotation(time);
+            Quaternion qOffset = _playAnimationClip.EvaluateTransformRotation(time) * Quaternion.Inverse(_playAnimationClip.EvaluateTransformRotation(prevTime));
+            transform.rotation *= qOffset;
 
+            Vector3 pOffset = _playAnimationClip.EvaluateTransformPosition(time) - _playAnimationClip.EvaluateTransformPosition(prevTime);
+            qOffset = transform.rotation * Quaternion.Inverse(_playAnimationClip.EvaluateTransformRotation(0));
+            transform.position += qOffset * pOffset;
+            //transform.position = _playAnimationClip.EvaluateTransformPosition(time);
+            //transform.rotation = _playAnimationClip.EvaluateTransformRotation(time);
+            
             if (_animator.isHuman)
             {
                 _playAnimationClip.EvaluateHumanPose(time, ref _humanPose);
