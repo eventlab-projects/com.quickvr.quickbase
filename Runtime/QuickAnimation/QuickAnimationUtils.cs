@@ -121,16 +121,10 @@ namespace QuickVR
         {
             //Save the main animation curves
             WriteCurve("RootT", animation.GetAnimationCurve(QuickAnimation.CURVE_BODY_POSITION) + animation.GetAnimationCurve(QuickAnimation.CURVE_TRANSFORM_POSITION));
-
-            QuickAnimationCurve curveRot = animation.GetAnimationCurve(QuickAnimation.CURVE_TRANSFORM_ROTATION);
-            WriteCurve("RootQ", animation.GetAnimationCurve(QuickAnimation.CURVE_BODY_ROTATION));
-
+            WriteCurve("RootQ", animation.GetAnimationCurve(QuickAnimation.CURVE_BODY_ROTATION) * animation.GetAnimationCurve(QuickAnimation.CURVE_TRANSFORM_ROTATION));
             WriteCurve("LeftFootT", animation.GetAnimationCurve(QuickAnimation.CURVE_LEFT_FOOT_IK_GOAL_POSITION));
-
             WriteCurve("LeftFootQ", animation.GetAnimationCurve(QuickAnimation.CURVE_LEFT_FOOT_IK_GOAL_ROTATION));
-
             WriteCurve("RightFootT", animation.GetAnimationCurve(QuickAnimation.CURVE_RIGHT_FOOT_IK_GOAL_POSITION));
-
             WriteCurve("RightFootQ", animation.GetAnimationCurve(QuickAnimation.CURVE_RIGHT_FOOT_IK_GOAL_ROTATION));
 
             //Save the curves for the muscles

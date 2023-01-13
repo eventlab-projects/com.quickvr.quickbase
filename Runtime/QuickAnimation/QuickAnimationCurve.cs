@@ -95,6 +95,22 @@ namespace QuickVR
             return result;
         }
 
+        public static QuickAnimationCurveBase operator *(QuickAnimationCurveBase c1, QuickAnimationCurveBase c2)
+        {
+            QuickAnimationCurveBase result = new QuickAnimationCurveBase();
+
+            Keyframe[] kFrames = new Keyframe[c1.keys.Length];
+            for (int i = 0; i < kFrames.Length; i++)
+            {
+                float t = c1.keys[i].time;
+                kFrames[i].time = t;
+                kFrames[i].value = c1.keys[i].value * c2.Evaluate(t);
+            }
+            result.keys = kFrames;
+
+            return result;
+        }
+
         #endregion
 
     }
@@ -287,6 +303,42 @@ namespace QuickVR
             }
 
             return result;
+        }
+
+        public static QuickAnimationCurve operator *(QuickAnimationCurve c1, QuickAnimationCurve c2)
+        {
+            QuickAnimationCurve result = null;
+            if (c1._numDimensions == c2._numDimensions)
+            {
+                int dim = c1._numDimensions;
+                result = new QuickAnimationCurve();
+                result._numDimensions = dim;
+
+                if (dim <= 3)
+                {
+                    //Just multiply component-wise
+                    for (int i = 0; i < dim; i++)
+                    {
+                        result[i] = c1[i] * c2[i];
+                    }
+                }
+                else if (dim == 4)
+                {
+                    //Special case, Quaternion product. 
+                    Keyframe[] kFrames = c1[0].keys;
+                    for (int i = 0; i < kFrames.Length; i++)
+                    {
+                        float t = kFrames[i].time;
+                        Quaternion q1 = c1.EvaluateQuaternion(t);
+                        Quaternion q2 = c2.EvaluateQuaternion(t);
+
+                        result.AddKey(t, q1 * q2);
+                    }
+                }
+            }
+
+            return result;
+            
         }
 
         #endregion
