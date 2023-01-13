@@ -307,7 +307,7 @@ namespace QuickVR
         {
             if (!_curves.ContainsKey(curveName))
             {
-                _curves[curveName] = new QuickAnimationCurve(curveName);
+                _curves[curveName] = new QuickAnimationCurve();
             }
 
             return _curves[curveName];

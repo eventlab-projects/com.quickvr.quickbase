@@ -67,48 +67,7 @@ namespace QuickVR
 
             WriteLine("m_FloatCurves:");
 
-            //Save the main animation curves
-            QuickAnimationCurve curve = animation.GetAnimationCurve(QuickAnimation.CURVE_BODY_POSITION);
-            QuickAnimationCurve tmp = animation.GetAnimationCurve(QuickAnimation.CURVE_TRANSFORM_POSITION);
-
-            WriteCurve("RootT.x", curve[0] + tmp[0]);
-            WriteCurve("RootT.y", curve[1] + tmp[1]);
-            WriteCurve("RootT.z", curve[2] + tmp[2]);
-
-            curve = animation.GetAnimationCurve(QuickAnimation.CURVE_BODY_ROTATION);
-            WriteCurve("RootQ.x", curve[0]);
-            WriteCurve("RootQ.y", curve[1]);
-            WriteCurve("RootQ.z", curve[2]);
-            WriteCurve("RootQ.w", curve[3]);
-
-            curve = animation.GetAnimationCurve(QuickAnimation.CURVE_LEFT_FOOT_IK_GOAL_POSITION);
-            WriteCurve("LeftFootT.x", curve[0]);
-            WriteCurve("LeftFootT.y", curve[1]);
-            WriteCurve("LeftFootT.z", curve[2]);
-
-            curve = animation.GetAnimationCurve(QuickAnimation.CURVE_LEFT_FOOT_IK_GOAL_ROTATION);
-            WriteCurve("LeftFootQ.x", curve[0]);
-            WriteCurve("LeftFootQ.y", curve[1]);
-            WriteCurve("LeftFootQ.z", curve[2]);
-            WriteCurve("LeftFootQ.w", curve[3]);
-
-            curve = animation.GetAnimationCurve(QuickAnimation.CURVE_RIGHT_FOOT_IK_GOAL_POSITION);
-            WriteCurve("RightFootT.x", curve[0]);
-            WriteCurve("RightFootT.y", curve[1]);
-            WriteCurve("RightFootT.z", curve[2]);
-
-            curve = animation.GetAnimationCurve(QuickAnimation.CURVE_RIGHT_FOOT_IK_GOAL_ROTATION);
-            WriteCurve("RightFootQ.x", curve[0]);
-            WriteCurve("RightFootQ.y", curve[1]);
-            WriteCurve("RightFootQ.z", curve[2]);
-            WriteCurve("RightFootQ.w", curve[3]);
-
-            //Save the curves for the muscles
-            for (int i = 0; i < QuickHumanTrait.GetNumMuscles(); i++)
-            {
-                string muscleName = QuickHumanTrait.GetMuscleName(i);
-                WriteCurve(muscleName, animation.GetAnimationCurve(muscleName)[0]);
-            }
+            WriteCurves(animation);
 
             WriteLine("m_PPtrCurves: []");
             WriteLine("m_SampleRate: 60");
@@ -158,6 +117,30 @@ namespace QuickVR
             WriteEnd();
         }
 
+        protected virtual void WriteCurves(QuickAnimation animation)
+        {
+            //Save the main animation curves
+            WriteCurve("RootT", animation.GetAnimationCurve(QuickAnimation.CURVE_BODY_POSITION) + animation.GetAnimationCurve(QuickAnimation.CURVE_TRANSFORM_POSITION));
+
+            QuickAnimationCurve curveRot = animation.GetAnimationCurve(QuickAnimation.CURVE_TRANSFORM_ROTATION);
+            WriteCurve("RootQ", animation.GetAnimationCurve(QuickAnimation.CURVE_BODY_ROTATION));
+
+            WriteCurve("LeftFootT", animation.GetAnimationCurve(QuickAnimation.CURVE_LEFT_FOOT_IK_GOAL_POSITION));
+
+            WriteCurve("LeftFootQ", animation.GetAnimationCurve(QuickAnimation.CURVE_LEFT_FOOT_IK_GOAL_ROTATION));
+
+            WriteCurve("RightFootT", animation.GetAnimationCurve(QuickAnimation.CURVE_RIGHT_FOOT_IK_GOAL_POSITION));
+
+            WriteCurve("RightFootQ", animation.GetAnimationCurve(QuickAnimation.CURVE_RIGHT_FOOT_IK_GOAL_ROTATION));
+
+            //Save the curves for the muscles
+            for (int i = 0; i < QuickHumanTrait.GetNumMuscles(); i++)
+            {
+                string muscleName = QuickHumanTrait.GetMuscleName(i);
+                WriteCurve(muscleName, animation.GetAnimationCurve(muscleName));
+            }
+        }
+
         protected virtual AnimationCurve AddCurves(AnimationCurve c1, AnimationCurve c2)
         {
             AnimationCurve result = new AnimationCurve();
@@ -184,6 +167,23 @@ namespace QuickVR
         protected virtual void WriteLine(string line)
         {
             _sWriter.WriteLine(_indent + line);
+        }
+
+        protected virtual void WriteCurve(string curveName, QuickAnimationCurve curve)
+        {
+            int dim = curve._numDimensions;
+            if (dim == 1)
+            {
+                WriteCurve(curveName, curve[0]);
+            }
+            else
+            {
+                string[] suffix = { ".x", ".y", ".z", ".w" };
+                for (int i = 0; i < dim; i++)
+                {
+                    WriteCurve(curveName + suffix[i], curve[i]);
+                }
+            }
         }
 
         protected virtual void WriteCurve(string curveName, AnimationCurve aCurve)

@@ -104,11 +104,6 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
-        public string _name 
-        {
-            get; protected set;
-        }
-
         public int _numDimensions 
         {
             get; protected set;
@@ -127,20 +122,12 @@ namespace QuickVR
 
         #endregion
 
-        #region CREATION AND DESTRUCTION
-
-        public QuickAnimationCurve(string name)
-        {
-            _name = name;
-        }
-
-        #endregion
-
         #region GET AND SET
 
         public QuickAnimationCurveBase this[int key]
         {
             get => GetValue(key);
+            set => SetValue(key, value);
         }
 
         public QuickAnimationCurveBase[] GetAnimationCurves()
@@ -156,6 +143,14 @@ namespace QuickVR
             if (key == 3) return _w;
 
             return null;
+        }
+
+        protected virtual void SetValue(int key, QuickAnimationCurveBase curve)
+        {
+            if (key == 0) _x = curve;
+            else if (key == 1) _y = curve;
+            else if (key == 2) _z = curve;
+            else if (key == 3) _w = curve;
         }
 
         public virtual bool AddKey(float time, float value, bool forceAdd = false)
@@ -275,6 +270,23 @@ namespace QuickVR
             _y.Compress(epsilon);
             _z.Compress(epsilon);
             _w.Compress(epsilon);
+        }
+
+        public static QuickAnimationCurve operator +(QuickAnimationCurve c1, QuickAnimationCurve c2)
+        {
+            QuickAnimationCurve result = null;
+            if (c1._numDimensions == c2._numDimensions)
+            {
+                result = new QuickAnimationCurve();
+                result._numDimensions = c1._numDimensions;
+
+                for (int i = 0; i < c1._numDimensions; i++)
+                {
+                    result[i] = c1[i] + c2[i];
+                }
+            }
+
+            return result;
         }
 
         #endregion
