@@ -292,6 +292,11 @@ namespace QuickVR
 
         public override void Calibrate()
         {
+            Vector3 tmpPos = transform.position;
+            Quaternion tmpRot = transform.rotation;
+            transform.position = Vector3.zero;
+            transform.rotation = Quaternion.identity;
+
             base.Calibrate();
 
             //_hipsToHeadLength = Vector3.Distance(GetIKSolver(HumanBodyBones.Hips)._targetLimb.position, GetIKSolver(HumanBodyBones.Head)._targetLimb.position);
@@ -305,6 +310,9 @@ namespace QuickVR
 
             _vrPlayArea.Calibrate();
             //AlignVRPlayArea(_vrPlayArea.GetUserForward());
+
+            transform.position = tmpPos;
+            transform.rotation = tmpRot;
         }
 
         protected virtual void AlignVRPlayArea(Vector3 userFwd)
@@ -336,7 +344,7 @@ namespace QuickVR
         {
             AlignVRPlayArea(node.transform.forward);
 
-            QuickTrackedObject tObjectHead = _vrPlayArea.GetVRNode(HumanBodyBones.Head).GetTrackedObject();
+            //QuickTrackedObject tObjectHead = _vrPlayArea.GetVRNode(HumanBodyBones.Head).GetTrackedObject();
             QuickTrackedObject tObjectHips = node.GetTrackedObject();
             //tObjectHips.transform.position = new Vector3(tObjectHead.transform.position.x, tObjectHips.transform.position.y, tObjectHead.transform.position.z);
             tObjectHips.transform.position = GetIKSolver((HumanBodyBones)node.GetRole())._targetLimb.position;
