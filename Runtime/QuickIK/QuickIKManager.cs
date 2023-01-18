@@ -214,8 +214,8 @@ namespace QuickVR {
 
                 //And configure it according to the bone
                 HumanBodyBones boneLimb = ToHumanBodyBones(ikBone);
-                ikSolver._boneUpper = GetBoneUpper(boneLimb);
-                ikSolver._boneMid = GetBoneMid(boneLimb);
+                ikSolver._boneUpper = _animator.GetBoneTransform(GetBoneUpperID(boneLimb));
+                ikSolver._boneMid = _animator.GetBoneTransform(GetBoneMidID(boneLimb));
                 ikSolver._boneLimb = _animator.GetBoneTransform((QuickHumanBodyBones)boneLimb);
             }
             
@@ -263,7 +263,7 @@ namespace QuickVR {
                 {
                     ikTarget.LookAt(ikTarget.position + transform.right, transform.up);
                 }
-                else if (boneName.Contains("Spine"))
+                else if (boneID == HumanBodyBones.Spine)
                 {
                     ikTarget.position -= transform.forward * DEFAULT_TARGET_HINT_DISTANCE;
                 }
@@ -321,7 +321,7 @@ namespace QuickVR {
                 
                 if (ikSolver._targetHint)
                 {
-                    ResetIKTarget(QuickHumanTrait.GetParentBone(boneID), ikSolver._targetHint);
+                    ResetIKTarget(GetBoneMidID(boneID), ikSolver._targetHint);
                 }
             }
         }
@@ -409,32 +409,48 @@ namespace QuickVR {
             return _ikTargetsRoot;
         }
 
-        protected virtual Transform GetBoneUpper(HumanBodyBones boneLimbID)
+        protected virtual HumanBodyBones GetBoneUpperID(HumanBodyBones boneLimbID)
         {
-            if (boneLimbID == HumanBodyBones.Hips || boneLimbID == HumanBodyBones.Head)
+            HumanBodyBones boneUpperID;
+
+            if (boneLimbID == HumanBodyBones.Hips)
             {
-                return _animator.GetBoneTransform(HumanBodyBones.Spine);
+                boneUpperID = HumanBodyBones.Spine;
+            }
+            else if (boneLimbID == HumanBodyBones.Head)
+            {
+                boneUpperID = HumanBodyBones.Spine;
             }
             else if (boneLimbID == HumanBodyBones.LeftEye || boneLimbID == HumanBodyBones.RightEye)
             {
-                return _animator.GetBoneTransform(HumanBodyBones.Head);
+                boneUpperID = HumanBodyBones.Head;
             }
-            
-            return _animator.GetBoneTransform(QuickHumanTrait.GetParentBone(QuickHumanTrait.GetParentBone(boneLimbID)));
+            else
+            {
+                boneUpperID = QuickHumanTrait.GetParentBone(QuickHumanTrait.GetParentBone(boneLimbID));
+            }
+
+            return boneUpperID;
         }
 
-        protected virtual Transform GetBoneMid(HumanBodyBones boneLimbID)
+        protected virtual HumanBodyBones GetBoneMidID(HumanBodyBones boneLimbID)
         {
+            HumanBodyBones boneMidID;
+
             if (boneLimbID == HumanBodyBones.Hips || boneLimbID == HumanBodyBones.Head)
             {
-                return _animator.GetBoneTransform(HumanBodyBones.Spine);
+                boneMidID = HumanBodyBones.Spine;
             }
             else if (boneLimbID == HumanBodyBones.LeftEye || boneLimbID == HumanBodyBones.RightEye)
             {
-                return _animator.GetBoneTransform(HumanBodyBones.Head);
+                boneMidID = HumanBodyBones.Head;
+            }
+            else
+            {
+                boneMidID = QuickHumanTrait.GetParentBone(boneLimbID);
             }
 
-            return _animator.GetBoneTransform(QuickHumanTrait.GetParentBone(boneLimbID));
+            return boneMidID;
         }
 
         public override void Calibrate()

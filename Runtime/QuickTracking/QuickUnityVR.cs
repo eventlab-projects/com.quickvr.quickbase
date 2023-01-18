@@ -299,8 +299,6 @@ namespace QuickVR
 
             base.Calibrate();
 
-            //_hipsToHeadLength = Vector3.Distance(GetIKSolver(HumanBodyBones.Hips)._targetLimb.position, GetIKSolver(HumanBodyBones.Head)._targetLimb.position);
-
             ResetTrackingOffsets();
 
             transform.localScale = Vector3.one;
@@ -416,35 +414,32 @@ namespace QuickVR
                                 ikSolverEye._weightBlink = ((QuickVRNodeEye)node).GetBlinkFactor();
                             }
                         }
-                        //else
-                        //{
-                        //    //Keep the position and rotation that comes from the animation. 
-                        //    if (ikSolver._boneLimb)
-                        //    {
-                        //        //ikSolver._targetLimb.position = ikSolver._boneLimb.position;
-                        //    }
-                        //    //ikSolver._targetLimb.GetChild(0).rotation = tBone.rotation;
-                        //}
+                        else
+                        {
+                            //Keep the position and rotation that comes from the animation. 
+                            //if (ikSolver._boneLimb)
+                            //{
+                            //    ikSolver._targetLimb.position = ikSolver._boneLimb.position;
+                            //}
+                            //ikSolver._targetLimb.GetChild(0).rotation = _animator.GetBoneTransform(boneID).rotation;
+                        }
                     }
                 }
 
                 //2) Special case. If the Hips is set to Tracking mode, we need to adjust the IKTarget position of the hips
                 //in a way that the head will match the position of the camera provided by the HMD
-                //if (
-                //    GetIKControl(IKBone.Head) == ControlType.Tracking &&
-                //    _vrPlayArea.GetVRNode(HumanBodyBones.Head).IsTracked() &&
-                //    GetIKControl(IKBone.Hips) == ControlType.Tracking && 
-                //    !_vrPlayArea.GetVRNode(HumanBodyBones.Hips).IsTracked()
-                //    )
+                if (
+                    GetIKControl(IKBone.Head) == ControlType.Tracking &&
+                    _vrPlayArea.GetVRNode(HumanBodyBones.Head).IsTracked() &&
+                    GetIKControl(IKBone.Hips) == ControlType.Tracking &&
+                    !_vrPlayArea.GetVRNode(HumanBodyBones.Hips).IsTracked()
+                    )
                 {
                     QuickIKSolver ikSolverHips = GetIKSolver(IKBone.Hips);
                     QuickIKSolver ikSolverHead = GetIKSolver(IKBone.Head);
                     float chainLength = Vector3.Distance(_animator.GetBoneTransform(HumanBodyBones.Hips).position, _animator.GetBoneTransform(HumanBodyBones.Head).position);
                     Vector3 v = (ikSolverHips._targetLimb.position - ikSolverHead._targetLimb.position).normalized;
-                    //Debug.Log(v.ToString("f3"));
-                    float targetsDistance = Vector3.Distance(ikSolverHips._targetLimb.position, ikSolverHead._targetLimb.position);
                     ikSolverHips._targetLimb.position = ikSolverHead._targetLimb.position + v * Mathf.Min(_maxHipsToHeadDistance, chainLength);
-                    //ikSolverHips._targetLimb.position = ikSolverHead._targetLimb.position + v * chainLength;
                 }
 
                 _footprints.gameObject.SetActive(_useFootprints);
