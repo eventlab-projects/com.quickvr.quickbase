@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections;
+
 using UnityEngine;
+using UnityEngine.UI;
 using UnityEngine.EventSystems;
 
 namespace QuickVR 
@@ -38,9 +40,15 @@ namespace QuickVR
         public event Action OnUp;   // Called when Fire1 is released whilst the cursor is over this object.
         public event Action OnDown; // Called when Fire1 is pressed whilst the cursor is over this object.
 
-		#endregion
+        public delegate void ItemAction(QuickUIInteractiveItem item);
+        public static event ItemAction OnInteractiveItemSelected;
 
-		#region CREATION AND DESTRUCTION
+        public delegate void ButtonAction(Button button);
+        public static event ButtonAction OnButtonSelected;
+
+        #endregion
+
+        #region CREATION AND DESTRUCTION
 
         protected virtual void OnDisable() {
 			_isOver = _isDown = false;
@@ -83,6 +91,20 @@ namespace QuickVR
         public void OnPointerDown(PointerEventData eventData)
         {
             Down();
+
+            if (OnInteractiveItemSelected != null)
+            {
+                OnInteractiveItemSelected(this);
+            }
+
+            if (OnButtonSelected != null)
+            {
+                Button b = GetComponent<Button>();
+                if (b)
+                {
+                    OnButtonSelected(b);
+                }
+            }
         }
 
         public void OnPointerUp(PointerEventData eventData)
