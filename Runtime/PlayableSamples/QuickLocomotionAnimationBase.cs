@@ -102,8 +102,11 @@ namespace QuickVR
 
         protected virtual void UpdateFeetIKTargets()
         {
-            UpdateFootIKTarget(true);
-            UpdateFootIKTarget(false);
+            if (_ikManager)
+            {
+                UpdateFootIKTarget(true);
+                UpdateFootIKTarget(false);
+            }
         }
 
         protected virtual void UpdateFootIKTarget(bool isLeft)
@@ -115,14 +118,20 @@ namespace QuickVR
 
         protected virtual void UpdateFeetIKSolvers()
         {
-            UpdateFootIKSolver(true);
-            UpdateFootIKSolver(false);
+            if (_ikManager)
+            {
+                UpdateFootIKSolver(true);
+                UpdateFootIKSolver(false);
+            }
         }
 
         protected virtual void OnAnimatorIK()
         {
-            UpdateFootIKTargetData(true, out _ikTargetLeftFootPos, out _ikTargetLeftFootRot);
-            UpdateFootIKTargetData(false, out _ikTargetRightFootPos, out _ikTargetRightFootRot);
+            if (_ikManager)
+            {
+                UpdateFootIKTargetData(true, out _ikTargetLeftFootPos, out _ikTargetLeftFootRot);
+                UpdateFootIKTargetData(false, out _ikTargetRightFootPos, out _ikTargetRightFootRot);
+            }
         }
 
         protected virtual void UpdateFootIKTargetData(bool isLeft, out Vector3 ikTargetPos, out Quaternion ikTargetRot)
