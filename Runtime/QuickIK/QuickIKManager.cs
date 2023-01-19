@@ -115,16 +115,13 @@ namespace QuickVR {
 
         #region CREATION AND DESTRUCTION
 
-        protected override void Awake()
+        protected virtual void Awake()
         {
-            base.Awake();
-
             Reset();
         }
 
         protected virtual void Reset()
         {
-            InitAnimator();
             _animator.CreateMissingBones();
 
             CreateIKSolvers();

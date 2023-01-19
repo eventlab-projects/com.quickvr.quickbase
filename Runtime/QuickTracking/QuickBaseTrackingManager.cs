@@ -9,8 +9,21 @@ namespace QuickVR {
 
         #region PROTECTED PARAMETERS
 
+        protected Animator _animator
+        {
+            get
+            {
+                if (!m_Animator)
+                {
+                    m_Animator = GetComponent<Animator>();
+                    m_Animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
+                }
+
+                return m_Animator;
+            }
+        }
         [SerializeField, HideInInspector]
-        protected Animator _animator = null;
+        protected Animator m_Animator = null;
         
         protected QuickVRManager _vrManager
         {
@@ -24,26 +37,12 @@ namespace QuickVR {
 
         #region CREATION AND DESTRUCTION
 
-        protected virtual void Awake()
-        {
-            InitAnimator();
-        }
-
         protected virtual void OnEnable()
         {
             SkinnedMeshRenderer[] smRenderers = GetComponentsInChildren<SkinnedMeshRenderer>();
             foreach (SkinnedMeshRenderer r in smRenderers)
             {
                 r.updateWhenOffscreen = true;
-            }
-        }
-
-        public virtual void InitAnimator()
-        {
-            if (!_animator)
-            {
-                _animator = GetComponent<Animator>();
-                _animator.cullingMode = AnimatorCullingMode.AlwaysAnimate;
             }
         }
 
