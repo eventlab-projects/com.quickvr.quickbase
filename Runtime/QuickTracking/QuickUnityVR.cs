@@ -28,7 +28,6 @@ namespace QuickVR
         public QuickHandGestureSettings _gestureSettingsRightHand = null;
 
         public bool _useFootprints = true;
-        public bool _isSitting = false;
 
         public enum ControlType
         {

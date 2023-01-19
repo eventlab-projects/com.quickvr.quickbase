@@ -273,6 +273,19 @@ namespace QuickVR
                 {
                     result.enabled = enabled;
                 }
+
+                if (lProvider == DefaultLocomotionProvider.DirectMove || lProvider == DefaultLocomotionProvider.ContinuousMove)
+                {
+                    Animator aTarget = _vrManager.GetAnimatorTarget();
+                    if (aTarget)
+                    {
+                        QuickLocomotionAnimationBase lAnimation = aTarget.GetComponent<QuickLocomotionAnimationBase>();
+                        if (lAnimation)
+                        {
+                            lAnimation.enabled = enabled;
+                        }
+                    }
+                }
             }
         }
 

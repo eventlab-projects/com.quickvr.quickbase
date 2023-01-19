@@ -60,13 +60,6 @@ namespace QuickVR
             ikSolverSrc._targetLimb.localRotation = ikSolver._targetLimb.localRotation;
         }
 
-        protected override void Update()
-        {
-            _weight = _unityVR._isSitting ? 0 : 1;
-
-            base.Update();
-        }
-
         protected override void LateUpdate()
         {
             
