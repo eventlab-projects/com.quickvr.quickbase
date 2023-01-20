@@ -72,11 +72,17 @@ namespace QuickVR
             {
                 b.GetOrCreateComponent<QuickUIButton>();
             }
+
+            QuickUIInteractiveItem.OnButtonSelected += ActionButtonSelected;
+            QuickUIInteractiveItem.OnInteractiveItemSelected += ActionInteractiveItemSelected;
         }
 
         protected virtual void OnDisable()
         {
             QuickVRManager.OnPostCameraUpdate -= ActionPostCameraUpdate;
+
+            QuickUIInteractiveItem.OnButtonSelected -= ActionButtonSelected;
+            QuickUIInteractiveItem.OnInteractiveItemSelected -= ActionInteractiveItemSelected;
         }
 
         protected virtual void Reset()
@@ -133,6 +139,16 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
+
+        protected virtual void ActionButtonSelected(Button button)
+        {
+
+        }
+
+        protected virtual void ActionInteractiveItemSelected(QuickUIInteractiveItem interactiveItem)
+        {
+
+        }
 
         public virtual void SetTextInstructions(string text)
         {
