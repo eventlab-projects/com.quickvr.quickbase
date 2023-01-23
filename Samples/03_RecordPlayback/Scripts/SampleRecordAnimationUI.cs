@@ -168,7 +168,7 @@ namespace QuickVR.Samples.RecordAnimation
 
         protected virtual void ButtonLoadFromJSON_Down()
         {
-            QuickAnimation animation = QuickAnimationUtils.LoadFromJson("test.json", _animationPlayerDst.GetComponent<Animator>());
+            QuickAnimation animation = QuickAnimationUtils.FromJson(System.IO.File.ReadAllText("test.json"), _animationPlayerDst.GetComponent<Animator>());
             _animationPlayerDst.Play(animation);
         }
 

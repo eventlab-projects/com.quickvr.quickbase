@@ -635,18 +635,22 @@ namespace QuickVR
             return op;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="json"></param>
+        /// <param name="animator"></param>
+        /// <returns></returns>
+        public static QuickAnimation FromJson(string json, Animator animator)
+        {
+            return ToQuickAnimation(JsonUtility.FromJson<QuickAnimationParser>(json), animator);
+        }
+
         public static void SaveToJson(string path, QuickAnimation animation)
         {
             TextWriter writer = new StreamWriter(path);
             writer.Write(ToJson(animation));
             writer.Close();
-        }
-
-        public static QuickAnimation LoadFromJson(string path, Animator animator)
-        {
-            string s = File.ReadAllText(path);
-
-            return ToQuickAnimation(JsonUtility.FromJson<QuickAnimationParser>(s), animator);
         }
 
         public static void SaveToAnim(string path, QuickAnimation animation)
