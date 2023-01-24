@@ -194,15 +194,16 @@ namespace QuickVR
 
         protected virtual void UpdateStatePlaying(float prevTime, float time)
         {
-            Quaternion qOffset = _playAnimationClip.EvaluateTransformRotation(time) * Quaternion.Inverse(_playAnimationClip.EvaluateTransformRotation(prevTime));
-            transform.rotation *= qOffset;
+            //Quaternion qOffset = _playAnimationClip.EvaluateTransformRotation(time) * Quaternion.Inverse(_playAnimationClip.EvaluateTransformRotation(prevTime));
+            //transform.rotation *= qOffset;
 
-            Vector3 pOffset = _playAnimationClip.EvaluateTransformPosition(time) - _playAnimationClip.EvaluateTransformPosition(prevTime);
-            qOffset = transform.rotation * Quaternion.Inverse(_playAnimationClip.EvaluateTransformRotation(0));
-            transform.position += qOffset * pOffset;
-            //transform.position = _playAnimationClip.EvaluateTransformPosition(time);
-            //transform.rotation = _playAnimationClip.EvaluateTransformRotation(time);
-            
+            //Vector3 pOffset = _playAnimationClip.EvaluateTransformPosition(time) - _playAnimationClip.EvaluateTransformPosition(prevTime);
+            //qOffset = transform.rotation * Quaternion.Inverse(_playAnimationClip.EvaluateTransformRotation(0));
+            //transform.position += qOffset * pOffset;
+
+            transform.position = _playAnimationClip.EvaluateTransformPosition(time);
+            transform.rotation = _playAnimationClip.EvaluateTransformRotation(time);
+
             if (_animator.isHuman)
             {
                 _playAnimationClip.EvaluateHumanPose(time, ref _humanPose);

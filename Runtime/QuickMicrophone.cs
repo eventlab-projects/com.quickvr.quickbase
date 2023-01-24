@@ -67,31 +67,72 @@ namespace QuickVR
                 _sampleStart = Microphone.GetPosition("");
                 _isRecording = true;
             }
+            else
+            {
+                Debug.LogError("[QuickMicrophone.Record]:" + "_isInitialized = " + _isInitialized + " _isRecording = " + _isRecording);
+            }
         }
 
         public virtual AudioClip StopRecording()
         {
-            if (_isInitialized && _isRecording && _audioClip)
+            if (_isInitialized && _isRecording)
             {
-                int sampleEnd = Microphone.GetPosition("");
-                int numSamples = sampleEnd > _sampleStart ? sampleEnd - _sampleStart : (_audioClip.samples - _sampleStart) + sampleEnd;
-                //int numSamples = _audioClip.samples;
+                _lastRecordedClip = GetRecordingClip("MicRecord", _sampleStart, Microphone.GetPosition(""));
                 
-                _audioClip.GetData(_rawData, 0);
-                float[] recordData = new float[numSamples];
-                for (int i = 0; i < numSamples; i++)
-                {
-                    int sampleID = (_sampleStart + i) % _audioClip.samples;
-                    recordData[i] = _rawData[sampleID] * _amplifyFactor;
-                }
+                //int sampleEnd = Microphone.GetPosition("");
+                //int numSamples = sampleEnd > _sampleStart ? sampleEnd - _sampleStart : (_audioClip.samples - _sampleStart) + sampleEnd;
+                ////int numSamples = _audioClip.samples;
+                
+                //_audioClip.GetData(_rawData, 0);
+                //float[] recordData = new float[numSamples];
+                //for (int i = 0; i < numSamples; i++)
+                //{
+                //    int sampleID = (_sampleStart + i) % _audioClip.samples;
+                //    recordData[i] = _rawData[sampleID] * _amplifyFactor;
+                //}
 
-                _lastRecordedClip = AudioClip.Create("MicRecord", numSamples, 1, MIC_FREQUENCY, false);
-                _lastRecordedClip.SetData(recordData, 0);
+                //_lastRecordedClip = AudioClip.Create("MicRecord", numSamples, 1, MIC_FREQUENCY, false);
+                //_lastRecordedClip.SetData(recordData, 0);
             }
-
+            
             _isRecording = false;
 
             return _lastRecordedClip;
+        }
+
+        public virtual float[] GetRecordingData(int sampleStart, int sampleEnd)
+        {
+            float[] result = null;
+
+            if (_isInitialized)
+            {
+                int numSamples = sampleEnd > sampleStart ? sampleEnd - sampleStart : (_audioClip.samples - sampleStart) + sampleEnd;
+                //int numSamples = _audioClip.samples;
+
+                _audioClip.GetData(_rawData, 0);
+                result = new float[numSamples];
+                for (int i = 0; i < numSamples; i++)
+                {
+                    int sampleID = (_sampleStart + i) % _audioClip.samples;
+                    result[i] = _rawData[sampleID] * _amplifyFactor;
+                }
+            }
+
+            return result;
+        }
+
+        public virtual AudioClip GetRecordingClip(string recordName, int sampleStart, int sampleEnd)
+        {
+            AudioClip result = null;
+            float[] recordingData = GetRecordingData(sampleStart, sampleEnd);
+            
+            if (recordingData != null)
+            {
+                result = AudioClip.Create(recordName, recordingData.Length, 1, MIC_FREQUENCY, false);
+                result.SetData(recordingData, 0);
+            }
+
+            return result;
         }
 
         #endregion
