@@ -24,9 +24,14 @@ namespace QuickVR
 
         protected bool _isPlayerSelected = false;
 
-        [SerializeField, ReadOnly]
-        public static GameObject _selectedPlayer = null;
-        protected int _selectedPlayerID = 0;
+        public static GameObject _selectedPlayer
+        {
+            get; protected set;
+        }
+        public static int _selectedPlayerID
+        {
+            get; protected set;
+        }
 
         protected Transform _playerExhibitor = null;
 
