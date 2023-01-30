@@ -15,6 +15,8 @@ namespace QuickVR
         public float _rotationSpeed = 25.0f;
         public List<GameObject> _players = new List<GameObject>();
 
+        public QuickUserGUI _pfGUI = null;
+
         #endregion
 
         #region PROTECTED ATTRIBUTES
@@ -51,14 +53,15 @@ namespace QuickVR
 
         protected override void Start()
         {
+            _gui = GetComponentInChildren<QuickUserGUI>(true);
+
             if (!_gui)
             {
-                _gui = Instantiate(Resources.Load<QuickUserGUI>("Prefabs/pf_ChoosePlayerGUI"));
+                _gui = Instantiate(_pfGUI);
                 _gui.transform.parent = transform;
                 _gui.transform.ResetTransformation();
             }
 
-            _gui = GetComponentInChildren<QuickUserGUI>(true);
             _gui.gameObject.SetActive(false);
             
             _playerExhibitor = _gui.transform.Find(PLAYER_EXHIBITOR_NAME);
