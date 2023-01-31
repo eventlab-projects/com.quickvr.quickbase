@@ -2,6 +2,7 @@ using UnityEditor;
 using UnityEngine;
 
 using System.Collections.Generic;
+using UnityEngine.Animations.Rigging;
 
 namespace QuickVR
 {
@@ -33,6 +34,11 @@ namespace QuickVR
             if (!_ikManagers.Contains(ikManager))
             {
                 _ikManagers.Add(ikManager);
+            }
+
+            if (!ikManager.GetComponent<BoneRenderer>())
+            {
+                ikManager.GetComponent<Animator>().InitBoneRenderer();
             }
         }
 
@@ -74,6 +80,7 @@ namespace QuickVR
                         Handles.color = new Color(1, 0, 0, 0.5f);
                         if (Handles.Button(ikSolver._targetLimb.position, ikSolver._targetLimb.rotation, size, size, Handles.CubeHandleCap))
                         {
+                            Debug.Log(ikSolver._targetLimb.name);
                             SelectIKTarget(ikSolver._targetLimb, ikSolver, ikBone);
                         }
 
@@ -98,6 +105,27 @@ namespace QuickVR
 
             Selection.activeTransform = ikTarget;
         }
+
+        #region EXTENSIONS
+
+        public static void InitBoneRenderer(this Animator animator)
+        {
+            BoneRenderer bRenderer = animator.GetOrCreateComponent<BoneRenderer>();
+            List<Transform> tBones = new List<Transform>();
+
+            for (QuickHumanBodyBones boneID = QuickHumanBodyBones.Hips; boneID < QuickHumanBodyBones.LastBone; boneID++)
+            {
+                Transform t = animator.GetBoneTransform(boneID);
+                if (t)
+                {
+                    tBones.Add(t);
+                }
+            }
+
+            bRenderer.transforms = tBones.ToArray();
+        }
+
+        #endregion
 
     }
 
