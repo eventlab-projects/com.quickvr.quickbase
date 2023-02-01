@@ -24,6 +24,8 @@ namespace QuickVR
 
         #region PROTECTED ATTRIBUTES
 
+        protected static HashSet<QuickAnimationPlayer> _instances = new HashSet<QuickAnimationPlayer>();
+
         protected float _recordTimeFrame = 0.0f;
         protected float _recordTimeStart = 0.0f;
         protected float _recordTimeLastFrame = 0.0f;
@@ -53,6 +55,7 @@ namespace QuickVR
         protected virtual void Awake()
         {
             _animator = gameObject.GetOrCreateComponent<Animator>();
+            _instances.Add(this);
         }
 
         protected virtual void OnEnable()
@@ -65,9 +68,55 @@ namespace QuickVR
             QuickVRManager.OnPreCameraUpdate -= UpdatePlayer;
         }
 
+        protected virtual void OnDestroy()
+        {
+            _instances.Remove(this);
+        }
+
         #endregion
 
         #region GET AND SET
+
+        public static HashSet<QuickAnimationPlayer> GetInstances()
+        {
+            return _instances;
+        }
+
+        public static HashSet<T> GetInstancesByType<T>() where T : QuickAnimationPlayer
+        {
+            HashSet<T> result = new HashSet<T>();
+            foreach (QuickAnimationPlayer aPlayer in _instances)
+            {
+                if (aPlayer && typeof(T) == aPlayer.GetType())
+                {
+                    result.Add((T)aPlayer);
+                }
+            }
+
+            return result;
+        }
+
+        public static void RecordAll()
+        {
+            foreach (QuickAnimationPlayer aPlayer in _instances)
+            {
+                if (aPlayer)
+                {
+                    aPlayer.Record();
+                }
+            }
+        }
+
+        public static void StopRecordingAll()
+        {
+            foreach (QuickAnimationPlayer aPlayer in _instances)
+            {
+                if (aPlayer)
+                {
+                    aPlayer.StopRecording();
+                }
+            }
+        }
 
         protected virtual void SetState(State newState)
         {
