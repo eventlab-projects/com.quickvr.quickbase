@@ -166,7 +166,7 @@ namespace QuickVR
             {
                 _playAnimationClip.SetEvaluateMethod(_playMode);
                 _playTimeStart = _playTimeCurrent = _playTimePrev = timeStart;
-                _playTimeEnd = Mathf.Min(timeEnd, _playAnimationClip.GetTimeLength());
+                _playTimeEnd = timeEnd;
 
                 SetState(State.Playing);
             }
@@ -226,16 +226,17 @@ namespace QuickVR
             _playTimePrev = _playTimeCurrent;
             _playTimeCurrent += Time.deltaTime;
 
-            if (_playTimeCurrent >= _playTimeEnd)
+            float pTimeEnd = Mathf.Min(_playTimeEnd, _playAnimationClip.GetTimeLength());
+            if (_playLoop)
             {
-                if (_playLoop)
+                _playTimeCurrent = _playTimeStart + Mathf.Repeat(_playTimeCurrent, pTimeEnd);
+                _playTimePrev = _playTimeStart;
+            }
+            else
+            {
+                if (_playTimeCurrent >= pTimeEnd)
                 {
-                    _playTimeCurrent = _playTimeStart + Mathf.Repeat(_playTimeCurrent, _playTimeEnd);
-                    _playTimePrev = _playTimeStart;
-                }
-                else
-                {
-                    UpdateStatePlaying(_playTimeEnd, _playTimeEnd);
+                    UpdateStatePlaying(pTimeEnd, pTimeEnd);
                     SetState(State.Idle);
                 }
             }
