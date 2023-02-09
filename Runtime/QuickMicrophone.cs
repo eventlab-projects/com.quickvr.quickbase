@@ -52,6 +52,11 @@ namespace QuickVR
 
         #region GET AND SET
 
+        public virtual bool IsInitialized()
+        {
+            return _isInitialized;
+        }
+
         public virtual AudioClip GetAudioClip(out int currentSample)
         {
             //currentSample contains the current sample in the _audioClip where the microphone is recording. 
