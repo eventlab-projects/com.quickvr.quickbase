@@ -129,8 +129,8 @@ namespace QuickVR.Samples.RecordAnimation
         {
             _canvasGroup = gameObject.GetOrCreateComponent<CanvasGroup>();
             _interactionManager = QuickSingletonManager.GetInstance<QuickVRInteractionManager>();
-            _interactorLeftHand = _interactionManager.GetVRInteractorHandLeft();
-            _interactorRightHand = _interactionManager.GetVRInteractorHandRight();
+            _interactorLeftHand = _interactionManager._interactorHandLeft;
+            _interactorRightHand = _interactionManager._interactorHandRight;
         }
 
         private void ButtonRecordStop_Down()

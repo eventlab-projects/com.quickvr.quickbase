@@ -31,6 +31,10 @@ namespace QuickVR
             ContinuousTurn,
         }
 
+        public QuickVRInteractor _interactorHead { get; protected set; }
+        public QuickVRInteractorHand _interactorHandLeft { get; protected set; }
+        public QuickVRInteractorHand _interactorHandRight { get; protected set; }
+
         #endregion
 
         #region PROTECTED ATTRIBUTES
@@ -39,9 +43,6 @@ namespace QuickVR
         protected XRInteractionManager _xrInteractionManager = null;
 
         protected XROrigin _xrRig = null;
-        
-        protected QuickVRInteractor _interactorHandLeft = null;
-        protected QuickVRInteractor _interactorHandRight = null;
 
         protected CharacterController _characterController = null;
         protected QuickVRHandAnimator _handAnimatorLeft = null;
@@ -74,10 +75,13 @@ namespace QuickVR
             _vrManager = QuickSingletonManager.GetInstance<QuickVRManager>();
             _xrInteractionManager = QuickSingletonManager.GetInstance<XRInteractionManager>();
 
-            _interactorHandLeft = transform.CreateChild("__InteractorHandLeft__").GetOrCreateComponent<QuickVRInteractor>();
+            _interactorHead = transform.CreateChild("__InteractorHead__").GetOrCreateComponent<QuickVRInteractor>();
+            _interactorHead._xrNode = XRNode.Head;
+
+            _interactorHandLeft = transform.CreateChild("__InteractorHandLeft__").GetOrCreateComponent<QuickVRInteractorHand>();
             _interactorHandLeft._xrNode = XRNode.LeftHand;
 
-            _interactorHandRight = transform.CreateChild("__InteractorHandRight__").GetOrCreateComponent<QuickVRInteractor>();
+            _interactorHandRight = transform.CreateChild("__InteractorHandRight__").GetOrCreateComponent<QuickVRInteractorHand>();
             _interactorHandRight._xrNode = XRNode.RightHand;
 
             //By default, disable all the locomotion providers
@@ -110,6 +114,8 @@ namespace QuickVR
             _handAnimatorRight = ((QuickVRNodeHand)playArea.GetVRNode(HumanBodyBones.RightHand)).GetHandAnimator();
 
             _xrRig.Camera = Camera.main;
+            _interactorHead.transform.parent = Camera.main.transform;
+            _interactorHead.transform.ResetTransformation();
         }
 
         protected virtual void Reset()
@@ -291,16 +297,6 @@ namespace QuickVR
             }
 
             return result;
-        }
-
-        public virtual QuickVRInteractor GetVRInteractorHandLeft()
-        {
-            return _interactorHandLeft;
-        }
-
-        public virtual QuickVRInteractor GetVRInteractorHandRight()
-        {
-            return _interactorHandRight;
         }
 
         #endregion

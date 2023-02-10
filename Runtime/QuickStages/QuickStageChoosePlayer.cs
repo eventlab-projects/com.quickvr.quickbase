@@ -132,7 +132,7 @@ namespace QuickVR
             _selectedPlayerID = 0;
             LoadSelectedPlayer();
 
-            _interactionManager.GetVRInteractorHandRight().SetInteractorEnabled(InteractorType.UI, true);
+            _interactionManager._interactorHandRight.SetInteractorEnabled(InteractorType.UI, true);
             
             //_gui._followCamera = !QuickVRManager.IsXREnabled();
             _gui.gameObject.SetActive(true);
@@ -153,7 +153,7 @@ namespace QuickVR
                 yield return null;
             }
 
-            _interactionManager.GetVRInteractorHandRight().SetInteractorEnabled(InteractorType.UI, false);
+            _interactionManager._interactorHandRight.SetInteractorEnabled(InteractorType.UI, false);
 
             _gui.gameObject.SetActive(false);
 

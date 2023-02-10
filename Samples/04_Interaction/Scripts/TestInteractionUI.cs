@@ -84,8 +84,8 @@ namespace QuickVR.SampleInteraction
         {
             _canvasGroup = gameObject.GetOrCreateComponent<CanvasGroup>();
             _interactionManager = QuickSingletonManager.GetInstance<QuickVRInteractionManager>();
-            _interactorLeftHand = _interactionManager.GetVRInteractorHandLeft();
-            _interactorRightHand = _interactionManager.GetVRInteractorHandRight();
+            _interactorLeftHand = _interactionManager._interactorHandLeft;
+            _interactorRightHand = _interactionManager._interactorHandRight;
 
             _toggleUIRayRightHand.isOn = true;
         }

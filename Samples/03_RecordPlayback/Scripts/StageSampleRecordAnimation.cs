@@ -35,7 +35,7 @@ namespace QuickVR.Samples.RecordAnimation
         protected virtual void ShowGUI(bool show)
         {
             _gui.gameObject.SetActive(show);
-            _interactionManager.GetVRInteractorHandRight().SetInteractorEnabled(InteractorType.UI, show);
+            _interactionManager._interactorHandRight.SetInteractorEnabled(InteractorType.UI, show);
         }
 
         #endregion
