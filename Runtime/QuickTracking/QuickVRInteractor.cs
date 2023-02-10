@@ -15,6 +15,7 @@ namespace QuickVR
         Grab,
         Teleport,
         UI,
+        Generic, 
     }
 
     public class QuickVRInteractor : MonoBehaviour
@@ -39,6 +40,7 @@ namespace QuickVR
                 ConfigureInteractorGrabRay();
                 ConfigureInteractorTeleportRay();
                 ConfigureInteractorUIRay();
+                //ConfigureInteractorUIGeneric();
             }
         } 
             
@@ -58,7 +60,7 @@ namespace QuickVR
 
         protected InputActionMap _actionMapDefault = null;
 
-        protected Dictionary<InteractorType, ActionBasedController> _interactors = new Dictionary<InteractorType, ActionBasedController>();
+        protected Dictionary<InteractorType, XRBaseControllerInteractor> _interactors = new Dictionary<InteractorType, XRBaseControllerInteractor>();
 
         #endregion
 
@@ -92,27 +94,37 @@ namespace QuickVR
             _interactors[InteractorType.UI] = CreateInteractor(interactionManager._pfInteractorUIRay);
         }
 
-        protected virtual ActionBasedController CreateInteractor(ActionBasedController pfInteractor)
+        protected virtual XRBaseControllerInteractor CreateInteractor(XRBaseControllerInteractor pfInteractor)
         {
             //Create the Interactor Direct
-            ActionBasedController result = Instantiate(pfInteractor, transform);
-            result.enableInputTracking = false;
+            XRBaseControllerInteractor result = Instantiate(pfInteractor, transform);
+            ActionBasedController aController = result.GetComponent<ActionBasedController>();
+            if (aController)
+            {
+                aController.enableInputTracking = false;
+            }
 
             return result;
         }
 
+        /// <summary>
+        /// Configures a Direct Interactor to interact with objects containing the XRGrabInteractable component.  
+        /// </summary>
         protected virtual void ConfigureInteractorGrabDirect()
         {
             //Configure the direct interactor
-            ActionBasedController interactor = GetInteractor(InteractorType.GrabDirect);
+            ActionBasedController interactor = GetInteractor(InteractorType.GrabDirect).GetComponent<ActionBasedController>();
             SetInputAction(interactor, ActionType.Select, "Grab");
             SetInputAction(interactor, ActionType.Activate, "Use");
         }
 
+        /// <summary>
+        /// Configures a Ray Interactor to interact with objects containing the XRGrabInteractable component.  
+        /// </summary>
         protected virtual void ConfigureInteractorGrabRay()
         {
             //Configure the grab ray
-            ActionBasedController interactor = GetInteractor(InteractorType.Grab);
+            ActionBasedController interactor = GetInteractor(InteractorType.Grab).GetComponent<ActionBasedController>();
             SetInputAction(interactor, ActionType.Select, "Grab");
             SetInputAction(interactor, ActionType.Activate, "Use");
             SetInputAction(interactor, ActionType.Haptic, "Haptic Device");
@@ -122,10 +134,13 @@ namespace QuickVR
             ray.enableUIInteraction = false;
         }
 
+        /// <summary>
+        /// Configures a Ray Interactor to interact with objects containing the BaseTeleportationInteractable component.  
+        /// </summary>
         protected virtual void ConfigureInteractorTeleportRay()
         {
             //Configure the teleport ray
-            ActionBasedController interactor = GetInteractor(InteractorType.Teleport);
+            ActionBasedController interactor = GetInteractor(InteractorType.Teleport).GetComponent<ActionBasedController>();
             SetInputAction(interactor, ActionType.Select, "Teleport");
             SetInputAction(interactor, ActionType.Haptic, "Haptic Device");
             
@@ -134,15 +149,23 @@ namespace QuickVR
             ray.enableUIInteraction = false;
         }
 
+        /// <summary>
+        /// Configures a Ra Interactor to interact with the UI elements. 
+        /// </summary>
         protected virtual void ConfigureInteractorUIRay()
         {
             //Configure the UI ray
-            ActionBasedController interactor = GetInteractor(InteractorType.UI);
+            ActionBasedController interactor = GetInteractor(InteractorType.UI).GetComponent<ActionBasedController>();
             SetInputAction(interactor, ActionType.UI, "Use");
 
             QuickXRRayInteractor ray = interactor.GetComponent<QuickXRRayInteractor>();
             ray._interactionType = InteractorType.UI;
             ray.enableUIInteraction = true;
+        }
+
+        protected virtual void ConfigureInteractorGenericRay()
+        {
+
         }
 
         protected virtual void SetInputAction(ActionBasedController interactor, ActionType actionType, string actionName)
@@ -170,9 +193,9 @@ namespace QuickVR
 
         #region GET AND SET
 
-        public virtual ActionBasedController GetInteractor(InteractorType type)
+        public virtual XRBaseControllerInteractor GetInteractor(InteractorType type)
         {
-            _interactors.TryGetValue(type, out ActionBasedController result);
+            _interactors.TryGetValue(type, out XRBaseControllerInteractor result);
 
             return result;
         }
@@ -185,13 +208,13 @@ namespace QuickVR
             //    interactor.gameObject.SetActive(enabled);
             //}
 
-            ActionBasedController interactor = GetInteractor(type);
+            XRBaseControllerInteractor interactor = GetInteractor(type);
             if (interactor && interactor.gameObject.activeSelf != enabled)
             {
                 interactor.gameObject.SetActive(enabled);
 
                 //Disable all the interactors
-                HashSet<ActionBasedController> enabledInteractors = new HashSet<ActionBasedController>();
+                HashSet<XRBaseControllerInteractor> enabledInteractors = new HashSet<XRBaseControllerInteractor>();
                 foreach (var pair in _interactors)
                 {
                     if (pair.Value.gameObject.activeSelf)
@@ -202,7 +225,7 @@ namespace QuickVR
                 }
 
                 //Reenable the interactors that were enabled at the begining. 
-                foreach (ActionBasedController tmp in enabledInteractors)
+                foreach (XRBaseControllerInteractor tmp in enabledInteractors)
                 {
                     tmp.gameObject.SetActive(true);
                 }
@@ -211,7 +234,7 @@ namespace QuickVR
 
         public virtual bool IsEnabledInteractor(InteractorType type)
         {
-            ActionBasedController interactor = GetInteractor(type);
+            XRBaseControllerInteractor interactor = GetInteractor(type);
             return interactor ? interactor.gameObject.activeSelf : false;
         }
 
@@ -227,7 +250,7 @@ namespace QuickVR
             transform.LookAt(tMiddle, transform.up);
 
             //Configure the DirectInteractor
-            ActionBasedController interactor = GetInteractor(InteractorType.GrabDirect);
+            XRBaseControllerInteractor interactor = GetInteractor(InteractorType.GrabDirect);
             Transform tAttach = interactor.GetComponent<XRDirectInteractor>().attachTransform;
             tAttach.position = Vector3.Lerp(tHand.position, tMiddle.position, 0.5f);
 

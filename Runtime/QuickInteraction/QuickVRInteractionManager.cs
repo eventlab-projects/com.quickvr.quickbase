@@ -17,17 +17,10 @@ namespace QuickVR
     {
         #region PUBLIC ATTRIBUTES
 
-        public ActionBasedController _pfInteractorGrabDirect = null;
-        public ActionBasedController _pfInteractorGrabRay = null;
-        public ActionBasedController _pfInteractorTeleportRay = null;
-        public ActionBasedController _pfInteractorUIRay = null;
-
-        public enum ControllerNode
-        {
-            Head,
-            LeftHand,
-            RightHand,
-        }
+        public XRBaseControllerInteractor _pfInteractorGrabDirect = null;
+        public XRBaseControllerInteractor _pfInteractorGrabRay = null;
+        public XRBaseControllerInteractor _pfInteractorTeleportRay = null;
+        public XRBaseControllerInteractor _pfInteractorUIRay = null;
 
         public enum DefaultLocomotionProvider
         {
@@ -214,19 +207,19 @@ namespace QuickVR
         {
             if (_pfInteractorGrabDirect == null)
             {
-                _pfInteractorGrabDirect = Resources.Load<ActionBasedController>(PF_INTERACTOR_GRAB_DIRECT);
+                _pfInteractorGrabDirect = Resources.Load<XRBaseControllerInteractor>(PF_INTERACTOR_GRAB_DIRECT);
             }
             if (_pfInteractorGrabRay == null)
             {
-                _pfInteractorGrabRay = Resources.Load<ActionBasedController>(PF_INTERACTOR_GRAB_RAY);
+                _pfInteractorGrabRay = Resources.Load<XRBaseControllerInteractor>(PF_INTERACTOR_GRAB_RAY);
             }
             if (_pfInteractorTeleportRay == null)
             {
-                _pfInteractorTeleportRay = Resources.Load<ActionBasedController>(PF_INTERACTOR_TELEPORT_RAY);
+                _pfInteractorTeleportRay = Resources.Load<XRBaseControllerInteractor>(PF_INTERACTOR_TELEPORT_RAY);
             }
             if (_pfInteractorUIRay == null)
             {
-                _pfInteractorUIRay = Resources.Load<ActionBasedController>(PF_INTERACTOR_UI_RAY);
+                _pfInteractorUIRay = Resources.Load<XRBaseControllerInteractor>(PF_INTERACTOR_UI_RAY);
             }
         }
 
