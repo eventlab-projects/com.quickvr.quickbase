@@ -17,9 +17,6 @@ namespace QuickVR
 
         public int _recordFPS = 30;
 
-        [Range(0.0f, 1.0f)]
-        public float _weight = 1.0f;
-
         #endregion
 
         #region PROTECTED ATTRIBUTES

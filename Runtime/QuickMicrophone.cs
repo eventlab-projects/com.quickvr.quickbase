@@ -12,6 +12,15 @@ namespace QuickVR
 
         public float _amplifyFactor = 1;
 
+        public enum SamplingRate
+        {
+            HZ_08k   = 8000, 
+            HZ_16k  = 16000, 
+            HZ_22k  = 22000, 
+            HZ_44k  = 44100, 
+        }
+        public SamplingRate _samplingRate = SamplingRate.HZ_44k;
+
         #endregion
 
         #region PROTECTED ATTRIBUTES
@@ -24,13 +33,12 @@ namespace QuickVR
         protected int _sampleStart = 0;
         protected bool _isRecording = false;
 
-        protected float[] _rawData = new float[MIC_TIME * MIC_FREQUENCY];
+        protected float[] _rawData = null;
 
         #endregion
 
         #region CONSTANTS
 
-        protected const int MIC_FREQUENCY = 44100;
         protected const int MIC_TIME = 600;
 
         #endregion
@@ -45,7 +53,8 @@ namespace QuickVR
             }
             _isInitialized = true;
 
-            _audioClip = Microphone.Start(null, true, MIC_TIME, MIC_FREQUENCY);
+            _rawData = new float[MIC_TIME * (int)_samplingRate];
+            _audioClip = Microphone.Start(null, true, MIC_TIME, (int)_samplingRate);
         }
 
         #endregion
@@ -133,7 +142,7 @@ namespace QuickVR
             
             if (recordingData != null)
             {
-                result = AudioClip.Create(recordName, recordingData.Length, 1, MIC_FREQUENCY, false);
+                result = AudioClip.Create(recordName, recordingData.Length, 1, (int)_samplingRate, false);
                 result.SetData(recordingData, 0);
             }
 
