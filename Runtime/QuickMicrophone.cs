@@ -21,13 +21,24 @@ namespace QuickVR
         }
         public SamplingRate _samplingRate = SamplingRate.HZ_44k;
 
+        //The AudioClip that is being used for recording. 
+        public AudioClip _audioClip { get; protected set; }
+
+        //currentSample contains the current sample in the _audioClip where the microphone is recording. 
+        public int _currentSample
+        {
+            get
+            {
+                return _isInitialized ? Microphone.GetPosition("") : 0;
+            }
+        }
+
         #endregion
 
         #region PROTECTED ATTRIBUTES
 
         protected bool _isInitialized = false;
 
-        protected AudioClip _audioClip = null;          //The AudioClip that is being used for recording. 
         protected AudioClip _lastRecordedClip = null;   //The last recorded AudioClip
 
         protected int _sampleStart = 0;
@@ -55,6 +66,7 @@ namespace QuickVR
 
             _rawData = new float[MIC_TIME * (int)_samplingRate];
             _audioClip = Microphone.Start(null, true, MIC_TIME, (int)_samplingRate);
+            Debug.Log("NUM SAMPLES = " + _audioClip.samples);
         }
 
         #endregion
@@ -64,14 +76,6 @@ namespace QuickVR
         public virtual bool IsInitialized()
         {
             return _isInitialized;
-        }
-
-        public virtual AudioClip GetAudioClip(out int currentSample)
-        {
-            //currentSample contains the current sample in the _audioClip where the microphone is recording. 
-            currentSample = _isInitialized? Microphone.GetPosition("") : 0;
-
-            return _audioClip;
         }
 
         public virtual void Record()
