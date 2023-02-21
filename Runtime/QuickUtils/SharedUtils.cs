@@ -11,7 +11,7 @@ using UnityEngine;
 //(and properly renamed its namespace) across all the packages needing these features, until Unity
 //finally introduces package dependencies from git. 
 
-//src: 
+//src: https://github.com/eventlab-projects/com.quickvr.quickbase/blob/master/Runtime/QuickUtils/SharedUtils.cs
 
 namespace QuickVR
 {
