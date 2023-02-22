@@ -29,7 +29,7 @@ public class QuickEnableRenderers : MonoBehaviour
         _renderers = new List<Renderer>();
         foreach (Renderer r in GetComponentsInChildren<Renderer>())
         {
-            if (r.gameObject.layer != LayerMask.NameToLayer("UI"))
+            if (r.gameObject.layer != LayerMask.NameToLayer("UI"))  //Avoid hidding the interaction rays. 
             {
                 _renderers.Add(r);
             }
