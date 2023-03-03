@@ -281,7 +281,7 @@ namespace QuickVR
                         QuickLocomotionAnimationBase lAnimation = aTarget.GetComponent<QuickLocomotionAnimationBase>();
                         if (lAnimation)
                         {
-                            lAnimation.enabled = enabled;
+                            lAnimation.enabled = IsEnabledLocomotionSystem(DefaultLocomotionProvider.ContinuousMove) || IsEnabledLocomotionSystem(DefaultLocomotionProvider.DirectMove);
                         }
                     }
                 }
