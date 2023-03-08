@@ -19,7 +19,29 @@ namespace QuickVR
         protected QuickIKManager _ikManager = null;
 
         protected Dictionary<HumanBodyBones, Vector3> _initialForward = new Dictionary<HumanBodyBones, Vector3>();
-        protected Dictionary<HumanBodyBones, Vector3> _currentForward = new Dictionary<HumanBodyBones, Vector3>();
+
+        protected Dictionary<HumanBodyBones, Vector3> _currentForward
+        {
+            get
+            {
+                if (m_CurrentForward == null)
+                {
+                    m_CurrentForward = new Dictionary<HumanBodyBones, Vector3>();
+
+                    foreach (HumanBodyBones boneID in LOOK_AT_BONES)
+                    {
+                        m_CurrentForward[boneID] = _ikManager.GetIKSolver(boneID)._targetLimb.forward;
+                    }
+                }
+
+                return m_CurrentForward;
+            }
+            set
+            {
+                m_CurrentForward = value;
+            }
+        }
+        protected Dictionary<HumanBodyBones, Vector3> m_CurrentForward = null;
 
         protected enum State
         {
@@ -51,14 +73,6 @@ namespace QuickVR
                 QuickIKSolver ikSolver = _ikManager.GetIKSolver(boneID);
                 _initialForward[boneID] = ikSolver._targetLimb.forward;
                 ikSolver._enableIK = true;
-            }
-        }
-
-        protected virtual void InitCurrentForward()
-        {
-            foreach (HumanBodyBones boneID in LOOK_AT_BONES)
-            {
-                _currentForward[boneID] = _ikManager.GetIKSolver(boneID)._targetLimb.forward;
             }
         }
 
@@ -101,6 +115,7 @@ namespace QuickVR
         [ButtonMethod]
         public virtual void StopLookAt()
         {
+            _currentForward = null;
             _state = State.LookAtNone;
         }
 
