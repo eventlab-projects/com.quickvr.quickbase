@@ -256,7 +256,7 @@ namespace QuickVR
             return GetUpperLength() + GetMidLength();
         }
 
-        protected virtual Vector3 GetIKTargetHintPosition()
+        protected virtual Vector3 GetIKTargetHintPosition(float ikAngle)
         {
             return _targetHint.position;
         }
@@ -350,10 +350,10 @@ namespace QuickVR
                 float targetDistance = Mathf.Min(Vector3.Distance(bUpperPos, ikTargetLimbPos), chainLength);
 
                 float cos = (Mathf.Pow(midLength, 2) - Mathf.Pow(upperLength, 2) - Mathf.Pow(targetDistance, 2)) / (-2 * upperLength * targetDistance);
-                float ikAngle = Mathf.Acos(cos) * Mathf.Rad2Deg;
+                float ikAngle = Mathf.Acos(cos);    //The IKAngle in radians. 
                 v = _boneMid.position - bUpperPos;
-                Vector3 w = GetIKTargetHintPosition() - bUpperPos;
-                _boneUpper.Rotate(Vector3.Cross(v, w), ikAngle, Space.World);
+                Vector3 w = GetIKTargetHintPosition(ikAngle) - bUpperPos;
+                _boneUpper.Rotate(Vector3.Cross(v, w), ikAngle * Mathf.Rad2Deg, Space.World);
             }
 
             //Rotate the mid limb towards the target position. 
