@@ -151,6 +151,11 @@ namespace QuickVR {
                 ikSolver.transform.SetSiblingIndex((int)ikBone);
             }
 
+            for (IKBone ikBone = IKBone.LeftHand; ikBone <= IKBone.RightFoot; ikBone++)
+            {
+                GetIKSolver(ikBone)._targetHint.parent = _ikTargetsRoot;
+            }
+
             for (IKBone ikBone = IKBone.LeftThumbDistal; ikBone <= IKBone.LeftLittleDistal; ikBone++)
             {
                 GetIKSolver(ikBone)._targetHint.parent = _animator.GetBoneTransform(HumanBodyBones.LeftHand);
@@ -204,12 +209,41 @@ namespace QuickVR {
             Transform ikSolversRoot = transform.CreateChild(IK_SOLVERS_ROOT_NAME);
             Transform t = ikSolversRoot.CreateChild(IK_SOLVER_PREFIX + ikBone.ToString());
             T ikSolver = t.GetComponent<T>();
+            if (ikSolver && ikSolver.GetType() != typeof(T))
+            {
+                //If it is not of the exact type required, make it null. 
+                ikSolver = null;
+            }
 
             if (!ikSolver)
             {
+                //There is no IKSolver of type T. Remove any other QuickIKSolver component on this transform. 
+                QuickIKSolver[] ikSolvers = t.GetComponents<QuickIKSolver>();
+
+                //Add the desired IKSolver type
                 ikSolver = t.gameObject.AddComponent<T>();
 
-                //And configure it according to the bone
+                if (ikSolvers.Length > 0)
+                {
+                    QuickIKSolver ikSolverTmp = ikSolvers[0];
+                    Transform tLimb = ikSolver._targetLimb;
+                    Transform tLimbTmp = ikSolverTmp._targetLimb;
+
+                    tLimb.name = tLimbTmp.name;
+                    tLimb.parent = tLimbTmp.parent;
+                    tLimb.position = tLimbTmp.position;
+                    tLimb.rotation = tLimbTmp.rotation;
+
+                    for (int i = ikSolvers.Length - 1; i >= 0; i--)
+                    {
+                        ikSolverTmp = ikSolvers[i];
+                        DestroyImmediate(ikSolverTmp._targetLimb.gameObject);
+                        DestroyImmediate(ikSolverTmp._targetHint.gameObject);                        
+                        DestroyImmediate(ikSolverTmp);
+                    }
+                }
+                
+                //Configure the IKSolver according to the bone
                 HumanBodyBones boneLimb = ToHumanBodyBones(ikBone);
                 ikSolver._boneUpper = _animator.GetBoneTransform(GetBoneUpperID(boneLimb));
                 ikSolver._boneMid = _animator.GetBoneTransform(GetBoneMidID(boneLimb));
@@ -252,13 +286,24 @@ namespace QuickVR {
 
                 //Set the rotation of the IKTarget
                 ikTarget.rotation = transform.rotation;
-                if (boneID == HumanBodyBones.LeftHand)
+                if (boneID == HumanBodyBones.LeftHand || boneID == HumanBodyBones.RightHand)
                 {
-                    ikTarget.LookAt(ikTarget.position - transform.right, transform.up);
-                }
-                else if (boneID == HumanBodyBones.RightHand)
-                {
-                    ikTarget.LookAt(ikTarget.position + transform.right, transform.up);
+                    bool isLeft = boneID == HumanBodyBones.LeftHand;
+                    int sign = isLeft ? -1 : 1;
+                    Transform tFingerMid = _animator.GetBoneTransform(isLeft ? HumanBodyBones.LeftMiddleProximal : HumanBodyBones.RightMiddleProximal);
+                    Transform tFingerRing = _animator.GetBoneTransform(isLeft ? HumanBodyBones.LeftRingProximal : HumanBodyBones.RightRingProximal);
+                    Vector3 v = Vector3.ProjectOnPlane(sign * (tFingerRing.position - tFingerMid.position), transform.right);
+
+                    if (boneID == HumanBodyBones.LeftHand)
+                    {
+                        ikTarget.LookAt(ikTarget.position - transform.right, transform.up);
+                        ikTarget.Rotate(ikTarget.forward, sign * Vector3.Angle(ikTarget.right, v), Space.World);
+                    }
+                    else if (boneID == HumanBodyBones.RightHand)
+                    {
+                        ikTarget.LookAt(ikTarget.position + transform.right, transform.up);
+                        ikTarget.Rotate(ikTarget.forward, sign * Vector3.Angle(ikTarget.right, v), Space.World);
+                    }
                 }
                 else if (boneID == HumanBodyBones.Spine)
                 {

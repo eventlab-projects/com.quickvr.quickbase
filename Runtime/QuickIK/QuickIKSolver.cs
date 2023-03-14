@@ -70,7 +70,7 @@ namespace QuickVR
             {
                 if (!m_targetLimb)
                 {
-                    m_targetLimb = transform.CreateChild(QuickIKManager.IK_TARGET_PREFIX);
+                    m_targetLimb = transform.CreateChild(QuickIKManager.IK_TARGET_PREFIX + "_Limb");
                     m_targetLimb.CreateChild("__BoneRotation__");
                 }
 
@@ -82,21 +82,9 @@ namespace QuickVR
         {
             get
             {
-                if (!m_targetHint && _boneUpper)
+                if (!m_targetHint)
                 {
-                    int i = 0;
-                    for (; i < _boneUpper.childCount && !_boneUpper.GetChild(i).name.Contains(QuickIKManager.IK_TARGET_PREFIX); i++)
-                    {
-                        
-                    }
-                    if (i < _boneUpper.childCount)
-                    {
-                        m_targetHint = m_boneUpper.GetChild(i);
-                    }
-                    else
-                    {
-                        m_targetHint = m_boneUpper.CreateChild(QuickIKManager.IK_TARGET_PREFIX);
-                    }
+                    m_targetHint = transform.CreateChild(QuickIKManager.IK_TARGET_PREFIX + "_Hint");
                 }
                 return m_targetHint;
             }
@@ -188,6 +176,71 @@ namespace QuickVR
         [SerializeField, Range(0.0f, 1.0f)]
         protected float m_weightIKRot = 1.0f;
 
+        protected Animator _animator
+        {
+            get
+            {
+                if (!m_Animator)
+                {
+                    m_Animator = GetComponentInParent<Animator>();
+                }
+
+                return m_Animator;
+            }
+        }
+        protected Animator m_Animator;
+
+        protected virtual Transform _upperBoneReference
+        {
+            get
+            {
+                if (!m_UpperBoneReference)
+                {
+                    m_UpperBoneReference = _boneUpper.CreateChild("__BoneUpperReference__");
+                    Vector3 fwdHint;
+                    if (
+                        _boneLimb == _animator.GetBoneTransform(HumanBodyBones.LeftHand) || 
+                        _boneLimb == _animator.GetBoneTransform(HumanBodyBones.RightHand)
+                        )
+                    {
+                        //fwdHint = -_animator.transform.forward;
+                        fwdHint = Vector3.Lerp(-_animator.transform.forward, -_animator.transform.up, 0.25f);
+                    }
+                    else if 
+                        (
+                        _boneLimb == _animator.GetBoneTransform(HumanBodyBones.LeftFoot) || 
+                        _boneLimb == _animator.GetBoneTransform(HumanBodyBones.RightFoot)
+                        )
+                    {
+                        fwdHint = _animator.transform.forward;
+                    }
+                    else if 
+                        (
+                        _boneLimb == _animator.GetBoneTransform(HumanBodyBones.LeftThumbDistal)
+                        )
+                    {
+                        fwdHint = _animator.transform.right;
+                    }
+                    else if 
+                        (
+                        _boneLimb == _animator.GetBoneTransform(HumanBodyBones.RightThumbDistal)
+                        )
+                    {
+                        fwdHint = -_animator.transform.right;
+                    }
+                    else
+                    {
+                        fwdHint = _animator.transform.up;
+                    }
+
+                    m_UpperBoneReference.LookAt(_boneMid, fwdHint);
+                }
+
+                return m_UpperBoneReference;
+            }
+        }
+        protected Transform m_UpperBoneReference = null;
+
         #endregion
 
         #region EVENTS
@@ -258,6 +311,21 @@ namespace QuickVR
 
         protected virtual Vector3 GetIKTargetHintPosition(float ikAngle)
         {
+            //float r = GetChainLength();
+            //float maxY = _boneUpper.position.y + r;
+
+            //float t = Mathf.Clamp01((maxY - _targetLimb.position.y) / (r));
+
+            ////return Vector3.Lerp(_targetLimb.position - Vector3.up * (GetMidLength() + QuickIKManager.DEFAULT_TARGET_HINT_DISTANCE), _targetHint.position, t);
+            ////return Vector3.Lerp(_boneUpper.position + Vector3.Lerp(_animator.transform.forward, Vector3.down, 0.5f).normalized * (QuickIKManager.DEFAULT_TARGET_HINT_DISTANCE), _targetHint.position, t);
+            //return Vector3.Lerp(_boneMid.position - Vector3.up * (GetMidLength() + QuickIKManager.DEFAULT_TARGET_HINT_DISTANCE), _targetHint.position, t);
+
+            float uLength = GetUpperLength();
+            //int sign = _isLeft ? -1 : 1;
+            Vector3 hintPos = _boneUpper.position + _upperBoneReference.forward * (uLength * Mathf.Cos(ikAngle)) + _upperBoneReference.up * (uLength * Mathf.Sin(ikAngle));
+
+            _targetHint.position = hintPos;
+
             return _targetHint.position;
         }
 

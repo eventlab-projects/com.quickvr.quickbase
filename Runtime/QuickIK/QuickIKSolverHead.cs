@@ -9,6 +9,11 @@ namespace QuickVR
     public class QuickIKSolverHead : QuickIKSolver
     {
 
+        protected override Vector3 GetIKTargetHintPosition(float ikAngle)
+        {
+            return _targetHint.position;
+        }
+
         #region UPDATE
 
         protected override float CheckIKTargetDistance()

@@ -9,6 +9,8 @@ public class TestObjectSelected : MonoBehaviour
 
     public virtual void ObjectSelectedAction()
     {
+        Debug.Log("OBJECT SELECTED!!!");
+
         Color color;
         if (_currentSelection == 0)
         {
@@ -26,6 +28,16 @@ public class TestObjectSelected : MonoBehaviour
         GetComponent<Renderer>().material.color = color;
 
         _currentSelection = (_currentSelection + 1) % 3;
+    }
+
+    public virtual void ObjectSelectedAction2()
+    {
+        Debug.Log("OBJECT SELECTED!!!");
+    }
+
+    public virtual void ObjectUnselectedAction()
+    {
+        Debug.Log("OBJECT UNSELECTED!!!");
     }
 
 }
