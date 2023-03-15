@@ -81,7 +81,7 @@ namespace QuickVR
         #region PROTECTED PARAMETERS
 
         protected QuickVRPlayArea _vrPlayArea = null;
-
+        
         protected Vector3 _headOffset = Vector3.zero;
         protected float _maxHipsToHeadDistance = 0;
 
@@ -522,25 +522,30 @@ namespace QuickVR
                 //            QuickHumanBodyBones fBoneID = fingerBones[i];
                 //            initialFingerBonesLocalRotations.Add(_animator.GetBoneTransform(fBoneID).localRotation);
 
-                //            if (_animator.GetBoneTransform(fBoneID) && _vrPlayArea.GetVRNode(fBoneID).IsTracked())
+                //            Transform tBoneFinger = _animator.GetBoneTransform(fBoneID);
+                //            QuickVRNode vrNodeFinger = _vrPlayArea.GetVRNode(fBoneID);
+                //            if (tBoneFinger && vrNodeFinger.IsTracked())
                 //            {
-                //                ApplyFingerRotation(fBoneID, fingerBones[i + 1]);
+                //                Transform tBoneFingerNext = _animator.GetBoneTransform(fingerBones[i + 1]);
+                //                QuickVRNode vrNodeFingerNext = _vrPlayArea.GetVRNode(fingerBones[i + 1]);
+                //                KeyValuePair<Transform, Transform> fingerBone = new KeyValuePair<Transform, Transform>(tBoneFinger, vrNodeFinger.transform);
+                //                KeyValuePair<Transform, Transform> fingerBoneNext = new KeyValuePair<Transform, Transform>(tBoneFingerNext, vrNodeFingerNext.transform);
+                //                ApplyFingerRotation(fingerBone, fingerBoneNext);
                 //            }
                 //        }
 
-                //        //At this point the finger is correctly aligned. Set the targets to match this. 
-                //        //HumanBodyBones boneID = (HumanBodyBones)fingerBones[2];
-                //        //QuickIKSolver ikSolver = GetIKSolver(boneID);
-                //        //Transform tBone = _animator.GetBoneTransform(boneID);
+                //        //At this point the finger is correctly aligned. Set the targets to match this.
+                //        HumanBodyBones boneID = (HumanBodyBones)fingerBones[2];
+                //        QuickIKSolver ikSolver = GetIKSolver(boneID);
+                //        Transform tBone = _animator.GetBoneTransform(boneID);
 
-                //        //ikSolver._targetLimb.position = tBone.position;
-                //        //ikSolver._targetLimb.GetChild(0).rotation = tBone.rotation;
-                //        //ikSolver._targetHint.position = ikSolver._boneMid.position + (ikSolver._boneMid.position - ikSolver._boneUpper.position) + (ikSolver._boneMid.position - ikSolver._boneLimb.position);
+                //        ikSolver._targetLimb.position = tBone.position;
+                //        ikSolver._targetLimb.GetChild(0).rotation = tBone.rotation;
 
-                //        ////Restore the rotation of the bone fingers
-                //        //ikSolver._boneUpper.localRotation = initialFingerBonesLocalRotations[0];
-                //        //ikSolver._boneMid.localRotation = initialFingerBonesLocalRotations[1];
-                //        //ikSolver._boneLimb.localRotation = initialFingerBonesLocalRotations[2];
+                //        //Restore the rotation of the bone fingers
+                //        ikSolver._boneUpper.localRotation = initialFingerBonesLocalRotations[0];
+                //        ikSolver._boneMid.localRotation = initialFingerBonesLocalRotations[1];
+                //        ikSolver._boneLimb.localRotation = initialFingerBonesLocalRotations[2];
                 //    }
                 //}
 
@@ -627,9 +632,6 @@ namespace QuickVR
 
                             ikSolver._targetLimb.position = ikSolver._boneUpper.position + v * ikSolver.GetUpperLength() + w * ikSolver.GetMidLength();
                             ikSolver._targetLimb.rotation = n2.transform.rotation;
-                            ikSolver._targetHint.position = ikSolver._boneMid.position + n1.transform.up * DEFAULT_TARGET_HINT_FINGER_DISTANCE;
-                            ikSolver._targetHint.rotation = n1.transform.rotation;
-                            //ikSolver._targetHint.position = ikSolver._boneMid.position + (n1.transform.position - n0.transform.position) + (n1.transform.position - n2.transform.position);
                         }
                     }
                 }
