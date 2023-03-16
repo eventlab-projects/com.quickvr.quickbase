@@ -166,6 +166,16 @@ namespace QuickVR
             _colliders = GetComponentsInChildren<Collider>(true);
         }
 
+        protected virtual void OnEnable()
+        {
+            QuickVRManager.OnSourceAnimatorSet += ActionAnimatorSourceSet;
+        }
+
+        protected virtual void OnDisable()
+        {
+            QuickVRManager.OnSourceAnimatorSet -= ActionAnimatorSourceSet;
+        }
+
         protected virtual void Reset()
         {
             if (_handPoseNeutral == null)
@@ -185,6 +195,47 @@ namespace QuickVR
         #endregion
 
         #region GET AND SET
+
+        protected virtual void ActionAnimatorSourceSet(Animator animator)
+        {
+            Debug.Log("HOLA!!!");
+            foreach (QuickHumanFingers fingerID in QuickUtils.GetEnumValues<QuickHumanFingers>())
+            {
+                InitFingerRotation(animator, fingerID);
+            }
+        }
+
+        protected virtual void InitFingerRotation(Animator animator, QuickHumanFingers fingerID)
+        {
+            HumanBodyBones proximalBoneID;
+            if (fingerID == QuickHumanFingers.Thumb)
+            {
+                proximalBoneID = _isLeft ? HumanBodyBones.LeftThumbProximal : HumanBodyBones.RightThumbProximal;
+            }
+            else if (fingerID == QuickHumanFingers.Index)
+            {
+                proximalBoneID = _isLeft ? HumanBodyBones.LeftIndexProximal : HumanBodyBones.RightIndexProximal;
+            }
+            else if (fingerID == QuickHumanFingers.Middle)
+            {
+                proximalBoneID = _isLeft ? HumanBodyBones.LeftMiddleProximal : HumanBodyBones.RightMiddleProximal;
+            }
+            else if (fingerID == QuickHumanFingers.Ring)
+            {
+                proximalBoneID = _isLeft ? HumanBodyBones.LeftRingProximal : HumanBodyBones.RightRingProximal;
+            }
+            else //if (fingerID == QuickHumanFingers.Little)
+            {
+                proximalBoneID = _isLeft ? HumanBodyBones.LeftLittleProximal : HumanBodyBones.RightLittleProximal;
+            }
+
+            Transform tBoneSrc0 = animator.GetBoneTransform(proximalBoneID);
+            Transform tBoneSrc1 = animator.GetBoneTransform(proximalBoneID + 1);
+            Vector3 v = tBoneSrc1.position - tBoneSrc0.position;
+
+            FingerBones fBones = _fingerBoneTransforms[fingerID];
+            fBones._proximal.LookAt(fBones._proximal.position + v, fBones._proximal.up);
+        }
 
         protected virtual bool CheckHandPoses()
         {
