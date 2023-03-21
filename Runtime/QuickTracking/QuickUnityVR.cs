@@ -438,7 +438,9 @@ namespace QuickVR
                     QuickIKSolver ikSolverHead = GetIKSolver(IKBone.Head);
                     float chainLength = Vector3.Distance(_animator.GetBoneTransform(HumanBodyBones.Hips).position, _animator.GetBoneTransform(HumanBodyBones.Head).position);
                     Vector3 v = (ikSolverHips._targetLimb.position - ikSolverHead._targetLimb.position).normalized;
-                    ikSolverHips._targetLimb.position = ikSolverHead._targetLimb.position + v * Mathf.Min(_maxHipsToHeadDistance, chainLength);
+                    Transform targetHips = ikSolverHips._targetLimb;
+                    targetHips.position = ikSolverHead._targetLimb.position + v * Mathf.Min(_maxHipsToHeadDistance, chainLength);
+                    //targetHips.localPosition = new Vector3(targetHips.localPosition.x, Mathf.Min(targetHips.localPosition.y, _maxHipsHeight), targetHips.localPosition.z);
                 }
 
                 _footprints.gameObject.SetActive(_useFootprints);

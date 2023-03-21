@@ -95,8 +95,7 @@ namespace QuickVR {
 
         protected static List<HumanBodyBones> _ikLimbBones = null;
 
-        [SerializeField, HideInInspector]
-        protected Vector3 _initialHipsLocalPosition = Vector3.zero;
+        protected float _maxHipsHeight = 0;
 
         [SerializeField, HideInInspector]
         protected bool _isInitialized = false;
@@ -130,8 +129,6 @@ namespace QuickVR {
             {
                 LoadTPose();
                 SavePose();
-
-                _initialHipsLocalPosition = _animator.GetBoneTransform(HumanBodyBones.Hips).localPosition;
 
                 _isInitialized = true;
             }
@@ -367,6 +364,8 @@ namespace QuickVR {
                     ResetIKTarget(GetBoneMidID(boneID), ikSolver._targetHint);
                 }
             }
+
+            _maxHipsHeight = GetIKSolver(HumanBodyBones.Hips)._targetLimb.localPosition.y;
         }
 
         public virtual void LoadAnimPose()
@@ -484,6 +483,7 @@ namespace QuickVR {
 
         public override void Calibrate()
         {
+            LoadTPose();
             LoadPose();
         }
 

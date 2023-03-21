@@ -324,8 +324,11 @@ namespace QuickVR
             //int sign = _isLeft ? -1 : 1;
             Vector3 hintPos = _boneUpper.position + _upperBoneReference.forward * (uLength * Mathf.Cos(ikAngle)) + _upperBoneReference.up * (uLength * Mathf.Sin(ikAngle));
 
-            _targetHint.position = hintPos;
-
+            if (!float.IsNaN(hintPos.x))
+            {
+                _targetHint.position = hintPos;
+            }
+            
             return _targetHint.position;
         }
 
